@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Environment
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-no-padding">
+  <ion-list inset>
+    <ion-radio-group [(ngModel)]="selectedURLId">
+      <ion-item *ngFor="let url of URLS; let i=index;" (click)="selectURL(url)">
+
+        <ion-label class="ion-text-uppercase" style="cursor:pointer" *ngIf='url.Id != 1'>
+          {{url.Name}}
+        </ion-label>
+        <ion-radio color="slate" slot="end" id="{{url.Id}}" [value]="url.Id" *ngIf='url.Id != 1'></ion-radio>
+
+      </ion-item>
+    </ion-radio-group>
+  </ion-list>
+  <ion-item lines="none" *ngIf="selectedURLId === 5">
+  <ion-input class="url-input" type="text" placeholder="   Enter Custom ExpressPoint URL"
+    maxlength="50" [(ngModel)]="otherURl"></ion-input>
+  </ion-item>
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button color="slate" (click)="close()">
+      Close
+    </ion-button>
+    <ion-button color="slate" (click)="Submit()">
+      Submit
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

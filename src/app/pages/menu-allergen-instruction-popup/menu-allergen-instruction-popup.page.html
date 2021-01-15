@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="text-large">
+      Allergies And Special Instruction
+      <!--for <span class="text-upper">{{patronDetails.PersonName}}</span>-->
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding>
+  <h2 *ngIf="patronDetails.allergy_count >0">
+    Allergies
+  </h2>
+  <p style="color: #555; font-size: 1.1em;" class="text-center;" *ngIf="!patronDetails.allergy_count >0">
+    No allergies have been specified for this student.
+  </p>
+  <ion-list lines="none" *ngIf="patronDetails.allergy_count >0">
+    <ion-item *ngFor="let allergy of patronDetails.Allergies">
+      <ion-label>
+        {{allergy.AllergyDescription}}
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <!--<p style="color: #555; font-size: 1.1em;" class="text-center" *ngIf="patronDetails.SpecialInstruction_count!>0">
+    No notes or special instructions have been specified for this student.
+  </p>-->
+  <h2 *ngIf="patronDetails.SpecialInstruction_count > 0">
+    Special Instruction
+  </h2>
+  <p *ngIf="patronDetails.SpecialInstruction_count > 0">
+    {{patronDetails.SpecialInstruction}}
+  </p>
+</ion-content>
+<ion-footer>
+  <ion-toolbar class="center" color="white">
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

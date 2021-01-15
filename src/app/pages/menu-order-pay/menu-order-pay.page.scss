@@ -1,0 +1,79 @@
+.scroll-content {
+    height: auto;
+    margin-bottom: 70px;
+    margin-top: 70px;
+    overflow-y: auto;
+}
+
+.inactive-input-label {
+    text-align: right !important;
+    background: white;
+    // padding: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.3) !important;
+    border-radius: 4px;
+    min-height: 35px;
+    // vertical-align: middle !important;
+    line-height: 35px;
+    max-height: 35px;
+    display: inline-block;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 5px;
+}
+
+.active-input-label {
+    text-align: right !important;
+    border: 2px solid #5e9be5 !important;
+    padding-right: 5px;
+}
+
+.placeholder-input-label {
+    background: transparent;
+    border: 0;
+    font-size: 12px;
+}
+
+ion-list ion-label {
+    white-space: normal;
+}
+ion-footer {
+    left: 0;
+    bottom: 0;
+    position: relative;
+    z-index: 10;
+    display: block;
+    width: 100%;
+}
+
+/*
+app-menu-order-pay .placeholder-input-label{
+    background: transparent;
+    border: 0;
+    font-size: 12px;
+}
+
+*/
+
+#card::placeholder {
+    font-size: 12px;
+    text-align: center !important;
+}
+
+.btn-select-account {
+    margin: 0 auto;
+}
+.modal-wrapper.menu-order-pay {
+    left: calc(50% - (800px / 2));
+    top: calc(50% - (700px / 2));
+    position: absolute;
+    max-width: 900px;
+    min-height: 700px;
+    min-width: 800px;
+}
+
+@media only screen and (max-width: 900px) {
+    .modal-wrapper.menu-order-pay {
+        left: calc(50% - (700px / 2));
+        min-width: 700px;
+    }
+}

@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Options
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-no-padding">
+  <ion-list mode="ios" inset>
+    <ion-item mode="ios" block clear icon-start (click)="goCloseSession()" *ngIf="openSession">
+      <ion-icon slot="start" name="checkbox-outline" color="slate"></ion-icon>
+      <ion-label text-large>Close Service</ion-label>
+    </ion-item>
+    <ion-item mode="ios" block clear icon-start (click)="goSwitchSites()" *ngIf="sites.length>1  && isNetworkOnline">
+      <ion-icon slot="start" name="repeat" color="slate"></ion-icon>
+      <ion-label text-large>Switch Sites</ion-label>
+    </ion-item>
+    <ion-item mode="ios" block clear icon-start (click)="goLogout()">
+      <ion-icon slot="start" name="exit" color="slate"></ion-icon>
+      <ion-label text-large>Sign Out</ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

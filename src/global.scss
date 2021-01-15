@@ -1,0 +1,165 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import '~@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+
+
+// From old app.scss
+
+@import './components/ion-digit-keyboard/ion-digit-keyboard';
+// @import './components/ion-alpha-keyboard/ion-alpha-keyboard';
+@import "./theme/variables.scss";
+
+$customColors: ('primary', 'secondary', 'slate', 'danger', 'light', 'mint', 'blue', 
+'green', 'info', 'gray', 'black', 'trans');
+
+@each $color in $customColors {
+  .ion-color-#{$color} {
+  --ion-color-base: var(--ion-color-#{$color}) !important;
+  --ion-color-base-rgb: var(--ion-color-#{$color}-rgb) !important;
+  --ion-color-contrast: var(--ion-color-#{$color}-contrast) !important;
+  --ion-color-contrast-rgb: var(--ion-color-#{$color}-contrast-rgb) !important;
+  --ion-color-shade: var(--ion-color-#{$color}-shade) !important;
+  --ion-color-tint: var(--ion-color-#{$color}-tint) !important;
+  }
+}
+
+.popover-content {
+    overflow: hidden !important;
+}
+
+ion-content{
+  --background: white;
+}
+
+ion-header .toolbar{
+  --background: #00897B !important;
+}
+
+ion-alert {
+  z-index: 99999 !important;
+}
+
+.customAlertCss {
+  .alert-title{
+    color: #00897B !important;
+  }
+
+  .alert-ios .alert-message,
+  .alert-md .alert-message {
+      max-height: 300px;
+      max-width: 500px !important;
+      overflow: hidden !important;
+      color: black !important;
+      font-size: 15px;
+      text-align: center !important;
+      font-family: "Times New Roman", Times, serif;
+  }
+  
+  .alert-wrapper {
+    border-radius: 2px;
+    max-width: 400px !important;
+    background-color: #fafafa;
+    -webkit-box-shadow: 0 16px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 16px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .alert-message{
+    overflow-y: hidden !important;
+  }
+  
+  .alert-input{
+    border-bottom-color: #00897B !important;
+  }
+    ion-button{
+      color: #00897B !important;
+  }
+
+  .alert-button-group {
+    flex-direction: row !important;
+    
+  }
+}
+
+.searchbar-clear-icon {
+  display: none !important;
+  }
+
+.clearfix {
+
+    &::after {
+        display: block;
+        clear: both;
+        content: "";
+      }
+}
+
+ion-item  {
+  --background-focused: none;
+}
+button:focus {outline:0;}
+
+.transaction-details-popup,
+.transaction-meal-types-popup {
+  .modal-wrapper {
+    left: calc(50% - (900px/2));
+    top: calc(50% - (700px/2));
+    position: absolute;
+    max-width: 900px;
+    max-height: 700px;
+    min-width: 900px;
+    overflow-y: auto;
+  }
+}
+
+.menu-order-pay-popup {
+  .modal-wrapper {
+    left: calc(50% - (700px/2));
+    top: calc(50% - (700px/2));
+    position: absolute;
+    max-width: 800px;
+    max-height: 600px;
+    min-width: 700px;
+  }
+}
+
+ion-button {
+  text-transform: none;
+}
+.custom-loader-class{ // Loader custom css
+  --background:#fafafa;
+  --spinner-color:#444;
+}
+
+.sale-details-popup {
+  .popover-content,
+  .popover-content.sc-ion-popover-md 
+    {
+      width: calc(100vw - 30%) !important;
+      min-width: calc(100vw - 30%) !important;
+      left: 15% !important;
+    }
+}

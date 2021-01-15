@@ -1,0 +1,17 @@
+app-user-details-popup .scroll-content{
+    height: auto;
+    margin-bottom: 70px;
+    margin-top: 70px;
+    overflow-y: auto;
+}
+
+app-user-details-popup [custom-list] .button {
+    padding: 40px 0 !important;
+}
+
+app-user-details-popup [custom-list] .button-inner {
+    text-align: left !important;
+    justify-content: left !important;
+    font-size: 150% !important;
+    font-weight: normal !important;
+}

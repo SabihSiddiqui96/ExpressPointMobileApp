@@ -1,0 +1,37 @@
+{
+  "name": "ExpressPoint",
+  "productName": "ExpressPoint",
+  "description": "Point Of Service, Powered by PrimeroEdge",
+  "author": "Cybersoft Technologies Inc.",
+  "version": "2.1.6",
+  "homepage": "https://primeroedge.com/",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "copy-www": "cpx ../www/**/* app",
+    "package-win": "electron-packager . ExpressPoint --overwrite --icon=images/icon.ico --prune=true --out=builds --ignore=Ionic --platform=win32 --asar",
+    "package-win32": "electron-packager . ExpressPoint --overwrite --icon=images/icon.ico --prune=true --out=builds --ignore=Ionic --platform=win32 --asar --arch=ia32",
+    "create-installer-win": "node installers/windows/createInstaller.js",
+    "create-installer-win32": "node installers/windows/createInstaller32.js",
+    "create-installer-release": "node installers/windows/createSignedInstaller.js",
+    "win": "npm run copy-www && npm run package-win && npm run copy-cdexe",
+    "build-windows": "npm run copy-www && npm run package-win && npm run create-installer-win",
+    "build-windows32": "npm run copy-www && npm run package-win32 && npm run create-installer-win32",
+    "release-windows": "npm run copy-www && npm run package-win && npm run create-installer-release",
+    "all": "cd .. && ionic build && cd electron-windows && npm run copy-www && npm run package-win && npm run start",
+    "now": "npm run copy-www && npm run package-win && npm run start"
+  },
+  "dependencies": {
+    "electron-browser-storage": "^1.0.6",
+    "os": "^0.1.1",
+    "systeminformation": "4.23.1",
+    "@trodi/electron-splashscreen": "^0.1.0",
+    "electron-packager": "12.1.0",
+    "cpx": "1.5.0",
+    "electron": "3.1.1",
+    "electron-squirrel-startup": "1.0.0",
+    "electron-winstaller": "2.6.4",
+    "fs-extra": "9.0.0"
+  }
+}

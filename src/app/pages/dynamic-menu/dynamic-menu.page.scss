@@ -1,0 +1,107 @@
+.item-inner {
+  margin: -12px !important;
+  padding: 5px !important;
+}
+.flip_image {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+.spinMarkForReview {
+  position: fixed;
+  top: 50%;
+  left: 90%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+// .addFundDiv{
+//   .label-md{
+//     margin: 5px 5px;
+//   }
+// }
+// .list-md {
+//   margin: -1px 0 10px;
+// }
+.addFundDiv {
+  .item-divider-inner {
+    padding: 2px !important;
+  }
+  ion-label {
+    margin: 5px 5px;
+  }
+  ion-item {
+    background-color: transparent !important;
+    --background: transparent !important;
+    padding-left: 0px;
+    --padding-start: 0px;
+  }
+  ion-item-divider {
+    --background: transparent !important;
+    --padding-start: 0px;
+    border-bottom: none;
+  }
+}
+.list-md {
+  margin: -1px 0 6px;
+}
+.list-md-lines-none {
+  --border-width: 0;
+  border: none !important;
+}
+.padd0 {
+  padding-left: 0px !important;
+}
+.header-md .toolbar-md ion-button {
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  --box-shadow: none !important;
+  border: none !important;
+}
+ion-header {
+  left: 0;
+  top: 0;
+  position: absolute;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}
+.panel-main ion-header ion-menu-toggle ion-button {
+  --border-color: transparent;
+  --color: #fff;
+  --background: transparent;
+  -webkit-box-shadow: none;
+  --box-shadow: none;
+  box-shadow: none;
+  --opacity: 1;
+}
+.center-text {
+  display: block;
+  text-align: center;
+}
+ion-list.addFundDiv {
+  background-color: transparent !important;
+}
+ion-list.addFundDiv ion-button {
+  height: 3.5rem !important;
+  text-align: center;
+  font-weight: 500;
+  color: #000;
+}
+ion-list.addFunds_btn_mobile ion-button {
+  font-size: 83% !important;
+}
+ion-list.addFunds_btn ion-button {
+  font-size: 1.4rem !important;
+}
+ion-footer ion-toolbar {
+  padding: 4px;
+  .label-margin-v3 {
+    margin: 13px 8px 13px 0;
+  }
+}
+.align-content-center {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}

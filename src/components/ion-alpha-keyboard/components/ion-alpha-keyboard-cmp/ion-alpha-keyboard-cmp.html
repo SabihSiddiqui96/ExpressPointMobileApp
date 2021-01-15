@@ -1,0 +1,261 @@
+<div class="keyboard">
+
+	<ion-row>
+		<ion-col size="11"></ion-col>
+		<ion-col size="1">
+			<div class="icons" tappable (click)="btnClick($event, 'ion-hide')">
+				<ion-icon name="arrow-down"></ion-icon>
+			</div>
+		</ion-col>
+	</ion-row>
+
+	<div class="wrap">
+
+
+		<ion-row class="row_numbers">
+
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '`')">`</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '~')">~</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '!')">!</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '1')">1</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '@')">@</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '2')">2</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '#')">#</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '3')">3</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '$')">$</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '4')">4</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '%')">%</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '5')">5</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '^')">^</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '6')">6</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '&')">&</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '7')">7</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '*')">*</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '8')">8</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '(')">(</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '9')">9</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, ')')">)</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '0')">0</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '_')">_</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '-')">-</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key number" *ngIf="shiftOn" tappable (click)="btnClick($event, '+')">+</div>
+				<div class="key number" *ngIf="!shiftOn" tappable (click)="btnClick($event, '=')">=</div>
+			</div>
+		</ion-row>
+
+		<ion-row class="row_q">
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'Q')">Q</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'q')">q</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'W')">W</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'w')">w</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'E')">E</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'e')">e</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'R')">R</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'r')">r</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'T')">T</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 't')">t</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'Y')">Y</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'y')">y</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'U')">U</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'u')">u</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'I')">I</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'i')">i</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'O')">O</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'o')">o</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'P')">P</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'p')">p</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key icons" tappable (click)="btnClick($event, 'backspace')">
+					<ion-icon name="backspace"></ion-icon>
+				</div>
+			</div>
+		</ion-row>
+
+		<ion-row class="row_a">
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'A')">A</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'a')">a</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'S')">S</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 's')">s</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'D')">D</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'd')">d</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'F')">F</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'f')">f</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'G')">G</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'g')">g</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'H')">H</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'h')">h</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'J')">J</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'j')">j</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'K')">K</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'k')">k</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'L')">L</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'l')">l</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key enter" tappable (click)="btnClick($event, 'next')">
+					Next
+				</div>
+			</div>
+		</ion-row>
+
+		<ion-row class="row_z">
+			<div class="wrapper">
+				<div class="key icons" tappable (click)="toggleShift()">
+					<ion-icon name="arrow-round-up"></ion-icon>
+				</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'Z')">Z</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'z')">z</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'X')">X</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'x')">x</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'C')">C</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'c')">c</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'V')">V</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'v')">v</div>
+			</div>
+
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'B')">B</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'b')">b</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'N')">N</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'n')">n</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, 'M')">M</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, 'm')">m</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key" *ngIf="shiftOn" tappable (click)="btnClick($event, '?')">?</div>
+				<div class="key" *ngIf="!shiftOn" tappable (click)="btnClick($event, '.')">.</div>
+			</div>
+
+			<div class="wrapper">
+				<div class="key icons" tappable (click)="toggleShift()">
+					<ion-icon name="arrow-round-up"></ion-icon>
+				</div>
+			</div>
+		</ion-row>
+
+		<ion-row class="row_space">
+			<div class="wrapper ">
+				<div class="key space" tappable (click)="btnClick($event, 'space')">
+
+				</div>
+			</div>
+		</ion-row>
+
+	</div>
+
+</div>

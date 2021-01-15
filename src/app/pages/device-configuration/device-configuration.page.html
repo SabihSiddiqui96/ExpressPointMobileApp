@@ -1,0 +1,75 @@
+<ion-header>
+  <ion-toolbar hideBackButton="true" color="slate">
+    <ion-buttons slot="start">
+      <ion-menu-toggle *ngIf="!showBack">
+        <ion-button   fill="clear" style="display: block !important;" start>
+          <ion-icon slot="icon-only" name="menu"></ion-icon>
+        </ion-button>
+      </ion-menu-toggle>
+      <ion-back-button *ngIf="showBack"></ion-back-button>
+      <!-- <ion-button *ngIf="showBack" icon-only fill="clear" start (click)="goToLogin()">
+        <ion-icon name="arrow-round-back"></ion-icon>
+      </ion-button> -->
+    </ion-buttons>
+    <ion-title>
+      Device Information
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-tabs *ngIf="!showBack && !hideSession">
+    <ion-tab-bar slot="top">
+      <ion-tab-button tab="aboutTab" class="width-25">
+        <ion-icon name="ios-information-circle"></ion-icon>
+        <ion-label>About</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="sessionTab" class="width-25">
+        <ion-icon name="ios-restaurant"></ion-icon>
+        <ion-label>Session Details</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="settingTab" class="width-25">
+        <ion-icon name="checkbox-outline"></ion-icon>
+        <ion-label>Setting Values</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="adminTab" class="width-25">
+        <ion-icon name="ios-settings"></ion-icon>
+        <ion-label>Admin</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-tabs>
+  <ion-tabs *ngIf="!showBack && hideSession">
+    <ion-tab-bar slot="top">
+      <ion-tab-button tab="aboutTab" class="width-33">
+        <ion-icon name="ios-information-circle"></ion-icon>
+        <ion-label>About</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="settingTab" class="width-33">
+        <ion-icon name="checkbox-outline"></ion-icon>
+        <ion-label>Setting Values</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="adminTab" class="width-33">
+        <ion-icon name="ios-settings"></ion-icon>
+        <ion-label>Admin</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-tabs>
+  <ion-tabs *ngIf="showBack">
+    <ion-tab-bar slot="top">
+      <ion-tab-button tab="aboutTab" class="width-33">
+        <ion-icon name="ios-information-circle"></ion-icon>
+        <ion-label>About</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="settingTab" class="width-33">
+        <!--[rootParams]="{showBack: showBack}"-->
+        <ion-icon name="checkbox-outline"></ion-icon>
+        <ion-label>Setting Values</ion-label>
+      </ion-tab-button>
+      <ion-tab-button tab="adminTab" class="width-33">
+        <!--[rootParams]="{showBack: showBack}"-->
+        <ion-icon name="ios-settings"></ion-icon>
+        <ion-label>Admin</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-tabs>
+</ion-content>

@@ -1,0 +1,45 @@
+
+  .menu-item-category button {
+    background: linear-gradient(rgba(255,255,255,1), rgba(219,221,224,.7));
+  }
+  .menu-item-dynamic button {
+    background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.2));
+  }
+
+  .menu-item-category {
+    background: white;
+  }
+
+.menu-item-category {
+  --ion-button-border-radius: 3px;
+  margin: 5px 5px 10px 5px;
+}
+
+.menu-dynamic button ion-icon,
+.menu-button button ion-icon {
+  position: absolute;
+  top: 5px;
+}
+
+.menu-dynamic button,
+.menu-button button {
+  height: calc((100vh - 180px) / 6);
+  --ion-button-border-radius: 3px;
+  white-space: normal;
+  margin: 0 !important;
+  font-size: 1.6rem;
+  line-height: 1.6rem;
+}
+
+ion-footer{
+  left: 0;
+  bottom: 0;
+  position: relative;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}
+
+.label-text-padding{
+  padding-left: 35px;
+}

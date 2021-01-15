@@ -1,0 +1,79 @@
+<div (window:resize)="onWindowResize($event)"
+	class="keyboard-{{theme}} align-{{align}} {{roundButtons ? 'round-buttons' : ''}} {{showLetters == false ? 'no-letters' : ''}}">
+
+	<ion-row>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 1)">
+				1
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 2)">
+				2
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 3)">
+				3
+			</ion-button>
+		</ion-col>
+	</ion-row>
+	<ion-row>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 4)">
+				4
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 5)">
+				5
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 6)">
+				6
+			</ion-button>
+		</ion-col>
+	</ion-row>
+	<ion-row>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 7)">
+				7
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 8)">
+				8
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 9)">
+				9
+			</ion-button>
+		</ion-col>
+	</ion-row>
+	<ion-row>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, leftAction.text)">
+				<ion-icon slot="icon-only" name="backspace"></ion-icon>
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, 0)">
+				0
+			</ion-button>
+		</ion-col>
+		<ion-col size="4">
+			<ion-button expand="block" size="large" (click)="btnClick($event, '00')">
+				00
+			</ion-button>
+		</ion-col>
+	</ion-row>
+	<ion-row *ngIf="!hideKey">
+		<ion-col size="12">
+			<ion-button expand="block" size="large" (click)="btnClick($event, rightAction.text)">
+				<ion-icon slot="icon-only" name="arrow-dropright-circle"></ion-icon>
+			</ion-button>
+		</ion-col>
+	</ion-row>
+</div>

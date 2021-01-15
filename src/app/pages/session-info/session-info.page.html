@@ -1,0 +1,37 @@
+<ion-content bg-theme>
+  <ion-row class="ion-justify-content-center">
+    <ion-col size="12" size-md="8" size-xl="6" class="ion-justify-content-center">
+      <div box-denom class="ion-margin-horizontal">
+        <ion-row *ngFor="let Session of sessionList; let i=index;">
+          <div>
+            <p>
+              <b>Open Date</b> : {{Session.OpenDate | date:'MM-dd-yyyy'}}</p>
+            <p>
+              <b>Opening Balance</b> : $ {{Session.OpeningBalance}}</p>
+            <p>
+              <b>TerminalId</b>: {{Session.TerminalId}}</p>
+            <p>
+              <b>School Name</b> : {{selectedSite.SiteNameWithCode}}</p>
+            <p>
+              <b>Opened By</b> : {{Session.OpenedBy}}</p>
+            <p>
+              <b>Sent Status</b> :
+              <ion-icon *ngIf="Session.isSentToServer" name="checkmark-circle" color="secondary"></ion-icon>
+              <ion-icon *ngIf="!Session.isSentToServer" name="close-circle" color="danger"></ion-icon>
+            </p>
+            <p *ngIf="Session.isStillOpen">
+              <b>Open Session Status</b>
+              <ion-icon name="checkmark-circle" color="secondary"></ion-icon>
+            </p>
+            <p *ngIf="!Session.isStillOpen">
+              <b>Open Session Status</b>
+              <ion-icon name="close-circle" color="danger"></ion-icon>
+            </p>
+
+          </div>
+        </ion-row>
+
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>

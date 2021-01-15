@@ -1,0 +1,17 @@
+export enum SiteSettingCodes { // Refer PR_Site_Settings table for codes
+    ENNEWSTD,
+    ENPROGADLT,
+    ENVIS,
+    ENSTF,
+    DEPCHGDUE,
+    SERINACSTU,
+    CHGFOCTPIN,
+    ALWALCTPRN,
+    SHWOTHSTD,
+    CHKOTHML,
+    INCVRFY,
+    CSTMTYPE,
+    ENORDR,
+    CANUSEPRN,
+    CHGVISTSTD
+}

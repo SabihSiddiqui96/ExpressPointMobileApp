@@ -1,0 +1,323 @@
+<ion-content bg-theme>
+  <ion-row *ngIf="!hidePermission">
+    <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
+      <div box-denom padd20 class="ion-margin-horizontal">
+        <!-- <h1 class="ion-text-center">Permissions</h1> -->
+        <div class="accordion">
+          <div class="option">
+            <input type="checkbox" id="toggle1" class="toggle" />
+            <label class="ion-text-uppercase title" for="toggle1">Permissions</label>
+            <div class="contentBox">
+              <ion-row lines="none" *ngFor="let Permission of permissions; let i=index;">
+                <ion-label class="ion-align-self-center">
+                  {{Permission.RoleDescription}}
+                </ion-label>
+              </ion-row>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-align-self-baseline">
+    <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
+      <div box-denom padd20 class="ion-margin-horizontal">
+        <!-- <h1 class="ion-text-center">Settings</h1> -->
+        <div class="accordion">
+          <div class="option">
+            <input type="checkbox" id="toggle2" class="toggle" />
+            <label class="ion-text-uppercase title" for="toggle2">Settings</label>
+            <div class="contentBox">
+              <ion-row lines="none" *ngFor="let setting of settings; let i=index;">
+                <ion-label class="ion-text-uppercase" style="cursor:pointer">
+                  {{setting.SettingDescription}}
+                  <b>({{setting.SettingCode}})</b>:
+                  <b>{{setting.SettingValue}} {{setting.SettingValueDescription}} </b>
+                </ion-label>
+              </ion-row>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-align-self-baseline" *ngIf="!hideSiteSettings">
+    <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
+      <div box-denom padd20 class="ion-margin-horizontal">
+        <!-- <h1 class="ion-text-center">Site Settings</h1> -->
+        <div class="accordion">
+          <div class="option">
+            <input type="checkbox" id="toggle3" class="toggle" />
+            <label class="ion-text-uppercase title" for="toggle3">Site Settings</label>
+            <div class="contentBox">
+              <ion-row lines="none" *ngFor="let obj of siteSettings; let i=index;">
+                <ion-label class="ion-text-uppercase" style="cursor:pointer">
+                  {{obj.SettingDescription}}:
+                  <b>{{obj.SettingValue}}</b>
+                </ion-label>
+              </ion-row>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-align-self-baseline">
+    <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
+      <div box-denom padd20 class="ion-margin-horizontal">
+        <div class="accordion">
+          <div class="option">
+            <input type="checkbox" id="toggle4" class="toggle" />
+            <label class="ion-text-uppercase title" for="toggle4">Default Restrictions</label>
+            <div class="contentBox">
+              <!-- <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat. </p> -->
+              <ion-row no-lines>
+                <ion-label class="ion-text-uppercase" style="cursor:pointer">
+                  Maximum number of restricted items allowed per day:
+                  <b>{{maxRestrictedCount}}</b>
+                </ion-label>
+              </ion-row>
+              <ion-row no-lines>
+                <ion-label class="ion-text-uppercase" style="cursor:pointer">
+                  Restricted Categories:
+                  <span style="font-weight:bold"
+                    *ngFor="let item of restrictedCategories;let last = last;">{{item.Description}}<span
+                      *ngIf="!last">,</span> </span>
+                </ion-label>
+              </ion-row>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-align-self-baseline" *ngIf="PriceMode === 0">
+    <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
+      <div box-denom padd20 class="ion-margin-horizontal">
+        <div class="accordion">
+          <div class="option">
+            <input type="checkbox" id="toggle5" class="toggle" />
+            <label class="ion-text-uppercase title" for="toggle5">Charge Limits</label>
+            <div class="contentBox">
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="3">
+                    <div>
+                      &nbsp;
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Free
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Reduced
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Paid
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row style="font-weight: bold">
+                  <ion-col size="3">
+                    <div>
+                      Student <strong>{{mealText}}</strong>
+                    </div>
+                  </ion-col>
+                  <ion-col size="3" *ngFor="let limit of studentLimits; let i=index;">
+                    <div>
+                      {{limit.CreditLimit | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+
+                </ion-row>
+              </ion-grid>
+              <br>
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="3">
+                    <div>
+                      &nbsp;
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Staff
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Visitor
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Prog Adult
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row style="font-weight: bold">
+                  <ion-col size="3">
+                    <div>
+                      Adult <strong>{{mealText}}</strong>
+                    </div>
+                  </ion-col>
+                  <ion-col size="3" *ngFor="let adult of adultLimits; let i=index;">
+                    <div>
+                      {{adult.CreditLimit | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+              <br>
+              <ion-grid *ngIf="showSepChargeLimits === true">
+                <ion-row>
+                  <ion-col size="3">
+                    <div>
+                      &nbsp;
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Free
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Reduced
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Paid
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row style="font-weight: bold">
+                  <ion-col size="3">
+                    <div>
+                      Student <strong>- A la Carte</strong>
+                    </div>
+                  </ion-col>
+                  <ion-col size="3" *ngFor="let limit of studentLimits; let i=index;">
+                    <div>
+                      {{limit.CreditLimitAlaCarte | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+
+                </ion-row>
+              </ion-grid>
+              <br>
+              <ion-grid *ngIf="showSepChargeLimits === true">
+                <ion-row>
+                  <ion-col size="3">
+                    <div>
+                      &nbsp;
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Staff
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Visitor
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Prog Adult
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row style="font-weight: bold">
+                  <ion-col size="3">
+                    <div>
+                      Adult <strong>- A la Carte</strong>
+                    </div>
+                  </ion-col>
+                  <ion-col size="3" *ngFor="let adult of adultLimits; let i=index;">
+                    <div>
+                      {{adult.CreditLimitAlaCarte | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+
+  <ion-row class="ion-align-self-baseline" *ngIf="!hideSyncComboMeals">
+    <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
+      <div box-denom padd20 class="ion-margin-horizontal">
+        <div class="accordion">
+          <div class="option">
+            <input type="checkbox" id="toggle6" class="toggle" />
+            <label class="ion-text-uppercase title" for="toggle6">System Meal Combo Prices</label>
+            <div class="contentBox">
+              <ion-grid>
+                <ion-row class="textAlign">
+                  <ion-col size="3">
+                    <div>
+                      Meal Type
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Free
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Reduced
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      Paid
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <br>
+                <ion-row style="font-weight: bold" class="textAlign" *ngFor="let meal of mealComboPrices; let i=index;">
+                  <ion-col size="3">
+                    <div>
+                      {{meal.MealTypeDescription}}
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      {{meal.Free | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      {{meal.Reduced | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+                  <ion-col size="3">
+                    <div>
+                      {{meal.Paid | currency:'USD':true:'1.2-2'}}
+                    </div>
+                  </ion-col>
+                </ion-row>
+
+              </ion-grid>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>

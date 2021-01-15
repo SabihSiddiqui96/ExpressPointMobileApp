@@ -1,0 +1,153 @@
+<ion-header>
+  <ion-toolbar hideBackButton="true" color="slate">
+    <ion-menu-toggle slot="start">
+      <ion-button fill="clear">
+        <ion-icon name="menu" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-menu-toggle>
+    <ion-title class="ion-text-center">
+      Summary Sale
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content bg-theme>
+  <ion-row vh100 class="ion-justify-content-center">
+    <ion-col size="12" size-lg="8">
+      <div box-sale-list>
+        <p box-info style="text-align: left">
+          You are serving at
+          <span (click)="showPopup('classMealtype')">
+            <strong
+              *ngIf="filter.selected_mealtype > 0 && mealTypes.length >0">{{filter.selected_mealtype_name}}</strong>
+            <span *ngIf="filter.selected_mealtype == -1 && mealTypes.length ==0">Meal Type: None
+              Available</span>
+            <span *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0"><strong>Select a Meal Type
+                ...</strong></span>
+            <ion-icon class="icon-custom" style="font-size: 22px;
+                      vertical-align: middle;" name="md-arrow-dropdown"></ion-icon>
+          </span>
+          for
+          <span (click)="showPopup('classMealitem')">
+            <strong
+              *ngIf="(filter.selected_menuitem > 0) && menuItems.length >0">{{filter.selected_menuitem_name}}</strong>
+            <ion-label *ngIf="filter.selected_menuitem == -1 && menuItems.length ==0 && filter.selected_mealtype!=-1">
+              Item:
+              None Available</ion-label>
+            <span *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0"><strong>Select a Menu Item
+                ...</strong></span>
+            <span *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0"><strong>Select a Menu Item
+                ...</strong></span>
+            <ion-icon class="icon-custom" style="font-size: 22px; vertical-align: middle;" name="md-arrow-dropdown">
+            </ion-icon>
+          </span>
+          <!-- <ion-content> -->
+          <!-- <div custom-list no-padding class="list-quick-sale"> -->
+        </p>
+        <ion-row>
+          <ion-col size="12" size-lg="6" size-md="6">
+            <ion-row>
+              <ion-col size="12" size-lg="4" size-md="4" class="ion-justify-content-center">
+                <strong>Person Type</strong>
+              </ion-col>
+              <ion-col size="12" size-lg="2" size-md="2">
+              </ion-col>
+              <ion-col size="12" size-lg="4" size-md="4" class="ion-justify-content-center">
+                <strong>Meal Count</strong>
+              </ion-col>
+              <ion-col size="12" size-lg="2" size-md="2">
+              </ion-col>
+            </ion-row>
+            <ion-row *ngFor="let summary of summaryMealCount; let i=index" class="ion-justify-content-center">
+              <ion-col size="12" size-lg="4" size-md="4" style="vertical-align: middle; padding:10px;">
+                <strong>{{summary.PriceType}}</strong>
+              </ion-col>
+              <ion-col size="12" size-lg="2" size-md="2">
+                <ion-button expand="block" size="small" color="slate"
+                  (click)="DecrementMealCount(summary.PriceTypeId,summary.MealCount)"
+                  *ngIf="summary.PriceTypeId == activeField">
+                  <ion-icon name="remove" class="icon-custom"></ion-icon>
+                </ion-button>
+              </ion-col>
+              <ion-col size="12" size-lg="4" size-md="4">
+                <input type="text" id="{{summary.PriceTypeId}}"
+                  (click)="setActiveField(summary.PriceTypeId,summary.MealCount)"
+                  [ngClass]="{'active-input-label': summary.PriceTypeId == activeField, 'inactive-input-label': summary.PriceTypeId != activeField}"
+                  [(ngModel)]="summary.MealCount" appKeyDownEvent itemIndex="i">
+                <!-- <ion-label slot="end" class="ion-text-right" width-100 (click)="changeActiveInput('amount')"
+                  *ngIf="isIOS"
+                  [ngClass]="amountClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
+                  {{summary.MealCount}}</ion-label> -->
+                <!--[disabled]=true-->
+                <!-- <ion-label slot="end" text-right width-100 (click)="changeActiveInput('amount')" [ngClass]="amountClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">{{summary.MealCount}}</ion-label> -->
+              </ion-col>
+              <!-- <ion-col col-12 col-lg-5 col-md-5 class="ion-justify-content-center" *ngIf="isIOS">
+                              <ion-label slot="end" text-right width-100 (click)="changeActiveInput('amount')"
+                                  [ngClass]="amountClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
+                                  {{summary.MealCount}}</ion-label>
+                          </ion-col> -->
+              <ion-col size="12" size-lg="2" size-md="2">
+                <ion-button expand="block" size="small" color="slate"
+                  (click)="IncrementMealCount(summary.PriceTypeId,summary.MealCount)"
+                  *ngIf="summary.PriceTypeId == activeField">
+                  <ion-icon name="add" class="icon-custom"></ion-icon>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="totalMealCounts > 0">
+              <ion-col size="12" size-lg="4" size-md="4" class="ion-justify-content-center"
+                style="vertical-align: middle; padding:10px;">
+                <strong>Total Selected</strong>
+              </ion-col>
+              <ion-col size="12" size-lg="2" size-md="2">
+              </ion-col>
+              <ion-col size="12" size-lg="4" size-md="4" class="ion-justify-content-center">
+                <input type="text" [disabled]=true class="inactive-input-label" [(ngModel)]="totalMealCounts">
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="12">
+                <p box-info style="text-align: left" *ngIf="summaryMealCount.length == 0">No Person
+                  Types. Select Meal Type and Menu Item.</p>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+          <ion-col size="12" size-lg="6" size-md="6">
+            <ion-card>
+              <ion-digit-keyboard [align]="keyboardSettings.align" [width]="keyboardSettings.width"
+                [visible]="keyboardSettings.visible" [leftActionOptions]="keyboardSettings.leftActionOptions"
+                [rightActionOptions]="keyboardSettings.rightActionOptions"
+                [roundButtons]="keyboardSettings.roundButtons" [showLetters]="keyboardSettings.showLetters"
+                [swipeToHide]="keyboardSettings.swipeToHide" [theme]="keyboardSettings.theme"
+                (buttonClick)="numberClick($event)">
+              </ion-digit-keyboard>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+        <!-- </ion-item> -->
+        <!-- <ion-item>
+                      <ion-label>No students found.</ion-label>
+                  </ion-item> -->
+        <!-- </div> -->
+        <!-- </ion-content> -->
+        <ion-row>
+          <ion-col size="4">
+            <ion-button expand="block" (click)="goToServicePage()" *ngIf="summaryMealCount.length === 0">
+              <ion-icon slot="start" name="backspace"></ion-icon>
+              Cancel
+            </ion-button>
+            <ion-button expand="block" (click)="resetSummarySale()" *ngIf="summaryMealCount.length > 0">
+              <ion-icon slot="start" name="backspace"></ion-icon>
+              Clear Selection
+            </ion-button>
+          </ion-col>
+          <ion-col size="8">
+            <ion-button expand="block" color="slate" [disabled]="!enableRecordSales" (click)="saveSummarySale()">
+
+              Record Sales
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>

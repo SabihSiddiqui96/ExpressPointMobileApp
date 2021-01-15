@@ -1,0 +1,43 @@
+// .tabs-md .tab-button[aria-selected=true] {
+//     color: #00897B; /*your  text color */
+//     .tab-button-icon{
+//       color: #00897B;
+//     }
+//   }
+//   .tabs-md[tabsHighlight="true"] .tab-highlight {
+//     background-color: #00897B;
+//   }
+  ion-title{
+    text-align:center;
+  }
+  ion-tab-bar{
+    --background:#f8f8f8;
+    max-width: 100%;
+    width: 100%;
+    .width-25{
+      max-width: 25%;
+      width: 25%;
+    }
+    .width-33{
+      max-width: 33.33%;
+      width: 33.33%;
+    }
+  }
+  ion-tab-button{
+    // --color:#000;
+    --color-selected:#00897B;
+    --ripple-color: #00897B;
+  }
+  ion-tab-button.tab-selected { 
+    border-bottom: 2px solid  #00897B;
+    // transform: translate3d(329px, 0px, 0px) scaleX(330);
+    // transition-duration: 300ms;
+    ion-label{
+      -webkit-transform: scale3d(1.16667, 1.16667, 1);
+    transform: scale3d(1.16667, 1.16667, 1); 
+     -webkit-transition: -webkit-transform 0.3s ease-in-out; 
+     transition: -webkit-transform 0.3s ease-in-out;
+     transition: transform 0.3s ease-in-out;
+     transition: transform 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out;
+    }
+  }

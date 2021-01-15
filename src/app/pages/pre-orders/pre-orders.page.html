@@ -1,0 +1,170 @@
+<ion-header>
+  <!-- <ion-toolbar color="slate">
+    <ion-buttons left>
+      <ion-button default expand="block" icon-only fill="clear" color="primary" (click)="goToServicePage()">
+        <ion-icon name="arrow-round-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      Orders
+    </ion-title>
+  </ion-toolbar> -->
+  <ion-toolbar hideBackButton="true" color="slate">
+    <ion-menu-toggle slot="start">
+      <ion-button fill="clear">
+        <ion-icon name="menu" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-menu-toggle>
+    <ion-title class="ion-text-center">
+      Orders
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="pre-orders" bg-theme>
+  <ion-row vh100 class="ion-justify-content-center">
+    <ion-col size="12" size-lg="10">
+      <!--col-12 col-lg-8-->
+      <div box-sale-list>
+        <p box-info style="text-align: center">
+          You are serving
+          <span (click)="showPopup('mealType')">
+            <strong *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</strong>
+            <strong *ngIf="selectedMealType == -1">Select Meal Type</strong>&nbsp;&nbsp;
+            <ion-icon class="icon-custom" style="font-size: 22px;
+          vertical-align: middle;" name="md-arrow-dropdown"></ion-icon>
+          </span>
+          <!-- </span> for serving line
+          <strong>The Grill</strong>&nbsp;&nbsp;
+          <ion-icon style="font-size: 22px;
+          vertical-align: middle;" name="md-arrow-dropdown"></ion-icon> -->
+          <strong>{{orderServedCount}}</strong> Orders of
+          <strong>{{totalOrdersCount}}</strong> have been served
+        </p>
+        <div custom-list class="list-quick-sale ion-no-padding">
+          <ion-grid box-header>
+            <ion-row>
+              <ion-col size="4" class="text-center" (click)="showPopup('keyboard-patron')">
+                <span>
+                  <ion-button class="button-look" shape="round"><strong>Patron</strong></ion-button>
+                 </span> 
+              </ion-col>
+              <ion-col size="2" class="text-center" (click)="showPopup('keyboard-order')">
+                <span>
+                  <ion-button class="button-look" shape="round"><strong>Order # </strong></ion-button>
+                </span>
+              </ion-col>
+              <ion-col size="5" class="text-center padtop14">
+                <span>
+                  <strong>Ordered Menu Items</strong>
+                </span>
+              </ion-col>
+              <ion-col size="1" class="text-center padtop14">
+                <span>
+                  <strong>Served</strong>
+                </span>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          <ion-grid>
+            <ion-row *ngFor="let student of studentList; let i=index;" align-items-center>
+              <ion-col size="4" class="text-center">
+                <ion-item>
+                  <ion-avatar slot="start" class="avatar-small">
+                    <!-- <ion-icon name="contact" *ngIf="!student.Image"></ion-icon> -->
+                    <img src="{{student.Image}}" *ngIf="student.Image">
+                    <img src="assets/img/default_male.png" *ngIf="!student.Image && student.Gender === 'M'">
+                    <img src="assets/img/default_female.png" *ngIf="!student.Image && student.Gender === 'F'">
+                    <img style="border-radius: 0%;" src="assets/img/no_image.png"
+                      *ngIf="!student.Image && (student.Gender !== 'M' && student.Gender !== 'F')">
+                  </ion-avatar>
+                  <ion-label>
+                    <strong>{{student.OrderName.split(" ").join(", ")}}</strong>
+                    <br>
+                    <span
+                      [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
+                      | currency:'USD':true:'1.2-2'}}</span>
+                  </ion-label>
+                </ion-item>
+              </ion-col>
+              <ion-col size="2" class="text-center">
+
+                <ion-label>
+                  <strong>{{student.OrderNumber}}</strong>
+                </ion-label>
+
+              </ion-col>
+              <ion-col size="5" class="text-left">
+                <ion-row>
+                  <div size="3">
+                  </div>
+                  <div class="text-left">
+                    <p *ngFor="let item of student.OrderedItems;" class="margin0">
+                      <strong>{{item}}</strong>
+                    </p>
+                  </div>
+
+                </ion-row>
+
+              </ion-col>
+              <ion-col size="1" class="ion-text-center">
+                <ion-row class="minHt100" class="ion-justify-content-center ion-align-items-center">
+                    <ion-checkbox mode="md"  id="{{student.PersonId}}" (click)="selectStudent()"
+                      [(ngModel)]="studentList[i].isSelected" *ngIf="!student.IsServed">
+                    </ion-checkbox>
+                    <ion-icon large name="md-checkmark" color="secondary" *ngIf="student.IsServed">
+                    </ion-icon>
+                </ion-row>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+          <ion-item *ngIf="studentList.length==0" lines="none">
+            <ion-label>No students found.</ion-label>
+          </ion-item>
+        </div>
+        <!-- </ion-content> -->
+        <ion-row *ngIf="getSelectedStudentCount() > 0 && !filteredData">
+          <ion-col size="4">
+            <ion-button expand="block" (click)="clearStudents()">
+              <ion-icon slot="start" name="backspace"></ion-icon>
+              Cancel
+            </ion-button>
+          </ion-col>
+          <!-- <ion-col col-4 *ngIf="filteredData">
+              <ion-button expand="block" slot="end" color="slate">
+                  Previous Orders
+              </ion-button>
+          </ion-col> -->
+          <ion-col size="8">
+            <!-- <ion-label class="ion-text-center" *ngIf="getSelectedStudentCount() == 0">
+              Waiting for your selections ...
+            </ion-label> -->
+            <ion-button expand="block" color="slate" (click)="saveStudentData()">
+              Record Sales for {{getSelectedStudentCount()}} Student
+              <span slot="end" *ngIf="getSelectedStudentCount() > 1">s</span>
+              <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
+            </ion-button>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="filteredData">
+
+          <ion-col size="4">
+            <ion-button expand="block" slot="end" color="slate" (click)="showAllOrders()">
+              Show All Orders
+            </ion-button>
+          </ion-col>
+          <ion-col size="8">
+            <ion-label class="ion-text-center" *ngIf="getSelectedStudentCount() == 0">
+              Waiting for your selections ...
+            </ion-label>
+            <ion-button expand="block" color="slate" (click)="saveStudentData()" *ngIf="getSelectedStudentCount() > 0">
+              Record Sales for {{getSelectedStudentCount()}} Student
+              <span slot="end" *ngIf="getSelectedStudentCount() > 1">s</span>
+              <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>

@@ -1,0 +1,165 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add Funds for
+      <span class="text-upper">{{navPatronDetails.PersonName}}</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-no-padding">
+  <ion-row class="vh100">
+    <!-- col-12 -->
+    <ion-col size-lg="6" [attr.push-lg]="swapLeft==true ? 6: 0">
+      <ion-card>
+        <ion-list lines="none" class="ion-no-padding ion-no-margin">
+          <!--radio-group-->
+          <!-- <ion-item>
+          <ion-label>Cash</ion-label>
+          <ion-radio color="slate" [checked]="paymentOption=='cash'" value="cash" slot="start"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>Check</ion-label>
+          <ion-radio color="slate" [checked]="paymentOption=='check'" value="check" slot="start" [disabled]="!navPatronDetails.AcceptCheck"></ion-radio>
+          <span [ngClass]="{'ion-hide': !navPatronDetails.AcceptCheck }" (click)="showMessage('Payment via Check is disabled for this patron')">
+            <ion-icon name="help-circle" small></ion-icon>
+          </span>
+        </ion-item> -->
+          <ion-item>
+            <ion-label>
+              <ion-segment color="slate" [(ngModel)]="paymentOption" (ionChange)="setCashPaymentOption()"
+                class="pay_segment">
+                <ion-segment-button value="cash" (click)="changeActiveInput('amount')">
+                  <ion-label>
+                    Cash
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="check" (click)="changeActiveInput('check')" *ngIf="!hideCheckOption">
+                  <ion-label>
+                    Check
+                    <span *ngIf="!navPatronDetails.AcceptCheck"
+                      (click)="showMessage('Payment via Check is disabled for this patron')">
+                      <ion-icon name="help-circle" small></ion-icon>
+                    </span>
+                  </ion-label>
+                </ion-segment-button>
+              </ion-segment>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <!-- <ion-list no-lines no-padding no-margin border-top> -->
+        <ion-item [ngClass]="{'ion-hide' : paymentOption!='check'}" *ngIf="!hideCheckOption">
+          <ion-label  class="ion-margin-start" style="font-size: 14px">Check #</ion-label>
+          <!-- <input type="text" slot="end" class="ion-text-right" (click)="changeActiveInput('check')" class="activeInput"
+            [ngClass]="checkNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'"
+            [(ngModel)]="cashCheckNum" id="check" style="width: -webkit-fill-available" appKeyDownEvent> -->
+          <ion-label  class="ion-text-right" (click)="changeActiveInput('check')"
+            (keyup)="checkAlphaNumeric($event)"
+            [ngClass]="checkNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
+            {{cashCheckNum}}</ion-label>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-label class="ion-margin-start" style="font-size: 14px">Amount</ion-label>
+          <!-- <input type="text" (click)="changeActiveInput('amount')" class="activeInput ion-text-right"
+            [ngClass]="amountClass == 'active_input_label' || paymentOption =='cash' ? 'active-input-label': 'inactive-input-label'"
+            [(ngModel)]="cashTopupAmount" id="cash" style="width: -webkit-fill-available" appKeyDownEvent> -->
+          <ion-label  class="ion-text-right" (click)="changeActiveInput('amount')" class="activeInput"
+            [ngClass]="amountClass == 'active_input_label' || paymentOption =='cash' ? 'active-input-label': 'inactive-input-label'">
+            {{cashTopupAmount}}</ion-label>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-label static class="ion-text-wrap">Current Balance</ion-label>
+          <ion-label class="ion-text-right" text-bold [ngClass]="{ 'color_green': navPatronDetails.Balance>0 ,'color_black': navPatronDetails.Balance == 0 ,
+            'color_red': navPatronDetails.Balance < 0 }">{{navPatronDetails.Balance
+            | currency:'USD':true:'1.2-2'}}</ion-label>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-label static>Payment</ion-label>
+          <ion-label class="ion-text-right" text-bold *ngIf="cashTopupAmount">{{cashTopupAmount}}</ion-label>
+          <ion-label class="ion-text-right" text-bold *ngIf="!cashTopupAmount">
+            {{0 | currency:'USD':true:'1.2-2'}}
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-label static>Bonus</ion-label>
+          <ion-label class="ion-text-right" text-bold>{{bonusAmount | currency:'USD':true:'1.2-2'}}
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none" *ngIf="cashAmount > 0">
+          <ion-label static>New Balance</ion-label>
+          <ion-label class="ion-text-right" text-bold [ngClass]="{ 'color_green': newBalance>0 ,'color_black': newBalance == 0 ,
+              'color_red': newBalance < 0 }">{{newBalance
+            | currency:'USD':true:'1.2-2'}}</ion-label>
+        </ion-item>
+        <!-- </ion-list> -->
+      </ion-card>
+    </ion-col>
+    <!-- col-12 -->
+    <ion-col size-lg="6" [attr.pull-lg]="swapLeft==true ? 6: 0">
+      <ion-row>
+        <ion-col *ngFor="let button of priceButtons">
+          <ion-button expand="block" medium color="secondary" [ngClass]="{'active' : buttonPriceActive== button.value }"
+            (click)="setCashTopupAmount(button.price,button.value)">${{button.value}}</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-digit-keyboard [align]="keyboardSettings.align" [width]="keyboardSettings.width"
+        [visible]="keyboardSettings.visible" [leftActionOptions]="keyboardSettings.leftActionOptions"
+        [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
+        [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
+        [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
+      </ion-digit-keyboard>
+    </ion-col>
+  </ion-row>
+  <!-- <ion-row>
+    <ion-col col-12 col-lg-12>
+      <ion-list no-lines bg-box-light>
+        <ion-item>
+          <ion-label slot="start" static>Current Balance</ion-label>
+          <ion-label slot="end" text-right text-bold [ngClass]="{ 'color_green': navPatronDetails.Balance>0 ,'color_black': navPatronDetails.Balance == 0 ,
+            'color_red': navPatronDetails.Balance < 0 }">{{navPatronDetails.Balance | currency:'USD':true:'1.2-2'}}</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label slot="start" static>Payment</ion-label>
+            <ion-label slot="end" text-right text-bold *ngIf="input.amount">{{input.amount}}</ion-label>
+            <ion-label slot="end" text-right text-bold *ngIf="!input.amount">{{0 | currency:'USD':true:'1.2-2'}}</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label slot="start" static>Bonus</ion-label>
+            <ion-label slot="end" text-right text-bold>{{bonus_amount | currency:'USD':true:'1.2-2'}}</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label slot="start" static>New Balance</ion-label>
+            <ion-label slot="end" text-right text-bold [ngClass]="{ 'color_green': new_balance>0 ,'color_black': new_balance == 0 ,
+              'color_red': new_balance < 0 }">{{new_balance | currency:'USD':true:'1.2-2'}}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+  </ion-row> -->
+  <!-- <ion-row>
+    <ion-col col-12 col-lg-6>
+      <ion-row>
+        <ion-col *ngFor="let button of price_buttons">
+          <ion-button ion-button block size="large" color="secondary" [ngClass]="{'active' : button_price_active== button.value }" (click)="preSetCashTendered(button.price,button.value)">${{button.value}}</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-digit-keyboard [align]="keyboardSettings.align" [width]="keyboardSettings.width" [visible]="keyboardSettings.visible"
+        [leftActionOptions]="keyboardSettings.leftActionOptions" [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
+        [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide" [theme]="keyboardSettings.theme"
+        (buttonClick)="numberClick($event)">
+      </ion-digit-keyboard>
+    </ion-col>
+  </ion-row> -->
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button size="large" fill="clear" color="black" (click)="close(transactionNumber)">
+
+      Close
+    </ion-button>
+    <ion-buttons slot="primary">
+      <ion-button expand="block" size="large" color="slate" (click)="checkPayment()"
+        [disabled]="checkButtonDisabled() || makePaymentProcessing">
+        Make Payment
+        <ion-icon slot="end" name="arrow-round-forward" class="color_green"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

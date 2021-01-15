@@ -1,0 +1,14 @@
+[no-shadow] {
+  background-image: radial-gradient(circle, #ededed, #ededed);
+}
+
+[no-shadow] {
+  --background: #ededed;
+}
+
+.increment_decrement_btn {
+  font-size: 2rem;
+}
+input:focus {
+  outline: none !important;
+}

@@ -1,0 +1,44 @@
+<ion-content bg-theme>
+
+  <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
+
+    <ion-col size="12" size-md="8" size-xl="6" class="ion-align-self-center">
+
+      <div box-list-white class="ion-margin-horizontal">
+        <h1 class="ion-text-center" title>
+          <strong> Device Details</strong>
+        </h1>
+        <p>
+          <b>District </b> : {{districtName}}</p>
+        <p>
+          <b>School </b> : {{selectedSite.SiteNameWithCode}}</p>
+        <p>
+          <b>Name</b> : {{deviceInfo.DeviceName}}</p>
+        <p>
+          <b>UUID</b> : {{deviceInfo.uuid}}</p>
+        <p>
+          <b>TerminalId</b>: {{deviceInfo.TerminalId}}</p>
+        <!--<p><b>Device SchoolId</b> :  {{DeviceInfo.SchoolId}}</p>-->
+
+        <p>
+          <b>Number of Students in this school </b> : {{studentCount}}
+        </p>
+
+        <p>
+          <b>Number of Staff in this school </b> : {{staffCount}}
+        </p>
+        <p>
+          <b>Last Login User F/L name </b> : {{lastLoggedInUser}}
+        </p>
+
+        <p>
+          <b>Platform</b> : {{deviceInfo.platform}}</p>
+        <p>
+          <b>Serial Number</b> : {{deviceInfo.serial}}</p>
+
+        <p>
+          <b>App version Number</b> : {{versionNumber}}</p>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>

@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Review Comments
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding>
+  <ion-textarea placeholder="Enter a comment" rows="8" custom-tb [(ngModel)]="Comment"></ion-textarea>
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button fill="clear" color="black" (click)="close()">
+      Cancel
+    </ion-button>
+    <ion-button fill="clear" color="slate" (click)="cancel()">
+      No Comment
+    </ion-button>
+    <ion-button class="ion-float-right" color="slate" (click)="save()">Save Comment</ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="text-large">
+      Notes & Special Instructions
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding>
+  <p style="color: #555; font-size: 1.1em;" class="text-center" *ngIf="!specialInstruction?.length">
+    No notes or special instructions have been specified for this student.
+  </p>
+  <p *ngIf="specialInstruction?.length">
+    {{specialInstruction}}
+  </p>
+</ion-content>
+<ion-footer>
+  <ion-toolbar class="center" color="white">
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,16 @@
+{
+  "extends": "./node_modules/electron-webpack/tsconfig-base.json",
+  "compileOnSave": true,
+  "compilerOptions": {
+      "target": "es2015",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "noUnusedLocals": false
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

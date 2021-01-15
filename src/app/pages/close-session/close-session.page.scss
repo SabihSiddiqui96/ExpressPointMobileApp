@@ -1,0 +1,33 @@
+[no-shadow] {
+  background-image: radial-gradient(circle, #ededed, #ededed);
+}
+
+[no-shadow] {
+  --background: #ededed;
+}
+
+[box-checkcards] {
+  padding: 10px 10px 10px 10px !important;
+  -moz-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  background: white;
+  border-radius: 6px;
+}
+
+.increment_decrement_btn {
+  font-size: 2rem;
+}
+
+input:focus {
+  outline: none !important;
+}
+
+ion-footer {
+  left: 0;
+  bottom: 0;
+  position: relative;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}

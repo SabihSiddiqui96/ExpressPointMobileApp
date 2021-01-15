@@ -1,0 +1,15 @@
+.list-md.list-inset ion-item:first-child {
+    --border-width:  0;
+}
+.url-input {
+    --padding-top: 0px;
+    --padding-bottom: 8px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    font-size: 18px !important;
+    border-bottom: 3px solid #aaa;
+}
+.url-input input:focus,
+.url-input input:active {
+  --border-color: green;
+}

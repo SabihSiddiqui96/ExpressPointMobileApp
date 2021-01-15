@@ -1,0 +1,25 @@
+.scroll-content {
+    height: auto;
+    margin-bottom: 70px;
+    margin-top: 70px;
+    overflow-y: auto;
+}
+
+.inactive-input-label {
+    background: white;
+    padding: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.3) !important;
+    border-radius: 4px;
+    min-height: 35px;
+    vertical-align: middle !important;
+    text-align: right !important;
+}
+
+.active-input-label {
+    text-align: right !important;
+    border: 2px solid #5e9be5 !important;
+    padding-right: 5px;
+}
+input:focus {
+    outline: none !important;
+}

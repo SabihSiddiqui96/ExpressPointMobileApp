@@ -1,0 +1,1 @@
+export { IonAlphaKeyboardCmp } from './ion-alpha-keyboard-cmp/ion-alpha-keyboard-cmp';

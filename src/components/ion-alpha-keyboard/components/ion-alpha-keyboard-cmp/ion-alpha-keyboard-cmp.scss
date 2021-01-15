@@ -1,0 +1,36 @@
+.keyboard{
+  width:100vw; 
+  background-color: #c1c6cc;
+  color: #111;
+  bottom: 0;
+  position: fixed;
+  left: 0;
+  margin: 0 auto;
+  z-index: 9999 !important;
+  text-align: center;
+}
+
+.key{
+  background-color:#eee;
+  border-radius:5px;
+  margin: calc(0.1em + 0.2vw); 
+  font-size:calc(14px + 1vw);
+  line-height: calc(1.5em + 1vw);
+  width: calc(1.7em + 1vw);
+  height: calc(1.5em + 1vw);
+  text-align: center;
+}
+
+.number {width: calc(1.5em + 1vw);}
+.icons {font-size:calc(0.9em + 1vw); font-weight: bolder; padding: 5px;}
+.enter{font-size:calc(0.8em + 1vw); text-align: center; padding-left:0; width:calc(2.5em + 1vw)}
+.space{min-width: 40vw}
+.wrapper :active{background: lighten(#222, 50%);} 
+.row_numbers{width:100%; margin: 0 auto; text-align: center; }
+.row_q{width:92%; margin: 0 auto; text-align: center; }
+.row_a{width:88%; margin: 0 auto; text-align: center;}
+.row_z{width:86%; margin: 0 auto; text-align: center;}
+.row_space{width:65%; margin: 0 auto; text-align: center; }
+.wrap{display: inline-block}
+
+

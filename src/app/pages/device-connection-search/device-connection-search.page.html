@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Device District</ion-title>
+  </ion-toolbar>
+  <ion-searchbar autofocus #districtSearch id="districtSearch" (debounce)="500"
+    (ionInput)="searchSchoolDistrict(schoolKey)" placeholder="Search District Name ..." [(ngModel)]="schoolKey">
+  </ion-searchbar>
+</ion-header>
+<ion-content>
+  <div *ngIf="showLoader && !showError">
+    <ion-spinner name="lines"></ion-spinner>
+  </div>
+  <ion-list>
+    <ion-item [ngClass]="{'ion-hide' : showLoader}" *ngFor="let district of schoolDistrictList"
+      (click)="setDistrict(district)">
+      <ion-label>
+        {{district.districtName}}
+      </ion-label>
+    </ion-item>
+    <ion-item *ngIf="showError">
+      <ion-label>
+        No district was identified.
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

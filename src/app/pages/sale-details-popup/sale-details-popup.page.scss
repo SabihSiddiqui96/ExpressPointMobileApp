@@ -1,0 +1,31 @@
+ion-footer{
+  left: 0;
+  bottom: 0;
+  position: absolute;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}
+
+[custom-list] ion-label{
+  margin: 8px 0 !important;
+  --color: black !important;
+}
+[custom-list] [header-row] ion-label {
+  font-weight: bold !important;
+}
+[custom-list] ion-row,
+[border-bottom] {
+  border-bottom: 1px solid #dbdde0 !important;
+}
+[custom-list] ion-row:last-child {
+  border-bottom: 0 !important;
+}
+[custom-list] ion-row [icon-only] {
+  height: 2.5rem !important;
+}
+
+#fixHeightZone{
+  height: 400px;
+  //-y: scroll;
+}

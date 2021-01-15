@@ -1,0 +1,194 @@
+<ion-header>
+  <ion-toolbar style="--min-height: 40px;">
+    <ion-title class="ion-items-align-center">
+      {{title}}
+    </ion-title>
+    <!-- <div style="position: fixed;bottom: 2px;right: 0; padding-right: 10px;" *ngIf="showSearch">
+          <ion-input placeholder="Search School..." type="text" class="{{searchClass}}"
+              (click)="setActiveField('search')" (keyup)="searchServingLocation($event)" [(ngModel)]="keyword"
+              (ngModelChange)="keyword = $event.toLocaleUpperCase()">
+          </ion-input>
+      </div> -->
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-no-padding">
+  <!-- <ion-scroll style="height: 400px;"> -->
+  <div id="fixHeightZone">
+    <ion-list *ngIf="!showKeyboard">
+
+      <ion-grid lines="none" class="bg-transparent ion-no-padding">
+        <ion-row>
+          <ion-col size="8" *ngIf="toShowSortOrder" lines="none" bold class="bg-transparent ion-no-padding">
+            <ion-grid lines="none" class="bg-transparent ion-no-padding">
+              <ion-row>
+                <ion-col size="3" size-md="3" size-sm="3" style="display: flex;">
+                  <ion-label text-small bold style="padding-right: 6px;padding-left: 6px;"
+                    style="margin: auto;text-align:right">
+                    Sort by&nbsp;:</ion-label>
+                </ion-col>
+                <ion-col>
+                  <ion-grid lines="none" class="bg-transparent">
+                    <ion-row>
+                      <ion-col size="6">
+                        <ion-button size="small" expand="block" class="full-width name-display-button ion-float-right"
+                          [color]="isNameSortOrder('LnFn') ? 'slate' : ''" (click)="setNameSortOrder('LnFn')">Last Name
+                        </ion-button>
+                      </ion-col>
+                      <ion-col size="6">
+                        <ion-button size="small" expand="block" class="full-width name-display-button ion-float-left"
+                          [color]="isNameSortOrder('FnLn') ? 'slate' : ''" (click)="setNameSortOrder('FnLn')">First Name
+                        </ion-button>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-col>
+          <ion-col bold lines="none" class="bg-transparent" style="display: flex;">
+            <ion-item lines="none" style="text-align:right; width: -webkit-fill-available;"
+              *ngIf=" ((this.navType=='patronPatron' ||
+                        this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' ) && this.navPage!='Payments')">
+              <ion-label style="margin: auto;text-align:right">Show All </ion-label>
+              <ion-toggle slot="end" color="secondary" [(ngModel)]="showFullList" (ionChange)="showAll(showFullList)"
+              class="toggle_small"></ion-toggle>
+            </ion-item>
+
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <!-- <div *ngIf="this.navType=='ReviewTypes' && isElectron">
+
+        <ion-row>  
+          <ion-col size-sm="12" size-md="6" style="display: flex;" *ngFor=" let list of lists; let i=index;"
+            (click)="select(list)" [style.backgroundColor]="list.BackColor" [style.border]="list.BackColor">
+             <ion-item>
+              <ion-label class="ion-item-content ion-text-large ion-text-nowrap">{{list.label}}</ion-label>
+              <ion-icon color="black" name="checkmark" *ngIf="list.value == navSelectedValue">
+              </ion-icon>
+             </ion-item>
+          </ion-col>
+        </ion-row>
+      </div> -->
+
+      <div *ngIf="this.navType=='ReviewTypes'">
+          <!-- <ion-content> -->
+            <!-- <div class="review-static"> -->
+                <ion-row size="12" size-md="12">
+                    <ion-col *ngFor=" let list of lists; let i=index;" (click)="select(list)" size="6" size-md="6">
+                        <div *ngIf="lists.length >0" class="review-item-static" style="overflow:hidden !important;">
+                            <ion-button expand="block" [style.backgroundColor]="list.BackColor">
+                                {{list.label}}&ensp;
+                                <ion-icon slot="end" color="black" name="checkmark" *ngIf="list.value == navSelectedValue">
+                                </ion-icon>
+                            </ion-button>
+                        </div>
+                    </ion-col>
+                </ion-row>
+            <!-- </div> -->
+        <!-- </ion-content> -->
+      </div>
+      <div *ngIf="this.navType!='ReviewTypes'">
+        <ion-row *ngIf="showSearch">
+          <ion-col>
+            <ion-searchbar class="ion-text-uppercase" autofocus #schoolSearch id="schoolSearch" (debounce)="500"
+              type="text" (ionInput)="searchServingLocation($event)" placeholder="Search School..."
+              [(ngModel)]="keyword" (ngModelChange)="keyword = $event.toLocaleUpperCase()">
+            </ion-searchbar>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngFor=" let list of lists; let i=index;" class="minHeight bg-border"
+          [attr.ion-justify-content-center]="isPatronType" [attr.ion-align-items-center]="isPatronType"
+          style="min-height: 100%;border-bottom: 1px solid #dedede;" (click)="select(list)">
+          <!--as scss file not working -->
+          <ion-col >
+            <ion-item lines="none" [style.background-color]="list.BackColor">
+              <ion-avatar slot="start" class="avatar-small"
+                *ngIf="(this.navType=='patronPatron' || this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' )">
+                <!-- <ion-icon name="contact" *ngIf="!list.Image "></ion-icon> -->
+                <img src="{{list.Image}}" *ngIf="list.Image">
+                <img src="assets/img/default_male.png" *ngIf="!list.Image && list.Gender === 'M'">
+                <img src="assets/img/default_female.png" *ngIf="!list.Image && list.Gender === 'F'">
+                <img src="assets/img/no_image.png" style="border-radius: 0%;"
+                  *ngIf="!list.Image && (list.Gender !== 'M' && list.Gender !== 'F')">
+              </ion-avatar>
+              <ion-label text-large>{{list.label}}
+                <span *ngIf="list.hadmeal == true && this.navPage!='Payments'"> *</span>
+                <p *ngIf="isPatronType" class="center_text_content">&nbsp;</p>
+              </ion-label>
+              <ion-icon slot="end" color="black" name="checkmark"
+                *ngIf="list.value == navSelectedValue && list.identifier==null">
+              </ion-icon>
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="2" *ngIf="isPatronType">
+            <ion-item lines="none">
+              <ion-label text-large style="font-weight: bold;">
+                {{list.Grade}}
+                <p class="center_text_content" style="font-weight: bold;">{{list.Homeroom}}</p>
+              </ion-label>
+            </ion-item>
+          </ion-col>
+          <ion-col size="1" *ngIf="isPatronType">
+            <ion-item lines="none">
+              <ion-label text-large font-bold style="text-align:center;font-weight: bold;">
+                {{list.Status}}</ion-label>
+            </ion-item>
+          </ion-col>
+          <ion-col style="display: flex;" *ngIf="list.identifier!=null">
+            <ion-item lines="none">
+              <ion-label text-large style="text-align:center">{{list.identifier}}
+              </ion-label>
+              <ion-icon slot="end" color="slate" name="checkmark" *ngIf="list.value == navSelectedValue">
+              </ion-icon>
+            </ion-item>
+          </ion-col>
+
+
+        </ion-row>
+      </div>
+
+
+      <ion-item *ngIf="lists.length == 0">
+        <ion-label>No results found.</ion-label>
+      </ion-item>
+
+    </ion-list>
+    <ion-row *ngIf="showKeyboard">
+      <ion-col>
+        <ion-item>
+          <ion-label>
+            <ion-input placeholder="{{placeholder}}" value="{{keyboardSearch.keyword}}" class="ion-text-center">
+            </ion-input>
+          </ion-label>
+        </ion-item>
+        <ion-digit-keyboard [align]="keyboardSettings.align" [width]="keyboardSettings.width"
+          [visible]="keyboardSettings.visible" [leftActionOptions]="keyboardSettings.leftActionOptions"
+          [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
+          [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
+          [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
+        </ion-digit-keyboard>
+      </ion-col>
+    </ion-row>
+  </div>
+
+  <!-- </ion-scroll> -->
+
+</ion-content>
+<ion-footer>
+  <ion-toolbar position="bottom">
+
+    <div class="ion-text-center">
+      <ion-button color="slate" (click)="close()">
+        Close
+      </ion-button>
+
+      <ion-button color="slate" (click)="menuSave()" *ngIf="this.navType=='menuType' || this.navType=='servingLine'">
+        Save
+      </ion-button>
+    </div>
+
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,213 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="text-large">
+      Restrictions
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding>
+  <div>
+    <p style="color: #555; font-size: 1.1em;font-weight: bold;">
+      Food Restrictions
+    </p>
+    <p style="color: #555 ;" class="text-center;" *ngIf="!navPatronDetails.Allergies?.length > 0 ">
+      There are no food restrictions for this student.
+    </p>
+
+    <ion-row lines="none" *ngIf="navPatronDetails.Allergies?.length > 0">
+      <ion-col style="color:red; font-size: 1.2em;font-weight: bold;" *ngFor="let allergy of navPatronDetails.Allergies"
+        size="3" class="ion-align-self-center">{{allergy.AllergyDescription}}
+      </ion-col>
+    </ion-row>
+  </div>
+  <div>
+    <p style="color: #555;font-weight: bold">
+      Special Instructions
+    </p>
+    <p style="color: #555; font-size: 1.1em;" class="text-center" *ngIf="!navSpecialInstruction?.length">
+      No notes or special instructions have been specified for this student.
+    </p>
+    <p style="color:red; font-size: 1.2em;font-weight: bold;" *ngIf="navSpecialInstruction?.length">
+      {{navSpecialInstruction}}
+    </p>
+  </div>
+  <ion-row lines="none">
+    <ion-col>
+      <p style="color: #555555;font-weight: bold">Charges Allowed</p>
+    </ion-col>
+  <ion-col>
+      <ion-button fill="clear" [color]="navPatronDetails.CannotCharge ? 'danger' : 'secondary'">
+        <ion-icon slot="icon-only" [name]="navPatronDetails.CannotCharge ? 'md-close-circle' : 'md-checkmark-circle'">
+        </ion-icon>
+      </ion-button>
+    </ion-col>
+  <ion-col>
+      <p style="color: #555;font-weight: bold"> Accept checks</p>
+    </ion-col>
+  <ion-col>
+      <ion-button fill="clear" [color]="navPatronDetails.AcceptCheck ? 'secondary' : 'danger'">
+        <ion-icon slot="icon-only" [name]="navPatronDetails.AcceptCheck ? 'md-checkmark-circle' : 'md-close-circle'">
+        </ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+
+  <ion-row lines="none">
+    <ion-col style="color: #555;font-weight: bold">
+      Ala-Carte Restrictions for {{currentDayText}} <span *ngIf="showMaxLimit()">- Max Limit : <span
+          [ngStyle]="alacarteAllowedStyles">{{navPatronDetails.NoOfAlaCarteAllowedForPerson}}</span> </span>
+    </ion-col>
+  </ion-row>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-grid>
+
+          <ion-row>
+
+            <ion-col style="color: #555;">
+              Ala-Carte Cash
+            </ion-col>
+            <ion-col *ngIf="currentDay==1">
+              <ion-button fill="clear" [color]="alaCarteCash[0]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[0]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="currentDay==2">
+              <ion-button  fill="clear" [color]="alaCarteCash[1]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[1]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="currentDay==3">
+              <ion-button fill="clear" [color]="alaCarteCash[2]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[2]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+
+            <ion-col *ngIf="currentDay==4">
+              <ion-button fill="clear" [color]="alaCarteCash[3]==1 ?'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[3]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="currentDay==5">
+              <ion-button fill="clear" [color]="alaCarteCash[4]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[4]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+
+            <ion-col style="color: #555;">
+              Ala-Carte Charge
+            </ion-col>
+            <ion-col *ngIf="currentDay==1">
+              <ion-button fill="clear" [color]="alaCarteCharge[0]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[0]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="currentDay==2">
+              <ion-button fill="clear" [color]="alaCarteCharge[1]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[1]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="currentDay==3">
+              <ion-button fill="clear" [color]="alaCarteCharge[2]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[2]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+
+            <ion-col *ngIf="currentDay==4">
+              <ion-button fill="clear" [color]="alaCarteCharge[3]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[3]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col *ngIf="currentDay==5">
+              <ion-button fill="clear" [color]="alaCarteCharge[4]==1 ? 'danger' : 'secondary'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[4]==1 ? 'md-close-circle' : 'md-checkmark-circle'">
+                </ion-icon>
+              </ion-button>
+            </ion-col>
+
+
+          </ion-row>
+
+        </ion-grid>
+
+      </ion-col>
+
+      <ion-col size="6">
+
+        <div *ngIf="showDollarRestrictions">
+
+          <ion-grid>
+            <ion-row class="ion-justify-content-center">
+              <ion-col size="5">
+
+              </ion-col>
+              <ion-col size="3" style="font-weight: bold">
+                Set
+              </ion-col>
+              <ion-col size="4" *ngIf="!hideRemainingAmt" style="font-weight: bold">
+                Remaining
+              </ion-col>
+            </ion-row>
+            <ion-row class="ion-justify-content-center">
+              <ion-col size="5" style="color: #555;font-weight: bold">
+                Daily $ Limit
+              </ion-col>
+              <ion-col size="3" [ngStyle]="dailyALCRestrictionStyle">
+                {{(navPatronDetails.DailyALCRestriction!=null ? navPatronDetails.DailyALCRestriction.toFixed(2):0) | currency }}
+              </ion-col>
+              <ion-col size="4" *ngIf="!hideRemainingAmt" class="remText">
+                {{this.remainDailyALC | currency }}
+              </ion-col>
+            </ion-row>
+
+            <ion-row class="ion-justify-content-center">
+              <ion-col size="5" style=" color: #555;font-weight: bold">
+                Weekly $ Limit
+              </ion-col>
+              <ion-col size="3" [ngStyle]="weeklyALCRestrictionStyle">
+                {{(navPatronDetails.WeeklyALCRestriction!=null ? navPatronDetails.WeeklyALCRestriction.toFixed(2):0) | currency }}
+              </ion-col>
+              <ion-col size="4" *ngIf="!hideRemainingAmt" class="remText">
+                {{remainWeeklyALC | currency }}
+              </ion-col>
+            </ion-row>
+
+            <ion-row class="ion-justify-content-center">
+              <ion-col size="5" style="color: #555;font-weight: bold">
+                Monthly $ Limit
+              </ion-col>
+              <ion-col size="3" [ngStyle]="monthlyALCRestrictionStyle">
+                {{(navPatronDetails.MonthlyALCRestriction!=null ? navPatronDetails.MonthlyALCRestriction.toFixed(2):0) | currency }}
+              </ion-col>
+              <ion-col size="4" *ngIf="!hideRemainingAmt" class="remText">
+                {{remainMonthlyALC | currency }}
+              </ion-col>
+            </ion-row>
+
+          </ion-grid>
+
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="center" color="white">
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

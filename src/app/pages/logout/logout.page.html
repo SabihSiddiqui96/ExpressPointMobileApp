@@ -1,0 +1,151 @@
+<!-- This html is a replica of Login html with disabled buttons to act as an intermediate page
+ when user is navigating towards Login page -->
+<ion-row vh100 class="ion-justify-content-center" bg-theme>
+  <ion-col size="10" size-md="6" class="ion-align-items-center" [ngClass]="{'login-box': !keyboardVisible}">
+    <div box-white
+      [ngClass]="{'padding-bottom': isNativeKeyboardOpen && isAndroid , 'padding-bottom-zero': !isNativeKeyboardOpen && isAndroid }">
+      <img src='assets/img/expresspoint-logo-dark.svg' class="ion-margin-bottom">
+      <h1 class="ion-text-center" title>{{districtName}}</h1>
+      <!-- Non-iOS -->
+      <!-- <ion-list mode="ios" inset *ngIf="!isIOS"> -->
+      <ion-list mode="ios" inset *ngIf="showLoginFields || (!isSSOAuth && !isWindowsAuth)">
+        <ion-item mode="ios" class="no-line">
+          <ion-icon name="person" color="slate" slot="start"></ion-icon>
+          <ion-input type="text" placeholder="Username" custom-tb #input1 (keyup)="focusInput($event,input2)"
+            autocorrect="off" autocapitalize="none">
+          </ion-input>
+          <ion-button disabled fill="clear" style="z-index: 99!important;" color="slate"
+            *ngIf="isElectronApp && openOSK" class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+            <ion-icon slot="icon-only" name="keypad">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+        <ion-item mode="ios" class="no-line ion-align-items-center">
+          <ion-icon name="lock" color="slate" slot="start"></ion-icon>
+          <ion-input [type]="passwordType" placeholder="Password" custom-tb #input2 (keyup)="focusInput($event,null)"
+            autocorrect="off" autocapitalize="none">
+          </ion-input>
+          <ion-button disabled fill="clear" style="z-index: 99!important;" color="slate"
+            *ngIf="isElectronApp && openOSK" class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+            <ion-icon slot="icon-only" name="keypad">
+            </ion-icon>
+          </ion-button>
+          <ion-button disabled fill="clear" color="slate"
+            [ngClass]="(isElectronApp && openOSK)?'eye-icon-openosk':'eye-icon'" class="eye-icon"
+            style="height:32px;z-index: 9;" (click)='hideShowPassword()'>
+            <ion-icon slot="end" [name]="passwordIcon" style="font-size:32px;"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+      <!-- Non-iOS -->
+
+      <!-- iOS only -->
+      <!-- <ion-list mode="ios" inset *ngIf="isIOS && (showLoginFields || (!isSSOAuth && !isWindowsAuth))">
+        <ion-icon slot="start" name="person" color="slate"></ion-icon>
+        <label>Username</label>
+        <label class="{{userNameClass}}"  disabled tappable (click)="changeActiveInput('userName')">{{login.username}}</label>
+        <br />
+        <br />
+        <ion-icon slot="start" name="lock" color="slate"></ion-icon>
+        <label>Password</label>
+        <label class="{{pwdClass}}"  disabled  tappable
+          (click)="changeActiveInput('password')">{{passwordIcon==='eye-off'?maskedPassword:login.password}}
+          <ion-button disabled  fill="clear" color="slate" class="eye-icon-ios" style="height:32px;">
+            <ion-icon slot="end" [name]="passwordIcon" style="font-size:32px;" tappable (click)="iosHideShowPassword()">
+            </ion-icon>
+          </ion-button>
+        </label>
+      </ion-list> -->
+      <!-- iOS only -->
+
+      <div *ngIf="(!isSSOAuth && !isWindowsAuth) || showLoginFields">
+        <ion-button disabled expand="block" size="large" box-action color="slate"
+          [disabled]="disableLogin || loginProcessing" (click)="validateLogin()">
+          Login
+
+          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <div class="spinLogin" *ngIf="canProceed || loginProcessing">
+            <ion-spinner name="bubbles"></ion-spinner>
+          </div>
+
+        </ion-button>
+      </div>
+
+      <div *ngIf="(isSSOAuth || isWindowsAuth) && !showLoginFields">
+        <ion-button disabled expand="block" size="large" box-action color="slate"
+          [disabled]="disableLogin || loginProcessing" (click)="showLogin()">
+          Use PrimeroEdge Login
+          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div *ngIf="!showLoginFields">
+        <ion-label class="ion-text-center" *ngIf="isSSOAuth">OR</ion-label>
+        <ion-button disabled expand="block" size="large" box-action margin-top color="slate"
+          [disabled]="disableLogin || loginProcessing" (click)="validateSSOLogin()" *ngIf="isSSOAuth">
+          Use Single Sign On
+          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <div class="spinLogin" *ngIf="canProceed || loginProcessing">
+            <ion-spinner name="bubbles"></ion-spinner>
+          </div>
+        </ion-button>
+
+        <ion-label class="ion-text-center" *ngIf="isWindowsAuth">OR</ion-label>
+        <ion-button disabled expand="block" size="large" box-action margin-top color="slate"
+          [disabled]="disableLogin || loginProcessing" (click)="validateWindowsLogin()" *ngIf="isWindowsAuth">
+          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          Use Windows Login
+          <div class="spinLogin" *ngIf="canProceed || loginProcessing">
+            <ion-spinner name="bubbles"></ion-spinner>
+          </div>
+        </ion-button>
+      </div>
+
+      <div *ngIf="showLoginFields">
+        <br />
+        <br />
+        <ion-button disabled expand="block" size="large" box-action class="ion-margin-top" color="slate"
+          [disabled]="disableLogin || loginProcessing" (click)="showLogin()">
+          <ion-icon slot="start" name="arrow-round-back"></ion-icon>
+          Back
+        </ion-button>
+      </div>
+
+      <h2 *ngIf="hasNotSentTransactions== false && transactions.length> 0" style="color:green ;text-align:center">All
+        Transactions have been sent to the server.</h2>
+      <h2 *ngIf="hasNotSentTransactions == true" style="color:orange ;text-align:center">Some transactions are still on
+        the device. Please do not close the app.</h2>
+
+    </div>
+  </ion-col>
+
+  <!-- iOS only -->
+  <!-- <ion-alpha-keyboard *ngIf="keyboardVisible" (buttonClick)="alphaClick($event)"> </ion-alpha-keyboard> -->
+  <!-- iOS only -->
+
+</ion-row>
+<ion-footer *ngIf="!isNativeKeyboardOpen" no-shadow>
+  <ion-toolbar no-shadow>
+    <ion-buttons *ngIf="versionNumber" slot="start">
+      <ion-label> Version {{versionNumber}}</ion-label>
+    </ion-buttons>
+    <ion-buttons *ngIf="loginUrl" class="ion-align-items-end" slot="end">
+      <ion-button disabled slot="end" fill="clear" color="slate" (click)="removeDeviceConnection()">
+        <!--<ion-icon name="settings"></ion-icon>Reset-->
+        <ion-icon color="slate" name="ios-help-buoy" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button disabled *ngIf="!pnpPeripherals && isElectronApp" fill="clear" color="slate"
+        (click)="troubleShootPeripherals()">
+        <ion-icon color="slate" name="calculator" slot="icon-only"></ion-icon>
+      </ion-button>
+
+    </ion-buttons>
+  </ion-toolbar>
+  <div class="fusion-row" class="ion-justify-content-center">
+    <div class="fusion-copyright-content">
+      <div class="fusion-copyright-notice">
+        <strong> Copyright © {{copyRightYear}} Cybersoft Technologies, Inc. All rights reserved.</strong>
+      </div>
+    </div>
+  </div>
+</ion-footer>

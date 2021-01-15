@@ -1,0 +1,22 @@
+app-menu-item-quantity-popup .scroll-content{
+    height: auto;
+    margin-bottom: 70px;
+    margin-top: 70px;
+    overflow-y:auto;
+  }
+  
+  app-menu-item-quantity-popup ion-list {
+    background: white;
+    border-radius: 4px;
+    -moz-box-shadow:    0 1px 2px 0 rgba(0,0,0,.3);
+    -webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,.3);
+    box-shadow:         0 1px 2px 0 rgba(0,0,0,.3);
+  }
+  
+  app-menu-item-quantity-popup ion-content{
+    font-size: 4rem !important;
+  }
+  
+  app-menu-item-quantity-popup ion-row{
+    padding: 10px 16px;
+  }

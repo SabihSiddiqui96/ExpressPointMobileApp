@@ -1,0 +1,315 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Pay Transaction</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-no-padding">
+  <!-- class="vh100" -->
+  <ion-row>
+    <ion-col size="6" size-lg="6" [attr.push-lg]="swapLeft==true ? 6: 0">
+      <ion-card>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>Sale Total</ion-label>
+            <ion-label text-bold class="color-black ion-text-right">{{navOrderData.totalAmount |
+              currency:'USD':true:'1.2-2'}}
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="!hideFieldsForSplAcc">
+            <ion-label>Patron Balance</ion-label>
+            <ion-label text-bold class="color-black ion-text-right">{{navPatronDetails.Balance |
+              currency:'USD':true:'1.2-2'}}
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>Amount Due</ion-label>
+            <ion-label text-bold class="color-black ion-text-right">{{navOrderData.accountBalance |
+              currency:'USD':true:'1.2-2'}}
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="setCashPaymentOption()"
+                class="pay_segment" mode="md">
+                <ion-segment-button value="cash" (click)="changeActiveInput('amount')">
+                  <ion-label>
+                    Cash
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="check" (click)="changeActiveInput('amount')" *ngIf="!hideCheckOption">
+                  <ion-label>
+                    Check
+                    <span *ngIf="!navPatronDetails.AcceptCheck">
+                      <ion-icon name="help-circle" small></ion-icon>
+                    </span>
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="card" (click)="changeActiveInput('card')" *ngIf="!hideCardOption">
+                  <ion-label>
+                    Card
+                  </ion-label>
+                </ion-segment-button>
+              </ion-segment>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption=='cash'">
+            <ion-label>Amount Tendered</ion-label>
+            <!-- <input type="text" class="ion-text-right" (click)="changeActiveInput('amount')"
+              [ngClass]="{'active-input-label': amountClass == 'active_input_label', 'inactive-input-label': amountClass == 'input_label'}"
+              [(ngModel)]="cashtendered" id="cash" style="width: -webkit-fill-available" appKeyDownEvent> -->
+            <ion-label  class="ion-text-right" width-100 (click)="changeActiveInput('amount')"
+              [ngClass]="{'active-input-label': amountClass == 'active_input_label', 'inactive-input-label': amountClass == 'input_label'}">
+              {{cashtendered}}</ion-label>
+
+
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption =='cash' && !hideFieldsForSplAcc">
+            <ion-label>Deposit:</ion-label>
+            <!-- <input type="text" class="ion-text-right" (click)="changeActiveInput('deposit')"
+              [ngClass]="{'active-input-label': depositClass == 'active_input_label', 'inactive-input-label': depositClass == 'input_label'}"
+              [(ngModel)]="depositAmount" id="deposit" [disabled]="!depositChangeDue"
+              style="width: -webkit-fill-available" appKeyDownEvent> -->
+            <ion-label  class="ion-text-right" width-100 (click)="changeActiveInput('deposit')"
+              [ngClass]="{'active-input-label': depositClass == 'active_input_label', 'inactive-input-label': depositClass == 'input_label'}">
+              {{depositAmount}}</ion-label>
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption=='cash'">
+            <!--&& changeDue > 0-->
+            <ion-label>Change Due: </ion-label>
+            <ion-label class="ion-text-right" text-bold>{{changeDue | currency:'USD':true:'1.2-2'}}
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="navIsSpecialAccount==false && cashpaymentOption=='cash'">
+            <ion-label>Deposit Change?</ion-label>
+            <ion-toggle color="slate" [(ngModel)]="depositChangeDue"
+              (ionChange)="setDepositChangeDue(depositChangeDue)"></ion-toggle>
+          </ion-item>
+
+          <ion-item  *ngIf="cashpaymentOption =='cash' && patronDetails.isSpecialAccount && showSelectAccount && isStaffNVisitor && showPatron">
+            <ion-label>Deposit: </ion-label>
+            <ion-label class="ion-text-right" text-bold>{{depositAmount}}
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption =='cash' && patronDetails.isSpecialAccount && showSelectAccount && isStaffNVisitor && showPatron">
+            <ion-label>Deposit Change to student account?</ion-label>
+            <ion-toggle color="slate" [(ngModel)]="depositChangeDue"
+              (ionChange)="setDepositChangeDue(depositChangeDue)"></ion-toggle>
+          </ion-item>
+
+          <ion-item *ngIf="cashpaymentOption=='check' && !hideCheckOption">
+            <ion-label>Amount Tendered</ion-label>
+            <!-- <input type="text" class="ion-text-right" (click)="changeActiveInput('amount')"
+              [ngClass]="amountClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'"
+              [(ngModel)]="cashtendered" id="cashCheck" style="width: -webkit-fill-available" appKeyDownEvent> -->
+            <ion-label class="ion-text-right" width-100 (click)="changeActiveInput('amount')"
+              [ngClass]="amountClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
+              {{cashtendered}}</ion-label>
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption=='check' && !hideCheckOption">
+            <ion-label>Check Number</ion-label>
+            <!-- <input type="text" text-right (click)="changeActiveInput('check')"
+              [ngClass]="checkNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'"
+              [(ngModel)]="cashCheckNum" id="check" style="width: -webkit-fill-available" appKeyDownEvent> -->
+            <ion-label class="ion-text-right" width-100 (click)="changeActiveInput('check')"
+              [ngClass]="checkNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
+              {{cashCheckNum}}</ion-label>
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption=='card' && !hideCardOption">
+            <ion-label>Amount Tendered</ion-label>
+            <ion-label class="ion-text-right" [ngClass]="amountClass == 'active_input_label' ">
+              {{cardAmount}}</ion-label>
+          </ion-item>
+          <ion-item *ngIf="cashpaymentOption=='card' && !hideCardOption">
+            <ion-label>Card Number</ion-label>
+            <!-- <input type="text" class="ion-text-right" (click)="changeActiveInput('card')"
+              [ngClass]="cardNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'"
+              [(ngModel)]="cashCardNum" id="card" placeholder="Last 4 digits of card"
+              style="width: -webkit-fill-available" appKeyDownEvent> -->
+            <ion-label class="ion-text-right" width-100 (click)="changeActiveInput('card')"
+              [ngClass]="cardNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
+              {{cashCardNum}} <input type="text" placeholder="Last 4 digits of card" class='placeholder-input-label'
+                disabled />
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card>
+      <ion-row>
+        <ion-col size="6" size-md="6" size-sm="6" class="btn-select-account">
+          <ion-button expand="block" (click)="selectPatronAccount()"
+            [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" class="previous_patron_btn"
+            style="height:3.6rem;"
+            *ngIf="isStaffNVisitor && showSelectAccount && patronDetails.isSpecialAccount">
+            Select Account
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-col>
+    <ion-col size="6" size-lg="6" [attr.pull-lg]="swapLeft==true ? 6: 0">
+      <ion-row>
+        <ion-col size="3" *ngFor="let button of priceButtons">
+          <ion-button expand="block" size="large" color="secondary"
+            [ngClass]="{'active' : buttonPriceActive== button.value }"
+            (click)="preSetCashTendered(button.price,button.value)">${{button.value}}</ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-digit-keyboard [align]="keyboardSettings.align" [width]="keyboardSettings.width"
+        [visible]="keyboardSettings.visible" [leftActionOptions]="keyboardSettings.leftActionOptions"
+        [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
+        [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
+        [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
+      </ion-digit-keyboard>
+    </ion-col>
+  <ion-row *ngIf="showPatron">
+    <ion-col>
+      <ion-list lines="none" class="panel-patron-info ion-no-padding ion-no-margin" style="margin: 0;">
+        <ion-item-divider class="patron-info-name">
+            <ion-label style="width:100%">
+                <ion-grid class="padd0 ion-no-padding ion-no-margin">
+                    <ion-row>
+                        <ion-col class="center_text_content padd0" size="9" size-md="9" size-sm="9">
+
+                            <img *ngIf="isBirthDay" src="assets/img/confetti_left.png">
+                            <h2 #confettiHolder *ngIf="accountDetails.isSpecialAccount">
+                                {{accountDetails.PersonName}}
+                            </h2>
+                            <h2 #confettiHolder *ngIf="!accountDetails.isSpecialAccount">{{personName}}</h2>
+                            &nbsp;
+                            <img *ngIf="isBirthDay" src="assets/img/confetti_right.png">
+
+                        </ion-col>
+                        <ion-col size="3" size-md="3" size-sm="3">
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-label>
+        </ion-item-divider>
+        <ion-item-divider *ngIf="accountDetails.PersonIdentifier">
+            <ion-label class="ion-no-padding ion-no-margin" style="width:100%">
+                <ion-grid class="ion-no-padding ion-no-margin">
+                    <ion-row class="ion-no-padding ion-no-margin">
+                        <ion-col size="8" class="ion-no-padding ion-no-margin">
+                            <ion-label>
+                                <p *ngIf="!showPin" (click)="showPatronPin()">ID:
+                                    {{accountDetails.PersonIdentifier}}</p>
+                                <p *ngIf="showPin" (click)="showPatronPin()">PIN:
+                                    {{accountDetails.Identifier}}</p>
+                                <span id="startPatronPicture"></span>
+                                <p *ngIf="accountDetails.SchoolId!=schoolId">
+                                    <span class="center_text_content">Site:&nbsp; <span class="color-orange">
+                                            Visiting from
+                                            {{accountDetails.SiteCode}}</span>
+                                    </span>
+                                </p>
+                                <p *ngIf="accountDetails.SchoolId==schoolId"><span class="center_text_content">
+                                        Site:
+                                        {{accountDetails.SiteCode}}</span></p>
+                                <p>Grade: {{accountDetails.GradeDescription}}
+                                    <ion-note *ngIf="accountDetails.HomeRoom">({{accountDetails.HomeRoom}})
+                                    </ion-note>
+                                </p>
+                                <p *ngIf="HIDELGBLTY === 0">Status: {{accountDetails.PriceTypeStatus}}
+                                </p>
+
+                                <ion-grid lines="none" class="ion-no-padding">
+                                    <ion-row>
+                                        <ion-col size="6" class="ion-no-padding ion-no-margin">
+                                            <ion-button *ngIf="hideBalSetting==1" (click)="showBalance()">
+                                                Show Balance
+                                            </ion-button>
+                                            <label *ngIf="hideBalSetting==0" class="patron-info-balance"
+                                            [style.font-size.rem]="((isElectronApp === true) && ((accountDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
+                                            [ngClass]="{'color-green': accountDetails.Balance > 0, 'color-red': accountDetails.Balance < 0 }"
+                                            [style.display]="(accountDetails.Balance>0 || accountDetails.Balance == 0 || accountDetails.Balance < 0) ? ' ': 'none'"
+                                            (click)="showBalance()">{{accountDetails.Balance | currency:'USD':true:'1.2-2'}}
+                                            &nbsp; <span class="color-black"><span>
+                                                <ion-icon name="arrow-round-forward"></ion-icon>
+                                              </span></span> &nbsp; <span
+                                              [ngClass]="{'color-green': selectedStudentBalance  > 0, 'color-red': selectedStudentBalance < 0, 'color-black': selectedStudentBalance == 0 }">{{selectedStudentBalance |
+                                                              currency:'USD':true:'1.2-2'}}</span></label>
+                                        </ion-col>
+                                        <ion-col size="6" style="align-self: flex-end;"
+                                            *ngIf="(accountDetails.GradeId && accountDetails.HadSale===true)">
+                                            <ion-button default expand="block" style="height:3.6rem;"
+                                                (click)="ShowsolditemsPopover($event)"
+                                                [ngClass]="(accountDetails.IsSecondMeal!=true)?'btn_previous_items':'btn_previous_meals'"
+                                                [style.display]="(accountDetails.GradeId && accountDetails.HadSale===true) ? ' ': 'none'"
+                                                [style.font-size.rem]="(isElectronApp === true) ? '1.4' : '1.2'">
+                                                Previous
+                                                <span style="margin-left: 5px;"
+                                                    *ngIf="accountDetails.IsSecondMeal!=true">Item(s)</span>
+                                                <span style="margin-left: 5px;"
+                                                    *ngIf="accountDetails.IsSecondMeal==true">Meal(s)</span>
+                                            </ion-button>
+                                        </ion-col>
+                                        <!-- <ion-col size="0" style="padding: 5px;"
+                                            *ngIf="(accountDetails.GradeId && accountDetails.HadSale===true)">
+                                        </ion-col> -->
+                                    </ion-row>
+                                </ion-grid>
+                            </ion-label>
+                        </ion-col>
+                        <!-- <ion-col size="1"
+                            *ngIf="(accountDetails.InputDirection == 1) || (accountDetails.InputDirection == 2)"
+                            class="ion-no-padding ion-no-margin" style="font-size: 30px;">
+                            <ion-icon name="rewind" color="slate" *ngIf="accountDetails.InputDirection == 1">
+                            </ion-icon>
+                            <ion-icon name="fastforward" color="slate"
+                                *ngIf="accountDetails.InputDirection == 2">
+                            </ion-icon>
+                        </ion-col> -->
+                        <ion-col>
+                            <ion-avatar float-right style="width: auto !important;">
+                                <!-- <ion-icon name="contact" *ngIf="!patronImage && accountDetails.IsStudent"></ion-icon> -->
+
+                                <img src="{{patronImage}}" *ngIf="patronImage" (click)="showLargeImage(10)"
+                                    style="padding-right:3px!important;">
+
+
+                                <img class="flip_image" src="assets/img/default_male.png"
+                                    *ngIf="!patronImage && accountDetails.Gender === 'M'">
+
+
+                                <img class="flip_image" src="assets/img/default_female.png"
+                                    *ngIf="!patronImage && accountDetails.Gender === 'F'">
+
+
+                                <img style="--border-radius: 0%;" src="assets/img/no_image.png"
+                                    *ngIf="!patronImage && (accountDetails.Gender !== 'M' && accountDetails.Gender !== 'F')">
+
+                            </ion-avatar>
+                        </ion-col>
+                    </ion-row>
+
+                </ion-grid>
+
+            </ion-label>
+
+        </ion-item-divider>
+    </ion-list>
+    </ion-col>
+  </ion-row> 
+  </ion-row>
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button size="large" fill="clear" color="black" (click)="close()">
+      Cancel
+
+    </ion-button>
+
+    <ion-buttons slot="primary">
+      <ion-button size="large" color="slate" (click)="goToMenuService()" style="font-size: 135%;"
+        [ngClass]="{'show':canUsePrincipalAccount == true,'ion-hide':canUsePrincipalAccount == false && disablePrincipalAcctButton == false}"
+        [disabled]="canUsePrincipalAccount == false && disablePrincipalAcctButton == true">
+
+        Use Principal Account
+      </ion-button>
+      <ion-button size="large" color="slate" (click)="makeSale()" style="font-size: 135%;"
+        [disabled]="checkPayDisable() || saveInProgress || isCompleteTransactionProcessing">
+        Complete Transaction
+        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

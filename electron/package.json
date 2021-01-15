@@ -1,0 +1,82 @@
+{
+  "name": "ExpressPoint",
+  "productName": "ExpressPoint",
+  "description": "Point Of Service, Powered by PrimeroEdge",
+  "author": "PrimeroEdge LLC",
+  "version": "2.1.4",
+  "main": "src/main/index.js",
+  "scripts": {
+    "dev": "electron-webpack dev",
+    "copy-www": "cpx ../www/**/* src/renderer",
+    "build": "yarn copy-www && tsc && electron-builder build -w",
+    "build-windows": "electron-builder build -w ",
+    "postinstall": "electron-rebuild --force",
+    "tsc": "tsc"
+  },
+  "build": {
+    "appId": "com.primeroedge.expresspoint",
+    "extends": null,
+    "files": [
+      "src/**/*",
+      "package.json",
+      "Peripherals/**/*",
+      "build/**/*",
+      "references/**/*"
+    ],
+    "win": {
+      "asar": false,
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "publish": [
+        {
+          "provider": "generic",
+          "url": "http://localhost/squirrel/"
+        }
+      ]
+    },
+    "nsis": {
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
+      "include": "build/installer.nsh",
+      "installerHeaderIcon": "build/icon.ico",
+      "packElevateHelper": true
+    }
+  },
+  "dependencies": {
+    "electron-browser-storage": "^1.0.6",
+    "@trodi/electron-splashscreen": "^0.1.0",
+    "electron-log": "^3.0.5",
+    "electron-updater": "^4.0.6",
+    "machine-uuid": "^1.2.0",
+    "net": "^1.0.2",
+    "os": "^0.1.1",
+    "source-map-support": "^0.5.10",
+    "systeminformation": "^4.23.1"
+  },
+  "devDependencies": {
+    "@types/semver": "^6.0.0",
+    "angular2-template-loader": "^0.6.2",
+    "cpx": "^1.5.0",
+    "webpack": "4.28.4",
+    "electron": "3.1.1",
+    "electron-builder": "^20.44.4",
+    "electron-builder-squirrel-windows": "^20.39.0",
+    "electron-rebuild": "^1.8.4",
+    "electron-webpack": "^2.6.2",
+    "electron-webpack-ts": "^3.1.1",
+    "typescript": "^3.4.1"
+  },
+  "electronWebpack": {
+    "renderer": {
+      "sourceDirectory": null
+    }
+  }
+}

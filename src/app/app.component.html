@@ -1,0 +1,91 @@
+<ion-app>
+    <ion-menu contentId="mainmenu" [swipeGesture]="false" (ionDidOpen)="handleMenuOpen()">
+        <ion-header>
+            <ion-toolbar color="slate">
+                <ion-title>ExpressPoint</ion-title>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content>
+            <ion-list mode="ios" inset>
+                <!-- <ion-item *ngIf="currentPage != 'ServiceSelection'" (tap)="goToServicePage()" >
+                    <ion-icon item-start name="arrow-round-back" color="slate"></ion-icon>
+                    <ion-label text-medium>Serving Options</ion-label>
+                </ion-item> -->
+                <ion-item *ngIf="openSession && currentPage != 'MenuService' && !isTeacherOnly"
+                    (click)="checkOpenSession('MenuService')">
+                    <ion-icon slot="start" name="ios-restaurant" color="slate"></ion-icon>
+                    <ion-label text-medium>Continue Service</ion-label>
+                </ion-item>
+                <ion-item *ngIf="!openSession && currentPage != 'SchoolSelection' && !isTeacherOnly"
+                    (click)="checkOpenSession('MenuService')">
+                    <ion-icon slot="start" name="ios-restaurant" color="slate"></ion-icon>
+                    <ion-label text-medium>Open Service</ion-label>
+                </ion-item>
+                <ion-item *ngIf="openSession && currentPage != 'SchoolSelection' && !isTeacherOnly"
+                    (click)="goCloseSession()">
+                    <ion-icon slot="start" name="checkbox-outline" color="slate"></ion-icon>
+                    <ion-label text-medium>Close Service</ion-label>
+                </ion-item>
+                <ion-item (click)="checkOpenSession('Transactions')"
+                    *ngIf="currentPage != 'SchoolSelection' && !isTeacherOnly">
+                    <ion-icon slot="start" name="ios-paper" color="slate"></ion-icon>
+                    <ion-label text-medium>Transactions</ion-label>
+                </ion-item>
+                <ion-item (click)="checkOpenSession('ClassroomSale')"
+                    *ngIf="permissions.CanDoClassroomSale && currentPage != 'SchoolSelection' || isTeacherOnly">
+                    <ion-icon slot="start" name="ios-people" color="slate"></ion-icon>
+                    <ion-label text-medium>Bulk Sales</ion-label>
+                </ion-item>
+                <ion-item *ngIf="canSumSale" (click)="checkOpenSession('SummarySale')">
+                    <ion-icon slot="start" name="ios-clipboard" color="slate"></ion-icon>
+                    <ion-label text-medium>Summary Sale</ion-label>
+                </ion-item>
+                <ion-item *ngIf="canOrderMeals && !isTeacherOnly && currentPage != 'SchoolSelection'"
+                    (click)="checkOpenSession('PreOrders')">
+                    <ion-icon slot="start" name="ios-filing" color="slate"></ion-icon>
+                    <ion-label text-medium>Orders</ion-label>
+                </ion-item>
+                <ion-item
+                    *ngIf="permissions.CanDoPayments && !hideAppPaymentOptions && currentPage != 'SchoolSelection' && !isTeacherOnly"
+                    (click)="checkOpenSession('Payments')">
+                    <ion-icon slot="start" name="ios-cash" color="slate"></ion-icon>
+                    <ion-label text-medium>Payments</ion-label>
+                </ion-item>
+                <ion-item (click)="checkOpenSession('DeviceConfiguration')" *ngIf="!isTeacherOnly">
+                    <ion-icon slot="start" name="ios-help-buoy" color="slate"></ion-icon>
+                    <ion-label text-medium>Device Information</ion-label>
+                </ion-item>
+                <ion-item slot="start" (click)="goSwitchSites()"
+                    *ngIf="currentPage == 'Service' && !isTeacherOnly && isMultipleSchools">
+                    <ion-icon slot="start" name="repeat" color="slate"></ion-icon>
+                    <ion-label text-medium>Switch Sites</ion-label>
+                </ion-item>
+                <ion-item (click)="goSwitchHands()" *ngIf="currentPage == 'MenuService' && !isTeacherOnly">
+                    <ion-icon slot="start" name="swap" color="slate"></ion-icon>
+                    <ion-label text-medium>Switch Hands</ion-label>
+                </ion-item>
+                <ion-item block clear slot="start" (click)="goLogout()">
+                    <ion-icon slot="start" name="exit" color="slate"></ion-icon>
+                    <ion-label text-medium>Sign Out</ion-label>
+                </ion-item>
+            </ion-list>
+        </ion-content>
+    </ion-menu>
+    <img class="PatronLargeImage" (click)="onPatronLargeImageClick()">
+    <ion-router-outlet id="mainmenu"></ion-router-outlet>
+    <ion-footer>
+        <div class="network-disconnect-bar ion-text-center" *ngIf="networkDown">
+            <div class="center_text_content" style="height: 100%;">
+                <b style="margin: 0 auto">{{variableOfflineMessage}}</b>
+                <ion-button style="margin-right:10px;width: 60px;height: 24px;" color="slate"
+                    (click)="retryNetwork('true')" *ngIf="isForceOffline">
+                    <ion-icon slot="end" name="refresh"></ion-icon>
+                    Retry
+                </ion-button>
+            </div>
+        </div>
+        <div *ngIf="hostedUrlMessage && hostedUrlMessage !== 'Production'" class="ribbon"
+            [ngClass]="(selectedSide === 'left')?'ribbon-bottom-left':'ribbon-bottom-right'">
+            <span>{{hostedUrlMessage}}</span></div>
+    </ion-footer>
+</ion-app>

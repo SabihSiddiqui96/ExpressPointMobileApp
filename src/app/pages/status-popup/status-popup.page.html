@@ -1,0 +1,118 @@
+<header>
+
+    <ion-button fill="clear" size="small" class="close" (click)="close()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+    </ion-button>
+    <div class="clearfix"></div>
+</header>
+
+<div padding-75 class="container">
+    <p class="ion-text-center" *ngIf="!error">
+        ExpressPoint is downloading data to make it available for offline use...
+    </p>
+
+    <ion-list lines="none" class="ion-text-center">
+
+        <ion-item *ngIf="syncList.SiteSettings" class="done">
+            <ion-icon slot="start" name="build"></ion-icon>
+            <ion-label>
+                Site Settings
+            </ion-label>
+            <ion-spinner name="circles" slot="end" *ngIf="syncList.SiteSettings=='InProgress'"></ion-spinner>
+            <ion-spinner slot="end" name="crescent" *ngIf="syncList.SiteSettings=='APIComplete'"></ion-spinner>
+            <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.SiteSettings=='Success'"></ion-icon>
+
+            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.SiteSettings=='Failed'"></ion-icon>
+            <ion-button slot="end" fill="outline" (click)="retryGeneralDB()" class="margin-3px" *ngIf="syncList.SiteSettings=='Failed'">
+                <ion-icon slot="start" name="refresh"></ion-icon>
+                Retry
+            </ion-button>
+            <!-- </ion-label> -->
+
+            <!-- </ion-label> -->
+
+
+        </ion-item>
+
+        <ion-item *ngIf="syncList.Students" class="done">
+            <ion-icon slot="start" name="contacts"></ion-icon>
+            <ion-label>
+                Students
+            </ion-label>
+            <ion-spinner name="circles" slot="end" *ngIf="syncList.Students=='InProgress'"></ion-spinner>
+            <ion-spinner slot="end" name="crescent" *ngIf="syncList.Students=='APIComplete'"></ion-spinner>
+            <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Students=='Success'"></ion-icon>
+            <ion-icon slot="end" color="danger" name="alert" *ngIf="syncList.Students=='Failed'"></ion-icon>
+
+
+            <!-- <ion-label slot="start"> -->
+            <ion-button slot="end" fill="outline" (click)="retryPersonDB()" class="margin-3px" *ngIf="syncList.Students=='Failed'">
+                <ion-icon slot="start" name="refresh"></ion-icon>
+                Retry
+            </ion-button>
+            <!-- </ion-label> -->
+
+        </ion-item>
+
+        <ion-item *ngIf="syncList.StaticMenus" class="done">
+            <ion-icon slot="start" name="grid"></ion-icon>
+            <ion-label>
+                Static Menu Grids
+            </ion-label>
+            <ion-spinner name="circles" slot="end" *ngIf="syncList.StaticMenus=='InProgress'"></ion-spinner>
+            <ion-spinner slot="end" name="crescent" *ngIf="syncList.StaticMenus=='APIComplete'"></ion-spinner>
+            <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.StaticMenus=='Success'"></ion-icon>
+            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.StaticMenus=='Failed'"></ion-icon>
+            <!-- <ion-label slot="start"> -->
+            <ion-button slot="end" fill="outline" (click)="retryStaticMenusDB()" class="margin-3px" *ngIf="syncList.StaticMenus=='Failed'">
+                <ion-icon slot="start" name="refresh"></ion-icon>
+                Retry
+            </ion-button>
+            <!-- </ion-label> -->
+        </ion-item>
+
+        <ion-item *ngIf="syncList.DynamicMenus" class="done">
+            <ion-icon slot="start" name="restaurant"></ion-icon>
+            <ion-label>
+                Dynamic Menus
+            </ion-label>
+            <ion-spinner name="circles" slot="end" *ngIf="syncList.DynamicMenus=='InProgress'"></ion-spinner>
+            <ion-spinner slot="end" name="crescent" *ngIf="syncList.DynamicMenus=='APIComplete'"></ion-spinner>
+            <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.DynamicMenus=='Success'"></ion-icon>
+            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.DynamicMenus=='Failed'"></ion-icon>
+            <!-- <ion-label slot="start"> -->
+            <ion-button slot="end" fill="outline" (click)="retryDynamicMenusDB()" class="margin-3px"
+                *ngIf="syncList.DynamicMenus=='Failed'">
+                <ion-icon slot="start" name="refresh"></ion-icon>
+                Retry
+            </ion-button>
+            <!-- </ion-label> -->
+        </ion-item>
+
+        <ion-item *ngIf="syncList.Users" class="done">
+            <ion-icon name="restaurant" slot="start"></ion-icon>
+            <ion-label>
+                Users
+            </ion-label>
+            <ion-spinner name="circles" slot="end" *ngIf="syncList.Users=='InProgress'"></ion-spinner>
+            <ion-spinner slot="end" name="crescent" *ngIf="syncList.Users=='APIComplete'"></ion-spinner>
+            <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Users=='Success'"></ion-icon>
+            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.Users=='Failed'"></ion-icon>
+            <button ion-button slot="end" (tap)="retryUsersDB()" *ngIf="syncList.Users=='Failed'">
+                <ion-icon slot="start" name="refresh"></ion-icon>
+                Retry
+            </button>
+        </ion-item>
+    </ion-list>
+
+    <ion-item *ngIf="error">
+        <ion-label>
+            <div class="center_text_content">
+                ExpressPoint ran into an issue while setting up the Database. Please verify your Network connectivity and
+                retry.Please contact
+                PrimeroEdge Support if you continue to see the problem.
+            </div>
+        </ion-label>
+    </ion-item>
+
+</div>

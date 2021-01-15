@@ -1,0 +1,52 @@
+<ion-header class="ion-no-border" no-shadow>
+  <!-- <ion-buttons end>
+    <button ion-button item-end icon-only clear color="slate" (tap)="popoverClick($event)">
+      <ion-icon name="menu"></ion-icon>
+    </button>
+  </ion-buttons> -->
+  <!-- <button ion-button icon-only clear menuToggle style="display: block !important;" start color="slate">
+    <ion-icon name="menu"></ion-icon>
+  </button> -->
+  <h1 class="ion-text-center" title>
+    Choose a
+    <br>
+    <strong>Serving Location</strong>
+  </h1>
+</ion-header>
+<ion-content bg-theme>
+  <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
+    <ion-col size="12" size-md="8" size-xl="6" class="ion-align-self-baseline">
+      <div box-list-white class="ion-margin-horizontal">
+        <ion-searchbar class="ion-text-uppercase" autofocus #schoolSearch id="schoolSearch" (debounce)="500" type="text"
+          (ionInput)="searchServingLocation($event)" placeholder="Search School..." [(ngModel)]="keyword"
+          (ngModelChange)="keyword = $event.toLocaleUpperCase()">
+        </ion-searchbar>
+        <ion-list mode="ios" inset (click)="setActiveField('site')">
+          <ion-radio-group>
+            <ion-item mode="ios" *ngFor="let site of siteList; let i=index;"
+              (click)="selectedSite = JSON.stringify(site)">
+              <ion-label class="ion-text-uppercase" style="cursor:pointer">
+                {{site.SiteNameWithCode}}
+              </ion-label>
+              <ion-radio color="slate" slot="end" id="{{site.SchoolId}}" [value]="JSON.stringify(site)">
+              </ion-radio>
+            </ion-item>
+            <ion-item *ngIf="siteList.length == 0">
+              <ion-label>No results found.</ion-label>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>
+
+<ion-footer class="ion-align-self-center" no-shadow>
+  <ion-button color="slate" expand="block" size="large" fill="clear" (click)="setupSchoolData()">
+    Proceed
+    <ion-icon name="arrow-forward"></ion-icon>
+  </ion-button>
+  <!-- <ion-row class="ion-justify-content-center">
+
+  </ion-row> -->
+</ion-footer>

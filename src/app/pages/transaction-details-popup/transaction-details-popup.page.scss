@@ -1,0 +1,33 @@
+.custom_margin {
+  .scroll-content {
+    top: 158px !important;
+    margin-top: 0 !important;
+  }
+}
+[margin] {
+  margin: 16px;
+}
+[margin-top-bottom] {
+  margin: 8px 0px !important;
+}
+ion-label {
+  ion-icon {
+    display: inline-block;
+    font-size: 1.2em;
+    vertical-align: bottom;
+  }
+}
+ion-button {
+  ion-icon {
+    font-size: 1.4em;
+  }
+}
+ion-text {
+  display: inline-block;
+  font-size: 1.2em;
+  padding-right: 10px;
+  font-family: "Ionicons";
+  ion-icon {
+    vertical-align: text-bottom;
+  }
+}

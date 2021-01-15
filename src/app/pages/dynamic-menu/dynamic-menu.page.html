@@ -1,0 +1,715 @@
+<ion-row vh-100 bg-theme>
+    <ion-col size="12" size-md="8" [attr.push-md]="swapRight==true ? 4: 0" [attr.push-sm]="swapRight==true ? 4: 0"
+             class="panel-main ion-no-padding">
+        <ion-header>
+            <ion-toolbar color="slate">
+                <ion-row style="align-items: center">
+                    <!--<ion-col col-1>
+                              <ion-button default expand="block" fill="clear" transparent (click)="popoverClick($event)">
+                                <ion-icon name="menu"></ion-icon>
+                              </ion-button>
+                            </ion-col>-->
+                    <!-- <ion-col col-1>
+                                <ion-button default expand="block" fill="clear" transparent (click)="goToServicePage()">
+                                    <ion-icon name="arrow-round-back"></ion-icon>
+                                </ion-button>
+                            </ion-col> -->
+                    <ion-col size="1">
+                        <ion-buttons [ngClass]="{'ion-hide':swapRight}" push-md-4>
+                            <!-- <ion-button default expand="block" (click)="showOptions($event)">
+                                            <ion-icon name="menu"></ion-icon>
+                                        </ion-button> -->
+                            <ion-menu-toggle>
+                                <ion-button class="btn-full-size-icon" fill="clear" style="display: block !important;" start>
+                                    <ion-icon slot="icon-only" name="menu"></ion-icon>
+                                </ion-button>
+                            </ion-menu-toggle>
+                        </ion-buttons>
+                    </ion-col>
+                    <ion-col size="3">
+                        <ion-button default expand="block" (click)="showPopup('mealType')">
+                            <span *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</span>
+                            <span *ngIf="selectedMealType == -1">Meal Type</span>
+                        </ion-button>
+                    </ion-col>
+                    <ion-col size="6">
+                        <ion-button expand="block" (click)="showPopup('servingLine')">
+                            <span *ngIf="selectedServingLine != -1">{{selectedServingLineName}}</span>
+                            <span *ngIf="selectedServingLine == -1">Serving Line</span>
+                        </ion-button>
+                    </ion-col>
+                    <ion-col size="1">
+                        <ion-button class="btn-full-size-icon" default expand="block" fill="clear" (click)="showAllCategories()">
+                            <ion-icon slot="icon-only" name="apps"></ion-icon>
+                        </ion-button>
+                    </ion-col>
+                    <ion-col size="1">
+                        <ion-button class="btn-full-size-icon" expand="block" (click)="openTransactionViewer()">
+                            <ion-icon slot="icon-only" name="ios-paper"></ion-icon>
+                        </ion-button>
+                    </ion-col>
+                </ion-row>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content *ngIf="isStaticMenuSelected==true" vh-100 top-margin (click)="emptySpaceClick()">
+            <div *ngIf="menuGrid.hasOwnProperty('Buttons')" class="menu-static">
+                <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
+                    <ion-col *ngFor="let grid of grid_row; let j=index" style="width:20%">
+                        <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0">
+                            <ion-button [tabindex]="i+j" expand="block" [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor"
+                                        [style.display]="" [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
+                                        [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
+                                        [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
+                                        (click)="gridClick(grid)">
+                                {{grid.ButtonDescription}}&ensp;
+                                <ion-icon class="button-icon" name="alert" [style.display]="grid.restrictedItem==false? 'none' : ''">
+                                </ion-icon>
+                                <ion-icon class="button-icon" name="restaurant"
+                                          [style.display]="grid.IsReimbursable==false? 'none' : ' '"></ion-icon>
+                            </ion-button>
+                        </div>
+                    </ion-col>
+                </ion-row>
+            </div>
+        </ion-content>
+        <ion-content *ngIf="isStaticMenuSelected==false" vh-100 top-margin (click)="emptySpaceClick()">
+            <ion-row *ngIf="selectedServingLine != -1" class="menu-dynamic">
+                <ion-col style="width:20%" *ngFor="let category of menuItemCategories; let i=index">
+                    <!-- <div class="category_text">{{category.CategoryName}}</div> -->
+                    <div class="menu-item-category">
+                        <ion-button [tabindex]="i" expand="block" (click)="showcategoryPopup(category)">
+
+                            {{category.DisplayCategoryName}}
+                            <!--<ion-icon name="more"></ion-icon>-->
+                        </ion-button>
+                    </div>
+                    <div *ngFor="let menuItem of itemsByCategory[i]; let j=index" class="menu-item-dynamic"
+                         [style.background]="category.BackColor">
+                        <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor" (click)="gridClick(menuItem)">
+                            {{menuItem.MenuItemDescription}}
+                            <ion-icon name="alert" *ngIf="menuItem.restrictedItem"></ion-icon>
+                        </ion-button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-content>
+    </ion-col>
+
+    <ion-col class="panel-main ion-no-padding"
+             [ngClass]="{'ion-hide' : patronId==null, 'pad-tablet':(isElectronApp===false), 'pad-electron': (isElectronApp===true)}"
+             size-md="4" size-sm="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0">
+        <div [ngClass]="{'ion-hide' : patronId==null}">
+            <ion-header>
+                <ion-toolbar color="slate">
+                    <ion-menu-toggle slot="start">
+                        <ion-button class="btn-full-size-icon" default expand="clear" [ngClass]="{'ion-hide':swapLeft}">
+                            <ion-icon name="menu" slot="icon-only"></ion-icon>
+                        </ion-button>
+                    </ion-menu-toggle>
+                    <!-- <ion-buttons right> -->
+                    <ion-row>
+                        <ion-col size="3">
+                            <ion-button default expand="block" (click)="makeSale(0)">
+                                <ion-icon slot="start" name="backspace"></ion-icon>
+                                Void
+                            </ion-button>
+                        </ion-col>
+                        <ion-col size="4">
+                            <ion-button default expand="block" (click)="goToLookUp()">
+                                <ion-icon slot="start" name="search"></ion-icon>
+                                Search
+                            </ion-button>
+                        </ion-col>
+                        <ion-col size="5">
+                            <ion-button default expand="block" (click)="showQ()">
+                                <ion-icon slot="start" name="people"></ion-icon>
+                                Queue <span class="queue_count">{{countQ}}</span>
+                            </ion-button>
+                        </ion-col>
+                    </ion-row>
+                    <!-- </ion-buttons> -->
+                </ion-toolbar>
+            </ion-header>
+            <ion-list lines="none" class="panel-patron-info ion-no-padding ion-no-margin" style="margin-top: 0;">
+                <ion-item-divider class="patron-info-name">
+                    <ion-label style="width:100%">
+                        <ion-grid class="padd0 ion-no-padding ion-no-margin">
+                            <ion-row>
+                                <ion-col *ngIf="!showSelectAccount" class="center_text_content padd0" size="9" size-md="9" size-sm="9">
+
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_left.png">
+                                    <h2 #confettiHolder *ngIf="patronDetails.isSpecialAccount">
+                                        {{patronDetails.PersonName}}
+                                    </h2>
+                                    <h2 #confettiHolder *ngIf="!patronDetails.isSpecialAccount">{{personName}}</h2>
+                                    &nbsp;
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_right.png">
+
+                                </ion-col>
+                                <ion-col *ngIf="showSelectAccount && patronDetails.isSpecialAccount && isStaffNVisitor === true"
+                                         class="center_text_content padd0" size="5" size-md="5" size-sm="5">
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_left.png">
+                                    <h2 #confettiHolder *ngIf="patronDetails.isSpecialAccount">{{patronDetails.PersonName}}</h2>
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_right.png">
+                                </ion-col>
+                                <ion-col *ngIf="showSelectAccount && patronDetails.isSpecialAccount && isStaffNVisitor === false"
+                                         class="center_text_content padd0" size="9" size-md="9" size-sm="9">
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_left.png">
+                                    <h2 #confettiHolder *ngIf="patronDetails.isSpecialAccount">{{patronDetails.PersonName}}</h2>
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_right.png">
+                                </ion-col>
+                                <ion-col *ngIf="showSelectAccount && !patronDetails.isSpecialAccount" class="center_text_content padd0"
+                                         size="9" size-md="9" size-sm="9">
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_left.png">
+                                    <h2 #confettiHolder *ngIf="!patronDetails.isSpecialAccount">{{personName}}</h2>&nbsp;
+                                    <img *ngIf="isBirthDay" src="assets/img/confetti_right.png">
+                                </ion-col>
+                                <ion-col size="4" size-md="4" size-sm="4" *ngIf="isStaffNVisitor && showSelectAccount">
+                                    <ion-button expand="block" (click)="selectAccount()" class="previous_patron_btn"
+                                                style="height:3.6rem;font-size: 65%;" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}">
+                                        Select Account
+                                    </ion-button>
+                                </ion-col>
+                                <ion-col size="3" size-md="3" size-sm="3">
+                                    <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                                                [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" style="height:3.6rem;font-size: 65%;"
+                                                [disabled]="!canLoadPrevPatron">
+                                        &lt; &lt; &nbsp;Previous
+                                    </ion-button>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
+                    </ion-label>
+                </ion-item-divider>
+                <ion-item-divider *ngIf="patronDetails.PersonIdentifier">
+                    <ion-label class="ion-no-padding ion-no-margin" style="width:100%">
+                        <ion-grid class="ion-no-padding ion-no-margin">
+                            <ion-row class="ion-no-padding ion-no-margin">
+                                <ion-col size="8" class="ion-no-padding ion-no-margin">
+                                    <ion-label>
+                                        <p *ngIf="!showPin" (click)="showPatronPin()">
+                                            ID:
+                                            {{patronDetails.PersonIdentifier}}
+                                        </p>
+                                        <p *ngIf="showPin" (click)="showPatronPin()">
+                                            PIN:
+                                            {{patronDetails.Identifier}}
+                                        </p>
+                                        <span id="startPatronPicture"></span>
+                                        <p *ngIf="patronDetails.SchoolId!=schoolId">
+                                            <span class="center_text_content">
+                                                Site:&nbsp; <span class="color-orange">
+                                                    Visiting from
+                                                    {{patronDetails.SiteCode}}
+                                                </span>
+                                            </span>
+                                        </p>
+                                        <p *ngIf="patronDetails.SchoolId==schoolId">
+                                            <span class="center_text_content">
+                                                Site:
+                                                {{patronDetails.SiteCode}}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            Grade: {{patronDetails.GradeDescription}}
+                                            <span *ngIf="patronDetails.HomeRoom">({{patronDetails.HomeRoom}})</span>
+                                        </p>
+                                        <p *ngIf="setting.HIDELGBLTY === 0">Status: {{patronDetails.PriceTypeStatus}}</p>
+
+                                        <ion-grid lines="none" class="ion-no-padding">
+                                            <ion-row>
+                                                <ion-col size="6" class="ion-no-padding ion-no-margin">
+                                                    <ion-button *ngIf="hideBalSetting==1" (click)="showBalance()">
+                                                        Show Balance
+                                                    </ion-button>
+                                                    <p *ngIf="hideBalSetting==0" class="patron-info-balance"
+                                                       [style.font-size.rem]="((isElectronApp === true) && ((patronDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
+                                                       [ngClass]="{'color-green': patronDetails.Balance > 0, 'color-red': patronDetails.Balance < 0 }"
+                                                       [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'"
+                                                       (click)="showBalance()">
+                                                        {{patronDetails.Balance | currency:'USD':true:'1.2-2'}}
+                                                        &nbsp; <span class="color-black">
+                                                            <ion-icon name="arrow-round-forward"></ion-icon>
+                                                        </span> &nbsp; <span [ngClass]="{'color-green': ((patronDetails.Balance - orderData.totalAmount) ) >
+                                                            0, 'color-red': ((patronDetails.Balance -
+                                                            orderData.totalAmount) ) < 0, 'color-black': ((patronDetails.Balance -
+                                                            orderData.totalAmount) ) == 0 }">{{
+patronDetails.Balance -
+                                        orderData.totalAmount |
+                                        currency:'USD':true:'1.2-2'
+                                                            }}
+                                                        </span>
+                                                    </p>
+                                                    <p>
+                                                        Transaction :
+                                                        <b>{{transactionNumber}}</b>
+                                                    </p>
+                                                </ion-col>
+                                                <ion-col size="6" style="align-self: flex-end;"
+                                                         *ngIf="(patronDetails.GradeId && patronDetails.HadSale===true)">
+                                                    <ion-button default expand="block" (click)="ShowsolditemsPopover($event)"
+                                                                [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
+                                                                [style.display]="(patronDetails.GradeId && patronDetails.HadSale===true) ? ' ': 'none'">
+                                                        Previous
+                                                        <span style="margin-left: 5px;" *ngIf="patronDetails.IsSecondMeal!=true">Item(s)</span>
+                                                        <span style="margin-left: 5px;" *ngIf="patronDetails.IsSecondMeal==true">Meal(s)</span>
+                                                    </ion-button>
+                                                </ion-col>
+                                                <!-- <ion-col size="0" style="padding: 5px;"
+                                                  *ngIf="(patronDetails.GradeId && patronDetails.HadSale===true)">
+                                                </ion-col> -->
+                                            </ion-row>
+                                        </ion-grid>
+                                    </ion-label>
+                                </ion-col>
+                                <ion-col size="1" *ngIf="(patronDetails.InputDirection == 1) || (patronDetails.InputDirection == 2)"
+                                         class="ion-no-padding ion-no-margin" style="font-size: 30px;">
+                                    <ion-icon name="rewind" color="slate" *ngIf="patronDetails.InputDirection == 1">
+                                    </ion-icon>
+                                    <ion-icon name="fastforward" color="slate" *ngIf="patronDetails.InputDirection == 2">
+                                    </ion-icon>
+                                </ion-col>
+                                <ion-col>
+                                    <ion-avatar float-right style="width: auto !important;">
+                                        <!-- <ion-icon name="contact" *ngIf="!patronDetails.Image && patronDetails.IsStudent"></ion-icon> -->
+
+                                        <img src="{{patronImage}}" *ngIf="patronImage" (click)="showLargeImage(10)"
+                                             style="padding-right:3px!important;">
+
+
+                                        <img class="flip_image" src="assets/img/default_male.png"
+                                             *ngIf="!patronImage && patronDetails.Gender === 'M'">
+
+
+                                        <img class="flip_image" src="assets/img/default_female.png"
+                                             *ngIf="!patronImage && patronDetails.Gender === 'F'">
+
+
+                                        <img style="--border-radius: 0%;" src="assets/img/no_image.png"
+                                             *ngIf="!patronImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F')">
+
+                                    </ion-avatar>
+                                </ion-col>
+                            </ion-row>
+
+                        </ion-grid>
+
+                    </ion-label>
+
+                </ion-item-divider>
+                <!-- <ion-item-divider *ngIf="isSpecialAccount==false" class="patron-info-actions">
+                            <ion-row>
+                                <ion-col col-4 *ngIf="!hideAddFunds">
+                                    <ion-button default expand="block" icon-start (click)="ShowAddDollarPopover($event)"
+                                        *ngIf="isSpecialAccount==false"
+                                        [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'">
+                                        Add Funds
+                                    </ion-button>
+                                </ion-col>
+                                <ion-col col-4>
+                                    <ion-button default expand="block" icon-start (click)="ShowallergyPopover($event)"
+                                        [style.border]="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
+                || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
+                this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
+                || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')? '4px solid #b22222':''">
+                                        Alerts
+                                        <span
+                                            *ngIf="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
+                || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
+                this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
+                || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')">*</span>
+                                    </ion-button>
+                                </ion-col>
+                                <ion-col col-4>
+                                    <ion-button default expand="block" icon-start (click)="getReviews()"
+                                        [style.border]="isMarked ? '4px solid #27FA58':''" [disabled]='isMarkForReviewClicked'>
+                                        Mark for Review
+                                        <span *ngIf='isMarked'>*</span>
+                                        <div class="spinMarkForReview" *ngIf='isMarkForReviewClicked'>
+
+                                            <ion-spinner name="bubbles"></ion-spinner>
+                                        </div>
+                                    </ion-button>
+                                </ion-col>
+                            </ion-row>
+                        </ion-item-divider> -->
+                <!--
+                        <ion-item-divider [style.display]="patronDetails.SchoolId==schoolId ? 'none': ((patronDetails.SiteCode)? '':'none')" class="patron-info-visiting">
+                          <p>
+                            <ion-icon name="help-circle" small></ion-icon>
+                            Visiting from {{patronDetails.SiteCode}}
+                          </p>
+                        </ion-item-divider>
+                        <ion-item-divider *ngIf="(patronDetails.GradeId && patronDetails.HadSale===true)" class="patron-info-prior-serve">
+                          <ion-row>
+                            <ion-col col-8>
+                              <p>
+                                <ion-icon name="flag" small></ion-icon>
+                                Previously served <span *ngIf="patronDetails.IsSecondMeal==true">a meal.</span>
+                              </p>
+                            </ion-col>
+                            <ion-col>
+                              <ion-button default expand="block" icon-start size="small" (click)="ShowsolditemsPopover($event)">
+                                <ion-icon name="restaurant"></ion-icon>
+                                View
+                              </ion-button>
+                            </ion-col>
+                          </ion-row>
+                        </ion-item-divider>
+                      -->
+            </ion-list>
+
+            <ion-list lines="none" *ngIf="displayDetails" class="panel-patron-info" style="margin-top: 0;">
+                <ion-item-divider class="patron-info-name">
+                    <ion-grid class="padd0">
+                        <ion-row>
+                            <ion-col class="center_text_content padd0">
+                                <h2>{{selectedAccountDetails.PersonName}}</h2>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                </ion-item-divider>
+                <ion-item-divider>
+                    <ion-label class="ion-no-padding ion-no-margin" style="width:100%">
+                        <ion-grid class="ion-no-padding ion-no-margin">
+                            <ion-row class="ion-no-padding ion-no-margin">
+                                <ion-col size="8" class="ion-no-padding ion-no-margin">
+                                    <ion-label>
+                                        <p *ngIf="!showPin" (click)="showPatronPin()">
+                                            ID:
+                                            {{selectedAccountDetails.PersonIdentifier}}
+                                        </p>
+                                        <p *ngIf="showPin" (click)="showPatronPin()">
+                                            PIN:
+                                            <span id="startPatronPicture"></span>
+                                        <p *ngIf="selectedAccountDetails.SchoolId!=schoolId">
+                                            <span class="center_text_content">
+                                                Site:&nbsp; <span class="color-orange">
+                                                    Visiting from
+                                                    {{selectedAccountDetails.SiteCode}}
+                                                </span>
+                                            </span>
+                                        </p>
+                                        <p *ngIf="selectedAccountDetails.SchoolId==schoolId">
+                                            <span class="center_text_content">
+                                                Site:
+                                                {{selectedAccountDetails.SiteCode}}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            Grade: {{selectedAccountDetails.GradeDescription}}
+                                            <ion-note *ngIf="selectedAccountDetails.HomeRoom">
+                                                ({{selectedAccountDetails.HomeRoom}})
+                                            </ion-note>
+                                        </p>
+                                        <p *ngIf="setting.HIDELGBLTY === 0">Status: {{selectedAccountDetails.PriceTypeStatus}}</p>
+
+                                        <ion-grid lines="none" class="ion-no-padding">
+                                            <ion-row>
+                                                <ion-col size="5" class="ion-no-padding ion-no-margin">
+                                                    <ion-button *ngIf="hideBalSetting==1" (click)="showBalance()">
+                                                        Show Balance
+                                                    </ion-button>
+                                                    <label *ngIf="hideBalSetting==0" class="patron-info-balance"
+                                                           [style.font-size.rem]="((isElectronApp === true) && ((selectedAccountDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
+                                                           [ngClass]="{'color-green': selectedAccountDetails.Balance > 0, 'color-red': selectedAccountDetails.Balance < 0 }"
+                                                           [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? ' ': 'none'"
+                                                           (click)="showBalance()">
+                                                        {{selectedAccountDetails.Balance | currency:'USD':true:'1.2-2'}}
+                                                        &nbsp; <span class="color-black">
+                                                            <span>
+                                                                <ion-icon name="arrow-round-forward"></ion-icon>
+                                                            </span>
+                                                        </span> &nbsp; <span [ngClass]="{'color-green': ((selectedAccountDetails.Balance - orderData.totalAmount) ) >
+                                                            0, 'color-red': ((patronDetails.Balance -
+                                                            orderData.totalAmount) ) < 0, 'color-black': ((selectedAccountDetails.Balance -
+                                                            orderData.totalAmount) ) == 0 }">{{
+selectedAccountDetails.Balance -
+                                    orderData.totalAmount |
+                                    currency:'USD':true:'1.2-2'
+                                                            }}
+                                                        </span>
+                                                    </label>
+                                                    <p>
+                                                        Transaction :
+                                                        <b>{{transactionNumber}}</b>
+                                                    </p>
+                                                </ion-col>
+                                                <ion-col size="5" style="align-self: flex-end;"
+                                                         *ngIf="(selectedAccountDetails.GradeId && selectedAccountDetails.HadSale===true)">
+                                                    <ion-button default expand="block" (click)="ShowsolditemsPopover($event)"
+                                                                [ngClass]="{'btn_previous_items':(selectedAccountDetails.IsSecondMeal!=true), 'btn_previous_meals':(selectedAccountDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
+                                                                [style.display]="(selectedAccountDetails.GradeId && selectedAccountDetails.HadSale===true) ? ' ': 'none'">
+                                                        Previous
+                                                        <span style="margin-left: 5px;"
+                                                              *ngIf="selectedAccountDetails.IsSecondMeal!=true">Item(s)</span>
+                                                        <span style="margin-left: 5px;"
+                                                              *ngIf="selectedAccountDetails.IsSecondMeal==true">Meal(s)</span>
+                                                    </ion-button>
+                                                </ion-col>
+                                                <ion-col size="2" style="padding: 5px;"
+                                                         *ngIf="(selectedAccountDetails.GradeId && selectedAccountDetails.HadSale===true)">
+                                                </ion-col>
+                                            </ion-row>
+                                        </ion-grid>
+                                    </ion-label>
+                                </ion-col>
+                                <!-- <ion-icon item-end name="rewind" color="slate" *ngIf="selectedAccountDetails.InputDirection == 1"></ion-icon>
+                                <ion-icon item-end name="fastforward" color="slate" *ngIf="selectedAccountDetails.InputDirection == 2">
+                                </ion-icon> -->
+
+                                <ion-col>
+                                    <ion-avatar float-right style="width: auto !important;">
+                                        <a (click)="showLargeImage(10)">
+                                            <img src="{{patronImage}}" *ngIf="patronImage" style="padding-right:3px!important;">
+                                        </a>
+                                        <a *ngIf="!patronImage && selectedAccountDetails.Gender === 'M'">
+                                            <img class="flip_image" src="assets/img/default_male.png">
+                                        </a>
+                                        <a *ngIf="!patronImage && selectedAccountDetails.Gender === 'F'">
+                                            <img class="flip_image" src="assets/img/default_female.png">
+                                        </a>
+                                        <a *ngIf="!patronImage && (selectedAccountDetails.Gender !== 'M' && selectedAccountDetails.Gender !== 'F')">
+                                            <img style="border-radius: 0%;" src="assets/img/no_image.png">
+                                        </a>
+                                    </ion-avatar>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
+                    </ion-label>
+                </ion-item-divider>
+            </ion-list>
+            <ion-list *ngIf="isSpecialAccount==false" class="addFundDiv ion-no-padding ion-no-margin"
+                      [ngClass]="(isElectronApp == true) ? 'addFunds_btn':'addFunds_btn_mobile'">
+
+                <ion-item-divider>
+                    <!--class="patron-info-actions"-->
+                    <ion-grid class="ion-no-padding ion-no-margin">
+                        <ion-row>
+                            <ion-col size="4" *ngIf="!hideAddFunds" style="padding-left:0px">
+                                <ion-button default expand="block" (click)="ShowAddDollarPopover($event)"
+                                            *ngIf="isSpecialAccount==false"
+                                            [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'">
+
+                                    Add Funds
+                                </ion-button>
+                            </ion-col>
+                            <ion-col size="4">
+                                <ion-button default expand="block" (click)="ShowallergyPopover($event)"
+                                            [style.border]="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
+        || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
+        this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
+            || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')|| this.patronDetails['NoOfAlaCarteAllowedForPerson'] ? '4px solid #b22222':''">
+
+                                    Alerts
+                                    <span *ngIf="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
+        || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
+        this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
+        || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')">*</span>
+                                </ion-button>
+                            </ion-col>
+                            <ion-col size="4" style="padding-right:0px">
+                                <ion-button default expand="block" (click)="getReviews()"
+                                            [style.border]="isMarked ? '4px solid #27FA58':''" [disabled]='isMarkForReviewClicked'>
+
+                                    Mark for Review
+                                    <span *ngIf='isMarked'>*</span>
+                                    <div class="spinMarkForReview" *ngIf='isMarkForReviewClicked'>
+
+                                        <ion-spinner name="bubbles"></ion-spinner>
+                                    </div>
+                                </ion-button>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                </ion-item-divider>
+            </ion-list>
+            <ion-list class="transaction-item-header ion-no-padding ion-no-margin">
+                <!-- TRANSACTION -->
+                <ion-item-divider>
+                    <ion-label slot="start">
+                        Item Count
+                        <span *ngIf="orderData.items.length != 0">({{orderData.items.length}})</span>
+                    </ion-label>
+                    <ion-label slot="end" class="ion-text-right" style="padding-right: 10px!important">
+                        Amount
+                    </ion-label>
+                </ion-item-divider>
+            </ion-list>
+            <ion-content scrollY="true" class="transaction-item-list" (click)="emptySpaceClick()">
+                <ion-list>
+                    <ion-item-divider *ngIf="orderData.items.length == 0">
+                        <ion-label>
+                            <p>No items selected.</p>
+                        </ion-label>
+                    </ion-item-divider>
+                    <ion-item-divider *ngIf="mealFormed==true">
+                        <div class="btn-mytray" slot="start">
+                            <div class="top-sctn">
+                                <ion-col class="mytray-red" *ngIf="trayFruit > 0"></ion-col>
+                                <ion-col class="mytray-red-e" *ngIf="trayFruit == 0"></ion-col>
+                                <ion-col class="mytray-orange" *ngIf="trayGrain > 0"></ion-col>
+                                <ion-col class="mytray-orange-e" *ngIf="trayGrain == 0"></ion-col>
+                                <ion-col class="mytray-blue" *ngIf="trayMilk > 0"></ion-col>
+                                <ion-col class="mytray-blue-e" *ngIf="trayMilk == 0"></ion-col>
+                            </div>
+                            <div class="bottom_sctn">
+                                <ion-col class="mytray-green" *ngIf="trayVeg > 0"></ion-col>
+                                <ion-col class="mytray-green-e" *ngIf="trayVeg == 0"></ion-col>
+                                <ion-col class="mytray-purple" *ngIf="trayMeat > 0"></ion-col>
+                                <ion-col class="mytray-purple-e" *ngIf="trayMeat == 0"></ion-col>
+                            </div>
+                        </div>
+                        <!-- Tray  -->
+                        <p *ngIf="patronDetails.IsSecondMeal!=true ">
+                            {{systemMenuItem.MenuItemDescription}}
+                        </p>
+                        <p slot="start" style="line-height: 1.3rem;" *ngIf="patronDetails.IsSecondMeal==true "
+                           class="ion-no-margin">
+                            <span style="font-size: 1rem; color: #555;">Will be served as a</span>
+                            <br>Second {{systemMenuItem.MenuItemDescription}}
+                        </p>
+                        <p slot="end" class="ion-text-right" text-bold>
+                            {{systemMenuItem.Price | currency:'USD':true:'1.2-2'}}
+                        </p>
+                        <!-- TRAY  -->
+
+                    </ion-item-divider>
+                    <ion-item-divider *ngFor="let item of orderData.items; let i = index">
+
+                        <span slot="start" style="display: block; width: 20px;"
+                              *ngIf="item.IsPartOfMeal == true && mealFormed==true"></span>
+                        <!-- <ion-col width-10><ion-button block class="btn_delete" (click)="deleteMenuFromCart(i)" ><ion-icon name="close-circle"></ion-icon></ion-button></ion-col> -->
+                        <ion-button class="btn-full-size-icon" fill="clear" color="danger" (click)="deleteItem(item)">
+                            <ion-icon slot="icon-only" name="md-close-circle"></ion-icon>
+                        </ion-button>
+                        <ion-label>
+                            {{item.Name}}
+                            <ion-note [style.display]="item.isSecondMeal ? patronDetails.FullName =='Student' && patronDetails.isSpecialAccount ? '':'none' :'none'">
+                                *
+                            </ion-note>
+                            <ion-note [style.display]="item.isSecondMeal ? patronDetails.IsStudent==true && !patronDetails.isSpecialAccount ? '':'none' :'none'">
+                                *
+                            </ion-note>
+                            <p>
+                                <ion-icon class="color-red" name="ios-leaf" *ngIf="item.Fruit"></ion-icon>
+                                <ion-icon class="color-yellow" name="ios-leaf" *ngIf="item.Grain"></ion-icon>
+                                <ion-icon class="color-blue" name="ios-leaf" *ngIf="item.Milk"></ion-icon>
+                                <ion-icon class="color-green" name="ios-leaf" *ngIf="item.Veg"></ion-icon>
+                                <ion-icon class="color-purple" name="ios-leaf" *ngIf="item.Meat"></ion-icon>
+                            </p>
+                        </ion-label>
+                        <ion-label slot="end" class="ion-text-right" text-bold style="padding-right: 10px!important"
+                                   *ngIf="!(item.IsPartOfMeal == true && mealFormed==true) && item.ShowPaidPrice == false">
+                            {{item.Price | currency:'USD':true:'1.2-2'}}
+                        </ion-label>
+                        <ion-label slot="end" class="ion-text-right" style="padding-right: 10px!important"
+                                   *ngIf="!(item.IsPartOfMeal == true && Meal_Formed==true) && item.ShowPaidPrice == true">
+                            {{item.PaidPrice | currency:'USD':true:'1.2-2'}}
+                        </ion-label>
+
+                    </ion-item-divider>
+                </ion-list>
+            </ion-content>
+            <ion-footer id="menuServiceFooter" class="bottom-footer"
+                        [ngClass]="{'ion-hide' : patronId==null, 'bottom-bar':true, 'endPatronPicture':true}">
+
+                <ion-toolbar class="ion-no-border" color="trans"
+                             *ngIf="!(!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge && this.patronDetails.Balance <= 0)">
+                    <ion-row *ngIf="taxMeal == 1 && taxPercent && this.patronDetails.IsSaleTaxable == true">
+                        <ion-col class="ion-text-center label-margin-v3">
+                            <ion-label text-bold>
+                                Item Total :
+                                {{this.orderData.subTotal | currency:'USD':true:'1.2-2'}}
+                            </ion-label>
+                        </ion-col>
+                        <ion-col class="ion-text-center label-margin-v3">
+                            <ion-label text-bold>
+                                Tax @ {{taxPercent}} % :
+                                {{this.orderData.tax | currency:'USD':true:'1.2-2'}}
+                            </ion-label>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col class="ion-text-center label-margin-v3">
+                            <ion-label text-bold>
+                                Total Amount Due:
+                                {{orderData.totalAmount | currency:'USD':true:'1.2-2'}}
+                            </ion-label>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="4">
+                            <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
+                                        [disabled]="enablePay()">
+                                <!-- [disabled]="(patronDetails.isSpecialAccount==true && orderData.items.length === 0) || isValidMenuItemArray"> -->
+                                Pay
+                            </ion-button>
+                        </ion-col>
+                        <ion-col size="8">
+                            <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)" [disabled]="enableCharge()">
+                                <!-- [disabled]="(patronDetails.isSpecialAccount==true && orderData.totalAmount>=0.00) || isValidMenuItemArray"> -->
+                                Charge
+                                <!-- <span
+                                                  *ngIf="patronDetails.Balance >= 0 && patronDetails.isSpecialAccount==false && isHidelgibility == false"
+                                                  class="btn-transaction-charge-amount">
+                                                  {{orderData.totalAmount | currency:'USD':true:'1.2-2'}}
+                                              </span> -->
+                            </ion-button>
+                        </ion-col>
+                    </ion-row>
+                </ion-toolbar>
+
+                <ion-toolbar class="ion-no-border" color="trans"
+                             *ngIf="!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge && this.patronDetails.Balance <= 0">
+                    <ion-row *ngIf="taxMeal == 1 && taxPercent && this.patronDetails.IsSaleTaxable == true">
+                        <ion-col class="ion-text-center label-margin-v3">
+                            <ion-label text-bold>
+                                Item Total :
+                                {{this.orderData.subTotal | currency:'USD':true:'1.2-2'}}
+                            </ion-label>
+                        </ion-col>
+                        <ion-col class="ion-text-center label-margin-v3">
+                            <ion-label text-bold>
+                                Tax @ {{taxPercent}} % :
+                                {{this.orderData.tax | currency:'USD':true:'1.2-2'}}
+                            </ion-label>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col class="ion-text-center label-margin-v3">
+                            <ion-label text-bold>
+                                Total Amount Due:
+                                {{cashTendAmount | currency:'USD':true:'1.2-2'}}
+                            </ion-label>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="8">
+                            <ion-button expand="block" size="large" color="mint" (click)="showChargePopup()"
+                                        [disabled]="(isValidMenuItemArray || transactionInProgress)">
+                                Pay
+                                <span *ngIf="patronDetails.isSpecialAccount==false" class="btn-transaction-charge-amount">
+                                    {{orderData.totalAmount | currency:'USD':true:'1.2-2'}}
+                                </span>
+                            </ion-button>
+                        </ion-col>
+                        <ion-col size="4">
+                            <ion-button expand="block" size="large" class="color-theme" (click)="makeSale(2)" [disabled]=" (patronDetails.isSpecialAccount==true && orderData.totalAmount>0) ||
+                              isValidMenuItemArray || transactionInProgress">
+                                Charge
+                                <div class="spinLogin" *ngIf="transactionInProgress">
+                                    <ion-spinner name="bubbles"></ion-spinner>
+                                </div>
+                            </ion-button>
+                        </ion-col>
+                    </ion-row>
+                </ion-toolbar>
+            </ion-footer>
+        </div>
+    </ion-col>
+    <ion-col size-md="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
+             [ngClass]="{'ion-hide' : patronId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue(currentTab) == 'advanced')}">
+        <page-patron-lookup [page]="type"></page-patron-lookup>
+    </ion-col>
+</ion-row>

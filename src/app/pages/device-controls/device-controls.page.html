@@ -1,0 +1,56 @@
+<ion-content bg-theme>
+  <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
+    <ion-col size="12" size-md="8" size-xl="6" class="ion-align-self-center">
+      <div box-list-white class="ion-margin-horizontal">
+        <ion-button default expand="block" color="primary" slot="icon-only" [disabled]="disableButtons"
+          (click)="SyncPersonData()">
+          <ion-label text-large>Sync latest Person info</ion-label>
+          <ion-icon name="checkmark-circle" color="secondary" *ngIf="syncedPersonData"></ion-icon>
+        </ion-button>
+        <ion-button default expand="block" slot="icon-only" color="primary" [disabled]="disableButtons"
+          (click)="SyncMenusData()">
+          <ion-label text-large>Sync latest Menu info</ion-label>
+          <ion-icon name="checkmark-circle" color="secondary" *ngIf="syncedMenusData"></ion-icon>
+        </ion-button>
+        <!-- <ion-button default expand="block" icon-only color="primary" [disabled]="disableButtons" (click)="SyncTransactions()">
+                   
+                      <ion-label text-large>Send Transactions To server</ion-label>
+                      <ion-icon center name="checkmark-circle" color="secondary" *ngIf="postedAllTransactions"></ion-icon>
+                  </ion-button> -->
+
+        <!--   -->
+        <ion-button default expand="block" icon-only color="primary" (click)="removeDeviceConnection()">
+          <ion-label text-large>Reset</ion-label>
+        </ion-button>
+        <!-- <ion-button default expand="block" icon-only color="primary" *ngIf='canSetupTerminals && isUserLoggedIn'
+            (click)="GenerateUUID()">
+            <ion-label text-large>Generate UUID</ion-label>
+          </ion-button> -->
+
+        <ion-button default expand="block" icon-only color="primary" *ngIf='isUserLoggedIn && !openSession'
+          (click)="deactivatePrompt()">
+          <ion-label text-large>Rename Device</ion-label>
+        </ion-button>
+
+        <ion-item *ngIf='isElectronApp' lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label slot="end" class="ion-text-right" position="bottom">Open On Screen Keyboard</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="openOSK" (ionChange)="setOpenOSK($event)">
+          </ion-toggle>
+        </ion-item>
+
+        <ion-item *ngIf='isElectronApp && MULTIREAD' lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Use Plug and Play Peripherals</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="pnpPeripherals" (ionChange)="configurePeripherals()">
+          </ion-toggle>
+        </ion-item>
+        <ion-item lines="none" class="ion-text-right" *ngIf='!pnpPeripherals && isElectronApp && MULTIREAD'>
+          <ion-label>
+            <ion-button default size="small" (click)='showPeripheralApp()'>Configure Peripherals</ion-button>
+          </ion-label>
+        </ion-item>
+
+      </div>
+    </ion-col>
+  </ion-row>
+
+</ion-content>

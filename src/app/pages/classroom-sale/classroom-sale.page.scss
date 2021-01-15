@@ -1,0 +1,97 @@
+.scroll-content {
+  overflow: hidden;
+}
+
+.ion-card {
+  position: relative;
+  text-align: left;
+  border: 1em;
+  border-radius: 0.5em;
+  border-color: #00897b;
+}
+
+.card-title {
+  position: relative;
+  top: 36%;
+  font-size: 1em;
+  width: 100%;
+  font-weight: bold;
+  color: #fff;
+  background-color: #00897b;
+}
+
+.card-subtitle {
+  font-size: 1em;
+  position: relative;
+  top: 52%;
+  width: 100%;
+  color: #fff;
+}
+.section {
+  background-color: #00897b;
+  color: #fff;
+  //margin-bottom: 4px;
+  position: relative;
+  top: 36%;
+  font-size: 1em;
+  width: 100%;
+  font-weight: bold;
+}
+.section-active {
+  background-color: #00897b;
+  color: #fff;
+  position: relative;
+  top: 36%;
+  font-size: 1em;
+  width: 100%;
+  font-weight: bold;
+}
+.list-quick-sale {
+  ion-button ion-icon {
+    color: #00897b;
+    font-size: 15px;
+  }
+}
+.btnIcon {
+  width: 22px;
+  margin: 0px;
+  height: 18px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --background: rgb(240, 240, 240);
+}
+.alertBtn {
+  border: 4px solid #b22222;
+  width: 30%;
+  border-radius: 3px;
+}
+.padd20 {
+  padding: 20px !important;
+}
+.minHt100 {
+  min-height: 100%;
+}
+.padd0 {
+  padding: 0px !important;
+}
+ion-icon .width-auto {
+  width: auto;
+}
+ion-checkbox {
+  height: 30px !important;
+  width: 30px !important;
+  --checkmark-color: #209b5d;
+}
+ion-avatar {
+  display: flex;
+  align-items: center;
+}
+[box-header] {
+  border: 1px solid #cde;
+  border-radius: 4px;
+  --background: #def;
+  --background-hover: #def;
+}
+.button-disabled {
+  opacity: 0.4 !important;
+}

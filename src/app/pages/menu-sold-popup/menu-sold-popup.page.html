@@ -1,0 +1,106 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Previously Served Items
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content *ngIf="navPatronDetails">
+  <div *ngIf="!useDynamicMenus">
+    <!---->
+    <ion-list class="scrollable-list">
+      <div *ngFor="let solditem of navPatronDetails.SoldItems">
+        <ion-item>
+          <ion-label item-content text-large class="payment-details-col">{{solditem.MenuItemDescription}}</ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{solditem.Price |
+            currency:'USD':true:'1.2-2'}}</ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{solditem.TerminalName}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{ solditem.Date |
+            date:'mediumTime'}}</ion-label>
+        </ion-item>
+      </div>
+    </ion-list>
+  </div>
+  <div *ngIf="useDynamicMenus">
+    <div *ngFor="let item of previousSalesItemized">
+      <div *ngFor="let soldItem of item.saleDetail">
+        <ion-item *ngIf="soldItem.IsReimbursable">
+          <ion-label item-content text-large class="payment-details-col">
+            {{soldItem.MenuItemDescription}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">
+            {{soldItem.Price | currency:'USD':true:'1.2-2'}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{soldItem.TerminalName}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{soldItem.Date |
+            date:'mediumTime'}}</ion-label>
+        </ion-item>
+
+        <ion-item *ngIf="soldItem.IsPartOfMeal" lines="none" class="ion-no-padding ion-margin-start ion-margin-end"
+          style="background: #f8f8f8 !important; min-height: 30px; border-left: 10px solid #dedede;">
+          <ion-label indent-20 item-content class="payment-details-col ion-no-margin">
+            {{soldItem.MenuItemDescription}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">
+
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{soldItem.TerminalName}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{soldItem.Date |
+            date:'mediumTime'}}</ion-label>
+        </ion-item>
+        <ion-item *ngIf="!soldItem.IsReimbursable && !soldItem.IsPartOfMeal">
+          <ion-label item-content text-large class="payment-details-col">
+            {{soldItem.MenuItemDescription}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">
+            {{soldItem.Price | currency:'USD':true:'1.2-2'}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{soldItem.TerminalName}}
+          </ion-label>
+          <ion-label item-content text-large class="payment-details-col ion-text-right">{{soldItem.Date |
+            date:'mediumTime'}}</ion-label>
+        </ion-item>
+      </div>
+
+    </div>
+  </div>
+  <!--<ion-list *ngIf="!useDynamicMenus" inset>
+    <ion-item *ngFor="let solditem of navPatronDetails.SoldItems">
+      <ion-label slot="start" text-large>{{solditem.MenuItemDescription}}</ion-label>
+      <ion-label slot="end" text-right text-large>{{solditem.Price | currency:'USD':true:'1.2-2'}}</ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list *ngIf="useDynamicMenus" inset>
+    <ion-item *ngFor="let item of previousSalesItemized">
+      <ion-row *ngFor="let soldItem of item.saleDetail">
+        <ion-col col-1 *ngIf="soldItem.IsPartOfMeal"></ion-col>
+        <ion-col>
+          <ion-label *ngIf="soldItem.IsReimbursable">
+            {{soldItem.MenuItemDescription}}
+          </ion-label>
+          <ion-label *ngIf="!soldItem.IsReimbursable">
+            {{soldItem.MenuItemDescription}}
+          </ion-label>
+        </ion-col>
+        <ion-col col-2 *ngIf="!soldItem.IsPartOfMeal">
+          <ion-label *ngIf="soldItem.IsReimbursable">
+            {{soldItem.Price | currency:'USD':true:'1.2-2'}}
+          </ion-label>
+          <ion-label *ngIf="!soldItem.IsReimbursable">
+            {{soldItem.Price | currency:'USD':true:'1.2-2'}}
+          </ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-item>
+  </ion-list>-->
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

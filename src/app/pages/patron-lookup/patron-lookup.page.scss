@@ -1,0 +1,113 @@
+.active-input-border  {
+  --background: white;
+  --padding-bottom: 8px !important;
+  --padding-end: 8px !important;
+  --padding-start: 8px !important;
+  --padding-top: 8px !important;
+  border: 2px solid #5e9be5 !important;
+  border-radius: 4px;  
+  }
+  
+ .inactive-input-border  {
+  --background: white;
+  --padding-bottom: 8px !important;
+  --padding-end: 8px !important;
+  --padding-start: 8px !important;
+  --padding-top: 8px !important;
+    // border: 2px solid rgba(0,0,0,.3);
+    border-radius: 4px;  
+  }
+  .selectedSiteRow ion-list{
+    box-shadow: none !important;
+    margin:0px 0px 15px 0px;
+  }
+  .selectedSiteRow ion-list ion-list-header{
+    // padding-left: 10px;
+    margin-bottom: 0px;
+    border-top: none;
+    font-size: 1.6rem;
+    text-align: center;
+    font-weight: bold;
+  }
+  // .selectedSiteRow ion-list ion-item{
+  //   padding-left: 20px !important;
+  // }
+  .native-input {
+    // margin: 13px 8px;
+    padding-left: 7px;
+    width: calc(100% - 8px - 8px);
+}
+ion-item .item-inner {
+  // padding-right: 8px;
+  border-bottom: none !important;
+}
+.list-md .item-input:last-child {
+  border-bottom: none !important;
+}
+.padd-bt-5{
+  padding-bottom:2px !important; 
+}
+.margin-top10{
+  margin: 10px 0px 10px !important;
+}
+.search-btn{
+  padding-left: 0;
+  border-radius: 5px;
+}
+.panel-side ion-label.color-white {
+  --color: #FFF !important;
+}
+ion-header {
+  left: 0;
+  top: 0;
+  position: absolute;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}
+ion-item {
+  --highlight-height: 0px;
+}
+ion-segment ion-segment-button{
+  font-size: 1.2rem;
+}
+.center-text{
+  display: block;
+  text-align: center;
+  padding:10px;
+}
+.no-background {
+  background: transparent !important;
+  --background: transparent !important;
+}
+ion-segment-button.ios {
+  --background: transparent !important;
+  background: transparent !important;
+  --padding-top: 0;
+	--padding-end: 16px;
+	--padding-bottom: 0;
+	--padding-start: 16px;
+	--transition: color 0.15s linear 0s,opacity 0.15s linear 0s;
+    min-width: 90px;
+    max-width: 350px;
+    min-height: 48px;
+	--border-width: 0;
+    --border-style: solid;
+    --opacity: 1;
+}
+.margin-top5{
+  margin: 5px 0px 0px !important;
+}
+.cus-padding{
+  padding: 67px 0 0px 0 !important
+}
+
+ion-header ion-menu-toggle ion-button{
+  --border-color: transparent;
+  --color: #fff;
+  --background: transparent;
+  -webkit-box-shadow: none;
+  --box-shadow: none;
+  box-shadow: none;
+  --opacity: 1;
+}

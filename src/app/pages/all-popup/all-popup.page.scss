@@ -1,0 +1,62 @@
+app-all-popup ion-content [custom-list] .ion-md-checkmark {
+  font-size: 4rem !important;
+}
+app-all-popup ion-content [custom-list] ion-row {
+  padding: 8px 14px;
+}
+
+app-all-popup ion-list ion-label {
+  white-space: normal;
+}
+
+// app-all-popup ion-content .scroll-content{
+//     height: auto;
+//     margin-bottom: 70px;
+//     margin-top: 70px;
+//     overflow: auto !important;
+// }
+ion-footer {
+  left: 0;
+  bottom: 0;
+  position: relative;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}
+.minHeight {
+  min-height: 100%;
+}
+.bg-border {
+  border-bottom: 1px solid #dedede;
+}
+[font-bold] {
+  font-weight: bold;
+}
+[padd-bottom] {
+  padding-bottom: 50px !important;
+}
+#fixHeightZone {
+  height: 400px;
+  overflow-y: auto;
+}
+
+.scrollY {
+  height: 400px;
+  overflow-y: auto;
+}
+.review-item-static {
+  background: white;
+}
+.review-item-static ion-button {
+  --background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
+}
+.review-item-static ion-button {
+  --background-hover: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.15)) !important;
+}
+.full-width {
+  width: 100%;
+}
+
+.sc-ion-label-md-h {
+  white-space: initial;
+}

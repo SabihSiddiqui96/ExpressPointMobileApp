@@ -1,0 +1,18 @@
+app-menu-service-options .scroll-content{
+   
+    height: auto;
+    margin-bottom: 70px;
+    margin-top: 70px;
+    overflow-y: auto;
+}
+
+app-menu-service-options [custom-list] .button {
+padding: 40px 0 !important;
+}
+
+app-menu-service-options [custom-list] .button-inner {
+text-align: left !important;
+justify-content: left !important;
+font-size: 80% !important;
+font-weight: normal !important;
+}

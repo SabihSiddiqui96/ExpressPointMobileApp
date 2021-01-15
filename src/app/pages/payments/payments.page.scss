@@ -1,0 +1,17 @@
+.flip_image {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+[bg-box-light] {
+  --background: #f8f8f8 !important;
+}
+
+[box-payment-list] {
+  align-content: center !important;
+  padding-top: 10px !important;
+}
+
+[marg-payment] {
+  margin-top: 0px !important;
+}

@@ -1,0 +1,7 @@
+{
+  "name": "ExpressPointApp-Dev",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

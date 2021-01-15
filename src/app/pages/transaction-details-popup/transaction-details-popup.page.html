@@ -1,0 +1,198 @@
+<ion-header>
+  <ion-toolbar hideBackButton="true" color="slate" class="ion-align-items-center">
+
+    <!-- <ion-buttons left>
+        <ion-button default expand="block" icon-only fill="clear" color="primary" *ngIf="!navIsFromservice" (click)="goToServicePage()">
+          <ion-icon name="arrow-round-back"></ion-icon>
+        </ion-button>
+      </ion-buttons> -->
+    <ion-menu-toggle slot="start">
+      <ion-button fill="clear" *ngIf="!navIsFromservice">
+        <ion-icon name="menu" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-menu-toggle>
+    <ion-title class="ion-text-center">
+      Transactions
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button expand="block" fill="clear" color="primary" (click)="showSearch()">
+        <ion-icon slot="icon-only" name="search"></ion-icon>
+      </ion-button>
+      <!-- *ngIf="!navIsFromservice"  (click)="totalMealTypeSales()" -->
+      <ion-button expand="block" *ngIf="!navIsFromservice" (click)="totalMealTypeSales()">
+        <ion-icon name="ios-paper" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button expand="block" fill="clear" color="primary" *ngIf="navIsFromservice" (click)="close()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="slate" *ngIf="searchClicked" class="ion-align-items-center ion-no-padding">
+    <!-- <ion-row input-outline addbar padding class="ion-justify-content-center"> -->
+    <div class="ion-margin-horizontal">
+      <ion-row class="ion-align-items-center" padding>
+        <ion-col size="9">
+          <ion-searchbar id="Firstname_search" (debounce)="500" (ionInput)="AdvancedTransactionLookup($event)"
+            placeholder="Enter Name" [(ngModel)]="patronSearch.PersonName"></ion-searchbar>
+        </ion-col>
+        <ion-col size="3" class="ion-align-items-end">
+          <ion-checkbox title="UnSynced" [(ngModel)]="patronSearch.Synced" (click)='showNotSyncedTransactions()'>
+          </ion-checkbox>
+          <ion-label style="color:floralwhite !important">&ensp; Not Sent</ion-label>
+        </ion-col>
+        <!-- <ion-col size="2" class="ion-align-items-start">
+          
+        </ion-col> -->
+      </ion-row>
+    </div>
+  </ion-toolbar>
+</ion-header>
+<ion-content bg-theme [ngClass]="searchClicked ? 'custom_margin': ''">
+  <div custom-list view-full>
+
+    <div box-list-white style="margin-bottom : 36px; height: unset" margin>
+      <div style="padding-bottom: 4px; text-align: right">
+        <ion-text color="danger">
+          <ion-icon name="close-circle" color="danger"></ion-icon>&ensp;Not Sent
+        </ion-text>
+        <ion-text color="blue">
+          <ion-icon name="checkmark" color="blue"></ion-icon>&ensp;Processing
+        </ion-text>
+        <ion-text color="secondary">
+          <ion-icon name="done-all" color="secondary"></ion-icon>&ensp;Complete
+        </ion-text>
+      </div>
+      <div></div>
+      <ion-row header-row class="ion-align-items-center">
+        <ion-col size="1" margin-top-bottom>
+          <ion-label>No</ion-label>
+        </ion-col>
+        <ion-col size="3" margin-top-bottom>
+          <ion-label>Patron Name</ion-label>
+        </ion-col>
+        <ion-col size="2" margin-top-bottom>
+          <ion-label>Date/Time</ion-label>
+        </ion-col>
+        <ion-col size="2" margin-top-bottom>
+          <ion-label>Meal Type</ion-label>
+        </ion-col>
+        <ion-col size="1" margin-top-bottom>
+          <ion-label>T-Type</ion-label>
+        </ion-col>
+        <ion-col size="1" margin-top-bottom>
+          <ion-label>Amount</ion-label>
+        </ion-col>
+        <!--<ion-col col-1>
+            <ion-label>Synced</ion-label>
+          </ion-col>-->
+
+        <ion-col size="2" margin-top-bottom>
+          <ion-label></ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let SaleData of transactionList; " class="ion-align-items-center">
+        <ion-col size="1">
+          <ion-label>{{SaleData.TransactionNumber}}</ion-label>
+        </ion-col>
+        <ion-col size="3">
+          <ion-label>
+            <ion-row>
+              <ion-col size="2">
+            <ion-icon center name="done-all" color="secondary"
+              *ngIf="SaleData.IsSynced==true && SaleData.IsProcessed == true"></ion-icon>
+            <ion-icon center name="checkmark" color="blue"
+              *ngIf="SaleData.IsSynced==true && SaleData.IsProcessed == false"></ion-icon>
+            <ion-icon center name="close-circle" color="danger" *ngIf="SaleData.IsSynced==false"></ion-icon>
+          </ion-col>
+          <ion-col size="10">
+          <div style="display: flex;">
+            &ensp;<span>{{SaleData.PersonName}}</span>
+          </div>
+          </ion-col>
+          </ion-row>
+          </ion-label>
+        </ion-col>
+        <ion-col size="2">
+          <ion-label>
+            <!--{{SaleData.TransactionDate | date:'MM-dd-yyyy'}}-->
+            {{SaleData.IsfromSameDay? (SaleData.TransactionDate | date:'mediumTime'):(SaleData.TransactionDate | date:'MM-dd-yyyy')}}
+
+          </ion-label>
+        </ion-col>
+        <ion-col size="2">
+          <ion-label>{{SaleData.MealType}}</ion-label>
+        </ion-col>
+        <ion-col size="1">
+          <ion-label>
+
+            <ion-icon center name="book"
+              *ngIf="(SaleData.IsCard==false && SaleData.IsCheck==true) && ( (SaleData.TransactionType == 1) || (SaleData.TransactionType == 4))"
+              small slot="icon-only" disabled></ion-icon>
+            <ion-icon center name="card"
+              *ngIf="(SaleData.IsCard==true) && ( (SaleData.TransactionType == 1) || (SaleData.TransactionType == 4))"
+              small slot="icon-only" disabled></ion-icon>
+            <ion-icon center name="cash"
+              *ngIf="(SaleData.IsCard==false && SaleData.IsCheck==false) && ( (SaleData.TransactionType == 1) || (SaleData.TransactionType == 4))"
+              small slot="icon-only" disabled></ion-icon>
+            <ion-icon center name="basket" *ngIf="(SaleData.IsCheck==false) && (SaleData.TransactionType == 2)" small
+              icon-only disabled></ion-icon>
+            <ion-icon center name="person" *ngIf="(SaleData.TransactionType == 3 || SaleData.TransactionType == 5)"
+              small slot="icon-only" disabled tooltip="principal account"></ion-icon>
+
+          </ion-label>
+        </ion-col>
+        <ion-col size="1">
+          <ion-label>{{SaleData.PaymentAmount | currency:'USD':true:'1.2-2'}}</ion-label>
+        </ion-col>
+        <!--<ion-col col-1>
+            <ion-label>
+              <ion-icon center name="checkmark-circle" color="secondary" *ngIf="SaleData.IsSynced==true"></ion-icon>
+              <ion-icon center name="close-circle" color="danger" *ngIf="SaleData.IsSynced==false"></ion-icon>
+            </ion-label>
+          </ion-col>-->
+
+        <ion-col size="1">
+          <ion-button expand="block" size="small" [disabled]="SaleData.IsClassroomSale"
+            (click)="selectTransaction('ReviewTypes',SaleData.DeviceTransactionId)">
+            <ion-icon slot="icon-only" name="flag" *ngIf="SaleData.IsMarked==false"></ion-icon>
+            <ion-icon slot="icon-only" name="flag" color="danger" *ngIf="SaleData.IsMarked==true"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="1">
+          <ion-button expand="block" size="small" (click)="getMenuItemsInTransaction(SaleData)">
+            <ion-icon slot="icon-only" name="list"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+  <div custom-list view-mobile>
+    <div box-list-white style="margin-bottom : 36px; height: unset" class="ion-margin">
+      <ion-row *ngFor="let SaleData of saleDataList; let i=index;">
+        <ion-col size="8">
+          <ion-label>
+            <span [style.display]="checkName(SaleData.PersonName)?'none':''">{{SaleData.LastName}},
+              {{SaleData.FirstName}}</span>
+            <span [style.display]="checkName(SaleData.PersonName)?'':'none'">{{SaleData.PersonName}}</span>
+            <br> {{SaleData.TransactionDate | date:'MM-dd-yyyy'}} / {{SaleData.MealType}}
+            <br> Sync Status:
+            <ion-icon center name="checkmark-circle" color="secondary" *ngIf="SaleData.IsSynced==true"></ion-icon>
+            <ion-icon center name="close-circle" color="danger" *ngIf="SaleData.IsSynced==false"></ion-icon>
+          </ion-label>
+        </ion-col>
+        <ion-col size="2">
+          <ion-button expand="block" size="small" [disabled]="SaleData.IsClassroomSale"
+            (click)="selectTransaction('ReviewTypes',SaleData.DeviceTransactionId)">
+            <ion-icon slot="icon-only" name="flag" *ngIf="SaleData.IsMarked==false"></ion-icon>
+            <ion-icon slot="icon-only" name="flag" color="danger" *ngIf="SaleData.IsMarked==true"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="2">
+          <ion-button expand="block" size="small" (click)="getMenuItemsInTransaction(SaleData.MenuItems)">
+            <ion-icon slot="icon-only" name="list"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+</ion-content>
