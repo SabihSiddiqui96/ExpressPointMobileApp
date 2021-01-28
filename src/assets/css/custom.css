@@ -5,6 +5,7 @@ ion-label {
 
 ion-backdrop {
   opacity: 0.7;
+  width:150%;
 }
 .theme-dark {
   background: #37474f !important;
@@ -841,9 +842,6 @@ ion-content {
   background: #fff;
 }
 
-ion-backdrop {
-  opacity: 0.7;
-}
 .theme-dark {
   background: #37474f !important;
   /*background: white !important;*/
@@ -1173,7 +1171,8 @@ ion-header ion-toolbar {
 
   .sc-ion-modal-md-h {
     --max-width: 800px;
-    --max-height: 600px;
+    --max-height: calc(90%);
+    --min-height: calc(90%);
     --min-width: 700px;
     position: absolute;
   }
@@ -1671,7 +1670,7 @@ ion-popover .popover-content {
   transform-origin: left top;
   --width: 250px;
   --min-width: 50%;
-  --min-height: 50%;
+  --min-height: 20%;
   --max-height: 90%;
   color: #000;
   --background: #fff;
@@ -1743,4 +1742,10 @@ ion-popover .popover-content {
 	-khtml-user-select: none; /* Konqueror HTML */
 	-webkit-user-select: none; /* Safari */
 	-webkit-touch-callout: none; /* iOS Safari */
+}
+.sync_popup .popover-content{
+    --width:100% !important;
+    width:100% !important;
+    left:0 !important;
+    top: 80px !important;
 }

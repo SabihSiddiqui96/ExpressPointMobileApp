@@ -36,7 +36,7 @@ ion-footer {
   padding-bottom: 50px !important;
 }
 #fixHeightZone {
-  height: 400px;
+  max-height: calc(70vh);
   overflow-y: auto;
 }
 

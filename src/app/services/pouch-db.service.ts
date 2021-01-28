@@ -57,7 +57,7 @@ export class PouchDBService {
         public settingService: SettingService, public signalRService: SignalRService) {
     }
     private deviceId;
-
+    
     public ResetDB(includeSystemDb = true) {
         console.time('ResetDB');
         const destroyPromises = [EXP_DYNAMIC_MENUS.destroy(), EXP_PERSON.destroy(), EXP_PERSON_IN_MEMORY.drop(), EXP_STANDARD_MENUS.destroy(), EXP_COMMON.destroy()];
@@ -263,7 +263,7 @@ export class PouchDBService {
         console.time('Setup:ALL');
         const popover = this.popoverCtrl.create({
             component: StatusPopupPage, componentProps: { 'navSyncList': this.syncList },
-            backdropDismiss: false
+            backdropDismiss: false,cssClass: 'sync_popup'
         }).then(async (res) => {
             await res.present();
         });
