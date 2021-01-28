@@ -35,7 +35,7 @@ import { SwitchHandsService } from "./services/switch-hands.service";
 import { SettingService } from "./services/setting.service";
 import { TransactionService } from "./services/transaction.service";
 
-import { ElectronService } from "ngx-electron";
+import { ElectronService } from './services/electron.service';
 import { PopupMessageService } from "./services/popup-message.service";
 import { PopupMessageCode } from "./services/enums/popup-message-codes";
 import { Observable, timer } from "rxjs";

@@ -128,7 +128,11 @@ function createWindow() {
             show: false,
             title: 'ExpressPoint',
             icon: iconPath,
-            autoHideMenuBar: true
+            autoHideMenuBar: true,
+            webPreferences: {
+                nodeIntegration: true,
+                enableRemoteModule: true
+            }
         },
     });
     electron_1.app.commandLine.appendSwitch('--disable-http-cache'); // Added to remove cache
@@ -172,7 +176,9 @@ electron_updater_1.autoUpdater.on('update-downloaded', (info) => {
         title: 'Update available',
         message: ('A newer version of ExpressPoint is available. Please restart the application to apply the update.')
     };
-    electron_1.dialog.showMessageBox(win, dialogOptions, response => electron_updater_1.autoUpdater.quitAndInstall());
+    electron_1.dialog.showMessageBox(win, dialogOptions)
+        .then(() => electron_updater_1.autoUpdater.quitAndInstall())
+        .catch((err) => console.error(err));
 });
 electron_updater_1.autoUpdater.on('error', (e) => {
     log.error(e);
@@ -282,8 +288,7 @@ electron_1.ipcMain.on('AppPlatformInitiated', () => {
 electron_1.ipcMain.on('ElectronAppClose', () => {
     // Cache clear
     const ses = win.webContents.session;
-    ses.clearCache(() => {
-    });
+    ses.clearCache();
     appQuitCalledFromApp = true;
     electron_1.app.quit();
 });

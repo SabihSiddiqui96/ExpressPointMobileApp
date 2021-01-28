@@ -19,7 +19,7 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { DeviceService } from '../../services/device.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { Events } from '../../services/events.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from '../../services/electron.service';
 import { Router } from '@angular/router';
 import { GoLogin } from '../login/go-login';
 import { SettingService } from '../../services/setting.service';

@@ -11,7 +11,7 @@ import { AppStateService } from '../services/app-state.service';
 import { SystemService } from '../services/system.service';
 import * as _ from 'lodash';
 import { UrlsService } from '../services/urls.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from './electron.service';
 import { Events } from './events.service';
 // import { ColdObservable } from 'rxjs/testing/ColdObservable';
 // import { resolveDefinition } from '@angular/core/src/view/util';

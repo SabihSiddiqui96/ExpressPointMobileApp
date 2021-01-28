@@ -1554,9 +1554,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public gridClick(menuItem) {
 
-        setTimeout(() => {
+        setTimeout( () => {
             (document.activeElement as HTMLElement).blur();
-        }, 0);
+        }, 0);      
 
         if (this.isStaticMenuSelected === true) {
             if (menuItem.emptygrid === true) {
@@ -2673,10 +2673,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public ShowAddDollarPopover(myEvent) {
 
-        setTimeout(() => {
+        setTimeout( () => {
             (document.activeElement as HTMLElement).blur();
-        }, 0);
-
+        }, 0);      
+        
         const modal = this.modalCtrl.create({
             component: MenuPaymentPopupPage,
             componentProps: {
@@ -2861,9 +2861,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
             }
 
-            setTimeout(() => {
+            setTimeout( () => {
                 (document.activeElement as HTMLElement).blur();
-            }, 0);
+            }, 0);      
 
             const modal = this.modalCtrl.create({
                 component: MenuOrderPayPage,

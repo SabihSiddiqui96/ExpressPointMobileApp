@@ -18,7 +18,7 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { SettingService } from '../../services/setting.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from '../../services/electron.service';
 import { SiteSettingCodes } from '../../services/enums/site-setting-codes';
 import { CommandCodes } from '../../services/enums/command-codes';
 import { Events } from '../../services/events.service';

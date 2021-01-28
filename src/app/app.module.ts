@@ -15,7 +15,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppComponent } from './app.component';
-import { NgxElectronModule, ElectronService } from 'ngx-electron';
+import { ElectronService } from './services/electron.service';
 import { PouchQueriesService } from '../app/services/Database/pouch-queries.service';
 import { PouchDBService } from '../app/services/pouch-db.service';
 import { HttpInterceptorService } from '../app/services/HTTP/http-interceptor.service';
@@ -194,7 +194,6 @@ import { SignalRService } from './services/SignalR.service';
     ],
     imports: [
         BrowserModule,
-        NgxElectronModule,
         AppRoutingModule,
         HttpClientModule,
         IonDigitKeyboard,

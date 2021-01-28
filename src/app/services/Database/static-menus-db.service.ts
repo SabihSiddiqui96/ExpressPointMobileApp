@@ -31,6 +31,7 @@ export class StaticMenusDBService {
         subscribe
         (
           data => {
+            this.events.publish('data:sync', { 'StaticMenus': 'APIComplete' });
             const menuGrids = [];
             if (data != null) {
               data.map(menuGrid => {

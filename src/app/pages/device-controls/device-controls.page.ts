@@ -9,7 +9,7 @@ import { AppStateService } from '../../services/app-state.service';
 import { TransactionService } from '../../services/transaction.service';
 import { Observable, interval } from 'rxjs';
 import { DeviceConnectionPage } from '../device-connection/device-connection.page';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from '../../services/electron.service';
 import { SettingService } from '../../services/setting.service';
 import { LogoutPage } from '../logout/logout.page';
 import { DeviceService } from '../../services/device.service';

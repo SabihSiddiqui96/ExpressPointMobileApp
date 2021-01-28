@@ -149,7 +149,11 @@ function createWindow() {
         show: false,
         title: 'ExpressPoint',
         icon: iconPath,
-        autoHideMenuBar: true
+        autoHideMenuBar: true,
+        webPreferences: {
+          nodeIntegration: true,
+          enableRemoteModule : true
+        }
       },
     });
 
@@ -209,7 +213,9 @@ autoUpdater.on('update-downloaded', (info) => {
     message: ('A newer version of ExpressPoint is available. Please restart the application to apply the update.')
   };
 
-  dialog.showMessageBox(win, dialogOptions, response => autoUpdater.quitAndInstall());
+  dialog.showMessageBox(win, dialogOptions)
+      .then(() => autoUpdater.quitAndInstall())
+      .catch((err) => console.error(err));
 });
 
 autoUpdater.on('error', (e) => {
@@ -338,8 +344,7 @@ ipcMain.on('AppPlatformInitiated', () => {
 ipcMain.on('ElectronAppClose', () => {
   // Cache clear
   const ses = win.webContents.session;
-  ses.clearCache(() => {
-  })
+  ses.clearCache();
   appQuitCalledFromApp = true;
   app.quit();
 });

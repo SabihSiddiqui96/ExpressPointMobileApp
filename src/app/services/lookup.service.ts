@@ -12,7 +12,7 @@ import { SettingService } from '../services/setting.service';
 import { PopupMessageService } from '../services/popup-message.service';
 import { PopupMessageCode } from '../services/enums/popup-message-codes';
 import { Events } from '../services/events.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from './electron.service';
 import { BehaviorSubject } from 'rxjs';
 import { SiteSettingCodes } from './enums/site-setting-codes';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';

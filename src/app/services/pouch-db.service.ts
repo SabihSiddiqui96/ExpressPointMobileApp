@@ -14,7 +14,7 @@ import { StatusPopupPage } from '../pages/status-popup/status-popup.page';
 import { AppStateService } from './app-state.service';
 import { SettingService } from '../services/setting.service';
 import { UtilService } from '../services/util.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from './electron.service';
 import ForerunnerDB from 'forerunnerdb';
 import { SystemDBService } from './Database/system-db.service';
 import { UsersDBService } from './Database/users-db.service';

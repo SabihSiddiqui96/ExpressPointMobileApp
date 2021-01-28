@@ -5,7 +5,7 @@ import { ToastController, LoadingController, AlertController, Platform } from '@
 import { SC_URL } from '../services/urls.service';
 import { UrlsId } from './enums/environment-url-id';
 import { AppStateService } from './app-state.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from './electron.service';
 import * as _ from 'lodash';
 import CryptoJS from 'crypto-js';
 

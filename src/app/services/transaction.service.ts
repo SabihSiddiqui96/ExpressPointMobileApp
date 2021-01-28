@@ -7,7 +7,7 @@ import { HttpService } from '../services/HTTP/http.service';
 import { PouchDBService, EXP_TRANSACTIONS } from '../services/pouch-db.service';
 import { UtilService } from '../services/util.service';
 import { Events as CustomEvents } from '../services/events.service';
-import { ElectronService } from 'ngx-electron';
+import { ElectronService } from './electron.service';
 import { LogoutPage } from '../pages/logout/logout.page';
 import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
