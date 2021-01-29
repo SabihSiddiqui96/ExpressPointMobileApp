@@ -232,7 +232,7 @@ autoUpdater.on('checking-for-update', i => {
 
 function print58m(printData: any) {
   return new Promise((resolve, reject) => {
-    mainWindow = new BrowserWindow({ width: 500, height: 500, show: true });
+    mainWindow = new BrowserWindow({ width: 500, height: 500, show: false, webPreferences: { nodeIntegration: true } });
     mainWindow.loadURL(path.join(__dirname, 'PrintPreview.html'));
     // mainWindow.hide();
 
@@ -242,8 +242,6 @@ function print58m(printData: any) {
         resolve(true);
       });
     });
-
-    mainWindow.hide();
   });
 }
 
@@ -252,8 +250,10 @@ ipcMain.on('print', (evnt: any, arg: any) => {
     if (result) {
       mainWindow.webContents.print({ silent: true }, (success) => {
         console.log('---mainWindow---');
-        mainWindow.destroy();
         console.log(success);
+
+      mainWindow.hide();
+      mainWindow.close();
       });
     }
   });

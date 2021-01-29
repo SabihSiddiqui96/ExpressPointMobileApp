@@ -190,7 +190,7 @@ electron_updater_1.autoUpdater.on('checking-for-update', i => {
 //#region  IPC Events
 function print58m(printData) {
     return new Promise((resolve, reject) => {
-        mainWindow = new electron_1.BrowserWindow({ width: 500, height: 500, show: true });
+        mainWindow = new electron_1.BrowserWindow({ width: 500, height: 500, show: false, webPreferences: { nodeIntegration: true } });
         mainWindow.loadURL(path.join(__dirname, 'PrintPreview.html'));
         // mainWindow.hide();
         mainWindow.webContents.on('did-finish-load', () => {
@@ -199,7 +199,6 @@ function print58m(printData) {
                 resolve(true);
             });
         });
-        mainWindow.hide();
     });
 }
 electron_1.ipcMain.on('print', (evnt, arg) => {
@@ -207,8 +206,9 @@ electron_1.ipcMain.on('print', (evnt, arg) => {
         if (result) {
             mainWindow.webContents.print({ silent: true }, (success) => {
                 console.log('---mainWindow---');
-                mainWindow.destroy();
                 console.log(success);
+                mainWindow.hide();
+                mainWindow.close();
             });
         }
     });
