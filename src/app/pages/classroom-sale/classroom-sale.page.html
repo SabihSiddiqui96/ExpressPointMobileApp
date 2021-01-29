@@ -160,7 +160,10 @@
           having
           a prior meal for {{filter.selected_mealtype_name}} today.
         </p>
-
+        <p *ngIf="hasStudentsWithoutPriceTypes" box-info>            
+                Students cannot be selected if price is not set for students price type. Verify all expected students are selected
+          </p>
+          
 
         <!-- <ion-content> -->
         <div custom-list *ngIf="studentLoaded" class="list-quick-sale ion-no-padding">
@@ -297,7 +300,7 @@
               [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }">
               <ion-row class="minHt100" class="ion-justify-content-center ion-align-items-center">
                 <ion-checkbox mode="md" id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
-                  [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal" [disabled]="student.IsAllergent">
+                  [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
                 </ion-checkbox>
                 <ion-icon large name="md-checkmark" color="secondary" *ngIf="student.HadMeal"></ion-icon>
               </ion-row>

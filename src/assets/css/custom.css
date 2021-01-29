@@ -1744,8 +1744,6 @@ ion-popover .popover-content {
 	-webkit-touch-callout: none; /* iOS Safari */
 }
 .sync_popup .popover-content{
-    --width:100% !important;
-    width:100% !important;
-    left:0 !important;
-    top: 80px !important;
+    --width:60% !important;
+    top: 18% !important;
 }

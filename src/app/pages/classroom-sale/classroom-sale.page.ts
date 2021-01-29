@@ -154,7 +154,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public taxMeal: number;
     public taxPercent: number;
     public canOpenPOS: boolean;
-
+    
+    public hasStudentsWithoutPriceTypes = false;
     constructor(public _nav: NavController,
         public popoverCtrl: PopoverController,
         private elRef: ElementRef,
@@ -592,7 +593,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'isStudentCEP': doc.isStudentCEP,
                             'IsStudent': doc.IsStudent,
                             'Site': doc.SiteCode,
-                            'Teacher': doc.HomeRoom
+                            'Teacher': doc.HomeRoom,
+                            'isPriceSetForStudentPriceType':true
                         };
                     });
                     students = _.sortBy(students, 'LastName');
@@ -835,13 +837,14 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             const studentsHadMeal = [];
             this.previousMealsCount = 0;
             let cepPriceApply = false;
-            students.map(student => {
-                // PouchQueriesService.GetPrice(this.filter.selected_menuitem, student.PriceTypeId, student.RDAGroupId, student.IsStudent, this.priceMode)
+            students = students.map(student => {
+                let studentWithPriceTypeChecked = { ...student, isPriceSetForStudentPriceType: true };
+                // PouchQueriesService.GetPrice(this.filter.selected_menuitem, studentWithTypeCheked.PriceTypeId, studentWithTypeCheked.RDAGroupId, studentWithTypeCheked.IsStudent, this.priceMode)
                 //   .then(price => {
 
-                if (student.isStudentCEP === true) { // student is CEP => CEP price no matter with school
+                if (studentWithPriceTypeChecked.isStudentCEP === true) { // studentWithTypeCheked is CEP => CEP price no matter with school
                     cepPriceApply = true;
-                } else { // student is not CEP => Check CHRGNCEP setting to charge or not
+                } else { // studentWithTypeCheked is not CEP => Check CHRGNCEP setting to charge or not
                     if (this.isSiteCEP === true) {
                         if (this.setting.CHRGNCEP === false) {
                             cepPriceApply = true;
@@ -853,22 +856,30 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     }
                 }
                 if (cepPriceApply) {
-                    student.Price = 0;
+                    studentWithPriceTypeChecked.Price = 0;
+                    studentWithPriceTypeChecked.isPriceSetForStudentPriceType = true ;
                 } else {
                     // if (price.rows.length > 0) {
-                    //   student.Price = price.rows[0].doc.Price;
+                    //   studentWithTypeCheked.Price = price.rows[0].doc.Price;
                     // }
-                    student.Price = this.getPrice(student.PriceTypeId,
-                        student.RDAGroupId, student.IsStudent, this.priceMode);
+                    studentWithPriceTypeChecked.Price = this.getPrice(studentWithPriceTypeChecked.PriceTypeId,
+                        studentWithPriceTypeChecked.RDAGroupId, studentWithPriceTypeChecked.IsStudent, this.priceMode);
+                    if (studentWithPriceTypeChecked.Price === null) {
+                        studentWithPriceTypeChecked.Price = 0;
+                        studentWithPriceTypeChecked.isPriceSetForStudentPriceType = false;
+                        this.hasStudentsWithoutPriceTypes = true;
+                    } else {
+                        studentWithPriceTypeChecked.isPriceSetForStudentPriceType = true ;
+                    }
                 }
                 //  });
 
-                if (student.PreviousSales) {
-                    student.PreviousSales.map(s => {
+                if (studentWithPriceTypeChecked.PreviousSales) {
+                    studentWithPriceTypeChecked.PreviousSales.map(s => {
                         if (s.MealTypeId === this.filter.selected_mealtype) {
                             s.SalesByMealType.map(sales => {
                                 if (sales.IsReimbursable) {
-                                    student.HadMeal = true;
+                                    studentWithPriceTypeChecked.HadMeal = true;
                                     // studentsHadMeal.push(s)
                                 }
                             });
@@ -876,10 +887,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     });
                 }
 
-                if (student.HadMeal) {
-                    studentsHadMeal.push(student);
+                if (studentWithPriceTypeChecked.HadMeal) {
+                    studentsHadMeal.push(studentWithPriceTypeChecked);
                 }
-
+                return studentWithPriceTypeChecked;
             });
             this.previousMealsCount = studentsHadMeal.length;
             this.studentList = students;
@@ -896,7 +907,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         });
 
     }
-
+    
     public getPrice(priceTypeId, rdaGroupId, isStudent, priceMode?) {
         let siteTypeId = 0;
         if (priceMode === 0 || (!isStudent && priceMode === 1)) {
@@ -910,17 +921,18 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + rdaGroupId + '--' + siteTypeId
             }
         );
-
+        
         if (priceDoc) {
             return priceDoc.doc.Price;
         } else {
-            return 0;
+            return null;
         }
-
+        
     }
 
     public clearStudents() {
         this.transactionInProgress = false;
+        this.hasStudentsWithoutPriceTypes = false;
         this.utilService.setLoader(true);
         // const settings = JSON.parse(AppStateService.get('Settings'));;
         const isTeacher = SettingService.isUserPermitted('CSQUICK');
@@ -1227,7 +1239,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 }
 
             });
-
+            
 
             PouchDBService.UpsertDocs(this.persons, EXP_PERSON);
 
@@ -1251,14 +1263,35 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         });
 
     }
-
+    public showWarning(message) {
+        this.alertCtrl.create({
+          header: '',
+          message: message,
+          cssClass: 'customAlertCss',
+          buttons: [
+            {
+              text: 'Got It'
+            }
+          ]
+        }).then(async (res) => {
+          await res.present();
+        });
+    }
+    
     public selectAllPatrons() {
         setTimeout(() => {
             this.studentList.forEach(obj => {
                 if (obj.HadMeal === false && obj.IsAllergent === false) {
                     obj.isSelected = this.selectAll;
+                    if (obj.isPriceSetForStudentPriceType === false) {
+                        obj.isSelected = false;
+                    }
                 }
             });
+            if (this.hasStudentsWithoutPriceTypes && this.selectAll) {
+                this.showWarning("Not all patrons are able to be selected because the menu items prices are not all set. Please notify your manager.");
+            }
+            
         });
         // const toggle = !this.selectAll;
         // this.studentList.map((student) => {
@@ -1287,7 +1320,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public selectStudent(index) {
         let totalItems = 0;
-        this.studentList.map(obj => { if (!obj.HadMeal) totalItems++ });
+        this.studentList.map(obj => { if (!obj.HadMeal && (obj.isPriceSetForStudentPriceType !== false)) totalItems++ });
 
         let checked = 0;
         this.studentList.map(obj => {
@@ -1296,7 +1329,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
         if (checked > 0 && checked < totalItems) { //If even one item is checked but not all
 
-            this.isIndeterminate = false;
+            this.isIndeterminate = true;
             this.selectAll = false;
 
         } else if (checked == totalItems) { //If all are checked
