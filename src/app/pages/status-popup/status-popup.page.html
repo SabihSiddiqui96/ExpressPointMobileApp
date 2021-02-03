@@ -10,14 +10,18 @@
     <p class="ion-text-center" *ngIf="!error">
         ExpressPoint is downloading data to make it available for offline use...
     </p>
-
+    
     <ion-list lines="none" class="ion-text-center">
-
+       
         <ion-item *ngIf="syncList.SiteSettings" class="done">
             <ion-icon slot="start" name="build"></ion-icon>
-            <ion-label>
+            <ion-label slot="start">
                 Site Settings
             </ion-label>
+           
+            <ion-progress-bar *ngIf="progressSiteSettingsTotal && progressSiteSettingsTotal > 0" slot="start" 
+                color="secondary" [value]="progressSiteSettingsCurrent/progressSiteSettingsTotal" ></ion-progress-bar>
+                <span> {{progressSiteSettingsCurrent}} / {{ progressSiteSettingsTotal}}</span>
             <ion-spinner name="circles" slot="end" *ngIf="syncList.SiteSettings=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.SiteSettings=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.SiteSettings=='Success'"></ion-icon>
@@ -27,18 +31,21 @@
                 <ion-icon slot="start" name="refresh"></ion-icon>
                 Retry
             </ion-button>
-            <!-- </ion-label> -->
-
-            <!-- </ion-label> -->
-
-
+        </ion-item>
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.SiteSettings && progressSiteSettingsLabels && progressSiteSettingsLabels.length > 0" class="syncDetailText">
+             <ion-label>
+                {{progressSiteSettingsLabels.join(', ')}}
+            </ion-label>
         </ion-item>
 
         <ion-item *ngIf="syncList.Students" class="done">
             <ion-icon slot="start" name="contacts"></ion-icon>
-            <ion-label>
+            <ion-label slot="start">
                 Students
             </ion-label>
+            <ion-progress-bar *ngIf="progressSetupPersonDBTotal && progressSetupPersonDBTotal > 0" slot="start" 
+                color="secondary" [value]="progressSetupPersonDBCurrent/progressSetupPersonDBTotal" ></ion-progress-bar>
+                <span> {{progressSetupPersonDBCurrent}} / {{ progressSetupPersonDBTotal}}</span>
             <ion-spinner name="circles" slot="end" *ngIf="syncList.Students=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.Students=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Students=='Success'"></ion-icon>
@@ -53,12 +60,20 @@
             <!-- </ion-label> -->
 
         </ion-item>
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Students && progressSetupPersonDBLabels && progressSetupPersonDBLabels.length > 0" class="syncDetailText">
+            <ion-label>
+               {{progressSetupPersonDBLabels.join(', ')}}
+           </ion-label>
+       </ion-item>
 
         <ion-item *ngIf="syncList.StaticMenus" class="done">
             <ion-icon slot="start" name="grid"></ion-icon>
-            <ion-label>
+            <ion-label slot="start">
                 Static Menu Grids
             </ion-label>
+            <ion-progress-bar *ngIf="progressStaticMenusDBTotal && progressStaticMenusDBTotal > 0" slot="start" 
+                color="secondary" [value]="progressStaticMenusDBCurrent/progressStaticMenusDBTotal" ></ion-progress-bar>
+                <span> {{progressStaticMenusDBCurrent}} / {{ progressStaticMenusDBTotal}}</span>
             <ion-spinner name="circles" slot="end" *ngIf="syncList.StaticMenus=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.StaticMenus=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.StaticMenus=='Success'"></ion-icon>
@@ -70,12 +85,20 @@
             </ion-button>
             <!-- </ion-label> -->
         </ion-item>
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.StaticMenus && progressStaticMenusDBLabels && progressStaticMenusDBLabels.length > 0" class="syncDetailText">
+             <ion-label>
+                {{progressStaticMenusDBLabels.join(', ')}}
+            </ion-label>
+        </ion-item>
 
         <ion-item *ngIf="syncList.DynamicMenus" class="done">
             <ion-icon slot="start" name="restaurant"></ion-icon>
-            <ion-label>
+            <ion-label slot="start">
                 Dynamic Menus
             </ion-label>
+            <ion-progress-bar *ngIf="progressDynamicMenusDBTotal && progressDynamicMenusDBTotal > 0" slot="start" 
+                color="secondary" [value]="progressDynamicMenusDBCurrent/progressDynamicMenusDBTotal" ></ion-progress-bar>
+                <span> {{progressDynamicMenusDBCurrent}} / {{ progressDynamicMenusDBTotal}}</span>
             <ion-spinner name="circles" slot="end" *ngIf="syncList.DynamicMenus=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.DynamicMenus=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.DynamicMenus=='Success'"></ion-icon>
@@ -88,12 +111,20 @@
             </ion-button>
             <!-- </ion-label> -->
         </ion-item>
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.DynamicMenus && progressDynamicMenusDBLabels && progressDynamicMenusDBLabels.length > 0" class="syncDetailText">
+            <ion-label>
+               {{progressDynamicMenusDBLabels.join(', ')}}
+           </ion-label>
+       </ion-item>
 
         <ion-item *ngIf="syncList.Users" class="done">
             <ion-icon name="restaurant" slot="start"></ion-icon>
-            <ion-label>
+            <ion-label slot="start">
                 Users
             </ion-label>
+            <ion-progress-bar *ngIf="progressSetupUsersDBTotal && progressSetupUsersDBTotal > 0" slot="start" 
+                color="secondary" [value]="progressSetupUsersDBCurrent/progressSetupUsersDBTotal" ></ion-progress-bar>
+                <span> {{progressSetupUsersDBCurrent}} / {{ progressSetupUsersDBTotal}}</span>
             <ion-spinner name="circles" slot="end" *ngIf="syncList.Users=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.Users=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Users=='Success'"></ion-icon>
@@ -102,9 +133,27 @@
                 <ion-icon slot="start" name="refresh"></ion-icon>
                 Retry
             </button>
+        </ion-item>    
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Users && progressSetupUsersDBLabel && progressSetupUsersDBLabel.length > 0" class="syncDetailText">
+                <ion-label>
+                    {{progressSetupUsersDBLabel.join(', ')}}
+                </ion-label>
         </ion-item>
     </ion-list>
 
+    <!-- Show all together -->
+    <ion-list lines="none" class="ion-text-center">
+        <ion-item *ngIf="(showDetailProgressType === 1 ) && progressSetupUsersDBLabel && progressSetupUsersDBLabel.length > 0" class="syncDetailText">
+            <ion-label>
+                <span *ngIf="syncList.SiteSettings"> {{ progressSiteSettingsLabels.join(', ') }} , </span>
+                <span *ngIf="syncList.StaticMenus"> {{ progressStaticMenusDBLabels.join(', ') }} , </span>
+                <span *ngIf="syncList.Students"> {{ progressSetupPersonDBLabels.join(', ') }} , </span>
+                <span *ngIf="syncList.Users"> {{ progressSetupUsersDBLabel.join(', ') }} </span>
+                <span *ngIf="syncList.DynamicMenus"> , {{ progressDynamicMenusDBLabels.join(', ') }}</span>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+    
     <ion-item *ngIf="error">
         <ion-label>
             <div class="center_text_content">

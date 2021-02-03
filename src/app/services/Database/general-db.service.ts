@@ -38,14 +38,17 @@ export class GeneralDBService {
 
     // this.SyncOrders(), this.SyncPriceTypes(),
 
-    return Promise.all(promises).then(() => {
-      this.events.publish('data:sync', { 'SiteSettings': this.syncStatus });
+      return Promise.all(promises).then(() => {
+        this.events.publish('data:syncDetails', { SiteSettings: { All : "D" } });
+        this.events.publish('data:sync', { 'SiteSettings': this.syncStatus });        
     });
   }
 
   public SyncAllEXPSettings() {
-    const settings = [];
-    return new Promise((resolve, reject) => {
+      const settings = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "S" } });
+      return new Promise((resolve, reject) => {
+          
       this.http.SyncAllEXPSettings().
         subscribe
         (
@@ -62,15 +65,20 @@ export class GeneralDBService {
               });
             }
             if (settings.length > 0) {
-              this.syncStatus = 'Success';
-              PouchDBService.UpsertDocs(settings, EXP_COMMON).then(() => { resolve(); });
+                this.syncStatus = 'Success';                
+                PouchDBService.UpsertDocs(settings, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings: "D" } });
+                    resolve();
+                });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "D" } });
               resolve();
             }
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "F" } });
             console.log(error);
             resolve();
           });
@@ -78,8 +86,10 @@ export class GeneralDBService {
   }
 
   public SyncOrders() {
-    const preOrders = [];
-    return new Promise((resolve, reject) => {
+      const preOrders = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncOrders().
         subscribe
         (
@@ -119,24 +129,30 @@ export class GeneralDBService {
             if (preOrders.length > 0) {
               this.syncStatus = 'Success';
               console.log('Orders before push' + JSON.stringify(preOrders));
-              PouchDBService.UpsertOrderDocs(preOrders, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertOrderDocs(preOrders, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "D" } });
+                    resolve();
+                });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "D" } });
               resolve();
             }
 
           },
-          error => {
+            error => {
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "F" } });
             console.log(error);
-
             resolve();
           });
     });
   }
 
   public SyncSiteDetails() {
-    const sites = [];
-    return new Promise((resolve, reject) => {
+      const sites = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncSites().
         subscribe
         (
@@ -161,16 +177,21 @@ export class GeneralDBService {
             }
             if (sites.length > 0) {
               this.syncStatus = 'Success';
-              PouchDBService.UpsertDocs(sites, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(sites, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "D" } });
+                    resolve();
+                });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "D" } });
               resolve();
             }
 
 
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "F" } });
             console.log(error);
             resolve();
           });
@@ -178,8 +199,10 @@ export class GeneralDBService {
   }
 
   public SyncDenominations() {
-    const denominations = [];
-    return new Promise((resolve, reject) => {
+      const denominations = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.getOpenSession().
         subscribe
         (
@@ -197,16 +220,21 @@ export class GeneralDBService {
               });
             }
             if (denominations.length > 0) {
-              this.syncStatus = 'Success';
-              PouchDBService.UpsertDocs(denominations, EXP_COMMON).then(() => { resolve(); });
+                this.syncStatus = 'Success';                
+                PouchDBService.UpsertDocs(denominations, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "D" } });
+                    resolve();
+                });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "D" } });
               resolve();
             }
 
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "F" } });
             console.log(error);
             resolve();
           });
@@ -215,9 +243,10 @@ export class GeneralDBService {
 
   public SyncMealTypes() {
 
-    const mealTypes = [];
+      const mealTypes = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "S" } });
     return new Promise((resolve, reject) => {
-
+        
       PouchQueriesService.GetMealTypes().then((res) => {
         const mealTypes = res.rows.map(row => row.doc);
         if (mealTypes.length > 0) {
@@ -232,7 +261,7 @@ export class GeneralDBService {
 
 
       const schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-
+      
       this.http.SyncMealTypes(schoolId).
         subscribe
         (
@@ -253,14 +282,19 @@ export class GeneralDBService {
             }
             if (mealTypes.length > 0) {
               this.syncStatus = 'Success';
-              PouchDBService.UpsertDocs(mealTypes, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(mealTypes, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "D" } });
+                    resolve();
+                });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "D" } });
               resolve();
             }
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "F" } });
             console.log(error);
             resolve();
           });
@@ -270,8 +304,10 @@ export class GeneralDBService {
   }
 
   public SyncPriceTypes() {
-    const priceTypes = [];
-    return new Promise((resolve, reject) => {
+      const priceTypes = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncPriceTypes().
         subscribe
         (
@@ -288,15 +324,19 @@ export class GeneralDBService {
             }
             if (priceTypes.length > 0) {
               this.syncStatus = 'Success';
-              PouchDBService.UpsertDocs(priceTypes, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(priceTypes, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "D" } });
+                    resolve();
+                });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "D" } });
               resolve();
             }
           },
-          error => {
+            error => {
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "F" } });
             console.log(error);
-
             resolve();
           });
     });
@@ -305,8 +345,10 @@ export class GeneralDBService {
 
 
   public SyncCreditLimits() {
-    const crediLimits = [];
-    return new Promise((resolve, reject) => {
+      const crediLimits = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncCreditLimits : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncCreditLimits().
         subscribe
         (
@@ -323,10 +365,14 @@ export class GeneralDBService {
               });
             }
             this.syncStatus = 'Success';
-            PouchDBService.UpsertDocs(crediLimits, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(crediLimits, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncCreditLimits : "D" } });
+                    resolve();
+                });
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncCreditLimits : "F" } });
             console.log(error);
             resolve();
           });
@@ -334,9 +380,10 @@ export class GeneralDBService {
   }
 
   public SyncGrades() {
-    const grades = [];
+      const grades = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncGrades : "S" } });
     return new Promise((resolve, reject) => {
-
+        
       PouchQueriesService.GetSatellitecombinedSiteGrades().then((res) => {
         const siteGrades = res.rows.map(row => row.doc);
         if (siteGrades.length > 0) {
@@ -370,10 +417,14 @@ export class GeneralDBService {
             }
 
             this.syncStatus = 'Success';
-            PouchDBService.UpsertDocs(grades, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(grades, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncGrades : "D" } });
+                    resolve();
+                });
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncGrades : "F" } });
             console.log(error);
             resolve();
           });
@@ -381,9 +432,10 @@ export class GeneralDBService {
   }
 
   public SyncHomeRooms() {
-    const homeRooms = [];
+      const homeRooms = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncHomeRooms : "S" } });
     return new Promise((resolve, reject) => {
-
+        
       PouchQueriesService.GetHomeRooms().then((res) => {
         const siteHomeRooms = res.rows.map(row => row.doc);
         if (siteHomeRooms.length > 0) {
@@ -413,10 +465,14 @@ export class GeneralDBService {
               });
             }
             this.syncStatus = 'Success';
-            PouchDBService.UpsertDocs(homeRooms, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(homeRooms, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncHomeRooms : "D" } });
+                    resolve();
+                });
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncHomeRooms : "F" } });
             console.log(error);
             resolve();
           });
@@ -424,8 +480,10 @@ export class GeneralDBService {
   }
 
   public SyncSpecialRosters() {
-    const specialRosters = [];
-    return new Promise((resolve, reject) => {
+      const specialRosters = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncSpecialRosters : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncSpecialRostersBySchoolId().
         subscribe
         (
@@ -442,10 +500,14 @@ export class GeneralDBService {
               });
             }
             this.syncStatus = 'Success';
-            PouchDBService.UpsertDocs(specialRosters, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(specialRosters, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncSpecialRosters : "D" } });
+                    resolve();
+                });
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncSpecialRosters : "F" } });
             console.log(error);
             resolve();
           });
@@ -453,8 +515,10 @@ export class GeneralDBService {
   }
 
   public SyncReviewTypes() {
-    const reviewTypes = [];
-    return new Promise((resolve, reject) => {
+      const reviewTypes = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncReviewTypes : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncReviewTypes().
         subscribe
         (
@@ -474,10 +538,14 @@ export class GeneralDBService {
               });
             }
             this.syncStatus = 'Success';
-            PouchDBService.UpsertDocs(reviewTypes, EXP_COMMON).then(() => { resolve(); });
+                PouchDBService.UpsertDocs(reviewTypes, EXP_COMMON).then(() => {
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncReviewTypes : "D" } });
+                    resolve();
+                });
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncReviewTypes : "F" } });
             console.log(error);
             resolve();
           });
@@ -509,22 +577,27 @@ export class GeneralDBService {
   //   });
   // }
 
-  public SyncAllSiteSettings() {
-    return new Promise((resolve, reject) => {
+    public SyncAllSiteSettings() {
+        this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "S" } });
+      return new Promise((resolve, reject) => {
+        
       if (AppStateService.get('SelectedSite')) {
         this.http.GetAllSiteSettings().subscribe(allSiteSettings => {
           AppStateService.set('AllSiteSettings', JSON.stringify(allSiteSettings));
-          this.syncStatus = 'Success';
+            this.syncStatus = 'Success';
+            this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "D" } });
           resolve();
 
         },
           error => {
             this.syncStatus = 'Failed';
-            console.log(error);
+              console.log(error);
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "F" } });
             resolve();
           });
       } else {
-        this.syncStatus = 'Failed';
+          this.syncStatus = 'Failed';
+          this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "F" } });
         resolve();
 
       }
@@ -533,8 +606,10 @@ export class GeneralDBService {
 
   // commenting this code for ExpressPoint Release to work
   public SyncPopupMessages() {
-    const popupupMessages = [];
-    return new Promise((resolve, reject) => {
+      const popupupMessages = [];
+      this.events.publish('data:syncDetails', { SiteSettings: { SyncPopupMessages : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncPopupMessages().
         subscribe
         (
@@ -561,12 +636,14 @@ export class GeneralDBService {
             }
             this.syncStatus = 'Success';
             PouchDBService.UpsertDocs(popupupMessages, EXP_COMMON).then(() => {
-              PopupMessageService.popupMessagesBuffered = popupupMessages;
+                PopupMessageService.popupMessagesBuffered = popupupMessages;
+                this.events.publish('data:syncDetails', { SiteSettings: { SyncPopupMessages : "D" } });
               resolve();
             });
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncPopupMessages : "F" } });
             console.log(error);
             resolve();
           });

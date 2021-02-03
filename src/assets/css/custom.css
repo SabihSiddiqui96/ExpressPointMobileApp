@@ -1747,3 +1747,10 @@ ion-popover .popover-content {
     --width:60% !important;
     top: 18% !important;
 }
+
+ion-progress-bar{
+    /* --background: white;
+    --buffer-background: #80deea;
+    --progress-background:#209b5d; */
+    width:13%;
+}

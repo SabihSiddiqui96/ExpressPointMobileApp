@@ -23,14 +23,17 @@ export class PersonDBService {
     // promises.push(this.SyncHSSRVSPersonDetails()); // Get PersonData Always
     // }
 
-    return Promise.all(promises).then(() => {
+      return Promise.all(promises).then(() => {
+        this.events.publish('data:syncDetails', { SetupPersonDB: {  All : "D" } });
       this.events.publish('data:sync', { 'Students': this.syncStatus });
     });
 
   }
 
-  public SyncPersonDetails() {
-    return new Promise((resolve, reject) => {
+    public SyncPersonDetails() {
+        this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "S" } });
+      return new Promise((resolve, reject) => {
+        
       let schoolId;
 
       if (AppStateService.get('SelectedSite')) {
@@ -52,16 +55,19 @@ export class PersonDBService {
                 AppStateService.set('LastSyncDate_Account', JSON.stringify(data.Now));
                 AppStateService.set('LastSyncDate_Person', JSON.stringify(data.Now));
                 AppStateService.set('SetupComplete', true);
-                this.syncStatus = 'Success';
+                  this.syncStatus = 'Success';
+                  this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "D" } });
                 resolve();
               });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "D" } });
               resolve();
             }
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "F" } });
             AppStateService.set('SetupComplete', false);
             console.log(error);
             resolve();
@@ -69,8 +75,10 @@ export class PersonDBService {
     });
   }
 
-  public SyncSpecialAccounts() {
-    return new Promise((resolve, reject) => {
+    public SyncSpecialAccounts() {
+        this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "S" } });
+      return new Promise((resolve, reject) => {
+        
       this.http.SyncSpecialAccounts().
         subscribe
         (
@@ -101,16 +109,19 @@ export class PersonDBService {
             if (specialAccounts.length > 0) {
               PouchDBService.UpsertDocs(specialAccounts, EXP_PERSON).then(() => {
                 // EXP_PERSON_IN_MEMORY.insert(specialAccounts);
-                AppStateService.set('SetupComplete', true);
+                  AppStateService.set('SetupComplete', true);
+                  this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "D" } });
                 resolve();
               });
             } else {
-              AppStateService.set('SetupComplete', true);
+                AppStateService.set('SetupComplete', true);
+                this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "D" } });
               resolve();
             }
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "F" } });
             AppStateService.set('SetupComplete', false);
             console.log(error);
             resolve();
@@ -219,8 +230,10 @@ export class PersonDBService {
   /**
    * HSSRVS: Home School Special roster Visiting students
    */
-  public SyncHSSRVSPersonDetails() {
-    return new Promise((resolve, reject) => {
+    public SyncHSSRVSPersonDetails() {
+        this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "S" } });
+      return new Promise((resolve, reject) => {
+        
       let schoolId;
 
       if (AppStateService.get('SelectedSite')) {
@@ -238,16 +251,19 @@ export class PersonDBService {
                 AppStateService.set('LastSyncDate_Account', JSON.stringify(data.Now));
                 AppStateService.set('LastSyncDate_Person', JSON.stringify(data.Now));
                 AppStateService.set('SetupComplete', true);
-                this.syncStatus = 'Success';
+                  this.syncStatus = 'Success';
+                  this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "D" } });
                 resolve();
               });
             } else {
-              this.syncStatus = 'Success';
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "D" } });
               resolve();
             }
           },
           error => {
-            this.syncStatus = 'Failed';
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "F" } });
             AppStateService.set('SetupComplete', false);
             console.log(error);
             resolve();
