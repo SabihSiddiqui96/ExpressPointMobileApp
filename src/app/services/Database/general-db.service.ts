@@ -66,7 +66,7 @@ export class GeneralDBService {
             if (settings.length > 0) {
                 this.syncStatus = 'Success';                
                 PouchDBService.UpsertDocs(settings, EXP_COMMON).then(() => {
-                    this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings: "D" } });
+                    this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "D" } });
                     resolve();
                 });
             } else {

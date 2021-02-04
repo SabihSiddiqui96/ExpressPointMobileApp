@@ -6,7 +6,7 @@
     <div class="clearfix"></div>
 </header>
 
-<div padding-75 class="container">
+<div padding-content class="container">
     <p class="ion-text-center" *ngIf="!error">
         ExpressPoint is downloading data to make it available for offline use...
     </p>
@@ -32,9 +32,11 @@
                 Retry
             </ion-button>
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.SiteSettings && progressSiteSettingsLabels && progressSiteSettingsLabels.length > 0" class="syncDetailText">
-             <ion-label>
-                {{progressSiteSettingsLabels.join(', ')}}
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.SiteSettings && progressSiteSettingsLabels && progressSiteSettingsLabels.size > 0" class="syncDetailText">
+             <ion-label class="ion-text-wrap">
+                <span *ngFor="let mapItem of progressSiteSettingsLabels | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;
+                   </span>
             </ion-label>
         </ion-item>
 
@@ -60,9 +62,11 @@
             <!-- </ion-label> -->
 
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Students && progressSetupPersonDBLabels && progressSetupPersonDBLabels.length > 0" class="syncDetailText">
-            <ion-label>
-               {{progressSetupPersonDBLabels.join(', ')}}
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Students && progressSetupPersonDBLabels && progressSetupPersonDBLabels.size > 0" class="syncDetailText">
+            <ion-label class="ion-text-wrap">
+               <span *ngFor="let mapItem of progressSetupPersonDBLabels | keyvalue">
+                {{mapItem.value}}&#44;&nbsp;
+               </span>
            </ion-label>
        </ion-item>
 
@@ -85,9 +89,11 @@
             </ion-button>
             <!-- </ion-label> -->
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.StaticMenus && progressStaticMenusDBLabels && progressStaticMenusDBLabels.length > 0" class="syncDetailText">
-             <ion-label>
-                {{progressStaticMenusDBLabels.join(', ')}}
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.StaticMenus && progressStaticMenusDBLabels && progressStaticMenusDBLabels.size > 0" class="syncDetailText">
+             <ion-label class="ion-text-wrap">
+                <span *ngFor="let mapItem of progressStaticMenusDBLabels | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;
+                   </span>
             </ion-label>
         </ion-item>
 
@@ -111,9 +117,11 @@
             </ion-button>
             <!-- </ion-label> -->
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.DynamicMenus && progressDynamicMenusDBLabels && progressDynamicMenusDBLabels.length > 0" class="syncDetailText">
-            <ion-label>
-               {{progressDynamicMenusDBLabels.join(', ')}}
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.DynamicMenus && progressDynamicMenusDBLabels && progressDynamicMenusDBLabels.size > 0" class="syncDetailText">
+            <ion-label class="ion-text-wrap">
+               <span *ngFor="let mapItem of progressDynamicMenusDBLabels | keyvalue">
+                {{mapItem.value}}&#44;&nbsp;
+               </span>
            </ion-label>
        </ion-item>
 
@@ -134,34 +142,52 @@
                 Retry
             </button>
         </ion-item>    
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Users && progressSetupUsersDBLabel && progressSetupUsersDBLabel.length > 0" class="syncDetailText">
-                <ion-label>
-                    {{progressSetupUsersDBLabel.join(', ')}}
+        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Users && progressSetupUsersDBLabel && progressSetupUsersDBLabel.size > 0" class="syncDetailText">
+                <ion-label class="ion-text-wrap">
+                    <span *ngFor="let mapItem of progressSetupUsersDBLabel | keyvalue">
+                        {{mapItem.value}}
+                       </span>
                 </ion-label>
         </ion-item>
     </ion-list>
 
     <!-- Show all together -->
-    <ion-list lines="none" class="ion-text-center">
-        <ion-item *ngIf="(showDetailProgressType === 1 ) && progressSetupUsersDBLabel && progressSetupUsersDBLabel.length > 0" class="syncDetailText">
-            <ion-label>
-                <span *ngIf="syncList.SiteSettings"> {{ progressSiteSettingsLabels.join(', ') }} , </span>
-                <span *ngIf="syncList.StaticMenus"> {{ progressStaticMenusDBLabels.join(', ') }} , </span>
-                <span *ngIf="syncList.Students"> {{ progressSetupPersonDBLabels.join(', ') }} , </span>
-                <span *ngIf="syncList.Users"> {{ progressSetupUsersDBLabel.join(', ') }} </span>
-                <span *ngIf="syncList.DynamicMenus"> , {{ progressDynamicMenusDBLabels.join(', ') }}</span>
+    <ion-list *ngIf="showDetailProgressType === 1" lines="none" class="ion-text-center ion-no-padding ion-no-margin">
+        <ion-item  class="syncDetailText">
+            <ion-label class="ion-text-wrap">
+                <span *ngIf="syncList.SiteSettings"> 
+                    <span *ngFor="let mapItem of progressSiteSettingsLabels | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;</span>
+                </span>                  
+                <span *ngIf="syncList.StaticMenus">
+                    <span *ngFor="let mapItem of progressStaticMenusDBLabels | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;</span>
+                </span>                   
+                <span *ngIf="syncList.Students"> 
+                    <span *ngFor="let mapItem of progressSetupPersonDBLabels | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;</span>
+                </span>                  
+                <span *ngIf="syncList.Users"> 
+                    <span *ngFor="let mapItem of progressSetupUsersDBLabel | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;</span>
+                </span>                   
+                <span *ngIf="syncList.DynamicMenus">
+                    <span *ngFor="let mapItem of progressDynamicMenusDBLabels | keyvalue">
+                    {{mapItem.value}}</span>
+                </span>                   
             </ion-label>
         </ion-item>
     </ion-list>
     
+    <ion-list lines="none" class="ion-text-center ion-no-padding ion-no-margin">
     <ion-item *ngIf="error">
-        <ion-label>
-            <div class="center_text_content">
-                ExpressPoint ran into an issue while setting up the Database. Please verify your Network connectivity and
-                retry.Please contact
-                PrimeroEdge Support if you continue to see the problem.
-            </div>
-        </ion-label>
-    </ion-item>
-
+            <ion-label>
+                <div class="center_text_content">
+                    ExpressPoint ran into an issue while setting up the Database. Please verify your Network connectivity and
+                    retry. Please contact
+                    PrimeroEdge Support if you continue to see the problem.
+                </div>
+            </ion-label>
+        </ion-item>
+    </ion-list>
 </div>
