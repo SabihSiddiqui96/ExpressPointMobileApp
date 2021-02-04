@@ -21,7 +21,6 @@ export class DynamicMenusDBService {
     this.SyncGetDefaultServingLineForTerminal(null), this.SyncCarryOverDetails()];
 
       return Promise.all(promises).then(() => {
-        this.events.publish('data:syncDetails', { DynamicMenusDB: {  All : "D" } });
       this.events.publish('data:sync', { 'DynamicMenus': this.syncStatus });
     });
   }

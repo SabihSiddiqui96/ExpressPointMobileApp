@@ -24,7 +24,6 @@ export class PersonDBService {
     // }
 
       return Promise.all(promises).then(() => {
-        this.events.publish('data:syncDetails', { SetupPersonDB: {  All : "D" } });
       this.events.publish('data:sync', { 'Students': this.syncStatus });
     });
 

@@ -21,7 +21,6 @@ export class StaticMenusDBService {
     this.SyncMenuItems(), this.SyncSystemMenuItems(), this.SyncGetDefaultMenusForTerminal(null)];
 
       return Promise.all(promises).then(() => {
-        this.events.publish('data:syncDetails', { StaticMenusDB: { All : "D" } });
       this.events.publish('data:sync', { 'StaticMenus': this.syncStatus });
     });
   }

@@ -17,7 +17,6 @@ export class UsersDBService {
         const promises = [this.GetUsers()];
 
         return Promise.all(promises).then(() => {
-            this.events.publish('data:syncDetails', { SetupUsersDB: {  All : "D" } });
             this.events.publish('data:sync', { 'Users': this.syncStatus });
         });
     }

@@ -39,7 +39,6 @@ export class GeneralDBService {
     // this.SyncOrders(), this.SyncPriceTypes(),
 
       return Promise.all(promises).then(() => {
-        this.events.publish('data:syncDetails', { SiteSettings: { All : "D" } });
         this.events.publish('data:sync', { 'SiteSettings': this.syncStatus });        
     });
   }
