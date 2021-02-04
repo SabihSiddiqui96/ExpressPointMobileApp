@@ -502,7 +502,7 @@ export class LookupService {
                 // same site
                 this.utilService.setLoader(true);
 
-                PouchQueriesService.PatronSearchByName(firstname, lastname, externalId).
+                PouchQueriesService.PatronSearchByName(firstname, lastname, externalId,!<Boolean>this.serveInactiveStudents).
                     then((res) => {
                         this.utilService.setLoader(false);
                         const docs = res.docs.map((patron) => {
@@ -512,9 +512,9 @@ export class LookupService {
                             return patron;
                         });
                         this.lookupResults = docs;
-                        if (this.serveInactiveStudents === 0) {
-                            this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
-                        }
+                        // if (this.serveInactiveStudents === 0) {
+                        //     this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
+                        // }
                         this.handlePersonResults(true);
                         resolve(this.lookupResults);
                     }).catch((err) => console.log(err));
