@@ -253,7 +253,10 @@ ipcMain.on('print', (evnt: any, arg: any) => {
         console.log(success);
 
       mainWindow.hide();
-      mainWindow.close();
+          mainWindow.close();
+          setTimeout(() => {
+            win.focus();
+          }, 200);
       });
     }
   });

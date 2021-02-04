@@ -209,6 +209,9 @@ electron_1.ipcMain.on('print', (evnt, arg) => {
                 console.log(success);
                 mainWindow.hide();
                 mainWindow.close();
+                setTimeout(() => {
+                    win.focus();
+                }, 200);
             });
         }
     });
