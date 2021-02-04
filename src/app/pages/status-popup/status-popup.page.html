@@ -32,7 +32,7 @@
                 Retry
             </ion-button>
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.SiteSettings && (syncList.SiteSettings=='Failed') && progressSiteSettingsLabels && progressSiteSettingsLabels.size > 0" class="syncDetailText">
+        <ion-item *ngIf="((showDetailProgressType === 2) ||  ((showDetailProgressType === 0) && (syncList.SiteSettings=='Failed'))) && syncList.SiteSettings && progressSiteSettingsLabels && progressSiteSettingsLabels.size > 0" class="syncDetailText">
              <ion-label class="ion-text-wrap">
                 <span *ngFor="let mapItem of progressSiteSettingsLabels | keyvalue">
                     {{mapItem.value}}&#44;&nbsp;
@@ -62,7 +62,7 @@
             <!-- </ion-label> -->
 
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Students && (syncList.Students=='Failed') && progressSetupPersonDBLabels && progressSetupPersonDBLabels.size > 0" class="syncDetailText">
+        <ion-item *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.Students=='Failed')) ) && syncList.Students && progressSetupPersonDBLabels && progressSetupPersonDBLabels.size > 0" class="syncDetailText">
             <ion-label class="ion-text-wrap">
                <span *ngFor="let mapItem of progressSetupPersonDBLabels | keyvalue">
                 {{mapItem.value}}&#44;&nbsp;
@@ -89,7 +89,7 @@
             </ion-button>
             <!-- </ion-label> -->
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.StaticMenus && (syncList.StaticMenus=='Failed') && progressStaticMenusDBLabels && progressStaticMenusDBLabels.size > 0" class="syncDetailText">
+        <ion-item *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.StaticMenus=='Failed')) ) && syncList.StaticMenus && progressStaticMenusDBLabels && progressStaticMenusDBLabels.size > 0" class="syncDetailText">
              <ion-label class="ion-text-wrap">
                 <span *ngFor="let mapItem of progressStaticMenusDBLabels | keyvalue">
                     {{mapItem.value}}&#44;&nbsp;
@@ -117,7 +117,7 @@
             </ion-button>
             <!-- </ion-label> -->
         </ion-item>
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.DynamicMenus && (syncList.DynamicMenus=='Failed') && progressDynamicMenusDBLabels && progressDynamicMenusDBLabels.size > 0" class="syncDetailText">
+        <ion-item *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.DynamicMenus=='Failed')) ) && syncList.DynamicMenus && progressDynamicMenusDBLabels && progressDynamicMenusDBLabels.size > 0" class="syncDetailText">
             <ion-label class="ion-text-wrap">
                <span *ngFor="let mapItem of progressDynamicMenusDBLabels | keyvalue">
                 {{mapItem.value}}&#44;&nbsp;
@@ -142,7 +142,7 @@
                 Retry
             </button>
         </ion-item>    
-        <ion-item *ngIf="(showDetailProgressType === 2 ) && syncList.Users && (syncList.Users=='Failed') && progressSetupUsersDBLabel && progressSetupUsersDBLabel.size > 0" class="syncDetailText">
+        <ion-item *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.Users=='Failed')) ) && syncList.Users && progressSetupUsersDBLabel && progressSetupUsersDBLabel.size > 0" class="syncDetailText">
                 <ion-label class="ion-text-wrap">
                     <span *ngFor="let mapItem of progressSetupUsersDBLabel | keyvalue">
                         {{mapItem.value}}

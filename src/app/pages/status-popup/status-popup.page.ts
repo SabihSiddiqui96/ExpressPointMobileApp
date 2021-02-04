@@ -301,7 +301,7 @@ export class StatusPopupPage implements OnInit {
     public progressSetupUsersDBCurrent = 0;
     public progressSetupUsersDBTotal = 1;
     public progressSetupUsersDBLabel = new Map<string, string>();
-    public showDetailProgressType = 2; // 0 - do not show text, 1 - show text together, 2 - show individual text
+    public showDetailProgressType = 0; // 0 - do not show text, 1 - show text together, 2 - show individual text
 
   constructor(
     private utilService: UtilService,
