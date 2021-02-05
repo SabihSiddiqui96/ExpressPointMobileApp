@@ -39,7 +39,7 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('Hello DeviceConnection Page');
     this.event.publish('connection_changed');
-
+    this.isElectronApp = this.utilService.isElectronApp();
     if (this.utilService.isElectronApp()) {
 
       this.utilService.publishIpcEvent('GetWindowsCredentials');
@@ -79,6 +79,7 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
   public keyboardShowSubscription;
   public keyboardHideSubscription;
   public isCordovaApp: boolean;
+  public isElectronApp: boolean;
 
   constructor(public navCtrl: NavController, public modalCtrl: ModalController,
     public event: Events, public loading: LoadingController, public network: Network,
@@ -95,7 +96,8 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
       event, pouchDBService, modalCtrl, utilService, http,
       deviceService, pouchQuery, router, appStateService, settingService, signalRService);
 
-    this.isCordovaApp = UtilService.isCordovaApp;
+      this.isCordovaApp = UtilService.isCordovaApp;
+      this.isElectronApp = this.utilService.isElectronApp();
     if (UtilService.isCordovaApp) {
 
       this.keyboardShowSubscription = this.event.subscribe("keyboard:willshow", (data) => {
@@ -487,5 +489,12 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
     this.selectedDistrict.loginUrl = null;
     this.selectedDistrict.PODistrictId = null;
     this.showLogin = false;
+  }
+    
+  public openOnScreenKeyboard() {
+    //Check if toggle is enabled in admin settings
+    if (this.utilService.isElectronApp()) {
+      this.utilService.openOnScreenKeyboard();
+    }
   }
 }

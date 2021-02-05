@@ -18,7 +18,8 @@ import { Router } from '@angular/router';
 export class LogoutPage implements OnInit {
 
 
-  ngOnInit() {
+ngOnInit() {
+    this.isElectronApp = this.utilService.isElectronApp();
     this.SaveDataForOfflineUse().then(() => {
       this.menu.close();
       console.log('Hello Logout Page');
@@ -40,13 +41,14 @@ export class LogoutPage implements OnInit {
 
   public transactions: any = [];
   public hasNotSentTransactions: boolean;
+  public isElectronApp: boolean;
 
   constructor(public _nav: NavController,
     public sessionTimeout: SessionTimeoutService, public menu: MenuController, public utilService: UtilService,
     public transactionService: TransactionService, public pouchQuery: PouchQueriesService,
     public router: Router, public appStateService: AppStateService, public pouchDBService: PouchDBService
     ) {
-
+        this.isElectronApp = this.utilService.isElectronApp();
   }
 
   public logoutAppWithTransactionCheck() {

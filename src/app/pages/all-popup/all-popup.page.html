@@ -92,10 +92,19 @@
       <div *ngIf="this.navType!='ReviewTypes'">
         <ion-row *ngIf="showSearch">
           <ion-col>
-            <ion-searchbar class="ion-text-uppercase" autofocus #schoolSearch id="schoolSearch" (debounce)="500"
-              type="text" (ionInput)="searchServingLocation($event)" placeholder="Search School..."
-              [(ngModel)]="keyword" (ngModelChange)="keyword = $event.toLocaleUpperCase()">
-            </ion-searchbar>
+            <ion-list lines="none" class="ion-text-center">
+            <ion-item mode="ios" class="no-line">
+                <ion-searchbar class="ion-text-uppercase" autofocus #schoolSearch id="schoolSearch" (debounce)="500"
+                    type="text" (ionInput)="searchServingLocation($event)" placeholder="Search School..."
+                    [(ngModel)]="keyword" (ngModelChange)="keyword = $event.toLocaleUpperCase()">
+                </ion-searchbar>
+                <ion-button fill="clear" style="z-index: 99!important;" color="slate" *ngIf="isElectronApp"
+                    class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad">
+                    </ion-icon>
+                </ion-button>
+            </ion-item>
+            </ion-list>
           </ion-col>
         </ion-row>
         <ion-row *ngFor=" let list of lists; let i=index;" class="minHeight bg-border"

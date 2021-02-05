@@ -8,9 +8,18 @@
       <h1 *ngIf="
     !selectedDistrict.districtName" class="ion-text-center" title>Let's begin by searching your district below.</h1>
       <h1 class="ion-text-center" title *ngIf="selectedDistrict.districtName">{{selectedDistrict.districtName}}</h1>
-      <ion-searchbar *ngIf="!this.showLogin" autofocus #districtSearch id="districtSearch" (debounce)="500"
-        (ionInput)="searchSchoolDistrict($event)" placeholder="Search District Name ..." [(ngModel)]="schoolKey">
-      </ion-searchbar>
+      <ion-list *ngIf="!this.showLogin" lines="none" class="ion-text-center">
+        <ion-item mode="ios" class="no-line">
+                <ion-searchbar *ngIf="!this.showLogin" autofocus #districtSearch id="districtSearch" (debounce)="500"
+                    (ionInput)="searchSchoolDistrict($event)" placeholder="Search District Name ..." [(ngModel)]="schoolKey">
+                </ion-searchbar>
+                <ion-button fill="clear" style="z-index: 99!important;" color="slate" *ngIf="!this.showLogin && isElectronApp"
+                        class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+                        <ion-icon slot="icon-only" name="keypad">
+                        </ion-icon>
+                </ion-button>
+        </ion-item>
+      </ion-list>
       <div *ngIf="showLoader && !showError">
         <ion-spinner name="lines"></ion-spinner>
       </div>
@@ -53,6 +62,11 @@
               <ion-icon color="slate" slot="start" name="person"></ion-icon>
               <ion-input type="text" custom-tb #input1 (keyup)="focusInput($event,input2)" placeholder="Username"
                 [(ngModel)]="login.username" autocorrect="off" autocapitalize="none"></ion-input>
+                <ion-button fill="clear" style="z-index: 99!important;" color="slate" *ngIf="isElectronApp"
+                    class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad">
+                    </ion-icon>
+                </ion-button>
               <!-- </ion-label> -->
             </ion-item>
             <ion-item>
@@ -61,7 +75,13 @@
               <ion-input [type]="passwordType" custom-tb #input2 (ionBlur)="passwordfocusblur('blur')"
                 placeholder="Password" (ionFocus)="passwordfocusblur('focus')" (keyup)="focusInput($event,null)"
                 [(ngModel)]="login.password" autocorrect="off" autocapitalize="none"></ion-input>
-              <ion-button color="slate" fill="clear" class="eye-icon" style="height:32px;z-index: 9;"
+                <ion-button fill="clear" style="z-index: 99!important;" color="slate" *ngIf="isElectronApp"
+                    class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad">
+                    </ion-icon>
+                </ion-button>
+              <ion-button color="slate" fill="clear" class="eye-icon" style="height:32px;z-index: 9;" 
+              [ngClass]="(isElectronApp)?'eye-icon-openosk':'eye-icon'"
                 (click)='hideShowPassword()'>
                 <ion-icon slot="end" [name]="passwordIcon" style="font-size:32px;"></ion-icon>
               </ion-button>

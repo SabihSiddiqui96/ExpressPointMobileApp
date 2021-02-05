@@ -28,7 +28,8 @@ export class SchoolSelectionPage implements OnInit {
 
 
 
-  ngOnInit() {
+    ngOnInit() {
+        this.isElectronApp = this.utilService.isElectronApp();
   }
   @ViewChild('schoolSearch', { static: false }) public schoolSearch;
   public JSON = JSON;
@@ -42,6 +43,7 @@ export class SchoolSelectionPage implements OnInit {
   public searchClass = 'inactive-input-border-search';
   public keyword: string = '';
   public siteListCopy: any;
+  public isElectronApp: boolean;
 
   constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
     private popoverCtrl: PopoverController, private modalCtrl: ModalController,
@@ -50,6 +52,7 @@ export class SchoolSelectionPage implements OnInit {
     private sessionTimeOut: SessionTimeoutService, public router: Router,
     public appStateService: AppStateService, public settingService: SettingService) {
 
+    this.isElectronApp = this.utilService.isElectronApp();
     // this.loader = this.loading.create({
     //   message: 'One moment, please. ExpressPoint is configuring your local database ...',
     //   showBackdrop: false,
@@ -230,6 +233,13 @@ export class SchoolSelectionPage implements OnInit {
 
     if (searchVal.length <= 1) {
       this.getSchoolListForSelection();
+    }
+  }
+    
+  public openOnScreenKeyboard() {
+    //Check if toggle is enabled in admin settings
+    if (this.utilService.isElectronApp()) {
+      this.utilService.openOnScreenKeyboard();
     }
   }
 }

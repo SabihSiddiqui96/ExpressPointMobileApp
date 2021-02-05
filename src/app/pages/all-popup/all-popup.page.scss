@@ -60,3 +60,42 @@ ion-footer {
 .sc-ion-label-md-h {
   white-space: initial;
 }
+
+.eye-icon {
+    position:absolute;
+    top:40%;
+    right:1px;
+    transform: translate(-50%, -50%); 
+    -webkit-transform:translate(-50%, -50%); 
+    -moz-transform:translate(-50%, -50%); 
+  }
+  
+  .eye-icon:hover {
+  background: transparent !important;
+  }
+  
+  .eye-icon-openosk {
+    position:absolute;
+    top:40%;
+    right:30px;
+    transform: translate(-50%, -50%); 
+    -webkit-transform:translate(-50%, -50%); 
+    -moz-transform:translate(-50%, -50%); 
+  }
+  
+  .eye-icon-openosk:hover {
+    --background: transparent !important;
+    }
+    
+  .eye-icon-ios {
+    position:absolute;
+    top:80%;
+    right:-30px;
+    transform: translate(-50%, -50%); 
+    -webkit-transform:translate(-50%, -50%); 
+    -moz-transform:translate(-50%, -50%); 
+  }
+  
+  .eye-icon-ios:hover {
+    --background: transparent !important;
+    }

@@ -17,10 +17,19 @@
   <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
     <ion-col size="12" size-md="8" size-xl="6" class="ion-align-self-baseline">
       <div box-list-white class="ion-margin-horizontal">
-        <ion-searchbar class="ion-text-uppercase" autofocus #schoolSearch id="schoolSearch" (debounce)="500" type="text"
-          (ionInput)="searchServingLocation($event)" placeholder="Search School..." [(ngModel)]="keyword"
-          (ngModelChange)="keyword = $event.toLocaleUpperCase()">
-        </ion-searchbar>
+        <ion-list lines="none" class="ion-text-center">
+            <ion-item mode="ios" class="no-line">
+                <ion-searchbar class="ion-text-uppercase" autofocus #schoolSearch id="schoolSearch" (debounce)="500" type="text"
+                (ionInput)="searchServingLocation($event)" placeholder="Search School..." [(ngModel)]="keyword"
+                (ngModelChange)="keyword = $event.toLocaleUpperCase()">
+                    <ion-button fill="clear" style="z-index: 99!important;" color="slate" *ngIf="isElectronApp"
+                            class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+                            <ion-icon slot="icon-only" name="keypad">
+                            </ion-icon>
+                    </ion-button>
+                </ion-searchbar>
+            </ion-item>
+        </ion-list>
         <ion-list mode="ios" inset (click)="setActiveField('site')">
           <ion-radio-group>
             <ion-item mode="ios" *ngFor="let site of siteList; let i=index;"

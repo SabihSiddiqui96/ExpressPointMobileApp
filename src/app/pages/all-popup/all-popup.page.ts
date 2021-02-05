@@ -348,6 +348,7 @@ export class AllPopupPage implements OnInit {
     public siteListCopy: any;
     public isElectron: boolean = false;
     public isPatronType: boolean = false;
+    public isElectronApp: boolean;
 
     constructor(
         public navCtrl: NavController,
@@ -360,7 +361,9 @@ export class AllPopupPage implements OnInit {
         public popoverCtrl: PopoverController,
         public appStateService: AppStateService,
         public pouchDBService: PouchDBService
-    ) { }
+    ) { 
+        this.isElectronApp = this.utilService.isElectronApp();
+    }
 
     public ionViewDidEnter() {
         // setTimeout(() => {
@@ -828,6 +831,13 @@ export class AllPopupPage implements OnInit {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public openOnScreenKeyboard() {
+        //Check if toggle is enabled in admin settings
+        if (this.utilService.isElectronApp()) {
+          this.utilService.openOnScreenKeyboard();
         }
     }
 }

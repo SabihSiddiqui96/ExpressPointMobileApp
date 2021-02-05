@@ -57,7 +57,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   public poDistrictId;
   public copyRightYear: number;
   public districtName: string = '';
-  public openOSK: boolean = false;
+  public openOSK: boolean = true;// Login to always have OSK
   public samlProcessing: boolean = false;
   public showLoginFields: boolean = false;
 
@@ -167,8 +167,8 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       this.goLogin();
     });
 
-    this.openOSK = AppStateService.get('OpenOSK');
-
+    // this.openOSK = AppStateService.get('OpenOSK');
+      this.openOSK = true;// Login Page to always show OSK
   }
 
 
@@ -191,7 +191,8 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       }
     }
     /**Electron Windows: check for updates */
-    this.openOSK = AppStateService.get('OpenOSK');
+    // this.openOSK = AppStateService.get('OpenOSK');
+    this.openOSK = true;// Login Page to always show OSK
   }
 
   public ngOnDestroy() {
