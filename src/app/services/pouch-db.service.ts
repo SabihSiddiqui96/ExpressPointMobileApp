@@ -57,7 +57,7 @@ export class PouchDBService {
         public settingService: SettingService, public signalRService: SignalRService) {
     }
     private deviceId;
-
+    
     public ResetDB(includeSystemDb = true) {
         console.time('ResetDB');
         const destroyPromises = [EXP_DYNAMIC_MENUS.destroy(), EXP_PERSON.destroy(), EXP_PERSON_IN_MEMORY.drop(), EXP_STANDARD_MENUS.destroy(), EXP_COMMON.destroy()];
@@ -259,20 +259,20 @@ export class PouchDBService {
 
         return new Promise((resolve, reject) => {
             this.syncList = { 'SiteSettings': 'InProgress', 'StaticMenus': 'InProgress', 'Students': 'InProgress', 'Users': 'InProgress' };
-
+            
             console.time('Setup:ALL');
             const popover = this.popoverCtrl.create({
                 component: StatusPopupPage, componentProps: { 'navSyncList': this.syncList },
-                backdropDismiss: false, cssClass: 'sync_popup'
+                backdropDismiss: false,cssClass: 'sync_popup'
             }).then(async (res) => {
                 await res.present().then(() => {
 
                     return new Promise((resolve, reject) => {
                         this.getSetupPromises().then((setupPromises) => {
                             Promise.all(setupPromises as any[]).then(() => {
-
+            
                                 console.timeEnd('Setup:ALL');
-                                EXP_PERSON.createIndex({ index: { fields: ['FirstName,  LastName, PersonIdentifier, IsActive, HomeRoomId, HomeRoomName, SpecialRosterid '] } });
+                                EXP_PERSON.createIndex({ index: { fields: ['FirstName,  LastName, HomeRoomId, HomeRoomName, SpecialRosterid '] } });
                                 // AppStateService.set('SetupComplete', true);
                                 resolve('Success');
                             },
@@ -308,18 +308,18 @@ export class PouchDBService {
                  * Fix for bug 126524 : Deleting Person information- > get person Information on each login
                  */
                 this.ResetDB(false).then(() => {
-                    if (DYNMENU === 1) {
-                        setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
-                        this.dynamicMenusDB.SetupDynamicMenusDB(), this.personDB.SetupPersonDB()], this.usersDb.SetupUsersDB();
-                        this.syncList['DynamicMenus'] = 'InProgress';
-                        this.syncList['Students'] = 'InProgress';
-                        resolve(setupPromises);
-                    } else {
-                        setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
-                        this.personDB.SetupPersonDB(), this.usersDb.SetupUsersDB()];
-                        this.syncList['Students'] = 'InProgress';
-                        resolve(setupPromises);
-                    }
+                        if (DYNMENU === 1) {
+                            setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
+                            this.dynamicMenusDB.SetupDynamicMenusDB(), this.personDB.SetupPersonDB()], this.usersDb.SetupUsersDB();
+                            this.syncList['DynamicMenus'] = 'InProgress';
+                            this.syncList['Students'] = 'InProgress';
+                            resolve(setupPromises);
+                        } else {
+                            setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
+                            this.personDB.SetupPersonDB(), this.usersDb.SetupUsersDB()];
+                            this.syncList['Students'] = 'InProgress';
+                            resolve(setupPromises);
+                        }
                 });
             }
 
