@@ -211,16 +211,21 @@ export class LookupService {
 
 
     public showPatronModel(patronList, isFromQueue, isFromAdvPatronSearch: boolean) {
-        const isVisitingPatronAllowed = (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) ? true : false;
-        this.modalCtrl.create({
-            component: PatronListModalPage,
-            componentProps: {
-                'patron_list': patronList, 'isFromQueue': isFromQueue,
-                'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed
-            }
-        }).then(async (res) => {
-            await res.present();
+        return new Promise((resolve, reject) => {
+            const isVisitingPatronAllowed = (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) ? true : false;
+            this.modalCtrl.create({
+                component: PatronListModalPage,
+                componentProps: {
+                    'patron_list': patronList, 'isFromQueue': isFromQueue,
+                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed
+                }
+            }).then(async (res) => {
+                await res.present().then(() => {
+                    resolve('Success');
+                });
+            });
         });
+        
     }
 
     public selectPatron(patron) {
@@ -385,31 +390,36 @@ export class LookupService {
 
     // Added in Lookup refactor
     public handlePersonResults(fromAdvPatronSearch?: boolean, inputDirection = Direction.None) {
-        if (this.lookupResults.length === 0) {
-            this.popupMessageService.showMessage(PopupMessageCode.E24397);
-            // this.utilService.showToast('No results found.');
-        } else if (this.lookupResults.length === 1) {
-            if (this.lookupResults[0].IsFromServer) {
-                this.getPersonInfoByPersonId(this.lookupResults[0].PersonId).then(() => {
-                    this.personDetails.InputDirection = inputDirection;
-                    this.selectPatron(this.personDetails);
+        return new Promise((resolve, reject) => {
+            if (this.lookupResults.length === 0) {
+                this.popupMessageService.showMessage(PopupMessageCode.E24397);
+                resolve('Success');
+                // this.utilService.showToast('No results found.');
+            } else if (this.lookupResults.length === 1) {
+                if (this.lookupResults[0].IsFromServer) {
+                    this.getPersonInfoByPersonId(this.lookupResults[0].PersonId).then(() => {
+                        this.personDetails.InputDirection = inputDirection;
+                        resolve('Success');
+                        this.selectPatron(this.personDetails);
+                    });
+                } else {
+                    this.lookupResults[0].InputDirection = inputDirection;
+                    resolve('Success');
+                    this.selectPatron(this.lookupResults[0]);
+                }
+            } else if (this.lookupResults.length > 1) { // && this.lookupResults.length <= 20
+                this.lookupResults.map(PL => {
+                    PL.InputDirection = inputDirection;
+                });
+                this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch).then(() => {
+                    resolve('Success');
                 });
             } else {
-                this.lookupResults[0].InputDirection = inputDirection;
-                this.selectPatron(this.lookupResults[0]);
+                resolve('Success');
+                // this.popupMessageService.showMessage(PopupMessageCode.E24398);
+                // this.utilService.showToast('Search results are too large. Please refine your search criteria.');
             }
-        } else if (this.lookupResults.length > 1) { // && this.lookupResults.length <= 20
-            this.lookupResults.map(PL => {
-                this.getPersonImage(PL.PersonId).then(image => {
-                    PL.Image = image;
-                });
-                PL.InputDirection = inputDirection;
-            });
-            this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch);
-        } else {
-            // this.popupMessageService.showMessage(PopupMessageCode.E24398);
-            // this.utilService.showToast('Search results are too large. Please refine your search criteria.');
-        }
+        });        
     }
 
     public getSettingValuesRequired() {
@@ -504,7 +514,7 @@ export class LookupService {
 
                 PouchQueriesService.PatronSearchByName(firstname, lastname, externalId).
                     then((res) => {
-                        this.utilService.setLoader(false);
+                        
                         const docs = res.docs.map((patron) => {
                             patron['value'] = patron.PersonId;
                             patron['label'] = patron.PersonName;
@@ -515,7 +525,9 @@ export class LookupService {
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
-                        this.handlePersonResults(true);
+                        this.handlePersonResults(true).then(() => {
+                            this.utilService.setLoader(false);
+                        }).catch((err) => this.utilService.setLoader(false));
                         resolve(this.lookupResults);
                     }).catch((err) => console.log(err));
             } else {

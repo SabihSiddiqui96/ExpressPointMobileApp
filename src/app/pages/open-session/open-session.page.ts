@@ -506,26 +506,36 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     setTimeout(() => {
       for (let i = 0; i < this.denominationDetailsCoins.length; i++) {
         if (this.utilService.isPlatformAndroid()) {
-          const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-          input.setAttribute('type', 'tel');
-          input.setAttribute('pattern', '[0-9]');
+            const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
+            if (input) {
+                input.setAttribute('type', 'tel');
+                input.setAttribute('pattern', '[0-9]');
+            }          
         } else {
-          const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-          input.setAttribute('type', 'text');
-          input.setAttribute('pattern', '[0-9]');
+            const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
+            if (input) {
+                input.setAttribute('type', 'text');
+                input.setAttribute('pattern', '[0-9]');
+            } 
+          
         }
       }
       for (let i = 0; i < this.denominationDetailsBills.length; i++) {
         if (this.utilService.isPlatformAndroid()) {
-          const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-          input.setAttribute('type', 'tel');
-          input.setAttribute('pattern', '[0-9]');
+            const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
+            if (input) {
+                input.setAttribute('type', 'tel');
+                input.setAttribute('pattern', '[0-9]');
+            }
+          
         } else {
-          const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-          input.setAttribute('type', 'text');
+            const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
+            if (input) {
+                input.setAttribute('type', 'text');
+            }
         }
       }
-    }, 2000);
+    }, 3000);
 
   }
 

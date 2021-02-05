@@ -23,6 +23,7 @@ import { SiteSettingCodes } from '../../services/enums/site-setting-codes';
 import { CommandCodes } from '../../services/enums/command-codes';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { LoadingService } from "../../services/loading.service";
 
 @Component({
     selector: 'page-patron-lookup',
@@ -118,7 +119,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public hideQueue: boolean = false;
     public domEvent;
     public openOSK: boolean = false;
-
+    public loadingID;
     public keyboardSettings: IonDigitKeyboardOptions = {
         align: 'center',
         width: '55%',
@@ -163,7 +164,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         public switchHandsService: SwitchHandsService,
         public navCtrl: NavController,
         private utilService: UtilService,
-
+        public loadingService: LoadingService,
         private http: HttpService,
         public popupMessageService: PopupMessageService,
         private popoverCtrl: PopoverController, public platform: Platform,
@@ -876,15 +877,23 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public AdvancedPatronLookup() {
         if (this.selectedSite !== -1 && (this.patronSearch.firstname !== '' || this.patronSearch.lastname !== '' || this.patronSearch.externalId !== '')) {
-            this.lookUpService.AdvancedPatronlookup(this.selectedSite, this.patronSearch.firstname,
-                this.patronSearch.lastname, this.patronSearch.externalId)
-                .then(() => { });
-            this.patronSearch.lastname = '';
-            this.patronSearch.firstname = '';
-            this.patronSearch.externalId = '';
-            if (this.selectAccuntClick || this.menuPayselectAcctClick) {
-                this.close(true);
-            }
+            this.loadingID = LoadingService.generateLoadingID();
+            this.loadingService.present(this.loadingID, null, false).then(() => {
+                this.lookUpService.AdvancedPatronlookup(this.selectedSite, this.patronSearch.firstname,
+                    this.patronSearch.lastname, this.patronSearch.externalId)
+                    .then(() => {
+                        this.loadingService.dismiss(this.loadingID);
+                    }).catch((err) => {
+                        this.loadingService.dismiss(this.loadingID);
+                    });
+                    this.patronSearch.lastname = '';
+                    this.patronSearch.firstname = '';
+                    this.patronSearch.externalId = '';
+                    if (this.selectAccuntClick || this.menuPayselectAcctClick) {
+                        this.close(true);
+                    }
+            });            
+            
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E18373);
             // this.utilService.showToast('Some fields are missing');
