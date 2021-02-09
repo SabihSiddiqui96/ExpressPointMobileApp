@@ -129,30 +129,77 @@ export class PouchQueriesService {
       lastName: lastName,
       externalId: externalId
     };
+     
+      return new Promise<FilteredDocs>((resolve) => {
 
-    return new Promise<FilteredDocs>((resolve) => {
-      EXP_PERSON.allDocs({
-        include_docs: true
-      }).then(res => {
-        const searchResult = JSON.parse('{ "docs": [] }');
-        _.filter(res.rows, function (o) {
-          if (o.doc.FirstName === undefined || o.doc.LastName === undefined) {
-            return false;
-          }
-          if ((RegExp(firstNameRegex, 'igm').test(o.doc.FirstName))
-            && (RegExp(lastNameRegex, 'igm').test(o.doc.LastName))
-            && (RegExp(externalIdRegex, 'i').test(o.doc.PersonIdentifier))
-            && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === o.doc.SchoolId)) {
-            searchResult.docs.push(o.doc);
-            return true;
-          } else {
-            return false;
-          }
-        });
+          if (PouchDBService.EXP_PERSON_QUICK_MATCH.length > 0) {
+            let SearchKeys = [];
+            _.filter(PouchDBService.EXP_PERSON_QUICK_MATCH, (obj) => {
+                  if (obj.FirstName === undefined || obj.LastName === undefined) {
+                      return false;
+                  }
+                  if ((RegExp(firstNameRegex, 'igm').test(obj.FirstName))
+                      && (RegExp(lastNameRegex, 'igm').test(obj.LastName))
+                      && (RegExp(externalIdRegex, 'i').test(obj.PersonIdentifier))
+                      && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId)) {
+                      SearchKeys.push(obj.id);
+                      return true;
+                  } else {
+                      return false;
+                  }
+              });          
+              EXP_PERSON.allDocs({
+                  keys: SearchKeys,
+                  include_docs: true
+              }).then(res => {
+                  const searchResult = JSON.parse('{ "docs": [] }');                
+                  _.filter(res.rows, function (o) {
+                    searchResult.docs.push(o.doc);
+                  });
+                  resolve(searchResult);
+              });
+          } else {              
+              PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
+              PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
+            PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0;
+              
+              EXP_PERSON.allDocs({
+                  include_docs: true
+              }).then(res => {
+                  
+                  const searchResult = JSON.parse('{ "docs": [] }');
+                  PouchDBService.EXP_PERSON_QUICK_MATCH_STARTED = true;
+                  _.filter(res.rows, function (o) {
+                      if (o.doc.FirstName === undefined || o.doc.LastName === undefined) {
+                          return false;
+                      }
+                      
+                      if (PouchDBService.USE_EXP_PERSON_QUICK_MATCH) {
+                        PouchDBService.EXP_PERSON_QUICK_MATCH.push({
+                            id: o.doc._id, 
+                            FirstName: o.doc.FirstName,
+                            LastName: o.doc.LastName,
+                            PersonIdentifier: o.doc.PersonIdentifier,
+                            SchoolId: o.doc.SchoolId
+                          });
+                          PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT++; 
+                      }                                           
 
-        resolve(searchResult);
+                      if ((RegExp(firstNameRegex, 'igm').test(o.doc.FirstName))
+                          && (RegExp(lastNameRegex, 'igm').test(o.doc.LastName))
+                          && (RegExp(externalIdRegex, 'i').test(o.doc.PersonIdentifier))
+                          && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === o.doc.SchoolId)) {
+                          searchResult.docs.push(o.doc);
+                          return true;
+                      } else {
+                          return false;
+                      }
+                  });
+                  PouchDBService.EXP_PERSON_QUICK_MATCH_STARTED = false;
+                  resolve(searchResult);
+              });        
+          }
       });
-    });
   }
 
 

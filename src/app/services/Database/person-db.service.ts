@@ -24,11 +24,14 @@ export class PersonDBService {
     // }
 
       return Promise.all(promises).then(() => {
-      this.events.publish('data:sync', { 'Students': this.syncStatus });
+        this.events.publish('data:sync', { 'Students': this.syncStatus });
+          PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
+          PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
+        PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0; 
     });
 
   }
-
+    
     public SyncPersonDetails() {
         this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "S" } });
       return new Promise((resolve, reject) => {

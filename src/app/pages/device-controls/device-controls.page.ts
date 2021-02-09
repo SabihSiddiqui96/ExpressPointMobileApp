@@ -124,7 +124,9 @@ export class DeviceControlsPage implements OnInit {
     this._PouchDBService.setupPersonData().then(() => {
       this.syncedPersonData = true;
       this.utilService.setLoader(false);
-
+        PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
+        PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
+        PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0; 
     });
   }
 

@@ -50,6 +50,12 @@ export class PouchDBService {
     public syncList = { 'SiteSettings': 'InProgress', 'StaticMenus': 'InProgress', 'Students': 'InProgress', 'Users': 'InProgress' };
     public fDB;
     public dbName;
+    public static USE_EXP_PERSON_QUICK_MATCH = true;
+    public static EXP_PERSON_QUICK_MATCH = [];
+    public static EXP_PERSON_QUICK_MATCH_COUNT = 0;
+    public static EXP_PERSON_QUICK_MATCH_STARTED = false;
+    public static  EXP_PERSON_QUICK_MATCH_MAX_LIMIT = 50000;//Set the max limit for in memory search
+
     constructor(public loading: LoadingController, public generalDB: GeneralDBService, public dynamicMenusDB: DynamicMenusDBService,
         public staticMenusDB: StaticMenusDBService, public personDB: PersonDBService, public systemDb: SystemDBService, public usersDb: UsersDBService,
         public platform: Platform, public popoverCtrl: PopoverController, public utilService: UtilService,
@@ -348,7 +354,7 @@ export class PouchDBService {
             }))
             .then((doc) => {
                 db.bulkDocs(doc);
-                if (db.name === 'EXP_PERSON') {
+                if (db.name === 'EXP_PERSON') {                    
                     EXP_PERSON_IN_MEMORY.upsert(doc);
                 }
             });
