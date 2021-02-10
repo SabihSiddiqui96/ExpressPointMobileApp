@@ -1461,7 +1461,7 @@ export class PouchQueriesService {
         if (closeSession.length > 0) {
           closeSession.map(doc => {
             this.http.postCloseSession_pouch(doc.SessionDenominations, doc.SessionCheck, doc.ClosingBalance,
-              doc.SessionId, doc.SchoolId, doc.TerminalId).subscribe(
+              doc.SessionId, doc.SchoolId, doc.TerminalId, doc.CloseDateWithTime).subscribe(
                 data => {
                   console.log('Posted Close Session');
                   AppStateService.remove('removedSessionId');

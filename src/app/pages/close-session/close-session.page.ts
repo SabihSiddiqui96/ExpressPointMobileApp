@@ -702,12 +702,19 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         //     sessionCheck.push(checkArray);
         // });
 
+
+        const now = new Date();
+        const UTC = now.getTime();
+        const localOffset = -1 * now.getTimezoneOffset() * 60000;
+        const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+
         this.utilService.setLoader(true);
         const closeSessionDoc = {
             '_id': 'CloseSession--' + AppStateService.get('session_id'),
             'SessionId': AppStateService.get('session_id'),
             'SessionCheck': sessionCheck,
             'ClosingBalance': this.total,
+            'CloseDateWithTime': currentTime,
             'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
             'TerminalId': this.terminalId,
             'SessionDenominations': sessionDenominations

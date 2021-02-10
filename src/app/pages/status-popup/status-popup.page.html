@@ -137,10 +137,10 @@
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.Users=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Users=='Success'"></ion-icon>
             <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.Users=='Failed'"></ion-icon>
-            <button ion-button slot="end" (tap)="retryUsersDB()" *ngIf="syncList.Users=='Failed'">
+            <ion-button ion-button slot="end" (click)="retryUsersDB()" *ngIf="syncList.Users=='Failed'" class="margin-3px">
                 <ion-icon slot="start" name="refresh"></ion-icon>
                 Retry
-            </button>
+            </ion-button>
         </ion-item>    
         <ion-item *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.Users=='Failed')) ) && syncList.Users && progressSetupUsersDBLabel && progressSetupUsersDBLabel.size > 0" class="syncDetailText">
                 <ion-label class="ion-text-wrap">

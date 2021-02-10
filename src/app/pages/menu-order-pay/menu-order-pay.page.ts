@@ -717,7 +717,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.cashtendered = '$' + amnt;
                 let chngDue = amnt - this.navOrderData.totalAmount;
                 this.changeDue = chngDue > 0 ? chngDue : 0.00;
-                let amountTowardsBalance = 0.00;
+                let amountTowardsBal = 0.00;
 
                 if (this.EXNEGBAL) {  // change to true
                     if (this.navPatronDetails['Balance'] < 0) {
@@ -725,16 +725,16 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         if (amountToZero > amnt) {
                             chngDue = 0.00;
                             if (amnt > this.navOrderData.totalAmount) {
-                                amountTowardsBalance = amnt - this.navOrderData.totalAmount;
+                                amountTowardsBal = amnt - this.navOrderData.totalAmount;
 
                             }
                         } else {
                             chngDue = amnt - amountToZero - this.navOrderData.totalAmount;
-                            amountTowardsBalance = amountToZero;
+                            amountTowardsBal = amountToZero;
 
                         }
-                        this.amountTowardsBalance = amountTowardsBalance;
-                        this.depositAmount = '$' + amountTowardsBalance.toFixed(2);
+                        this.amountTowardsBalance = amountTowardsBal;
+                        this.depositAmount = '$' + amountTowardsBal.toFixed(2);
 
 
                         this.changeDue = chngDue > 0 ? chngDue : 0.00;

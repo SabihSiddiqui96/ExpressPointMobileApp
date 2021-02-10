@@ -342,6 +342,9 @@ export class ServiceSelectionPage implements OnInit {
           resolve();
         }
       );
+      setTimeout(() => {
+        PouchQueriesService.PatronSearchByName('', '', 'abdedcfg')
+    }, 500);    
     });
 
   }

@@ -76,7 +76,13 @@
                 <p *ngIf="hideBalSetting==0" class="patron-info-balance"
                   [ngClass]="{'color-green': navPatronDetails.Balance > 0, 'color-red': navPatronDetails.Balance < 0 }"
                   [style.display]="(navPatronDetails.Balance>0 || navPatronDetails.Balance == 0 || navPatronDetails.Balance < 0) ? ' ': 'none'">{{navPatronDetails.Balance
-                  | currency:'USD':true:'1.2-2'}}</p>
+                  | currency:'USD':true:'1.2-2'}}&nbsp; <span class="color-black"><span>
+                    <ion-icon name="arrow-round-forward" *ngIf="cashAmount > 0" style="vertical-align: text-top;">
+                    </ion-icon>
+                </span></span>
+            &nbsp; <span *ngIf="cashAmount > 0" [ngClass]="{ 'color-green': newBalance>0 ,'color-black': newBalance == 0 ,
+              'color_red': newBalance < 0 }">
+                {{newBalance | currency:'USD':true:'1.2-2'}}</span></p>
                 <p>Transaction :
                   <b>{{transactionNumber}}</b>
                 </p>
@@ -186,7 +192,7 @@
                   <ion-label class="ion-text-right" text-bold>{{bonusAmount | currency:'USD':true:'1.2-2'}}
                   </ion-label>
                 </ion-item>
-                <ion-item lines="none" *ngIf="cashAmount > 0">
+                <ion-item lines="none" *ngIf="cashAmount > 0" style="display: none;">
                   <ion-label static>New Balance</ion-label>
                   <ion-label class="ion-text-right" text-bold [ngClass]="{ 'color-green': newBalance>0 ,'color-black': newBalance == 0 ,
                   'color_red': newBalance < 0 }">

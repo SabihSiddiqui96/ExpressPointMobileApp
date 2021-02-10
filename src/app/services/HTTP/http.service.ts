@@ -462,15 +462,16 @@ export class HttpService {
         return this.http.post(API_URL + 'SyncPayment', JSON.stringify(postData)).pipe(map(res => res));
     }
 
-    public postCloseSession_pouch(denominations, checks, total, sessionId, schoolId, terminalId): any {
-        return this.http.post(API_URL + 'CloseSession',
+    public postCloseSession_pouch(denominations, checks, total, sessionId, schoolId, terminalId, closeDateWithTime): any {
+        return this.http.post(API_URL + 'SyncCloseSession',
             JSON.stringify({
                 'ClosingBalance': total,
                 'SessionId': sessionId,
                 'SchoolId': schoolId,
                 'SessionDenominations': denominations,
                 'SessionChecks': checks,
-                'TerminalId': terminalId
+                'TerminalId': terminalId,
+                'CloseSessionDate': closeDateWithTime
             })).pipe(map(res => res));
     }
 

@@ -9,6 +9,7 @@
     "dev": "electron-webpack dev",
     "copy-www": "cpx ../www/**/* src/renderer",
     "build": "yarn copy-www && tsc && electron-builder build -w",
+    "all": "cd .. && ionic build && cd electron && yarn copy-www && tsc && electron-builder build -w",
     "build-windows": "electron-builder build -w ",
     "tsc": "tsc"
   },

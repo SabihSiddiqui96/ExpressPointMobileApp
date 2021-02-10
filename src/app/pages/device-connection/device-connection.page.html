@@ -1,7 +1,7 @@
 <!-- <ion-grid style="width: 100vw;" class="ion-justify-content-center" bg-theme> -->
 
 <ion-row class="vh100 ion-justify-content-center" bg-theme #deviceConnectionViewRoot>
-  <ion-col size="10" size-md="6" class="ion-align-self-center"
+  <ion-col size="10" size-md="8" class="ion-align-self-center"
     [ngClass]="{'padding-bottom': keyboardVisible && isAndroid , 'padding-bottom-zero': !keyboardVisible && isAndroid }">
     <div box-white>
       <img src='assets/img/expresspoint-logo-dark.svg' class="ion-margin-bottom">
@@ -57,7 +57,7 @@
           </ion-button>
 
           <ion-list mode="ios" inset>
-            <ion-item>
+            <ion-item mode="ios" class="no-line">
               <!-- <ion-label> -->
               <ion-icon color="slate" slot="start" name="person"></ion-icon>
               <ion-input type="text" custom-tb #input1 (keyup)="focusInput($event,input2)" placeholder="Username"
@@ -69,7 +69,7 @@
                 </ion-button>
               <!-- </ion-label> -->
             </ion-item>
-            <ion-item>
+            <ion-item mode="ios" class="no-line ion-align-items-center">
               <!-- <ion-label> -->
               <ion-icon color="slate" slot="start" name="lock"></ion-icon>
               <ion-input [type]="passwordType" custom-tb #input2 (ionBlur)="passwordfocusblur('blur')"
@@ -151,7 +151,7 @@
   <ion-row> -->
 <ion-row bg-theme>
   <ion-footer>
-    <ion-buttons slot="start" *ngIf="versionNumber" style="float:left">
+    <ion-buttons slot="start" *ngIf="versionNumber" style="float:left;padding-left: 45%;padding-top: 15px;">
       <ion-label>Version {{versionNumber}}</ion-label>
     </ion-buttons>
     <ion-button color="slate" *ngIf="!selectedDistrict.districtName" style="float:right" fill="clear"

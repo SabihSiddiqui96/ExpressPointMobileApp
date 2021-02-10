@@ -1743,16 +1743,18 @@ ion-popover .popover-content {
 	-webkit-user-select: none; /* Safari */
 	-webkit-touch-callout: none; /* iOS Safari */
 }
-.sync_popup .popover-content{
-    --width:60% !important;
-    top: 18% !important;    
+.sync_popup .popover-content {
+  --width: 50% !important;
+  top: 30% !important;
+  --padding-bottom: 15% !important;
 }
 
 @media screen and (max-height: 768px) {
-    .sync_popup .popover-content{
-        --width:60% !important;
-        top: 5% !important;
-    }
+  .sync_popup .popover-content {
+      --width: 50% !important;
+      top: 30% !important;
+      --padding-bottom: 15% !important;
+  }
 }
 
 ion-progress-bar{

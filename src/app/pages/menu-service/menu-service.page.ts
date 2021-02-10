@@ -172,6 +172,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public changeDue = 0.00;
     public depositChangeDue;
     public cashtendAmount: any = 0.00;
+    public cashDue: any = 0.00;
     public canUsePrincipalAccount: any = false;
     // public show_principal_message:any=false;
     public principalAccountId: any;
@@ -2789,7 +2790,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.isDepositByEXNEGBAL = userEventData.isDepositByEXNEGBAL;
                     this.amountTowardsBalance = userEventData.amountTowardsBalance;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
-
+                    this.cashDue = userEventData.cashDue;
                     this.makeSalePay();
                 } else {
                     MenuOrderPayPage.isCompleteTransactionProcessing = false;
@@ -3134,15 +3135,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
                         'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
                         'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
-                        'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
+                        'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
                         'IsCheck': this.orderData.IsCheck,
                         'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
                             { hour: 'numeric', minute: 'numeric', hour12: true }),
                         'BonusAmount': Number(this.bonusAmount).toFixed(2),
                         'AmountTendered': Number(this.cashtendAmount).toFixed(2),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                        'Balance': Number(this.patronDetails.Balance).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard || this.orderData.IsDeposit ? Number(0).toFixed(2) : (Number(this.cashtendAmount) - Number(this.amountTowardsBalance)).toFixed(2),
+                        'Balance': Number(this.saleData['NewBalance']).toFixed(2),
+                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard || this.orderData.IsDeposit ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
                         'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
@@ -3152,7 +3153,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     };
 
                     const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
-
+                    
                     this.utilService.publishIpcEvent('print', {
                         data: [{ html: receiptFormat }],
                         preview: false, copies: this.esrr === 1 ? 2 : 1

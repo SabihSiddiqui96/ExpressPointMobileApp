@@ -393,7 +393,7 @@
                                                         [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? ' ': 'none'"
                                                         (click)="showBalance()">{{selectedAccountDetails.Balance | currency:'USD':true:'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
-                                                                <ion-icon name="arrow-round-forward">
+                                                                <ion-icon name="arrow-round-forward" style="vertical-align: text-top;">
                                                                 </ion-icon>
                                                             </span></span>
                                                         &nbsp; <span [ngClass]="{'color-green': ((selectedAccountDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -
