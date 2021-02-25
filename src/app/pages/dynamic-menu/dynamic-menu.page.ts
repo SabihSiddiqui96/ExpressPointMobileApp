@@ -5025,13 +5025,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 let processOrderItem = true;
 
                 if (this.checkOrderItems(menuItem.ButtonDescription)) {
-                    if (this.orderData.items.length > 0) {
-                        this.orderData.items = [];
-                        // this.itemCount = 0;
-                        //  currPrice = itemPrice;
-                        this.orderData.totalAmount = 0;
-                        this.orderData.subTotal = 0;
-                        this.mealCount = 0;
+                    for (let i = 0; i < this.orderData.items.length; i++) {
+
+                        this.deleteItem(this.orderData.items[i])
                     }
                 } else {
                     // check if already ** single sale item exist in OrderData

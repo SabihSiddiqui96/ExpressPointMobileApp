@@ -1582,9 +1582,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public gridClick(grid) {
 
-        setTimeout( () => {
+        setTimeout(() => {
             (document.activeElement as HTMLElement).blur();
-        }, 0);      
+        }, 0);
 
         if (grid.emptygrid === true) {
             return false;
@@ -2057,14 +2057,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 if (appendArray) {
                     if (this.checkOrderItems(menuItem.ButtonDescription)) {
-                        if (this.orderData.items.length >= 1) {
-                            this.orderData.items = [];
-                            this.itemCount = 0;
-                            currPrice = itemPrice;
-                            this.orderData.totalAmount = 0;
-                            this.orderData.subTotal = 0;
-                            this.mealCount = 0;
+                        for (let i = 0; i < this.orderData.items.length; i++) {
+
+                            this.deleteMenuFromCart(i)
                         }
+
                     } else {
                         // check if already ** single sale item exist in OrderData
                         for (let i = 0; i < this.orderData.items.length; i++) {
@@ -2453,9 +2450,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public ShowAddDollarPopover(myEvent) {
 
-        setTimeout( () => {
+        setTimeout(() => {
             (document.activeElement as HTMLElement).blur();
-        }, 0);      
+        }, 0);
 
         const modal = this.modalCtrl.create({
             component: MenuPaymentPopupPage,
@@ -2761,9 +2758,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
 
-            setTimeout( () => {
+            setTimeout(() => {
                 (document.activeElement as HTMLElement).blur();
-            }, 0);      
+            }, 0);
 
             this.modalCtrl.create({
                 component: MenuOrderPayPage,
@@ -3153,7 +3150,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     };
 
                     const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
-                    
+
                     this.utilService.publishIpcEvent('print', {
                         data: [{ html: receiptFormat }],
                         preview: false, copies: this.esrr === 1 ? 2 : 1
