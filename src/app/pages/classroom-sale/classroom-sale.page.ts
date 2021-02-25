@@ -707,109 +707,112 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
 
     public getStudentListForSpecialRoster() {
-        // console.clear()
-        this.selectAllSetting = parseInt(SettingService.getSettingValue('SSABICS'));
-        const date = new Date();
-        const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
-        if (this.totalStudent > 0) {
-            this.popupMessageService.showMessage(PopupMessageCode.E04365);
-            // this.utilService.showToast('Please complete this transaction before changing the menu.');;
-            return;
-        }
-
-        if (this.filter.selected_menuitem !== 0) {
-
-            if (this.selectedSpecialRosterId !== 1
-                && this.filter.selected_mealtype !== -1 && this.filter.selected_menuitem !== -1) {
-
-                this.utilService.setLoader(true);
-
-                PouchQueriesService.GetPatronsBySpecialRoster(this.selectedSpecialRosterId).then(res => {
-
-                    this.persons = res.docs;
-                    let students = res.docs.map(doc => {
-                        let isAllergent;
-                        if (doc.RestrictedMenuItems !== null) {
-                            isAllergent = this.checkIfAllergy(this.filter.selected_menuitem, doc.RestrictedMenuItems);
-                        } else {
-                            isAllergent = false;
-
-                        }
-
-                        return {
-                            'PersonSchoolId': doc.SchoolId,
-                            'AccountId': doc.AccountId,
-                            'Balance': doc.Balance,
-                            'PersonId': doc.PersonId,
-                            'PreviousSales': doc.PreviousSales,
-                            'GradeId': doc.GradeId,
-                            'PriceTypeId': doc.PriceTypeId,
-                            'StatusCode': doc.SiteCode,
-                            'HadMeal': false,
-                            'isSelected': false,
-                            'RDAGroupId': doc.RDAGroupId,
-                            'RestrictedMenuItems': doc.RestrictedMenuItems,
-                            'Allergies': doc.Allergies,
-                            'IsAllergent': isAllergent,
-                            'SpecialInstruction': doc.SpecialInstruction,
-                            'Gender': doc.Gender,
-                            'FullName': doc.PersonName,
-                            'LastName': doc.LastName,
-                            'FirstName': doc.FirstName,
-                            'Image': null, // TO DO
-                            'Price': 0,
-                            'ShowAlert': this.showAllergiesAndNotes(doc),
-                            'IsSaleTaxable': doc.IsSaleTaxable,
-                            'isActive': doc.isActive,
-                            'isStudentCEP': doc.isStudentCEP,
-                            'IsStudent': doc.IsStudent,
-                            // "CanDisable": false //disabled="student.CanDisable"
-                            'Identifier': doc.Identifier,
-                            'Site': doc.SiteCode,
-                            'Teacher': doc.HomeRoom
-                        };
-                    });
-
-                    const canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
-                    const canServeVisitingAdults = SettingService.isUserPermitted('OTHRSADLT');
-
-                    if (!canServeVisitingPatrons && canServeVisitingAdults == true) {
-                        const patronsSpecialRosterPersonList = students.filter(s => s.PersonSchoolId === this.schoolId);
-                        const adultSpecialRosterPersonList = students.filter(s => s.PersonSchoolId !== this.schoolId
-                            && s.IsStudent === false);
-                        students = adultSpecialRosterPersonList.concat(patronsSpecialRosterPersonList);
-                    } else if (!canServeVisitingPatrons) {
-                        students = students.filter(s => s.PersonSchoolId === this.schoolId);
-                    }
-
-                    if (parseInt(SettingService.getSiteSettingValue('SERINACSTU')) === 0) { // ServeInactive Students Check
-                        students = students.filter(r => r.isActive === true);
-                    }
-
-                    students = _.sortBy(students, 'LastName');
-                    console.log(students);
-
-
-                    this.getStudentsImage(students);
-
-                    this.getMealPrice(students, day).then(() => {
-
-
-                        this.totalStudent = this.studentList.length;
-                        this.studentLoaded = true;
-
-                        if (this.totalStudent > 0) {
-                            this.studentBtnDisable = true;
-                            this.filterDisable = true;
-                        }
-                        this.utilService.setLoader(false);
-                    });
-                }).catch(err => console.log(err));
+        this.getPriceByMenuItemId().then(() => {
+            // console.clear()
+            this.selectAllSetting = parseInt(SettingService.getSettingValue('SSABICS'));
+            const date = new Date();
+            const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+            if (this.totalStudent > 0) {
+                this.popupMessageService.showMessage(PopupMessageCode.E04365);
+                // this.utilService.showToast('Please complete this transaction before changing the menu.');;
+                return;
             }
-        } else {
-            this.popupMessageService.showMessage(PopupMessageCode.E04316);
-            // this.utilService.showToast("The 'No Meal' service option is not available for sales by Special Roster.");
-        }
+
+            if (this.filter.selected_menuitem !== 0) {
+
+                if (this.selectedSpecialRosterId !== 1
+                    && this.filter.selected_mealtype !== -1 && this.filter.selected_menuitem !== -1) {
+
+                    this.utilService.setLoader(true);
+
+                    PouchQueriesService.GetPatronsBySpecialRoster(this.selectedSpecialRosterId).then(res => {
+
+                        this.persons = res.docs;
+                        let students = res.docs.map(doc => {
+                            let isAllergent;
+                            if (doc.RestrictedMenuItems !== null) {
+                                isAllergent = this.checkIfAllergy(this.filter.selected_menuitem, doc.RestrictedMenuItems);
+                            } else {
+                                isAllergent = false;
+
+                            }
+
+                            return {
+                                'PersonSchoolId': doc.SchoolId,
+                                'AccountId': doc.AccountId,
+                                'Balance': doc.Balance,
+                                'PersonId': doc.PersonId,
+                                'PreviousSales': doc.PreviousSales,
+                                'GradeId': doc.GradeId,
+                                'PriceTypeId': doc.PriceTypeId,
+                                'StatusCode': doc.SiteCode,
+                                'HadMeal': false,
+                                'isSelected': false,
+                                'RDAGroupId': doc.RDAGroupId,
+                                'RestrictedMenuItems': doc.RestrictedMenuItems,
+                                'Allergies': doc.Allergies,
+                                'IsAllergent': isAllergent,
+                                'SpecialInstruction': doc.SpecialInstruction,
+                                'Gender': doc.Gender,
+                                'FullName': doc.PersonName,
+                                'LastName': doc.LastName,
+                                'FirstName': doc.FirstName,
+                                'Image': null, // TO DO
+                                'Price': 0,
+                                'ShowAlert': this.showAllergiesAndNotes(doc),
+                                'IsSaleTaxable': doc.IsSaleTaxable,
+                                'isActive': doc.isActive,
+                                'isStudentCEP': doc.isStudentCEP,
+                                'IsStudent': doc.IsStudent,
+                                // "CanDisable": false //disabled="student.CanDisable"
+                                'Identifier': doc.Identifier,
+                                'Site': doc.SiteCode,
+                                'Teacher': doc.HomeRoom
+                            };
+                        });
+
+                        const canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
+                        const canServeVisitingAdults = SettingService.isUserPermitted('OTHRSADLT');
+
+                        if (!canServeVisitingPatrons && canServeVisitingAdults == true) {
+                            const patronsSpecialRosterPersonList = students.filter(s => s.PersonSchoolId === this.schoolId);
+                            const adultSpecialRosterPersonList = students.filter(s => s.PersonSchoolId !== this.schoolId
+                                && s.IsStudent === false);
+                            students = adultSpecialRosterPersonList.concat(patronsSpecialRosterPersonList);
+                        } else if (!canServeVisitingPatrons) {
+                            students = students.filter(s => s.PersonSchoolId === this.schoolId);
+                        }
+
+                        if (parseInt(SettingService.getSiteSettingValue('SERINACSTU')) === 0) { // ServeInactive Students Check
+                            students = students.filter(r => r.isActive === true);
+                        }
+
+                        students = _.sortBy(students, 'LastName');
+                        console.log(students);
+
+
+                        this.getStudentsImage(students);
+
+                        this.getMealPrice(students, day).then(() => {
+
+
+                            this.totalStudent = this.studentList.length;
+                            this.studentLoaded = true;
+
+                            if (this.totalStudent > 0) {
+                                this.studentBtnDisable = true;
+                                this.filterDisable = true;
+                            }
+                            this.utilService.setLoader(false);
+                        });
+                    }).catch(err => console.log(err));
+                }
+            } else {
+                this.popupMessageService.showMessage(PopupMessageCode.E04316);
+                // this.utilService.showToast("The 'No Meal' service option is not available for sales by Special Roster.");
+            }
+        });
+
     }
 
     public getStudentsImage(students) {
