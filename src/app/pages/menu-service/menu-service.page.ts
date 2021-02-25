@@ -1811,7 +1811,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public checkALCRestrictions(menuItem, priceTypeId) {
-        if (this.restrictableAlaCarteItems.length > 0 || this.restrictableCategories.length > 0) {
+        if ((this.restrictableAlaCarteItems.length > 0 || this.restrictableCategories.length > 0) && !this.checkOrderItems(menuItem.ButtonDescription)) {
             let menuItemId = 0;
             if (menuItem.RefId) {
                 menuItemId = menuItem.RefId;

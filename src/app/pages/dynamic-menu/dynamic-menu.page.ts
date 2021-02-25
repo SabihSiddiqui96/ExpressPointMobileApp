@@ -5165,7 +5165,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId);
                 }
             } else {
-                if (this.restrictableAlaCarteItems.length > 0) {
+                if (this.restrictableAlaCarteItems.length > 0 && !this.checkOrderItems(menuItem.ButtonDescription)) {
 
                     let menuItemId;
                     if (menuItem.RefId) {
