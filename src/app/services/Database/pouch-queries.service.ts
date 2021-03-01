@@ -1511,7 +1511,7 @@ export class PouchQueriesService {
           stats = JSON.parse(AppStateService.get('TransactionStats'));
         }
 
-        this.http.postHeartBeat(deviceInfo.TerminalId, stats.pending, stats.sent, heartBeatTime).subscribe(
+        this.http.postHeartBeat(deviceInfo.TerminalId, stats.pending, stats.sent, heartBeatTime,deviceInfo.AppVersion).subscribe(
           // tslint:disable-next-line:no-empty
           data => { },
           error => { console.log(error); reject(); },

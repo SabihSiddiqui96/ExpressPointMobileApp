@@ -524,13 +524,14 @@ export class HttpService {
         return this.http.post(API_URL + 'RecordtransactionList', orderData).pipe(map(res => res));
     }
 
-    public postHeartBeat(terminalId, pending, sent, heartBeatTime): any {
+    public postHeartBeat(terminalId, pending, sent, heartBeatTime,appVersion): any {
         return this.http.post(API_URL + 'SaveDeviceHeartbeat',
             {
                 'TerminalId': terminalId,
                 'Pending': pending,
                 'Sent': sent,
-                'HeartBeatTime': heartBeatTime
+                'HeartBeatTime': heartBeatTime,
+                'AppVersion':appVersion
             }, { responseType: 'text' }).pipe(map(res => res));
     }
 
