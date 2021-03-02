@@ -298,7 +298,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
+            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined && !this.utilService.isElectronApp()) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
                 setTimeout(() => {
@@ -342,7 +342,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.AdvancePatronSchoolList();
                             this.setActiveField('externalId');
                             setTimeout(() => {
-                                this.patronPinId.setFocus();
+                                if (!this.utilService.isElectronApp()) {
+                                    this.patronPinId.setFocus();
+                                }
                             }, 500);
 
                         }
@@ -649,7 +651,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
         setTimeout(() => {
-            this.patronPinId.setFocus();
+            if (!this.utilService.isElectronApp()) {
+                this.patronPinId.setFocus();
+            }
         }, 500);
         if (this.gradeList.length === 0) {
             this.GetGradesBySchool();
@@ -886,14 +890,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     }).catch((err) => {
                         this.loadingService.dismiss(this.loadingID);
                     });
-                    this.patronSearch.lastname = '';
-                    this.patronSearch.firstname = '';
-                    this.patronSearch.externalId = '';
-                    if (this.selectAccuntClick || this.menuPayselectAcctClick) {
-                        this.close(true);
-                    }
-            });            
-            
+                this.patronSearch.lastname = '';
+                this.patronSearch.firstname = '';
+                this.patronSearch.externalId = '';
+                if (this.selectAccuntClick || this.menuPayselectAcctClick) {
+                    this.close(true);
+                }
+            });
+
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E18373);
             // this.utilService.showToast('Some fields are missing');
