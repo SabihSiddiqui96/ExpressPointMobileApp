@@ -1600,7 +1600,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public deleteMenuFromCart(index) {
         this.event.publish('patronLargeImagehide', null);
-        // if (this.orderData.items[index].IsReimbursable == true) {
+
         if (this.mealCount >= 1) {
             // tslint:disable-next-line:max-line-length
             // if (this.orderData.items[index].price_type_id != this.SecondMealPriceType && this.patronDetails.isSpecialAccount == false && this.patronDetails['GradeId']) { //IsStudent Check
@@ -1753,6 +1753,21 @@ export class MenuServicePage implements OnInit, OnDestroy {
         console.log('***************');
 
         console.log(menuItem);
+        if (this.checkOrderItems(menuItem.ButtonDescription)) {
+            for (let i = 0; i < this.orderData.items.length; i++) {
+                this.clearAllItemsinCart()
+            }
+        } else {
+            for (let i = 0; i < this.orderData.items.length; i++) {
+                const itemData = this.orderData.items[i];
+                const description = itemData.Name;
+                if (this.checkOrderItems(description)) {
+                    this.popupMessageService.showMessage(PopupMessageCode.E05508);
+                    // this.utilService.showToast('No other items may be selected. Please remove the last menu item and re-enter selected items');
+                    return;
+                }
+            }
+        }
 
         if (this.patronDetails.PersonId) {
             if (menuItem.restrictedItem === true) {
@@ -1811,7 +1826,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public checkALCRestrictions(menuItem, priceTypeId) {
-        if ((this.restrictableAlaCarteItems.length > 0 || this.restrictableCategories.length > 0) && !this.checkOrderItems(menuItem.ButtonDescription)) {
+        if ((this.restrictableAlaCarteItems.length > 0 || this.restrictableCategories.length > 0)) { //&& !this.checkOrderItems(menuItem.ButtonDescription)
             let menuItemId = 0;
             if (menuItem.RefId) {
                 menuItemId = menuItem.RefId;
@@ -2053,57 +2068,29 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         }
                     }
                 }
-                let processOrderItem = true;
 
                 if (appendArray) {
-                    if (this.checkOrderItems(menuItem.ButtonDescription)) {
-                        for (let i = 0; i < this.orderData.items.length; i++) {
+                  
+                    this.itemCount = this.itemCount + 1; // ItemCount
 
-                            this.deleteMenuFromCart(i)
-                        }
-
-                    } else {
-                        // check if already ** single sale item exist in OrderData
-                        for (let i = 0; i < this.orderData.items.length; i++) {
-                            const itemData = this.orderData.items[i];
-                            const description = itemData.Name;
-                            if (this.checkOrderItems(description)) {
-                                processOrderItem = false;
-                                currPrice = itemData.Price;
-                                this.orderData.totalAmount = 0;
-                                this.orderData.subTotal = 0;
-                                itemData.isSecondMeal = false;
-                                this.mealCount = 0;
-                                this.popupMessageService.showMessage(PopupMessageCode.E05508);
-                                // this.utilService.showToast('No other items may be selected. Please remove the last menu item and re-enter selected items');
-                                break;
-                            }
-
-                            console.log(JSON.stringify(itemData));
-                        }
-                    }
-                    if (processOrderItem) {
-                        this.itemCount = this.itemCount + 1; // ItemCount
-
-                        this.orderData.items.push({
-                            'Name': menuItem.ButtonDescription,
-                            'Price': itemPrice,
-                            'RefId': refId,
-                            'price_type_id': priceTypeId,
-                            'IsReimbursable': menuItem.IsReimbursable,
-                            'isSecondMeal': secondmeal,
-                            'Quantity': quantity,
-                            'CurrentPrice': currPrice,
-                            'IniTotalPrice': itemPrice,
-                            'IsStudent': this.patronDetails.IsStudent,
-                            'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
-                            'ItemAddedAt': (new Date).getTime(),  // epoch timestamp at the time of adding item to the sale
-                            'IsTaxable': menuItem.IsTaxable,
-                            'PaidPrice': paidMealPrice, //this.paidMealPrice
-                            'ShowPaidPrice': this.showPaidPrice,
-                            'CurrentPaidMealPrice': this.currPaidMealPrice
-                        });
-                    }
+                    this.orderData.items.push({
+                        'Name': menuItem.ButtonDescription,
+                        'Price': itemPrice,
+                        'RefId': refId,
+                        'price_type_id': priceTypeId,
+                        'IsReimbursable': menuItem.IsReimbursable,
+                        'isSecondMeal': secondmeal,
+                        'Quantity': quantity,
+                        'CurrentPrice': currPrice,
+                        'IniTotalPrice': itemPrice,
+                        'IsStudent': this.patronDetails.IsStudent,
+                        'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
+                        'ItemAddedAt': (new Date).getTime(),  // epoch timestamp at the time of adding item to the sale
+                        'IsTaxable': menuItem.IsTaxable,
+                        'PaidPrice': paidMealPrice, //this.paidMealPrice
+                        'ShowPaidPrice': this.showPaidPrice,
+                        'CurrentPaidMealPrice': this.currPaidMealPrice
+                    });
                 }
             } else {
                 console.log(this.patronDetails);
@@ -3374,6 +3361,25 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.cashtendAmount = 0.00;
     }
 
+
+    public clearAllItemsinCart() {
+
+        this.restrictedAlacarteCount = 0;
+        this.alacarteTotal = 0.00;
+        this.mealCount = 0;
+        this.orderData = {
+            accountBalance: 0.00,
+            subTotal: 0.00,
+            tax: 0.00,
+            totalAmount: 0.00,
+            items: [],
+            IsDeposit: false,
+            IsCheck: false,
+            CheckNumber: '',
+            IsCard: false,
+            CardNumber: ''
+        };
+    }
     public voidOrder() {
         this.isMarked = false;
         this.reviewType = 0;
@@ -3389,7 +3395,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         AppStateService.set('TransactionNumber', this.transactionNumber - 1);
         // tslint:disable-next-line:max-line-length
         this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
-
+        
         this.restrictedAlacarteCount = 0;
         this.alacarteTotal = 0.00;
         this.patronDetails = {};
