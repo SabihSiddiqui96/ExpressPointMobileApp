@@ -70,8 +70,8 @@
               [ngClass]="{'active-input-label': depositClass == 'active_input_label', 'inactive-input-label': depositClass == 'input_label'}"
               [(ngModel)]="depositAmount" id="deposit" [disabled]="!depositChangeDue"
               style="width: -webkit-fill-available" appKeyDownEvent> -->
-            <ion-label  class="ion-text-right" width-100 (click)="changeActiveInput('deposit')"
-              [ngClass]="{'active-input-label': depositClass == 'active_input_label', 'inactive-input-label': depositClass == 'input_label'}">
+            <ion-label  class="ion-text-right" width-100 (click)="changeActiveInput('deposit')" text-bold>
+              <!-- [ngClass]="{'active-input-label': depositClass == 'active_input_label', 'inactive-input-label': depositClass == 'input_label'}"> -->
               {{depositAmount}}</ion-label>
           </ion-item>
           <ion-item *ngIf="cashpaymentOption=='cash'">
@@ -83,9 +83,9 @@
           <ion-item *ngIf="navIsSpecialAccount==false && cashpaymentOption=='cash'">
             <ion-label>Deposit Change?</ion-label>
             <ion-toggle color="slate" [(ngModel)]="depositChangeDue"
-              (ionChange)="setDepositChangeDue(depositChangeDue)"></ion-toggle>
+              (ionChange)="setCashTendered()"></ion-toggle>
           </ion-item>
-
+          <!-- "setDepositChangeDue(depositChangeDue)" -->
           <ion-item  *ngIf="cashpaymentOption =='cash' && patronDetails.isSpecialAccount && showSelectAccount && isStaffNVisitor && showPatron">
             <ion-label>Deposit: </ion-label>
             <ion-label class="ion-text-right" text-bold>{{depositAmount}}

@@ -196,7 +196,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                     this.getPatronDetails(userEventData.accountSelected);
                     this.depositChangeDue = true;
                     if (this.cashtendAmount > 0) {
-                        this.setDepositChangeDue(this.depositChangeDue);
+                        // this.setDepositChangeDue(this.depositChangeDue);
+                        this.setCashTendered()
                     }
                 }
 
@@ -545,7 +546,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.amountClass = 'input_label';
                 this.checkNoClass = 'input_label';
                 this.cardNoClass = 'input_label';
-                this.depositClass = 'active_input_label';
+                this.depositClass = 'input_label';
                 this.activeInputField = field;
             }
         } else if (field === 'card') {
@@ -719,29 +720,71 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.changeDue = chngDue > 0 ? chngDue : 0.00;
                 let amountTowardsBal = 0.00;
 
-                if (this.EXNEGBAL) {  // change to true
-                    if (this.navPatronDetails['Balance'] < 0) {
-                        const amountToZero = 0 - this.navPatronDetails['Balance'];
-                        if (amountToZero > amnt) {
-                            chngDue = 0.00;
-                            if (amnt > this.navOrderData.totalAmount) {
-                                amountTowardsBal = amnt - this.navOrderData.totalAmount;
+                if (this.depositChangeDue) {
+                    this.changeDue = 0.00;
+                    this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00'
+                } else {
 
-                            }
+
+                    if (this.EXNEGBAL) {  // change to true
+                        if (this.navPatronDetails['Balance'] < 0) {
+                            // const amountToZero = 0 - this.navPatronDetails['Balance'];
+                            // if (amountToZero > amnt) {
+                            //     chngDue = 0.00;
+                            //     if (amnt > this.navOrderData.totalAmount) {
+                            //         amountTowardsBal = amnt - this.navOrderData.totalAmount;
+
+                            //     }
+                            // } else {
+                            //     chngDue = amnt - amountToZero - this.navOrderData.totalAmount;
+                            //     amountTowardsBal = amountToZero - this.navOrderData.totalAmount ;
+
+                            // }
+                            // this.amountTowardsBalance = amountTowardsBal;
+                            // this.depositAmount = '$' + amountTowardsBal.toFixed(2);
+
+
+                            // this.changeDue = chngDue > 0 ? chngDue : 0.00;
+                            // this.isDepositByEXNEGBAL = true; // Check this
+
+                            const amountToZero = 0 - this.navPatronDetails['Balance'];
+
+                            /*
+                            With EXNEGBAL : the deposit amount would be the
+                            minimum of balance to zero or cashTendered- totalAMount
+
+                            if the minimum  of these is less than zero then there wont be a deposit available as
+                             amount tendered would be used up by the saletotal entirely
+
+                             Change Due will be calculated based on the deposit amount and totalSaleAmount  and Cashtendered
+                            */
+                            const tempDepositAmnt = Math.min(amountToZero, this.cashtendAmount - this.orderData.totalAmount)
+                            this.isDepositByEXNEGBAL = true;
+                            this.depositAmount = tempDepositAmnt > 0 ? '$' + tempDepositAmnt.toFixed(2) : '$' + '0.00'
+                            // this.depositAmount = tempDepositAmnt > 0 ? '$' + (tempDepositAmnt + Number(this.navOrderData.totalAmount)).toFixed(2) : '$' + '0.00'
+
+                            this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
                         } else {
-                            chngDue = amnt - amountToZero - this.navOrderData.totalAmount;
-                            amountTowardsBal = amountToZero;
+                            const changDue = amnt - this.navOrderData.totalAmount;
+                            this.changeDue = changDue > 0 ? changDue : 0.00;
+                            if (this.depositChangeDue) {
+                                this.depositAmount = '$' + this.changeDue.toFixed(2);
+                                this.oldDepositAmnt = '$0.00';
+                                this.oldChangeDue = this.changeDue;
+                                // if (!this.navIsSpecialAccount) { // change is always returned for special accounts
+                                this.changeDue = 0.00;
+                                // }
 
+                            } else {
+                                this.depositAmount = '$0.00';
+                                this.oldDepositAmnt = '$0.00';
+                                this.oldChangeDue = this.changeDue;
+                            }
                         }
-                        this.amountTowardsBalance = amountTowardsBal;
-                        this.depositAmount = '$' + amountTowardsBal.toFixed(2);
-
-
-                        this.changeDue = chngDue > 0 ? chngDue : 0.00;
-                        this.isDepositByEXNEGBAL = true; // Check this
+                        this.cashtendAmount = amnt; // this.amountTowardsBalance
                     } else {
-                        const changDue = amnt - this.navOrderData.totalAmount;
-                        this.changeDue = changDue > 0 ? changDue : 0.00;
+                        this.cashtendAmount = amnt; // this.amountTowardsBalance
+                        console.log(this.cashtendAmount);
                         if (this.depositChangeDue) {
                             this.depositAmount = '$' + this.changeDue.toFixed(2);
                             this.oldDepositAmnt = '$0.00';
@@ -749,28 +792,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             // if (!this.navIsSpecialAccount) { // change is always returned for special accounts
                             this.changeDue = 0.00;
                             // }
-
                         } else {
                             this.depositAmount = '$0.00';
                             this.oldDepositAmnt = '$0.00';
                             this.oldChangeDue = this.changeDue;
                         }
-                    }
-                    this.cashtendAmount = amnt; // this.amountTowardsBalance
-                } else {
-                    this.cashtendAmount = amnt; // this.amountTowardsBalance
-                    console.log(this.cashtendAmount);
-                    if (this.depositChangeDue) {
-                        this.depositAmount = '$' + this.changeDue.toFixed(2);
-                        this.oldDepositAmnt = '$0.00';
-                        this.oldChangeDue = this.changeDue;
-                        // if (!this.navIsSpecialAccount) { // change is always returned for special accounts
-                        this.changeDue = 0.00;
-                        // }
-                    } else {
-                        this.depositAmount = '$0.00';
-                        this.oldDepositAmnt = '$0.00';
-                        this.oldChangeDue = this.changeDue;
                     }
                 }
             } else {
@@ -878,51 +904,51 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.utilService.showToast(message);
     }
 
-    public setDepositChangeDue(depositChangeDue) {
-        console.log('&&&&&&&&&&&&&');
-        console.log(depositChangeDue);
-        let changeDue: number = 0;
-        this.depositAmount = this.depositAmount.length !== 0 ? this.depositAmount : '$0.00';
-        const depositAmnt = Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
-        if (this.changeDue !== 0.00) {
-            changeDue = this.changeDue;
-        }
-        if (depositChangeDue) {
-            this.navOrderData.IsDeposit = true;
-            this.oldDepositAmnt = '$' + depositAmnt.toFixed(2);
-            this.oldChangeDue = changeDue;
-            this.depositAmount = '$' + (depositAmnt + changeDue).toFixed(2);
-            this.changeDue = 0.00;
-        } else {
-            this.depositAmount = this.oldDepositAmnt;
-            this.changeDue = this.oldChangeDue;
-            // this.setCashTendered();
-            this.navOrderData.IsDeposit = false;
-            this.activeInputField = '';
-            this.amountClass = 'input_label';
-            this.checkNoClass = 'input_label';
-            this.depositClass = 'input_label';
-            this.cardNoClass = 'input_label';
-        }
+    // public setDepositChangeDue(depositChangeDue) {
+    //     console.log('&&&&&&&&&&&&&');
+    //     console.log(depositChangeDue);
+    //     let changeDue: number = 0;
+    //     this.depositAmount = this.depositAmount.length !== 0 ? this.depositAmount : '$0.00';
+    //     const depositAmnt = Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
+    //     if (this.changeDue !== 0.00) {
+    //         changeDue = this.changeDue;
+    //     }
+    //     if (depositChangeDue) {
+    //         this.navOrderData.IsDeposit = true;
+    //         this.oldDepositAmnt = '$' + depositAmnt.toFixed(2);
+    //         this.oldChangeDue = changeDue;
+    //         this.depositAmount = '$' + (depositAmnt + changeDue).toFixed(2);
+    //         this.changeDue = 0.00;
+    //     } else {
+    //         this.depositAmount = this.oldDepositAmnt;
+    //         this.changeDue = this.oldChangeDue;
+    //         // this.setCashTendered();
+    //         this.navOrderData.IsDeposit = false;
+    //         this.activeInputField = '';
+    //         this.amountClass = 'input_label';
+    //         this.checkNoClass = 'input_label';
+    //         this.depositClass = 'input_label';
+    //         this.cardNoClass = 'input_label';
+    //     }
 
-        if (this.showSelectAccount && this.showPatron) {
+    //     if (this.showSelectAccount && this.showPatron) {
 
-            this.depositeStudentAmount = this.filterCurrency(this.depositAmount);
+    //         this.depositeStudentAmount = this.filterCurrency(this.depositAmount);
 
-            if (isNaN(this.depositeStudentAmount)) {
-                this.depositeStudentAmount = 0.00;
-            }
+    //         if (isNaN(this.depositeStudentAmount)) {
+    //             this.depositeStudentAmount = 0.00;
+    //         }
 
-            if (Number(this.cashtendAmount) != 0 && (Number(this.cashtendAmount) > Number(this.navOrderData.totalAmount))) {
-                this.selectedStudentBalance = Number(this.accountDetails.Balance)
-                    + Number(this.depositeStudentAmount);
-            }
-            else {
-                this.selectedStudentBalance = Number(this.accountDetails.Balance) -
-                    Number(this.navOrderData.totalAmount);
-            }
-        }
-    }
+    //         if (Number(this.cashtendAmount) != 0 && (Number(this.cashtendAmount) > Number(this.navOrderData.totalAmount))) {
+    //             this.selectedStudentBalance = Number(this.accountDetails.Balance)
+    //                 + Number(this.depositeStudentAmount);
+    //         }
+    //         else {
+    //             this.selectedStudentBalance = Number(this.accountDetails.Balance) -
+    //                 Number(this.navOrderData.totalAmount);
+    //         }
+    //     }
+    // }
 
 
     public makeSale() {

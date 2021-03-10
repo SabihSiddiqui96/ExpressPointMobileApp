@@ -2070,7 +2070,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
 
                 if (appendArray) {
-                  
+
                     this.itemCount = this.itemCount + 1; // ItemCount
 
                     this.orderData.items.push({
@@ -2901,6 +2901,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
                 paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
             }
+            if (paymentAmnt > this.orderData.totalAmount) {
+                this.orderData.IsDeposit = true
+            }
 
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
@@ -3106,43 +3109,43 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (!this.bonusAmount) {
                     this.bonusAmount = 0;
                 }
-                if (this.utilService.isElectronApp() && this.printAuto === 1) {
-                    const transactionReceiptData: TransactionDetailPrintFormat = {
-                        'PersonName': this.patronDetails.PersonName,
-                        'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
-                        'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
-                        'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
-                        'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                        'TerminalName': this.terminalName,
-                        'Cashier': UtilService.userNameLoggedIn,
-                        'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
-                            this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
-                        'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                        'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
-                        'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
-                        'IsCheck': this.orderData.IsCheck,
-                        'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
-                            { hour: 'numeric', minute: 'numeric', hour12: true }),
-                        'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                        'AmountTendered': Number(this.cashtendAmount).toFixed(2),
-                        'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                        'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard || this.orderData.IsDeposit ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
-                        'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
-                        'ServingSiteId': this.siteName,
-                        'TransactionNumber': this.transactionNumber,
-                        'CheckNumber': this.orderData.CheckNumber,
-                        'CardNumber': this.orderData.CardNumber,
+                 if (this.utilService.isElectronApp() && this.printAuto === 1) {
+                const transactionReceiptData: TransactionDetailPrintFormat = {
+                    'PersonName': this.patronDetails.PersonName,
+                    'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
+                    'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
+                    'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
+                    'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
+                    'TerminalName': this.terminalName,
+                    'Cashier': UtilService.userNameLoggedIn,
+                    'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
+                        this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
+                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
+                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
+                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
+                    'IsCheck': this.orderData.IsCheck,
+                    'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
+                        { hour: 'numeric', minute: 'numeric', hour12: true }),
+                    'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                    'AmountTendered': Number(this.cashtendAmount).toFixed(2),
+                    'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
+                    'Balance': Number(this.saleData['NewBalance']).toFixed(2),
+                    'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
+                    'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
+                    'ServingSiteId': this.siteName,
+                    'TransactionNumber': this.transactionNumber,
+                    'CheckNumber': this.orderData.CheckNumber,
+                    'CardNumber': this.orderData.CardNumber,
 
-                    };
+                };
 
-                    const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
+                const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
 
-                    this.utilService.publishIpcEvent('print', {
-                        data: [{ html: receiptFormat }],
-                        preview: false, copies: this.esrr === 1 ? 2 : 1
-                    });
-                }
+                 this.utilService.publishIpcEvent('print', {
+                     data: [{ html: receiptFormat }],
+                     preview: false, copies: this.esrr === 1 ? 2 : 1
+                 });
+                 }
             }
 
             if (this.deviceTransactionId) {
@@ -3395,7 +3398,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         AppStateService.set('TransactionNumber', this.transactionNumber - 1);
         // tslint:disable-next-line:max-line-length
         this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
-        
+
         this.restrictedAlacarteCount = 0;
         this.alacarteTotal = 0.00;
         this.patronDetails = {};
