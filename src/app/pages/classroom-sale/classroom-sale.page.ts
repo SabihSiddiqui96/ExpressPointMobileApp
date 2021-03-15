@@ -2319,7 +2319,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         //     this.patronDetails.SpecialInstruction_count = 0;
         // }
         if (!this.patronDetails.isSpecialAccount &&
-            (allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
+            (allergenCount > 0 || this.patronDetails.SpecialInstruction.length > 0
                 || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
                 this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
                 || this.patronDetails.MonthlyALCRestriction || alaCarteCash[currentDay - 1] === '1' ||
