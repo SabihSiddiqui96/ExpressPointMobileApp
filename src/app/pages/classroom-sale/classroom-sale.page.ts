@@ -154,7 +154,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public taxMeal: number;
     public taxPercent: number;
     public canOpenPOS: boolean;
-    
+
     public hasStudentsWithoutPriceTypes = false;
     constructor(public _nav: NavController,
         public popoverCtrl: PopoverController,
@@ -594,38 +594,35 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'IsStudent': doc.IsStudent,
                             'Site': doc.SiteCode,
                             'Teacher': doc.HomeRoom,
-                            'isPriceSetForStudentPriceType':true
+                            'isPriceSetForStudentPriceType': true
                         };
                     });
                     students = _.sortBy(students, 'LastName');
 
-                    this.getStudentsImage(students);
+                    this.getStudentsImage(students).then((studentsWithImage) => {
+                        this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
+                            this.studentList = studentsWithPrices
+                            if (parseInt(SettingService.getSettingValue('SERINACSTU')) === 0) { // ServeInactive Students Check
+                                this.studentList = this.studentList.filter(r => r.isActive === true);
+                            }
 
-                    this.getMealPrice(students, day).then(() => {
 
+                            this.totalStudent = this.studentList.length;
+                            this.studentLoaded = true;
 
-
-                        if (parseInt(SettingService.getSettingValue('SERINACSTU')) === 0) { // ServeInactive Students Check
-                            this.studentList = this.studentList.filter(r => r.isActive === true);
-                        }
-                        // this.zone.run(() => {
-
-                        this.totalStudent = this.studentList.length;
-                        this.studentLoaded = true;
-
-                        if (this.totalStudent > 0) {
-                            this.studentBtnDisable = true;
-                            this.filterDisable = true;
-                        }
-                        if (this.totalStudent !== 0 && this.previousMealsCount === this.totalStudent) {
-                            setTimeout(() => {
-                                this.elRef.nativeElement.querySelector('.list-quick-sale').setAttribute('style', 'height: calc(100vh - 315px)');
-                            }, 50);
-                        }
-                        // });
-                        this.utilService.setLoader(false);
-
+                            if (this.totalStudent > 0) {
+                                this.studentBtnDisable = true;
+                                this.filterDisable = true;
+                            }
+                            if (this.totalStudent !== 0 && this.previousMealsCount === this.totalStudent) {
+                                setTimeout(() => {
+                                    this.elRef.nativeElement.querySelector('.list-quick-sale').setAttribute('style', 'height: calc(100vh - 315px)');
+                                }, 50);
+                            }
+                            this.utilService.setLoader(false);
+                        });
                     });
+
                 }).catch(err => console.log(err));
             }
 
@@ -675,7 +672,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'isStudentCEP': doc.isStudentCEP,
                             'IsStudent': doc.IsStudent,
                             'Site': doc.SiteCode,
-                            'Teacher': doc.HomeRoom
+                            'Teacher': doc.HomeRoom,
+                            'isPriceSetForStudentPriceType': true
 
                         };
 
@@ -683,22 +681,22 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                     students = _.sortBy(students, 'LastName');
 
-                    this.getStudentsImage(students);
+                    this.getStudentsImage(students).then((studentsWithImage) => {
+                        this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
+                            this.studentList = studentsWithPrices
+                            if (parseInt(SettingService.getSiteSettingValue('SERINACSTU')) === 0) { // ServeInactive Students Check
+                                this.studentList = this.studentList.filter(r => r.isActive === true);
+                            }
+                            this.totalStudent = this.studentList.length;
+                            this.studentLoaded = true;
 
-                    this.getMealPrice(students, day).then(() => {
 
-                        if (parseInt(SettingService.getSiteSettingValue('SERINACSTU')) === 0) { // ServeInactive Students Check
-                            this.studentList = this.studentList.filter(r => r.isActive === true);
-                        }
-                        this.totalStudent = this.studentList.length;
-                        this.studentLoaded = true;
-
-
-                        if (this.totalStudent > 0) {
-                            this.studentBtnDisable = true;
-                            this.filterDisable = true;
-                        }
-                        this.utilService.setLoader(false);
+                            if (this.totalStudent > 0) {
+                                this.studentBtnDisable = true;
+                                this.filterDisable = true;
+                            }
+                            this.utilService.setLoader(false);
+                        });
                     });
                 }).catch(err => console.log(err));
             }
@@ -708,7 +706,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public getStudentListForSpecialRoster() {
         this.getPriceByMenuItemId().then(() => {
-            // console.clear()
             this.selectAllSetting = parseInt(SettingService.getSettingValue('SSABICS'));
             const date = new Date();
             const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
@@ -767,7 +764,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                 // "CanDisable": false //disabled="student.CanDisable"
                                 'Identifier': doc.Identifier,
                                 'Site': doc.SiteCode,
-                                'Teacher': doc.HomeRoom
+                                'Teacher': doc.HomeRoom,
+                                'isPriceSetForStudentPriceType': true
                             };
                         });
 
@@ -791,19 +789,20 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         console.log(students);
 
 
-                        this.getStudentsImage(students);
+                        this.getStudentsImage(students).then((studentsWithImage) => {
 
-                        this.getMealPrice(students, day).then(() => {
+                            this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
+                                this.studentList = studentsWithPrices
 
+                                this.totalStudent = this.studentList.length;
+                                this.studentLoaded = true;
 
-                            this.totalStudent = this.studentList.length;
-                            this.studentLoaded = true;
-
-                            if (this.totalStudent > 0) {
-                                this.studentBtnDisable = true;
-                                this.filterDisable = true;
-                            }
-                            this.utilService.setLoader(false);
+                                if (this.totalStudent > 0) {
+                                    this.studentBtnDisable = true;
+                                    this.filterDisable = true;
+                                }
+                                this.utilService.setLoader(false);
+                            });
                         });
                     }).catch(err => console.log(err));
                 }
@@ -816,36 +815,39 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     public getStudentsImage(students) {
+        return new Promise((resolve) => {
+            students.map(student => {
+                this.utilService.isNetworkOnline().then((isNetworkOnline) => {
+                    if (isNetworkOnline && student.PersonId) { // this.network.type != 'none' || navigator.onLine
+                        this.http.GetPersonImage(student.PersonId).subscribe(data => {
+                            if (data != null) {
+                                student.Image = data;
+                            }
+                        }, e => { console.log(e); }, () => {
+                        });
 
-        students.map(student => {
-            this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                if (isNetworkOnline && student.PersonId) { // this.network.type != 'none' || navigator.onLine
-                    this.http.GetPersonImage(student.PersonId).subscribe(data => {
-                        if (data != null) {
-                            student.Image = data;
-                        }
-                    }, e => { console.log(e); }, () => {
-                    });
-
-                }
+                    }
+                });
             });
-        });
+            console.log('getStudentsImage')
+            console.log(students)
+            resolve(students);
+
+        })
 
     }
 
 
     public getMealPrice(students, day) {
         return new Promise((resolve) => {
-
             const studentsHadMeal = [];
             this.previousMealsCount = 0;
             let cepPriceApply = false;
             students = students.map(student => {
-                let studentWithPriceTypeChecked = { ...student, isPriceSetForStudentPriceType: true };
+                // let studentWithPriceTypeChecked = { ...student, isPriceSetForStudentPriceType: true };
                 // PouchQueriesService.GetPrice(this.filter.selected_menuitem, studentWithTypeCheked.PriceTypeId, studentWithTypeCheked.RDAGroupId, studentWithTypeCheked.IsStudent, this.priceMode)
                 //   .then(price => {
-
-                if (studentWithPriceTypeChecked.isStudentCEP === true) { // studentWithTypeCheked is CEP => CEP price no matter with school
+                if (student.isStudentCEP === true) { // studentWithTypeCheked is CEP => CEP price no matter with school
                     cepPriceApply = true;
                 } else { // studentWithTypeCheked is not CEP => Check CHRGNCEP setting to charge or not
                     if (this.isSiteCEP === true) {
@@ -859,30 +861,30 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     }
                 }
                 if (cepPriceApply) {
-                    studentWithPriceTypeChecked.Price = 0;
-                    studentWithPriceTypeChecked.isPriceSetForStudentPriceType = true ;
+                    student.Price = 0;
+                    student.isPriceSetForStudentPriceType = true;
                 } else {
                     // if (price.rows.length > 0) {
                     //   studentWithTypeCheked.Price = price.rows[0].doc.Price;
                     // }
-                    studentWithPriceTypeChecked.Price = this.getPrice(studentWithPriceTypeChecked.PriceTypeId,
-                        studentWithPriceTypeChecked.RDAGroupId, studentWithPriceTypeChecked.IsStudent, this.priceMode);
-                    if (studentWithPriceTypeChecked.Price === null) {
-                        studentWithPriceTypeChecked.Price = 0;
-                        studentWithPriceTypeChecked.isPriceSetForStudentPriceType = false;
+                    student.Price = this.getPrice(student.PriceTypeId,
+                        student.RDAGroupId, student.IsStudent, this.priceMode);
+                    if (student.Price === null) {
+                        student.Price = 0;
+                        student.isPriceSetForStudentPriceType = false;
                         this.hasStudentsWithoutPriceTypes = true;
                     } else {
-                        studentWithPriceTypeChecked.isPriceSetForStudentPriceType = true ;
+                        student.isPriceSetForStudentPriceType = true;
                     }
                 }
                 //  });
 
-                if (studentWithPriceTypeChecked.PreviousSales) {
-                    studentWithPriceTypeChecked.PreviousSales.map(s => {
+                if (student.PreviousSales) {
+                    student.PreviousSales.map(s => {
                         if (s.MealTypeId === this.filter.selected_mealtype) {
                             s.SalesByMealType.map(sales => {
                                 if (sales.IsReimbursable) {
-                                    studentWithPriceTypeChecked.HadMeal = true;
+                                    student.HadMeal = true;
                                     // studentsHadMeal.push(s)
                                 }
                             });
@@ -890,14 +892,15 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     });
                 }
 
-                if (studentWithPriceTypeChecked.HadMeal) {
-                    studentsHadMeal.push(studentWithPriceTypeChecked);
+                if (student.HadMeal) {
+                    studentsHadMeal.push(student);
                 }
-                return studentWithPriceTypeChecked;
+                return student;
             });
             this.previousMealsCount = studentsHadMeal.length;
-            this.studentList = students;
-            resolve();
+            // this.studentList = students;
+
+            resolve(students);
         });
     }
 
@@ -910,7 +913,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         });
 
     }
-    
+
     public getPrice(priceTypeId, rdaGroupId, isStudent, priceMode?) {
         let siteTypeId = 0;
         if (priceMode === 0 || (!isStudent && priceMode === 1)) {
@@ -924,13 +927,13 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + rdaGroupId + '--' + siteTypeId
             }
         );
-        
+
         if (priceDoc) {
             return priceDoc.doc.Price;
         } else {
             return null;
         }
-        
+
     }
 
     public clearStudents() {
@@ -1242,7 +1245,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 }
 
             });
-            
+
 
             PouchDBService.UpsertDocs(this.persons, EXP_PERSON);
 
@@ -1268,19 +1271,19 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
     public showWarning(message) {
         this.alertCtrl.create({
-          header: '',
-          message: message,
-          cssClass: 'customAlertCss',
-          buttons: [
-            {
-              text: 'Got It'
-            }
-          ]
+            header: '',
+            message: message,
+            cssClass: 'customAlertCss',
+            buttons: [
+                {
+                    text: 'Got It'
+                }
+            ]
         }).then(async (res) => {
-          await res.present();
+            await res.present();
         });
     }
-    
+
     public selectAllPatrons() {
         setTimeout(() => {
             this.studentList.forEach(obj => {
@@ -1294,7 +1297,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             if (this.hasStudentsWithoutPriceTypes && this.selectAll) {
                 this.showWarning("Not all patrons are able to be selected because the menu items prices are not all set. Please notify your manager.");
             }
-            
+
         });
         // const toggle = !this.selectAll;
         // this.studentList.map((student) => {
@@ -1597,7 +1600,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 } else {
                     this.patronSelectedData = null;
                 }
-                resolve();
+                resolve(null);
                 console.log(this.patronSelectedData);
             });
         });
