@@ -456,7 +456,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (this.orderData.items[i].Name === userEventData.orderItemData.Name &&
                     this.orderData.items[i].price_type_id === userEventData.orderItemData.price_type_id) {
 
-                    this.itemCount += (Number(userEventData.orderItemData.Quantity) - this.orderData.items[i].Quantity); // ItemCount
+                    // this.itemCount += (Number(userEventData.orderItemData.Quantity) - this.orderData.items[i].Quantity); // ItemCount
                     /**
                      * Set old values of orderData items
                      */
@@ -1676,7 +1676,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }
                     itemPrice = itemPrice + this.orderData.items[i]['Price'];
                     this.mealCount = 0;
-                    this.itemCount -= this.orderData.items[i].Quantity; // itemCount
+                    // this.itemCount -= this.orderData.items[i].Quantity; // itemCount
                 } else {
                     cartItems.push(this.orderData.items[i]);
                 }
@@ -1720,7 +1720,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
-            this.itemCount -= this.orderData.items[index].Quantity; // itemCount
+            // this.itemCount -= this.orderData.items[index].Quantity; // itemCount
             itemPrice = this.orderData.items[index]['Price'];
             if (this.orderData.items[index]['isSecondMeal']) {
                 this.mealCount = 1;
@@ -2056,7 +2056,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             this.orderData.items[i].IniTotalPrice = itemPrice;
                             this.orderData.items[i].PaidPrice = paidMealPrice
                             this.orderData.items[i].ShowPaidPrice = itemData.ShowPaidPrice
-                            this.itemCount = this.itemCount + 1; // itemCount
+                            // this.itemCount = this.itemCount + 1; // itemCount
                             appendArray = false;
                         } else {
                             this.utilService.showToast('Maximum quantity is 999');
@@ -2071,7 +2071,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 if (appendArray) {
 
-                    this.itemCount = this.itemCount + 1; // ItemCount
+                    // this.itemCount = this.itemCount + 1; // ItemCount
 
                     this.orderData.items.push({
                         'Name': menuItem.ButtonDescription,
@@ -3109,43 +3109,43 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (!this.bonusAmount) {
                     this.bonusAmount = 0;
                 }
-                 if (this.utilService.isElectronApp() && this.printAuto === 1) {
-                const transactionReceiptData: TransactionDetailPrintFormat = {
-                    'PersonName': this.patronDetails.PersonName,
-                    'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
-                    'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
-                    'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
-                    'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                    'TerminalName': this.terminalName,
-                    'Cashier': UtilService.userNameLoggedIn,
-                    'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
-                        this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
-                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
-                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
-                    'IsCheck': this.orderData.IsCheck,
-                    'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
-                        { hour: 'numeric', minute: 'numeric', hour12: true }),
-                    'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                    'AmountTendered': Number(this.cashtendAmount).toFixed(2),
-                    'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                    'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                    'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
-                    'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
-                    'ServingSiteId': this.siteName,
-                    'TransactionNumber': this.transactionNumber,
-                    'CheckNumber': this.orderData.CheckNumber,
-                    'CardNumber': this.orderData.CardNumber,
+                if (this.utilService.isElectronApp() && this.printAuto === 1) {
+                    const transactionReceiptData: TransactionDetailPrintFormat = {
+                        'PersonName': this.patronDetails.PersonName,
+                        'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
+                        'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
+                        'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
+                        'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
+                        'TerminalName': this.terminalName,
+                        'Cashier': UtilService.userNameLoggedIn,
+                        'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
+                            this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
+                        'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
+                        'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
+                        'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
+                        'IsCheck': this.orderData.IsCheck,
+                        'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
+                            { hour: 'numeric', minute: 'numeric', hour12: true }),
+                        'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                        'AmountTendered': Number(this.cashtendAmount).toFixed(2),
+                        'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
+                        'Balance': Number(this.saleData['NewBalance']).toFixed(2),
+                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
+                        'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
+                        'ServingSiteId': this.siteName,
+                        'TransactionNumber': this.transactionNumber,
+                        'CheckNumber': this.orderData.CheckNumber,
+                        'CardNumber': this.orderData.CardNumber,
 
-                };
+                    };
 
-                const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
+                    const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
 
-                 this.utilService.publishIpcEvent('print', {
-                     data: [{ html: receiptFormat }],
-                     preview: false, copies: this.esrr === 1 ? 2 : 1
-                 });
-                 }
+                    this.utilService.publishIpcEvent('print', {
+                        data: [{ html: receiptFormat }],
+                        preview: false, copies: this.esrr === 1 ? 2 : 1
+                    });
+                }
             }
 
             if (this.deviceTransactionId) {
@@ -3811,7 +3811,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         accbal = (Math.round(accbal * 100) / 100).toFixed(2);
         this.cashtendered = '$' + accbal;
         this.cashtendAmount = this.orderData.accountBalance;
-
+        this.itemCount = this.orderData.items.map(li => li.Quantity).reduce((sum, val) => sum + val, 0);
     }
 
     public showPatronPin() {
