@@ -3513,8 +3513,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 this.changeMealType(this.tempMealTypeId, this.tempMealTypeName);
                                 break;
 
-                            case 'menuType': this.selectedMenuType = selectedData.value;
-                                this.selectedMenuTypeName = selectedData.label;
+                            case 'menuType': this.selectedMenuType = selectedData.value!== undefined ? selectedData.value : this.selectedMenuType;
+                                this.selectedMenuTypeName = selectedData.label!== undefined ? selectedData.label :this.selectedMenuTypeName;
                                 this.changeMenuType();
                                 break;
                             case 'ReviewTypes': this.reviewType = selectedData.value;
