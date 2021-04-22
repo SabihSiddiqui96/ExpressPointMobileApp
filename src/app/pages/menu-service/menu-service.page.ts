@@ -1898,9 +1898,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
 
         if (this.menuItemsArr.length > 0) {
-            this.transactionInProgress = false;
-        } else if (this.menuItemsArr.length === 0) {
             this.transactionInProgress = true;
+        } else if (this.menuItemsArr.length === 0) {
+            this.transactionInProgress = false;
         }
 
         this.menuItemsArr.push(menuItemNo);
@@ -3937,9 +3937,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const totAmount = this.orderData.totalAmount;
         const isSpecialAccount = this.patronDetails.isSpecialAccount;
 
-        if (this.transactionInProgress) {
-            return true;
-        } else if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
+   if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
             const projBal = this.selectedAccountDetails.Balance - this.orderData.totalAmount;
             if (itemLen > 0 && totAmount >= 0.00 && projBal >= 0) { // To enable Charge button when account is linked to adult
                 return false;
