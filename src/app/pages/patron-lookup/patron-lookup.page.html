@@ -334,7 +334,7 @@
 
                     <!-- <ion-input id="pinInput" *ngIf="!isIOS" #patron_search_id placeholder="Enter a PIN" type="text"
                       [(ngModel)]="patronSearch.keyword" class="ion-text-center" (keyup)="checkNumeric($event)"> -->
-                    <ion-input id="pinInput" #patron_search_id placeholder="Enter a PIN" type="text"
+                    <ion-input id="pinInput" #patron_search_id placeholder="{{SearchByText}}" type="text"
                       [(ngModel)]="patronSearch.keyword" class="ion-text-center" (keyup)="checkNumeric($event)">
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" class="openOSKbutton"
@@ -577,7 +577,7 @@
               <ion-row>
                 <ion-col size="9" size-md="9" size-sm="9">
                   <ion-item lines="none">
-                    <ion-input id="pinInput" placeholder="Enter a PIN" value="{{patronSearch.keyword}}"
+                    <ion-input id="pinInput" placeholder="{{SearchByText}}" value="{{patronSearch.keyword}}"
                       class="ion-text-center">
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK"

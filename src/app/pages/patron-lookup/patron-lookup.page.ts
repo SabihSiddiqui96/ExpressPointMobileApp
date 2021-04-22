@@ -148,6 +148,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public enableStaff: boolean = false;
     public enableVisitor = false;
     public enableProgAdult = false;
+    public SearchByText: string;
     public selectAccuntClick: boolean = false;
     public menuPayselectAcctClick: boolean = false;
     public isKeyboardOpen: boolean;
@@ -1752,6 +1753,13 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.enableProgAdult = true;
                     } else {
                         this.enableProgAdult = false;
+                    }
+                    break;
+                case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:
+                    if (setting.SiteSettingValue === "1") {
+                        this.SearchByText = 'Enter a PIN';
+                    } else {
+                        this.SearchByText = 'Enter an ID';
                     }
                     break;
             }
