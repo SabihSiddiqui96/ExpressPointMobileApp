@@ -1897,11 +1897,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
             menuItemNo = menuItem.MenuItemId;
         }
 
-
         if (this.menuItemsArr.length > 0) {
-            this.transactionInProgress = true;
-        } else if (this.menuItemsArr.length === 0) {
             this.transactionInProgress = false;
+        } else if (this.menuItemsArr.length === 0) {
+            this.transactionInProgress = true;
         }
 
         this.menuItemsArr.push(menuItemNo);
