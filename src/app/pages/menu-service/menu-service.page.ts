@@ -350,7 +350,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.priceMode = parseInt(SettingService.getSettingValue('PRICEMODE'));
         this.setting.HIDELGBLTY = parseInt(SettingService.getSettingValue('HIDELGBLTY'));
         this.taxMeal = parseInt(SettingService.getSettingValue('TAXMEAL'));
-        this.taxPercent = parseInt(SettingService.getSettingValue('TAXPERCENT'));
+        this.taxPercent = parseFloat(SettingService.getSettingValue('TAXPERCENT'));
         this.printAuto = parseInt(SettingService.getSettingValue('PRINTAUTO'));
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
