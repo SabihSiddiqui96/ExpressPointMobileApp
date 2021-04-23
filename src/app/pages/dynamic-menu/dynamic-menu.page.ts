@@ -384,7 +384,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.setting.CHRGNCEP = Boolean(parseInt(SettingService.getSettingValue('CHRGNCEP'))); // settings.CHRGNCEP;
         this.priceMode = parseInt(SettingService.getSettingValue('PRICEMODE'));
         this.taxMeal = parseInt(SettingService.getSettingValue('TAXMEAL'));
-        this.taxPercent = parseInt(SettingService.getSettingValue('TAXPERCENT'));
+        this.taxPercent = parseFloat(SettingService.getSettingValue('TAXPERCENT'));
         this.printAuto = parseInt(SettingService.getSettingValue('PRINTAUTO'));
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));

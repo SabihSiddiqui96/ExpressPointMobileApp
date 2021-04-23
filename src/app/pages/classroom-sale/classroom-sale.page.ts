@@ -196,7 +196,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.userId = JSON.parse(AppStateService.get('login_details')).PrimeroUserId;
         this.isTeacher = SettingService.isUserPermitted('CSQUICK');
         this.taxMeal = parseInt(SettingService.getSettingValue('TAXMEAL'));
-        this.taxPercent = parseInt(SettingService.getSettingValue('TAXPERCENT'));
+        this.taxPercent = parseFloat(SettingService.getSettingValue('TAXPERCENT'));
         this.setting.CHRGNCEP = Boolean(parseInt(SettingService.getSettingValue('CHRGNCEP')));
         this.canDoBulkPrePay = SettingService.isUserPermitted('BULKPAY');
 
