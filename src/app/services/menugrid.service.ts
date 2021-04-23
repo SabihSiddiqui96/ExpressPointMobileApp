@@ -216,7 +216,7 @@ export class MenugridService {
   public calculateTax(orderDetails, isSaleTaxable) {
     let tax = 0.00;
     this.taxMeal = parseInt(SettingService.getSettingValue('TAXMEAL'));
-    this.taxPercent = parseInt(SettingService.getSettingValue('TAXPERCENT'));
+    this.taxPercent = parseFloat(SettingService.getSettingValue('TAXPERCENT'));
     if (this.taxMeal === 1 && this.taxPercent && isSaleTaxable === true) {
       orderDetails.map(o => {
         if (o.IsPartOfMeal === undefined) {
