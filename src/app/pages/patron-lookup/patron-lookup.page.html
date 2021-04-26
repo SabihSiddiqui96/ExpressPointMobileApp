@@ -210,7 +210,7 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
-                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="Patron Id"
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="{{AdvancedPinLookupLabel}}"
                       (click)="setActiveField('externalId')" [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event);handleKeyDown($event)">
                       <!-- (keyup)=""> -->
@@ -478,7 +478,7 @@
                 <!-- Non iOS -->
                 <!-- <ion-item lines="none" *ngIf="!isIOS"> -->
                 <ion-item lines="none">
-                  <ion-label slot="start" position="fixed">Patron Id</ion-label>
+                  <ion-label slot="start" position="fixed">{{AdvancedPinLookupLabel}}</ion-label>
 
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
                     (keyup)="checkNumeric($event);handleKeyDown($event)" (keypress)="keyUpPIN($event)"></ion-input>
@@ -690,7 +690,7 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
-                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="Patron Id"
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="{{AdvancedPinLookupLabel}}"
                       (click)="setActiveField('externalId')" [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event);handleKeyDown($event)">
                       <!-- (keyup)=""> -->
@@ -775,7 +775,7 @@
                 <!-- iOS only -->
                 <!-- Non iOS -->
                 <ion-item *ngIf="!isIOS">
-                  <ion-label item-start fixed>Patron Id</ion-label>
+                  <ion-label item-start fixed>{{AdvancedPinLookupLabel}}</ion-label>
 
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
                     (keyup)="checkNumeric($event);handleKeyDown($event)" (keypress)="keyUpPIN($event)"></ion-input>
@@ -787,7 +787,7 @@
                 <!-- Non iOS -->
                 <!-- iOS only -->
                 <ion-item *ngIf="isIOS" (click)="changeActiveInput('externalId')">
-                  <ion-label item-start fixed>Patron Id</ion-label>
+                  <ion-label item-start fixed>{{AdvancedPinLookupLabel}}</ion-label>
                   <ion-label item-end class="{{externalIdClass}}">{{patronSearch.externalId}}
                   </ion-label>
                 </ion-item>

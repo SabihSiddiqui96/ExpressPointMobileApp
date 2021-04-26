@@ -149,6 +149,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public enableVisitor = false;
     public enableProgAdult = false;
     public SearchByText: string;
+    public AdvancedPinLookupLabel : string
     public selectAccuntClick: boolean = false;
     public menuPayselectAcctClick: boolean = false;
     public isKeyboardOpen: boolean;
@@ -1757,9 +1758,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     break;
                 case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:
                     if (setting.SiteSettingValue === "1") {
+                        //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup
                         this.SearchByText = 'Enter a PIN';
+                        this.AdvancedPinLookupLabel = 'Patron Id'
                     } else {
                         this.SearchByText = 'Enter an ID';
+                        this.AdvancedPinLookupLabel = 'PIN'
                     }
                     break;
             }

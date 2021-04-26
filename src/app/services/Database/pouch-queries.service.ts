@@ -118,6 +118,17 @@ export class PouchQueriesService {
       externalId = '';
     }
 
+    let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN')
+ 
+    /**
+     * in Advanced Patron Search: SearchByPin setting behave the opposite way
+     * 
+     *  if SearchByPin = 1 then we need to search by StudentId
+     *  if SearchByPin = 0 then we need to search by Identifier
+     * 
+     */
+
+
     /* Disregarding the school ID: Other site search done on the server */
     const firstNameRegex = '(^' + firstName + ')';
     const lastNameRegex = '(^' + lastName + ')';
@@ -129,77 +140,81 @@ export class PouchQueriesService {
       lastName: lastName,
       externalId: externalId
     };
-     
-      return new Promise<FilteredDocs>((resolve) => {
 
-          if (PouchDBService.EXP_PERSON_QUICK_MATCH.length > 0) {
-            let SearchKeys = [];
-            _.filter(PouchDBService.EXP_PERSON_QUICK_MATCH, (obj) => {
-                  if (obj.FirstName === undefined || obj.LastName === undefined) {
-                      return false;
-                  }
-                  if ((RegExp(firstNameRegex, 'igm').test(obj.FirstName))
-                      && (RegExp(lastNameRegex, 'igm').test(obj.LastName))
-                      && (RegExp(externalIdRegex, 'i').test(obj.PersonIdentifier))
-                      && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId)) {
-                      SearchKeys.push(obj.id);
-                      return true;
-                  } else {
-                      return false;
-                  }
-              });          
-              EXP_PERSON.allDocs({
-                  keys: SearchKeys,
-                  include_docs: true
-              }).then(res => {
-                  const searchResult = JSON.parse('{ "docs": [] }');                
-                  _.filter(res.rows, function (o) {
-                    searchResult.docs.push(o.doc);
-                  });
-                  resolve(searchResult);
-              });
-          } else {              
-              PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
-              PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
-            PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0;
-              
-              EXP_PERSON.allDocs({
-                  include_docs: true
-              }).then(res => {
-                  
-                  const searchResult = JSON.parse('{ "docs": [] }');
-                  PouchDBService.EXP_PERSON_QUICK_MATCH_STARTED = true;
-                  _.filter(res.rows, function (o) {
-                      if (o.doc.FirstName === undefined || o.doc.LastName === undefined) {
-                          return false;
-                      }
-                      
-                      if (PouchDBService.USE_EXP_PERSON_QUICK_MATCH) {
-                        PouchDBService.EXP_PERSON_QUICK_MATCH.push({
-                            id: o.doc._id, 
-                            FirstName: o.doc.FirstName,
-                            LastName: o.doc.LastName,
-                            PersonIdentifier: o.doc.PersonIdentifier,
-                            SchoolId: o.doc.SchoolId
-                          });
-                          PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT++; 
-                      }                                           
+    return new Promise<FilteredDocs>((resolve) => {
 
-                      if ((RegExp(firstNameRegex, 'igm').test(o.doc.FirstName))
-                          && (RegExp(lastNameRegex, 'igm').test(o.doc.LastName))
-                          && (RegExp(externalIdRegex, 'i').test(o.doc.PersonIdentifier))
-                          && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === o.doc.SchoolId)) {
-                          searchResult.docs.push(o.doc);
-                          return true;
-                      } else {
-                          return false;
-                      }
-                  });
-                  PouchDBService.EXP_PERSON_QUICK_MATCH_STARTED = false;
-                  resolve(searchResult);
-              });        
+      if (PouchDBService.EXP_PERSON_QUICK_MATCH.length > 0) {
+        let SearchKeys = [];
+        _.filter(PouchDBService.EXP_PERSON_QUICK_MATCH, (obj) => {
+          if (obj.FirstName === undefined || obj.LastName === undefined) {
+            return false;
           }
-      });
+          if ((RegExp(firstNameRegex, 'igm').test(obj.FirstName))
+            && (RegExp(lastNameRegex, 'igm').test(obj.LastName))
+            && ((RegExp(externalIdRegex, 'i').test(obj.PersonIdentifier) && SearchByPin === '1')
+              || (RegExp(externalIdRegex, 'i').test(obj.Identifier) && SearchByPin === '0'))
+            && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId)) {
+            SearchKeys.push(obj.id);
+            return true;
+          } else {
+            return false;
+          }
+        });
+        EXP_PERSON.allDocs({
+          keys: SearchKeys,
+          include_docs: true
+        }).then(res => {
+          const searchResult = JSON.parse('{ "docs": [] }');
+          _.filter(res.rows, function (o) {
+            searchResult.docs.push(o.doc);
+          });
+          resolve(searchResult);
+        });
+      } else {
+        PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
+        PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
+        PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0;
+
+        EXP_PERSON.allDocs({
+          include_docs: true
+        }).then(res => {
+
+          const searchResult = JSON.parse('{ "docs": [] }');
+          PouchDBService.EXP_PERSON_QUICK_MATCH_STARTED = true;
+          _.filter(res.rows, function (o) {
+            if (o.doc.FirstName === undefined || o.doc.LastName === undefined) {
+              return false;
+            }
+
+            if (PouchDBService.USE_EXP_PERSON_QUICK_MATCH) {
+              PouchDBService.EXP_PERSON_QUICK_MATCH.push({
+                id: o.doc._id,
+                FirstName: o.doc.FirstName,
+                LastName: o.doc.LastName,
+                PersonIdentifier: o.doc.PersonIdentifier,
+                Identifier: o.doc.Identifier,
+                SchoolId: o.doc.SchoolId
+              });
+              PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT++;
+            }
+
+            if ((RegExp(firstNameRegex, 'igm').test(o.doc.FirstName))
+              && (RegExp(lastNameRegex, 'igm').test(o.doc.LastName))
+              && ((RegExp(externalIdRegex, 'i').test(o.doc.PersonIdentifier) && SearchByPin === '1')
+                || (RegExp(externalIdRegex, 'i').test(o.doc.Identifier) && SearchByPin === '0'))
+
+              && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === o.doc.SchoolId)) {
+              searchResult.docs.push(o.doc);
+              return true;
+            } else {
+              return false;
+            }
+          });
+          PouchDBService.EXP_PERSON_QUICK_MATCH_STARTED = false;
+          resolve(searchResult);
+        });
+      }
+    });
   }
 
 
@@ -1511,7 +1526,7 @@ export class PouchQueriesService {
           stats = JSON.parse(AppStateService.get('TransactionStats'));
         }
 
-        this.http.postHeartBeat(deviceInfo.TerminalId, stats.pending, stats.sent, heartBeatTime,deviceInfo.AppVersion).subscribe(
+        this.http.postHeartBeat(deviceInfo.TerminalId, stats.pending, stats.sent, heartBeatTime, deviceInfo.AppVersion).subscribe(
           // tslint:disable-next-line:no-empty
           data => { },
           error => { console.log(error); reject(); },
