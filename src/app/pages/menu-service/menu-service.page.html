@@ -170,7 +170,7 @@
                                     </ion-button>
                                 </ion-col>
                                 <ion-col size="3" size-md="3" size-sm="3">
-                                    <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                                    <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn" *ngIf = "canLoadPrevPatron"
                                         [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
                                         style="height:3.6rem; font-size: 65%;" [disabled]="!canLoadPrevPatron">
                                         &lt; &lt; &nbsp;Previous
@@ -241,11 +241,11 @@
                                                     </p>
                                                 </ion-col>
                                                 <ion-col size="6" style="align-self: flex-end;"
-                                                    *ngIf="(patronDetails.GradeId && patronDetails.HadSale===true)">
+                                                    *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true)">
                                                     <ion-button default expand="block"
                                                         (click)="ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(patronDetails.GradeId && patronDetails.HadSale===true) ? ' ': 'none'">
+                                                        [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) ? ' ': 'none'">
                                                         Previous
                                                         <span style="margin-left: 5px;"
                                                             *ngIf="patronDetails.IsSecondMeal!=true">Item(s)</span>
@@ -406,11 +406,11 @@
                                                     </p>
                                                 </ion-col>
                                                 <ion-col size="5" style="align-self: flex-end;"
-                                                    *ngIf="(selectedAccountDetails.GradeId && selectedAccountDetails.HadSale===true)">
+                                                    *ngIf="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true)">
                                                     <ion-button default expand="block"
                                                         (click)="ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(selectedAccountDetails.IsSecondMeal!=true), 'btn_previous_meals':(selectedAccountDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(selectedAccountDetails.GradeId && selectedAccountDetails.HadSale===true) ? ' ': 'none'">
+                                                        [style.display]="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) ? ' ': 'none'">
                                                         Previous
                                                         <span style="margin-left: 5px;"
                                                             *ngIf="selectedAccountDetails.IsSecondMeal!=true">Item(s)</span>

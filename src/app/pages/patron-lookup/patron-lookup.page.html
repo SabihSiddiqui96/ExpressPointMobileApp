@@ -352,7 +352,7 @@
                   </ion-item>
                 </ion-col>
                 <ion-col size="3" size-md="3" size-sm="3" *ngIf="!hidePrevPatron">
-                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn" *ngIf= "canLoadPrevPatron"
                     [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" [disabled]="!canLoadPrevPatron">
                     &lt;&lt; &nbsp;Previous
                   </ion-button>
