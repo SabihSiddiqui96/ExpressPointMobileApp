@@ -410,6 +410,14 @@ export class PouchQueriesService {
     });
 
   }
+  public static GetOfflineWindowsUser(username: string): any {
+
+    return EXP_USERS.allDocs({
+      startkey: 'WindowsUser-' + username,
+      endkey: 'WindowsUser-' + username + '\uffff',
+      include_docs: true
+    });
+  }
   public static AuthenticateUser(userName, password): any {
 
     const args = {

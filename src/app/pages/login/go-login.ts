@@ -344,31 +344,31 @@ export class GoLogin implements OnDestroy {
                                                 const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
                                                 // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
                                                 // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
-                                                    if (diffTime >= diffThreshold) {
+                                                if (diffTime >= diffThreshold) {
 
-                                                        const alert = this.alertCtrl.create({
-                                                            header: 'Warning',
-                                                            message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings.',
-                                                            backdropDismiss: false,
-                                                            buttons: [
-                                                                {
-                                                                    text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
-                                                                    handler: () => {
-                                                                        console.log('Clicked');
-                                                                        const openSettings = new OpenNativeSettings();
-                                                                        openSettings.open('date');
-                                                                        this.canProceed = false;
-                                                                        this.disableLogin = false;
-                                                                        this.loginProcessing = false;
-                                                                    }
+                                                    const alert = this.alertCtrl.create({
+                                                        header: 'Warning',
+                                                        message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings.',
+                                                        backdropDismiss: false,
+                                                        buttons: [
+                                                            {
+                                                                text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+                                                                handler: () => {
+                                                                    console.log('Clicked');
+                                                                    const openSettings = new OpenNativeSettings();
+                                                                    openSettings.open('date');
+                                                                    this.canProceed = false;
+                                                                    this.disableLogin = false;
+                                                                    this.loginProcessing = false;
                                                                 }
-                                                            ]
-                                                        }).then(async (res) => {
-                                                            await res.present();
-                                                        });
-                                                    } else {
-                                                        this.CheckLogin();
-                                                    }
+                                                            }
+                                                        ]
+                                                    }).then(async (res) => {
+                                                        await res.present();
+                                                    });
+                                                } else {
+                                                    this.CheckLogin();
+                                                }
                                             }
 
                                         } else {
@@ -393,6 +393,72 @@ export class GoLogin implements OnDestroy {
 
     public AuthenticateOffline() {
 
+
+        if (this.login.WindowsAuth) {
+            if (AppStateService.get('WindowsCredentials')) {
+                let windowsCredentials = AppStateService.get('WindowsCredentials')
+                PouchQueriesService.GetOfflineWindowsUser(windowsCredentials[1].toLowerCase()).then((res) => {
+                    if (res) {
+
+                        if (res.rows.length > 0) {
+                            this.loginDetails = res.rows['0'].doc;
+                            if (this.loginDetails.WindowsUserDomain.toLowerCase() === windowsCredentials[0].toLowerCase()) {
+                                this.CheckOfflineLoginLogic()
+                            }
+                            else {
+                                this.disableLogin = false;
+                                this.loginProcessing = false
+                                this.canProceed = false
+                                this.utilService.showToast('No user found');
+                            }
+                        } else {
+                            this.disableLogin = false;
+                            this.loginProcessing = false
+                            this.canProceed = false
+                            this.utilService.showToast('No user found');
+                        }
+
+                    } else {
+                        this.disableLogin = false;
+                        this.loginProcessing = false
+                        this.canProceed = false
+                        this.utilService.showToast('No user found');
+                    }
+                }).then(() => {
+                    console.log(this.loginDetails);
+                    PouchDBService.UpsertSingleDoc(this.loginDetails, EXP_SYSTEM).then(() => {
+                    });
+                });;
+            }
+        } else {
+
+            PouchQueriesService.GetOfflineUser(this.login.username.toLowerCase()).then((res) => {
+                if (res) {
+
+                    if (res.rows.length > 0) {
+                        this.loginDetails = res.rows['0'].doc;
+                        this.CheckOfflineLoginLogic()
+
+                    } else {
+                        this.disableLogin = false;
+                        this.utilService.showToast('No user found');
+                    }
+
+                } else {
+                    this.disableLogin = false;
+                    this.utilService.showToast('No user found');
+                }
+
+            }).then(() => {
+                console.log(this.loginDetails);
+                PouchDBService.UpsertSingleDoc(this.loginDetails, EXP_SYSTEM).then(() => {
+                });
+            });
+        }
+
+    }
+
+    public CheckOfflineLoginLogic() {
         // this.utilService.setLoader(true);
         const lastOnlineDate = AppStateService.get('LastOnlineDate');
         let tokenGoodBefore: number = 0;
@@ -404,132 +470,111 @@ export class GoLogin implements OnDestroy {
         tokenGoodBefore = parseInt(SettingService.getSettingValue('PRACCDAYCT'));
         minWaitInMinutes = parseInt(SettingService.getSettingValue('MINWAIPASS'));
         maxFailedLoginAttempts = parseInt(SettingService.getSettingValue('MAXREAPASS'));
-
-
-        PouchQueriesService.GetOfflineUser(this.login.username.toLowerCase()).then((res) => {
-            if (res) {
-
-                if (res.rows.length > 0) {
-                    this.loginDetails = res.rows['0'].doc;
-                    minutePassedSince = UtilService.getNumberOfUnitsFromDate(this.loginDetails.LastFailedLoginDate, 'MINUTES');
+        minutePassedSince = UtilService.getNumberOfUnitsFromDate(this.loginDetails.LastFailedLoginDate, 'MINUTES');
 
 
 
-                    const numberOfDays = UtilService.getNumberOfUnitsFromDate(lastOnlineDate, 'DAY');
+        const numberOfDays = UtilService.getNumberOfUnitsFromDate(lastOnlineDate, 'DAY');
 
-                    const numberOfDaysRemaining = tokenGoodBefore - numberOfDays;
+        const numberOfDaysRemaining = tokenGoodBefore - numberOfDays;
 
-                    if (minutePassedSince > minWaitInMinutes) { // check for minutes passed since last login failure
-                        this.loginDetails.NoFailedAttempts = 0;
-                    }
+        if (minutePassedSince > minWaitInMinutes) { // check for minutes passed since last login failure
+            this.loginDetails.NoFailedAttempts = 0;
+        }
 
-                    if (this.loginDetails.NoFailedAttempts < maxFailedLoginAttempts) { // Allow Login
+        if (this.loginDetails.NoFailedAttempts < maxFailedLoginAttempts) { // Allow Login
 
-                        if (tokenGoodBefore !== 0) {
-                            if (numberOfDays >= 0) {
-                                if (numberOfDaysRemaining > 0) {
-
-
-                                    if ((this.loginDetails.HashedPasswordWithSalt) ===
-                                        UtilService.getHashForText(this.login.password + this.loginDetails.Salt)) {
-
-                                        const message = 'You are currently operating in <b>offline mode</b> on this device. You have <b>'
-                                            + numberOfDaysRemaining +
-                                            'days remaining </b>to establish connectivity for this device. If a connection is not established by this time,' +
-                                            'you will be unable to access ExpressPoint.';
-                                        this.showWarning(message, 'GotoAuthOffline', numberOfDaysRemaining);
-                                        // this.utilService.setLoader(false);
+            if (tokenGoodBefore !== 0) {
+                if (numberOfDays >= 0) {
+                    if (numberOfDaysRemaining > 0) {
 
 
-                                        AppStateService.set('login_details', JSON.stringify(this.loginDetails));
-                                        AppStateService.set('Permissions', JSON.stringify(this.loginDetails['Permissions']));
-                                        UtilService.userNameLoggedIn = this.login.username.trim();
+                        if (((this.loginDetails.HashedPasswordWithSalt) ===
+                            UtilService.getHashForText(this.login.password + this.loginDetails.Salt)) ||
+                            this.login.WindowsAuth && this.loginDetails.WindowsUserDomain) {
 
-                                        if (!SettingService.isUserPermitted('OPENPOS')) {
-                                            this.disableLogin = false;
-                                            this.loginProcessing = false;
-                                            this.canProceed = false;
-                                            this.utilService.showToast('User is not permitted to operate POS');
-                                            return;
-                                        }
-
-                                        if (AppStateService.get('SetupComplete')) {
-                                            this._nav.navigateRoot('service-selection');
-                                        } else {
-                                            this.utilService.showToast('Something went wrong while configuring the device. Please try again.');
-                                        }
-                                    } else {
-                                        this.disableLogin = false;
-                                        this.canProceed = false;
-                                        this.loginDetails.NoFailedAttempts = this.loginDetails.NoFailedAttempts + 1;
-                                        this.loginDetails.LastFailedLoginDate = new Date().getTime();
-                                        this.utilService.showToast('UserName/Password Combination is not correct. Please try again.');
+                            const message = 'You are currently operating in <b>offline mode</b> on this device. You have <b>'
+                                + numberOfDaysRemaining +
+                                'days remaining </b>to establish connectivity for this device. If a connection is not established by this time,' +
+                                'you will be unable to access ExpressPoint.';
+                            this.showWarning(message, 'GotoAuthOffline', numberOfDaysRemaining);
+                            // this.utilService.setLoader(false);
 
 
-                                    }
-                                    // this.utilService.setLoader(false);
+                            AppStateService.set('login_details', JSON.stringify(this.loginDetails));
+                            AppStateService.set('Permissions', JSON.stringify(this.loginDetails['Permissions']));
 
-                                } else {
-                                    this.disableLogin = false;
-                                    this.canProceed = false;
-                                    this.utilService.showToast('To setup your ExpressPoint profile' +
-                                        'please connect this device to the internet and try again.');
-                                    // this.utilService.setLoader(false);
+                            UtilService.userNameLoggedIn = this.login.WindowsAuth ? this.loginDetails.WindowsUserName.trim() : this.login.username.trim();
 
-                                }
-                            } else {
-
-
-                                const message = '<p><b>Offline Limit Reached</b></p> <p><b> You have been offline for ' + tokenGoodBefore +
-                                    ' days or more</b></p><p>Please establish a connection for this device to continue for use.</p> ';
-                                this.showWarning(message, 'NoGoOffline', numberOfDaysRemaining);
-
+                            if (!SettingService.isUserPermitted('OPENPOS')) {
+                                this.disableLogin = false;
+                                this.loginProcessing = false;
+                                this.canProceed = false;
+                                this.utilService.showToast('User is not permitted to operate POS');
+                                return;
                             }
-                        } else {
-                            const message = '<p>You are trying to login using a date <b>prior</b> to your last successful login.<\p><p>' +
-                                '<b> Check your system date.</b></p>';
-                            this.showWarning(message, 'NoGoOffline', numberOfDaysRemaining);
 
-                        }
-
-
-                        // } else {
-                        //   this.utilService.showToast('There is a mistake in Prohibit Device when Offline setting.');
-                        // }
-
-                    } else {
-                        if (minutePassedSince > minWaitInMinutes) { // check for minutes passed since last login failure
-                            this.loginDetails.NoFailedAttempts = 0;
-
-
-
+                            if (AppStateService.get('SetupComplete')) {
+                                this._nav.navigateRoot('service-selection');
+                            } else {
+                                this.utilService.showToast('Something went wrong while configuring the device. Please try again.');
+                            }
                         } else {
                             this.disableLogin = false;
                             this.canProceed = false;
+                            this.loginDetails.NoFailedAttempts = this.loginDetails.NoFailedAttempts + 1;
                             this.loginDetails.LastFailedLoginDate = new Date().getTime();
-                            this.utilService.showToast('Login attempts exceeded. Please try again after ' + minWaitInMinutes + 'Minutes');
+                            this.utilService.showToast('UserName/Password Combination is not correct. Please try again.');
+
 
                         }
+                        // this.utilService.setLoader(false);
 
+                    } else {
+                        this.disableLogin = false;
+                        this.canProceed = false;
+                        this.utilService.showToast('To setup your ExpressPoint profile' +
+                            'please connect this device to the internet and try again.');
+                        // this.utilService.setLoader(false);
 
                     }
-
-
                 } else {
-                    this.disableLogin = false;
-                    this.utilService.showToast('No user found');
+
+
+                    const message = '<p><b>Offline Limit Reached</b></p> <p><b> You have been offline for ' + tokenGoodBefore +
+                        ' days or more</b></p><p>Please establish a connection for this device to continue for use.</p> ';
+                    this.showWarning(message, 'NoGoOffline', numberOfDaysRemaining);
+
                 }
+            } else {
+                const message = '<p>You are trying to login using a date <b>prior</b> to your last successful login.<\p><p>' +
+                    '<b> Check your system date.</b></p>';
+                this.showWarning(message, 'NoGoOffline', numberOfDaysRemaining);
+
+            }
+
+
+            // } else {
+            //   this.utilService.showToast('There is a mistake in Prohibit Device when Offline setting.');
+            // }
+
+        } else {
+            if (minutePassedSince > minWaitInMinutes) { // check for minutes passed since last login failure
+                this.loginDetails.NoFailedAttempts = 0;
+
+
 
             } else {
                 this.disableLogin = false;
-                this.utilService.showToast('No user found');
+                this.canProceed = false;
+                this.loginDetails.LastFailedLoginDate = new Date().getTime();
+                this.utilService.showToast('Login attempts exceeded. Please try again after ' + minWaitInMinutes + 'Minutes');
+
             }
 
-        }).then(() => {
-            console.log(this.loginDetails);
-            PouchDBService.UpsertSingleDoc(this.loginDetails, EXP_SYSTEM).then(() => {
-            });
-        });
+
+        }
+
 
     }
 
