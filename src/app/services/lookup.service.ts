@@ -225,7 +225,7 @@ export class LookupService {
                 });
             });
         });
-        
+
     }
 
     public selectPatron(patron) {
@@ -340,8 +340,17 @@ export class LookupService {
             // fetching all partial PIN results and filtering here is 'useExactPIN' is set to true
             PouchQueriesService.PINLookup(pin).then((data) => {
                 this.lookupResults = data.rows.map(row => row.doc);
+                let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN')
+                if (SearchByPin == null || SearchByPin == undefined) {
+                    SearchByPin = '1'
+                }
                 if (this.useExactPIN === 1) {
-                    this.lookupResults = this.lookupResults.filter(r => r.Identifier === pin);
+                    if (SearchByPin === '1') {
+                        this.lookupResults = this.lookupResults.filter(r => r.Identifier === pin);
+
+                    } else {
+                        this.lookupResults = this.lookupResults.filter(r => r.PersonIdentifier === pin);
+                    }
                 }
                 if (this.serveInactiveStudents === 0) {
                     this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
@@ -419,7 +428,7 @@ export class LookupService {
                 // this.popupMessageService.showMessage(PopupMessageCode.E24398);
                 // this.utilService.showToast('Search results are too large. Please refine your search criteria.');
             }
-        });        
+        });
     }
 
     public getSettingValuesRequired() {
@@ -514,7 +523,7 @@ export class LookupService {
 
                 PouchQueriesService.PatronSearchByName(firstname, lastname, externalId).
                     then((res) => {
-                        
+
                         const docs = res.docs.map((patron) => {
                             patron['value'] = patron.PersonId;
                             patron['label'] = patron.PersonName;
