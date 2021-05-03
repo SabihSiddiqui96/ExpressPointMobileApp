@@ -142,6 +142,11 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
             this.utilService.showToast('This ExpressPoint device is de-activated.Please re-configure.');
           }
         });
+      } else {
+        if (this.utilService.isElectronApp() && !this.utilService.isAppOnline) {
+          this.isWindowsAuth = Boolean(parseInt(SettingService.getSettingValue('AUTHENTYPE')))
+          this.isSSOAuth = Boolean(parseInt(SettingService.getSettingValue('SSOLGNTYPE')))
+        }
       }
     }
 
@@ -168,7 +173,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     });
 
     // this.openOSK = AppStateService.get('OpenOSK');
-      this.openOSK = true;// Login Page to always show OSK
+    this.openOSK = true;// Login Page to always show OSK
   }
 
 
