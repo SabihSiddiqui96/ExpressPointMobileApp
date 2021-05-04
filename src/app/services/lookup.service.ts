@@ -405,7 +405,7 @@ export class LookupService {
                 if (fromAdvPatronSearch) {
                     params.push("");
                 } else {
-                    params.push('for ' + this.studentPin.toString());
+                    params.push(' for ' + this.studentPin.toString());
                 }
                 this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
                 resolve('Success');
