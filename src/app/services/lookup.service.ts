@@ -401,7 +401,7 @@ export class LookupService {
     public handlePersonResults(fromAdvPatronSearch?: boolean, inputDirection = Direction.None) {
         return new Promise((resolve, reject) => {
             if (this.lookupResults.length === 0) {
-                this.popupMessageService.showMessage(PopupMessageCode.E24397);
+                this.popupMessageService.showMessage(PopupMessageCode.E24397,[this.studentPin.toString()]);
                 resolve('Success');
                 // this.utilService.showToast('No results found.');
             } else if (this.lookupResults.length === 1) {
