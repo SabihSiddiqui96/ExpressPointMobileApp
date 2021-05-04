@@ -63,6 +63,7 @@ export class SummarySalePage implements OnInit {
   public totalMealCounts = 0;
   // public isOpenSession: boolean = false;
   public isIOS: boolean = false;
+  public transactionInProgress: boolean = false
 
   public keyboardSettings: IonDigitKeyboardOptions = {
     align: 'center',
@@ -440,49 +441,53 @@ export class SummarySalePage implements OnInit {
   }
 
   public saveSummarySale() {
-    
-    const summarySaleDoc = {
-      '_id': 'SummarySale--' + new Date().getTime(),
-      'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-      'MealTypeId': this.filter.selected_mealtype,
-      'MenuItemId': this.filter.selected_menuitem,
-      // 'SessionId': this.sessionId,
-      'UserId': JSON.parse(AppStateService.get('login_details')).UserId,
-      'TerminalId': this.terminalId,
-      'IsDetailEntry': 0,
-      'Comment': '',
-      'SummarySaleCounts': this.summaryMealCount,
-      'IsSynced': false,
-      'TransactionDate' :  new Date().getTime()
-    };
+    if (!this.transactionInProgress) {
+      this.transactionInProgress = true;
+      const summarySaleDoc = {
+        '_id': 'SummarySale--' + new Date().getTime(),
+        'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+        'MealTypeId': this.filter.selected_mealtype,
+        'MenuItemId': this.filter.selected_menuitem,
+        // 'SessionId': this.sessionId,
+        'UserId': JSON.parse(AppStateService.get('login_details')).UserId,
+        'TerminalId': this.terminalId,
+        'IsDetailEntry': 0,
+        'Comment': '',
+        'SummarySaleCounts': this.summaryMealCount,
+        'IsSynced': false,
+        'TransactionDate': this.utilService.getCurrentTime()
+      };
 
-    this.manualSale.push(summarySaleDoc);
+      this.manualSale.push(summarySaleDoc);
 
 
 
 
-    // this.transactionService.SaveTerminalSaleStatus(terminalStatusDoc).then(() => { });
-    // this.terminalData.push(terminalStatusDoc);
-    // console.log('-----Terminal Status--------');
-    // console.log(JSON.stringify(this.terminalData));
+      // this.transactionService.SaveTerminalSaleStatus(terminalStatusDoc).then(() => { });
+      // this.terminalData.push(terminalStatusDoc);
+      // console.log('-----Terminal Status--------');
+      // console.log(JSON.stringify(this.terminalData));
 
-    PouchDBService.UpsertDocs(this.manualSale, EXP_TRANSACTIONS).then(() => {
-      this.popupMessageService.showMessage(PopupMessageCode.E22392);
-      // this.utilService.showToast('Summary sale successful');
-      // this.closeSession();
-      this.resetSummarySale();
+      PouchDBService.UpsertDocs(this.manualSale, EXP_TRANSACTIONS).then(() => {
+        this.popupMessageService.showMessage(PopupMessageCode.E22392);
+        // this.utilService.showToast('Summary sale successful');
+        // this.closeSession();
+        this.resetSummarySale();
 
-    }).catch((err) => {
-      console.log(err);
-    });
-    // PouchDBService.UpsertDocs(this.terminalData, EXP_TRANSACTIONS).then(() => { }).catch((err) => {
-    //     console.log(err);
-    // });
+      }).catch((err) => {
+        this.transactionInProgress = false
+        console.log(err);
+      });
+      // PouchDBService.UpsertDocs(this.terminalData, EXP_TRANSACTIONS).then(() => { }).catch((err) => {
+      //     console.log(err);
+      // });
 
-    this.event.publish('summary-sale-exists', { 'SummarySaleExists': false });
+      this.event.publish('summary-sale-exists', { 'SummarySaleExists': false });
+    }
   }
 
   public resetSummarySale() {
+    this.transactionInProgress = false
     this.summaryMealCount = [];
     this.terminalData = [];
     this.manualSale = [];

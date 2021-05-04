@@ -221,6 +221,15 @@ export class UtilService {
 
   }
 
+  public getCurrentTime() {
+    const now = new Date();
+    const UTC = now.getTime();
+    const localOffset = -1 * now.getTimezoneOffset() * 60000;
+    const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+
+    return currentTime
+  }
+
   public isElectronApp() {
     const userAgent = navigator.userAgent.toLowerCase();
     console.log(userAgent);
