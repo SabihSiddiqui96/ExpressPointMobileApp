@@ -2973,6 +2973,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                     'UserId': this.userId,
+                    'PersonIdentifier': this.patronDetails.PersonIdentifier,
                     '_id': this.selectedAccountDetails._id
                 };
 
@@ -3037,6 +3038,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'ServingSiteId': this.siteName,
                 'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                 'UserId': this.userId,
+                'PersonIdentifier': this.patronDetails.PersonIdentifier,
                 '_id': this.patronDetails._id
             };
 

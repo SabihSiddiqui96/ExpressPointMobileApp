@@ -1125,6 +1125,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'ServingSiteId': this.siteName,
                         'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                         'UserId': this.userId,
+                        'PersonIdentifier': student.PersonIdentifier,
                         '_id': student._id
                     };
 

@@ -681,6 +681,7 @@ export class DoPayment {
                 'ServingSiteId': this.siteName,
                 'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                 'UserId': this.userId,
+                'PersonIdentifier': this.navPatronDetails.PersonIdentifier,
                 '_id': this.navPatronDetails._id
 
             };
