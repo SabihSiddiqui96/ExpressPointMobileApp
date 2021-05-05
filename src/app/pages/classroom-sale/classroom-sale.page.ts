@@ -594,7 +594,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'IsStudent': doc.IsStudent,
                             'Site': doc.SiteCode,
                             'Teacher': doc.HomeRoom,
-                            'isPriceSetForStudentPriceType': true
+                            'isPriceSetForStudentPriceType': true,
+                            'PersonIdentifier': doc.PersonIdentifier
                         };
                     });
                     students = _.sortBy(students, 'LastName');
@@ -673,7 +674,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'IsStudent': doc.IsStudent,
                             'Site': doc.SiteCode,
                             'Teacher': doc.HomeRoom,
-                            'isPriceSetForStudentPriceType': true
+                            'isPriceSetForStudentPriceType': true,
+                            'PersonIdentifier': doc.PersonIdentifier
 
                         };
 
@@ -765,7 +767,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                 'Identifier': doc.Identifier,
                                 'Site': doc.SiteCode,
                                 'Teacher': doc.HomeRoom,
-                                'isPriceSetForStudentPriceType': true
+                                'isPriceSetForStudentPriceType': true,
+                                'PersonIdentifier': doc.PersonIdentifier
                             };
                         });
 
