@@ -1,19 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Components } from '@ionic/core';
-import { NavController, PopoverController } from '@ionic/angular';
+import { NavController } from '@ionic/angular';
 import { ModalController, LoadingController, AlertController } from '@ionic/angular';
-import { LogoutPage } from '../../pages/logout/logout.page';
-import { CloseSessionPage } from '../../pages/close-session/close-session.page';
 
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
-import { SaleDetailsPopupPage } from '../../pages/sale-details-popup/sale-details-popup.page';
-import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
-import { TransactionDetailsPopupPage } from '../../pages/transaction-details-popup/transaction-details-popup.page';
-import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
+import { PouchDBService } from '../../services/pouch-db.service';
 import { SessionTimeoutService } from '../../services/session-timeout.service';
 import { Network } from '@ionic-native/network/ngx';
-import { LoginPage } from '../../pages/login/login.page';
-import { SchoolSelectionPage } from '../../pages/school-selection/school-selection.page';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';

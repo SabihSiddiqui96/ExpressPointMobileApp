@@ -5,11 +5,11 @@ import { NavController, ModalController } from '@ionic/angular';
 
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { AppStateService } from '../../services/app-state.service';
 import { UtilService } from '../../services/util.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 @Component({
   selector: 'app-session-info',
@@ -56,7 +56,7 @@ export class SessionInfoPage implements OnInit {
             return s.isStillOpen &&
             Number(s.OpenedBy)=== JSON.parse(AppStateService.get('login_details')).UserId
               && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
-              && s.OpenDate === this.utilService.getCurrentDate();
+              && s.OpenDate === LocalTimerService.getCurrentDate();
 
           });
           console.log(sessionDocs);

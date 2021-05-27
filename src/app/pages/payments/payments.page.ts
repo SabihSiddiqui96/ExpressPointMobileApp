@@ -1,11 +1,9 @@
-import { Component, OnInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
-import { HostListener } from '@angular/core';
 import { NavController, AlertController, PopoverController, ModalController } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { LookupService } from '../../services/lookup.service';
-import { PouchDBService, EXP_TRANSACTIONS, EXP_COMMON, EXP_PERSON } from '../../services/pouch-db.service';
+import { PouchDBService, EXP_TRANSACTIONS, EXP_PERSON } from '../../services/pouch-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
 import { UtilService } from '../../services/util.service';

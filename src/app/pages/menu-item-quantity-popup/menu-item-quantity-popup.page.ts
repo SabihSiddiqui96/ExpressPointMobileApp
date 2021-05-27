@@ -3,7 +3,7 @@ import { Components } from '@ionic/core';
 import { NavController, PopoverController } from '@ionic/angular';
 
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
-import { timingSafeEqual } from 'crypto';
+// import { timingSafeEqual } from 'crypto';
 import { UtilService } from '../../services/util.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';

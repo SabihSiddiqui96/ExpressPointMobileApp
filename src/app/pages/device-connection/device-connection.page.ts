@@ -14,7 +14,6 @@ import { SchoolcafeUrlSearchPage } from '../../pages/schoolcafe-url-search/schoo
 import { UtilService } from '../../services/util.service';
 import { AppStateService } from '../../services/app-state.service';
 import { PopupMessageService } from '../../services/popup-message.service';
-import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { HttpService } from '../../services/HTTP/http.service';
 import { DeviceService } from '../../services/device.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
@@ -26,6 +25,9 @@ import { SettingService } from '../../services/setting.service';
 import { Status } from '../../services/enums/device-status';
 import { AuthService } from '../../services/auth.service';
 import { SignalRService } from '../../services/SignalR.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { SetupDbService } from '../../services/setup-db.service';
+import { DeviceControlsService } from '../../services/device-controls.service';
 
 @Component({
   selector: 'app-device-connection',
@@ -90,14 +92,16 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
     public deviceService: DeviceService, public popupMessageService: PopupMessageService,
     public pouchQuery: PouchQueriesService, public router: Router, public appStateService: AppStateService,
     public settingService: SettingService, public electronService: ElectronService, private authService: AuthService,
-    public signalRService: SignalRService) {
+    public signalRService: SignalRService,
+    public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) {
 
     super(navCtrl, loading, alertCtrl, network, sessionTimeOut,
       event, pouchDBService, modalCtrl, utilService, http,
-      deviceService, pouchQuery, router, appStateService, settingService, signalRService);
+      deviceService, pouchQuery, router, appStateService, settingService,
+      signalRService, setupDbService, deviceControlsService);
 
-      this.isCordovaApp = UtilService.isCordovaApp;
-      this.isElectronApp = this.utilService.isElectronApp();
+    this.isCordovaApp = UtilService.isCordovaApp;
+    this.isElectronApp = this.utilService.isElectronApp();
     if (UtilService.isCordovaApp) {
 
       this.keyboardShowSubscription = this.event.subscribe("keyboard:willshow", (data) => {
@@ -137,7 +141,7 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
     this.versionNumber = this.utilService.versionNumber;
 
     this.isAndroid = utilService.isPlatformAndroid();
-    this.copyRightYear = this.utilService.getCurrentYear();
+    this.copyRightYear = LocalTimerService.getCurrentYear();
   }
 
   public ngOnDestroy() {
@@ -476,7 +480,7 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
           },
           error => {
             console.log(error.error_description);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -490,7 +494,7 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
     this.selectedDistrict.PODistrictId = null;
     this.showLogin = false;
   }
-    
+
   public openOnScreenKeyboard() {
     //Check if toggle is enabled in admin settings
     if (this.utilService.isElectronApp()) {

@@ -57,18 +57,18 @@ export class StaticMenusDBService {
             if (menuGrids.length > 0) {
                 PouchDBService.UpsertDocs(menuGrids, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuGrids : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuGrids : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuGrids : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -102,19 +102,19 @@ export class StaticMenusDBService {
             if (menuItemPrices.length > 0) {
                 PouchDBService.UpsertDocs(menuItemPrices, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItemPrices : "D" } });
-                    resolve();
+                    resolve(null);
                 });
 
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItemPrices : "D" } });
-                resolve();
+                resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItemPrices : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -147,18 +147,18 @@ export class StaticMenusDBService {
             if (menuItemCategories.length > 0) {
                 PouchDBService.UpsertDocs(menuItemCategories, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItemCategoryDetails : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItemCategoryDetails : "D" } });
-                resolve();
+                resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItemCategoryDetails : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -188,18 +188,18 @@ export class StaticMenusDBService {
             if (defaultMenuGrids.length > 0) {
                 PouchDBService.UpsertDocs(defaultMenuGrids, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncDefaultMenuGrids : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncDefaultMenuGrids : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncDefaultMenuGrids : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -220,14 +220,14 @@ export class StaticMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertSingleDoc(restrictedMenuItemsDoc, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncRestrictableAlaCarteItems : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncRestrictableAlaCarteItems : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -247,14 +247,14 @@ export class StaticMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertSingleDoc(restrictedCategoriesDoc, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncRestrictableAlaCarteCategories : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncRestrictableAlaCarteCategories : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -288,18 +288,18 @@ export class StaticMenusDBService {
             if (menuItems.length > 0) {
                 PouchDBService.UpsertDocs(menuItems, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItems : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItems : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncMenuItems : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -327,18 +327,18 @@ export class StaticMenusDBService {
             if (systemMenuItems.length > 0) {
                 PouchDBService.UpsertDocs(systemMenuItems, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncSystemMenuItems : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncSystemMenuItems : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncSystemMenuItems : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -381,18 +381,18 @@ export class StaticMenusDBService {
             if (terminalDefaultMenu.length > 0) {
                 PouchDBService.UpsertDocs(terminalDefaultMenu, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { StaticMenusDB: { SyncGetDefaultMenusForTerminal : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.events.publish('data:syncDetails', { StaticMenusDB: { SyncGetDefaultMenusForTerminal : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { StaticMenusDB: { SyncGetDefaultMenusForTerminal : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }

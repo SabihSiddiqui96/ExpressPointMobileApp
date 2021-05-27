@@ -15,13 +15,12 @@ import { MenuOrderPayPage } from '../../pages/menu-order-pay/menu-order-pay.page
 import { MenuPaymentPopupPage } from '../../pages/menu-payment-popup/menu-payment-popup.page';
 import { MenuSoldPopupPage } from '../../pages/menu-sold-popup/menu-sold-popup.page';
 import { PatronLookupPage } from '../../pages/patron-lookup/patron-lookup.page';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { TransactionDetailsPopupPage } from '../../pages/transaction-details-popup/transaction-details-popup.page';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 
-import { EXP_COMMON, EXP_PERSON, EXP_TRANSACTIONS, PouchDBService, EXP_STANDARD_MENUS } from '../../services/pouch-db.service';
+import { EXP_PERSON, EXP_TRANSACTIONS, PouchDBService, EXP_STANDARD_MENUS } from '../../services/pouch-db.service';
 import { LookupService } from '../../services/lookup.service';
 import { SettingService } from '../../services/setting.service';
 
@@ -38,7 +37,6 @@ import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { MenugridService } from '../../services/menugrid.service';
 import { Events } from '../../services/events.service';
-import { create } from 'domain';
 import ConfettiGenerator from "confetti-js";
 import { Router } from '@angular/router';
 import { PrintService, TransactionDetailPrintFormat } from '../../services/print.service';
@@ -46,6 +44,8 @@ import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { TransactionTypes } from '../../services/enums/transaction-types'
 import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { ConfettiService } from '../../services/confetti.service';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -1269,9 +1269,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
             PouchQueriesService.GetPaymentSettings().
                 then((data) => {
                     this.paymentValidation = data.rows[0].doc.PaymentSettings;
-                    resolve();
+                    resolve(null);
                 })
-                .catch((err) => { console.log(err); resolve(); });
+                .catch((err) => { console.log(err); resolve(null); });
         });
     }
 
@@ -1332,9 +1332,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.selectedMealType = -1;
                         this.selectedMealTypeName = 'Meal Type';
                     }
-                    resolve();
+                    resolve(null);
                 })
-                .catch((err) => { console.log(err); resolve(); });
+                .catch((err) => { console.log(err); resolve(null); });
 
         });
 
@@ -2661,7 +2661,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.lookUpService.menuPayselectAccountClick = false;
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
                 this.transactionInProgress = false;
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 this.popupMessageService.showMessage(PopupMessageCode.E05368);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                 return;
@@ -2677,7 +2677,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 ordDetails['cashTendAmt'] = this.cashtendAmount;
                 this.transactionInProgress = this.restrictService.verifyChargeLimits(ordDetails); // this.chargeOrder(ordDetails);
                 if (!this.transactionInProgress) {
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 }
                 if (this.transactionInProgress) {
                     this.postSaleTransaction(this.orderData.TransactionType);
@@ -2692,7 +2692,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 this.postSaleTransaction(this.orderData.TransactionType);
                                 this.event.publish('patron-released', { 'patronDetails': null });
                             }
-                            MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                         });
 
                     }
@@ -2712,7 +2712,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     text: 'Cancel',
                                     handler: () => {
                                         console.log('Cancel clicked');
-                                        MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                                     }
                                 }
                             ]
@@ -2737,7 +2737,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 if (!this.patronDetails.IsAlaCarteByCashAllowed) {
                     this.transactionInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E05368);
                     // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                     return;
@@ -2776,7 +2776,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.cashDue = userEventData.cashDue;
                     this.makeSalePay();
                 } else {
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 }
 
 
@@ -2785,7 +2785,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         } else {
             this.transactionInProgress = false;
-            MenuOrderPayPage.isCompleteTransactionProcessing = false;
+            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
             this.popupMessageService.showMessage(PopupMessageCode.E05367);
             // this.utilService.showToast('No sale exists.');
         }
@@ -3280,7 +3280,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.bonusAmount = 0;
                         AppStateService.remove('patron_details');
                         this.transactionInProgress = false;
-                        MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
 
                         if (this.lookUpService.getQ().length !== 0) {
                             console.log('GetQ   ' + this.lookUpService.getQ()[0]);
@@ -3317,11 +3317,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }, error => {
                         console.log(error);
                         this.transactionInProgress = false;
-                        MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     });
             } else {
                 this.transactionInProgress = false;
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
             }
         });
     }
@@ -3653,7 +3653,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public onReviewTypeChange(reviewType, reviewTypeDescription, reviewTypeCd) {
-        const currentTime = this.utilService.getTime('time');
+        const currentTime = LocalTimerService.getTime('time');
         this.isMarked = true;
         const review = {
             'ReviewTypeCd': reviewTypeCd,
@@ -3855,7 +3855,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     const d1 = this.renderer2.createElement('CANVAS');
                     const nextId = "mycanvas" + UtilService.confettiID++;
                     d1.id = nextId;
-                    let confettiSettings = UtilService.getConfettiSettings(nextId);
+                    let confettiSettings = ConfettiService.getConfettiSettings(nextId);
                     this.renderer.setElementClass(d1, "mycanvas", true);
 
                     const textWidth = (this.elConfettiHolder.nativeElement).scrollWidth;
@@ -3970,9 +3970,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     if (res.rows.length > 0) {
                         this.allCategories = res.rows.map(row => row.doc);
                     }
-                    resolve();
+                    resolve(null);
                 })
-                .catch((err) => { console.log(err); resolve(); });
+                .catch((err) => { console.log(err); resolve(null); });
         });
     }
     public checkForCategory(menuItemId) {

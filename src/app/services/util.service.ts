@@ -7,7 +7,6 @@ import { UrlsId } from './enums/environment-url-id';
 import { AppStateService } from './app-state.service';
 import { ElectronService } from './electron.service';
 import * as _ from 'lodash';
-import CryptoJS from 'crypto-js';
 
 @Injectable({
   providedIn: 'root'
@@ -86,7 +85,7 @@ export class UtilService {
   public checkIfNetworkConnected() {
     return new Promise((resolve, reject) => {
       this.isAppOnline = this.isAppOnline;
-      resolve();
+      resolve(null);
 
     });
   }
@@ -195,40 +194,40 @@ export class UtilService {
     }
   }
 
-  public static getNumberOfUnitsFromDate(date, units): number {
-    let value: number = 0;
-    const now = new Date();
-    const epochTime = now.getTime() - date;
-    if (units === 'DAY') {
-      value = Math.floor(epochTime / (24 * 60 * 60 * 1000)); // 86400
-    } else if (units = 'MINUTES') {
-      value = Math.floor(epochTime / (60 * 1000));
-    }
-    return value;
-  }
+  // public  getNumberOfUnitsFromDate(date, units): number {
+  //   let value: number = 0;
+  //   const now = new Date();
+  //   const epochTime = now.getTime() - date;
+  //   if (units === 'DAY') {
+  //     value = Math.floor(epochTime / (24 * 60 * 60 * 1000)); // 86400
+  //   } else if (units = 'MINUTES') {
+  //     value = Math.floor(epochTime / (60 * 1000));
+  //   }
+  //   return value;
+  // }
 
-  public getTime(unit) {
-    const now = new Date();
-    const UTC = now.getTime();
-    const localOffset = -1 * now.getTimezoneOffset() * 60000;
-    const currentTime = Math.round(new Date(UTC + localOffset).getTime());
-    if (unit === 'time') {
-      return currentTime;
-    } else if (unit = 'date') {
-      const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
-      return currentDate;
-    }
+  // public getTime(unit) {
+  //   const now = new Date();
+  //   const UTC = now.getTime();
+  //   const localOffset = -1 * now.getTimezoneOffset() * 60000;
+  //   const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+  //   if (unit === 'time') {
+  //     return currentTime;
+  //   } else if (unit = 'date') {
+  //     const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+  //     return currentDate;
+  //   }
 
-  }
+  // }
 
-  public getCurrentTime() {
-    const now = new Date();
-    const UTC = now.getTime();
-    const localOffset = -1 * now.getTimezoneOffset() * 60000;
-    const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+  // public getCurrentTime() {
+  //   const now = new Date();
+  //   const UTC = now.getTime();
+  //   const localOffset = -1 * now.getTimezoneOffset() * 60000;
+  //   const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
-    return currentTime
-  }
+  //   return currentTime
+  // }
 
   public isElectronApp() {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -300,63 +299,10 @@ export class UtilService {
 
   }
 
-  public getCurrentYear() {
-    return new Date().getFullYear();
-  }
-  public getCurrentDate() {
-    return new Date().setHours(0, 0, 0, 0);
-  }
   public roundToDecimal(num, decimalPoints): number {
     return Number((Math.round(num * 100) / 100).toFixed(decimalPoints));
   }
 
-  /**
-   *
-   * @param inputStr Returns SHA-256 hash for input if not already hashed
-   */
-  public static getHashForText(inputStr) {
-    if (inputStr) {
-      if (UtilService.isStringHashed(inputStr)) {
-        return inputStr;
-      } else {
-        return CryptoJS.SHA256(inputStr).toString(CryptoJS.enc.Hex);
-      }
-    }
-  }
-  /**
- *
- * @param inputStr Returns SHA- 1 hash for input string
- */
-  public static getSHA1_HashForText(inputStr) {
-    if (inputStr) {
-
-      return CryptoJS.SHA1(inputStr).toString(CryptoJS.enc.Hex);
-    }
-  }
-
-  /**
-   *
-   * @param inputStr Checks if input string is hashed - Assuming SHA-256 hashing
-   * username and passwords are not 64 characters long in practical - safe catch to verify hashed
-   */
-  public static isStringHashed(inputStr) {
-    return inputStr.length === 64;
-  }
-
-  public static getConfettiSettings(nextId) {
-    return {
-      'target': nextId,
-      'max': '50',
-      'size': '0.5',
-      'animate': true,
-      'props': ['circle', 'square', 'triangle', 'line'],
-      'colors': [[165, 104, 246], [230, 61, 135], [0, 199, 228], [253, 214, 126]],
-      'clock': '10',
-      'rotate': true,
-      'width': '300',
-      'height': '200'
-    };
-  }
 
   public openOnScreenKeyboard() {
     if (this.isElectronApp()) {
@@ -381,16 +327,5 @@ export class UtilService {
     } else {
       return '100vh';
     }
-  }
-  /**
-   *
-   * @param str string in which the substring to be replaced
-   * @param replaceMap Mapping object for itemToBeReplaced : itemReplacedBy
-   */
-  public static ReplaceAllinString(str, replaceMap) {
-    const regex = new RegExp(Object.keys(replaceMap).join('|'), 'gi');
-    return str.replace(regex, (matched) => {
-      return replaceMap[matched.toLowerCase()]
-    })
   }
 }

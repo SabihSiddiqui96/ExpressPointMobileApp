@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, ModalController } from '@ionic/angular';
 
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { AppStateService } from '../../services/app-state.service';
 import { UtilService } from '../../services/util.service';
 import { SettingService } from '../../services/setting.service';

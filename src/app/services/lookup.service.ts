@@ -187,7 +187,7 @@ export class LookupService {
                     });
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
-                resolve();
+                resolve(null);
             });
         });
     }
@@ -203,7 +203,7 @@ export class LookupService {
                 } else {
                     this.popPersonFromQ(queueInput.PersonName);
                 }
-                resolve();
+                resolve(null);
             });
         });
     }
@@ -329,7 +329,7 @@ export class LookupService {
                         });
                     }
                 }
-                resolve();
+                resolve(null);
             });
         });
     }

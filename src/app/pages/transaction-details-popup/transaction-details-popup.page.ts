@@ -5,11 +5,9 @@ import { NavController, PopoverController, ModalController } from '@ionic/angula
 import { Events } from '../../services/events.service';
 import { SaleDetailsPopupPage } from '../../pages/sale-details-popup/sale-details-popup.page';
 import * as _ from 'lodash';
-import { CommentsPopupPage } from '../../pages/comments-popup/comments-popup.page';
-import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { TransactionMealTypePopupPage } from '../../pages/transaction-meal-type-popup/transaction-meal-type-popup.page';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
-import { PouchDBService, EXP_TRANSACTIONS, EXP_COMMON } from '../../services/pouch-db.service';
+import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
 
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 import { UtilService } from '../../services/util.service';
@@ -20,6 +18,7 @@ import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Router } from '@angular/router';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { LoadingService } from '../../services/loading.service';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 @Component({
     selector: 'app-transaction-details-popup',
@@ -56,10 +55,10 @@ export class TransactionDetailsPopupPage implements OnInit {
                     this.terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
                 }
                 this.getAllReviewReasons().then(() => {
-                    resolve();
+                    resolve(null);
                 }).catch((err) => {
                     console.log(err);
-                    resolve();
+                    resolve(null);
                 });
 
             }).then(() => {
@@ -132,15 +131,15 @@ export class TransactionDetailsPopupPage implements OnInit {
     }
 
 
-    public popoverClick(event) {
-        const popover = this.popoverCtrl.create({
-            component: UserDetailsPopupPage,
-            event: event,
-            componentProps: { 'open_session': true }, cssClass: this.utilService.popupCenter.cssClass
-        }).then(async (res) => {
-            await res.present();
-        });
-    }
+    // public popoverClick(event) {
+    //     const popover = this.popoverCtrl.create({
+    //         component: UserDetailsPopupPage,
+    //         event: event,
+    //         componentProps: { 'open_session': true }, cssClass: this.utilService.popupCenter.cssClass
+    //     }).then(async (res) => {
+    //         await res.present();
+    //     });
+    // }
 
     // public AdvancedTransactionLookup(personName: string = '') {
 
@@ -406,10 +405,10 @@ export class TransactionDetailsPopupPage implements OnInit {
 
             this.transactionServiceProvider.getAllReviewReasons().then((reviewTypesList) => {
                 this.reviewTypesList = reviewTypesList;
-                resolve();
+                resolve(null);
             }).catch((err) => {
                 console.log(err);
-                resolve();
+                resolve(null);
             });
         });
     }
@@ -447,7 +446,7 @@ export class TransactionDetailsPopupPage implements OnInit {
         // const now = new Date();
         // const UTC = now.getTime();
         // const localOffset = (-1) * now.getTimezoneOffset() * 60000;
-        const currentTime = this.utilService.getTime('time');
+        const currentTime = LocalTimerService.getTime('time');
 
         // for (let i = 0; i < this.reviewTypesList[0].length; i++) {
 
@@ -488,10 +487,10 @@ export class TransactionDetailsPopupPage implements OnInit {
                                 await PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { });
                             }
                         })).then(() => {
-                            resolve();
+                            resolve(null);
                         }).catch((err) => {
                             console.log(err);
-                            resolve();
+                            resolve(null);
                         });
                     }
                 })

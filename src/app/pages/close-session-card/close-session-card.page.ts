@@ -3,7 +3,7 @@ import { Components } from '@ionic/core';
 import { NavController } from '@ionic/angular';
 import { AppStateService } from '../../services/app-state.service';
 import { UtilService } from '../../services/util.service';
-import { PouchDBService, EXP_COMMON, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
+import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { SessionCardDoc, TransactionService } from '../../services/transaction.service';
 import { SettingService } from '../../services/setting.service';

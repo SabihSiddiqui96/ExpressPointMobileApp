@@ -16,6 +16,7 @@ import { Events } from './events.service';
 // import { ColdObservable } from 'rxjs/testing/ColdObservable';
 // import { resolveDefinition } from '@angular/core/src/view/util';
 import { Status } from './enums/device-status';
+import { HashingService } from './hashing.service';
 
 @Injectable({
   providedIn: 'root'
@@ -78,9 +79,9 @@ export class DeviceService {
             this.updateDeviceName().then(() => {
               const siteCode = _.split(JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode, '-', 2);
               this.deviceInfo.TerminalName = this.deviceInfo.DeviceName + '-' + siteCode[0];
-              AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve();
+              AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve(null);
 
-              resolve();
+              resolve(null);
             });
 
 
@@ -118,7 +119,7 @@ export class DeviceService {
                     this.deviceInfo.DeviceName + ' in the district, Please pick another.';
 
                   this.warningAlertAfterDeactivatingDevice(message).then(() => {
-                    resolve();
+                    resolve(null);
                   });
                 } else {
 
@@ -133,7 +134,7 @@ export class DeviceService {
 
                         this.Save().then(() => {
                           // alert.dismiss();
-                          resolve();
+                          resolve(null);
                           this.checkInProgress = false;
                         });
                       }, error => { }
@@ -182,12 +183,12 @@ export class DeviceService {
                 this.getDeviceName().then(() => {
                   const siteCode = _.split(JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode, '-', 2);
                   this.deviceInfo.TerminalName = this.deviceInfo.DeviceName + '-' + siteCode[0];
-                  AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve();
-                  resolve();
+                  AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve(null);
+                  resolve(null);
                 });
               } else {
                 // Device Registered but o
-                this.Save().then(() => { resolve(); this.checkInProgress = false; });
+                this.Save().then(() => { resolve(null); this.checkInProgress = false; });
               }
             } else {
               // Device Registered but Might not be aassociated to a terminal
@@ -199,7 +200,7 @@ export class DeviceService {
                 this.checkInProgress = false;
                 const siteCode = _.split(JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode, '-', 2);
                 this.deviceInfo.TerminalName = this.deviceInfo.DeviceName + '-' + siteCode[0];
-                AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve();
+                AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve(null);
               });
               // Creating the terminal if there is no terminal associated with the device
 
@@ -234,13 +235,13 @@ export class DeviceService {
           {
             text: 'Save Device Name',
             handler: data => {
-              // resolve();
+              // resolve(null);
               // this.checkInProgress = false;
               if (data.deviceName !== '') {
                 this.deviceInfo.DeviceName = data.deviceName;
 
                 this.Save().then(() => {
-                  resolve();
+                  resolve(null);
                   this.checkInProgress = false;
                 });
               } else {
@@ -281,8 +282,8 @@ export class DeviceService {
           AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo));
           this.event.publish('device-name-changed');
           // // console.clear()
-          // this.systemService.setDataForOfflineUse('DeviceInfo', JSON.stringify(this.deviceInfo)).then(() => { resolve(); });
-          this.systemService.setupSystemDb().then(() => { resolve(); });
+          // this.systemService.setDataForOfflineUse('DeviceInfo', JSON.stringify(this.deviceInfo)).then(() => { resolve(null); });
+          this.systemService.setupSystemDb().then(() => { resolve(null); });
 
         } else {
           const message = 'You already have a device named ' +
@@ -290,7 +291,7 @@ export class DeviceService {
           // this.utilService.showToast(message)
           // this.warningAlert(message)
           this.warningAlert(message).then(() => {
-            resolve();
+            resolve(null);
           });
         }
       });
@@ -308,7 +309,7 @@ export class DeviceService {
             handler: data => {
               if (data === undefined) {
                 this.getDeviceName().then(() => {
-                  resolve();
+                  resolve(null);
                 });
               }
             }
@@ -334,7 +335,7 @@ export class DeviceService {
             handler: data => {
               if (data === undefined) {
                 this.updateDeviceName().then(() => {
-                  resolve();
+                  resolve(null);
                 });
               }
             }
@@ -518,7 +519,7 @@ export class DeviceService {
       const selectedDistrict = JSON.parse(AppStateService.get('selectedDistrict'));
       this.http.GetExpressPointUrlUpdated(selectedDistrict.districtName, selectedDistrict.PODistrictId).subscribe(data => {
         if (data.length === 0) {
-          resolve();
+          resolve(null);
         }
         if (data.length === 1) {
 
@@ -532,10 +533,10 @@ export class DeviceService {
               .subscribe(data => {
                 if (data.length !== 0) {
                   AppStateService.set('SSOAuthDetails', JSON.stringify(data));
-                  resolve();
+                  resolve(null);
                 }
               });
-            resolve();
+            resolve(null);
           } else {
             selectedDistrict.loginUrl = null;
             AppStateService.set('selectedDistrict', JSON.stringify(selectedDistrict));
@@ -544,10 +545,10 @@ export class DeviceService {
               .subscribe(data => {
                 if (data.length == 0) {
                   AppStateService.set('SSOAuthDetails', JSON.stringify(data));
-                  resolve();
+                  resolve(null);
                 }
               });
-            resolve();
+            resolve(null);
           }
         }
 
@@ -556,7 +557,7 @@ export class DeviceService {
         error => {
           // const errorData = JSON.parse(error._body);
           // this.utilService.showToast(errorData.error_description);
-          resolve();
+          resolve(null);
         });
     });
 
@@ -565,7 +566,7 @@ export class DeviceService {
   public ChangeDeviceId(newId, oldId) {
     return new Promise((resolve) => {
       this.http.ChangeDeviceId(newId, oldId).subscribe(() => {
-        resolve();
+        resolve(null);
       });
     });
   }
@@ -579,7 +580,7 @@ export class DeviceService {
       this.electronService.ipcRenderer.send('app-ready');
       this.electronService.ipcRenderer.on('device', (event, data) => {
         deviceInfo.manufacturer = data.deviceName;
-        deviceInfo.uuid = UtilService.getSHA1_HashForText(data.SystemUUID);
+        deviceInfo.uuid = HashingService.getSHA1_HashForText(data.SystemUUID);
         deviceInfo.platform = 'Windows';
         deviceInfo.TerminalTypeId = 35;
         deviceInfo.rawSystemUUID = data.SystemUUID;

@@ -59,12 +59,12 @@ export class PersonDBService {
                 AppStateService.set('SetupComplete', true);
                   this.syncStatus = 'Success';
                   this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "D" } });
-                resolve();
+                resolve(null);
               });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
@@ -72,7 +72,7 @@ export class PersonDBService {
               this.events.publish('data:syncDetails', { SetupPersonDB: { SyncPersonDetails : "F" } });
             AppStateService.set('SetupComplete', false);
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -113,12 +113,12 @@ export class PersonDBService {
                 // EXP_PERSON_IN_MEMORY.insert(specialAccounts);
                   AppStateService.set('SetupComplete', true);
                   this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "D" } });
-                resolve();
+                resolve(null);
               });
             } else {
                 AppStateService.set('SetupComplete', true);
                 this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
@@ -126,7 +126,7 @@ export class PersonDBService {
               this.events.publish('data:syncDetails', { SetupPersonDB: { SyncSpecialAccounts : "F" } });
             AppStateService.set('SetupComplete', false);
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -177,19 +177,19 @@ export class PersonDBService {
               if (data.AccountDetails.length > 0) {
                 this.DifferentialUpsert(data.AccountDetails, true).then(() => {
                   AppStateService.set('LastSyncDate_Balance', JSON.stringify(data.Now));
-                  resolve();
+                  resolve(null);
                 });
               } else {
-                resolve();
+                resolve(null);
               }
             },
             error => {
               console.log(error);
-              resolve();
+              resolve(null);
             }
           );
       } else {
-        resolve();
+        resolve(null);
       }
     });
 
@@ -208,23 +208,23 @@ export class PersonDBService {
                 this.DifferentialUpsert(data.PersonSaledetails, true).then(() => {
                   AppStateService.set('LastSyncDate_SaleDetails', JSON.stringify(data.Now));
 
-                  resolve();
+                  resolve(null);
                 });
 
 
               } else {
-                resolve();
+                resolve(null);
               }
 
             },
             error => {
               console.log(error);
-              resolve();
+              resolve(null);
 
             }
           );
       } else {
-        resolve();
+        resolve(null);
       }
     });
 
@@ -255,12 +255,12 @@ export class PersonDBService {
                 AppStateService.set('SetupComplete', true);
                   this.syncStatus = 'Success';
                   this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "D" } });
-                resolve();
+                resolve(null);
               });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
@@ -268,7 +268,7 @@ export class PersonDBService {
               this.events.publish('data:syncDetails', { SetupPersonDB: { SyncHSSRVSPersonDetails : "F" } });
             AppStateService.set('SetupComplete', false);
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -392,7 +392,7 @@ export class PersonDBService {
         })).then(docs =>
           EXP_PERSON.bulkDocs(docs).then(() => {
             EXP_PERSON_IN_MEMORY.upsert(docs);
-            resolve();
+            resolve(null);
           })
         );
     });

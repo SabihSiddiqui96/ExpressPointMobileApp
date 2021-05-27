@@ -94,6 +94,9 @@ import { DeviceService } from './services/device.service';
 import { MenugridService } from './services/menugrid.service';
 import { SystemService } from './services/system.service';
 import { SignalRService } from './services/SignalR.service';
+import { HashingService } from './services/hashing.service'
+import { LocalTimerService } from './services/local-timer.service';
+import { DeviceControlsService } from './services/device-controls.service';
 
 @NgModule({
     declarations: [
@@ -247,6 +250,10 @@ import { SignalRService } from './services/SignalR.service';
         MenugridService,
         SystemService,
         SignalRService,
+        HashingService,
+        LocalTimerService,
+        SystemDBService,
+        DeviceControlsService,
         { provide: HTTP_INTERCEPTORS, useClass: HttpInterceptorService, multi: true },
         [{ provide: ErrorHandler, useClass: ErrorHandler },
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }]

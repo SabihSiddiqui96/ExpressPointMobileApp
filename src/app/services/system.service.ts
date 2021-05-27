@@ -17,7 +17,7 @@ export class SystemService {
   public setupSystemDb() {
     return new Promise((resolve, reject) => {
       this.systemDb.SetupSystemDB().then(() => {
-        resolve();
+        resolve(null);
       });
     });
   }
@@ -49,12 +49,12 @@ export class SystemService {
     return new Promise((resolve, reject) => {
       PouchQueriesService.GetDataforofflineUse().then((result) => {
         if (result.rows.length === 0) {
-          resolve();
+          resolve(null);
         } else {
           const doc = result.rows['0'].doc;
           doc[key] = value;
           PouchDBService.UpsertSingleDoc(doc, EXP_SYSTEM).then(() => {
-            resolve();
+            resolve(null);
 
           });
         }

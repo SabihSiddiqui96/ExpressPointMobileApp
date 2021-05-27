@@ -2,10 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { NgZone } from '@angular/core';
 import { NavController, PopoverController, ModalController, AlertController } from '@ionic/angular';
-import { MenuAllergenInstructionPopupPage } from '../../pages/menu-allergen-instruction-popup/menu-allergen-instruction-popup.page';
 import { MenuAllergensPopupPage } from '../../pages/menu-allergens-popup/menu-allergens-popup.page';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
-import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 import * as _ from 'lodash';
 import { Network } from '@ionic-native/network/ngx';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';

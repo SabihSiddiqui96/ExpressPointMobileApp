@@ -1,29 +1,27 @@
 import { NavController, AlertController, ModalController } from '@ionic/angular';
 // import { Keyboard, Network } from 'ionic-native';
 import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
-import { SchoolSelectionPage } from '../../pages/school-selection/school-selection.page';
-import { ClassroomSalePage } from '../../pages/classroom-sale/classroom-sale.page';
 import * as _ from 'lodash';
-import { ResetPasswordPage } from '../../pages/reset-password/reset-password.page';
 import { LoadingController } from '@ionic/angular';
 // import { OnInit } from '@angular/core';
 
 import { Network } from '@ionic-native/network';
 import { SessionTimeoutService } from '../../services/session-timeout.service';
-import { PouchDBService, EXP_COMMON, EXP_SYSTEM } from '../../services/pouch-db.service';
+import { PouchDBService, EXP_SYSTEM } from '../../services/pouch-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
-import { DeviceIdentificationPopupPage } from '../../pages/device-identification-popup/device-identification-popup.page';
 import { UtilService } from '../../services/util.service';
 import { DeviceService } from '../../services/device.service';
 import { SettingService } from '../../services/setting.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service'
-import { UrlsId } from '../../services/enums/environment-url-id'
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { OnDestroy } from '@angular/core';
 import { SignalRService } from '../../services/SignalR.service';
+import { HashingService } from '../../services/hashing.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { SetupDbService } from '../../services/setup-db.service';
+import { DeviceControlsService } from '../../services/device-controls.service';
 
 
 export class GoLogin implements OnDestroy {
@@ -53,7 +51,8 @@ export class GoLogin implements OnDestroy {
         public http: HttpService,
         public deviceService: DeviceService, public pouchQuery: PouchQueriesService, public router: Router,
         public appStateService: AppStateService,
-        public settingService: SettingService, public signalRService: SignalRService) { // , public settingService:SettingService
+        public settingService: SettingService, public signalRService: SignalRService
+        , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
 
         AppStateService.set('AllCatRemainOpen', false);
     }
@@ -470,11 +469,11 @@ export class GoLogin implements OnDestroy {
         tokenGoodBefore = parseInt(SettingService.getSettingValue('PRACCDAYCT'));
         minWaitInMinutes = parseInt(SettingService.getSettingValue('MINWAIPASS'));
         maxFailedLoginAttempts = parseInt(SettingService.getSettingValue('MAXREAPASS'));
-        minutePassedSince = UtilService.getNumberOfUnitsFromDate(this.loginDetails.LastFailedLoginDate, 'MINUTES');
+        minutePassedSince = LocalTimerService.getNumberOfUnitsFromDate(this.loginDetails.LastFailedLoginDate, 'MINUTES');
 
 
 
-        const numberOfDays = UtilService.getNumberOfUnitsFromDate(lastOnlineDate, 'DAY');
+        const numberOfDays = LocalTimerService.getNumberOfUnitsFromDate(lastOnlineDate, 'DAY');
 
         const numberOfDaysRemaining = tokenGoodBefore - numberOfDays;
 
@@ -490,7 +489,7 @@ export class GoLogin implements OnDestroy {
 
 
                         if (((this.loginDetails.HashedPasswordWithSalt) ===
-                            UtilService.getHashForText(this.login.password + this.loginDetails.Salt)) ||
+                            HashingService.getHashForText(this.login.password + this.loginDetails.Salt)) ||
                             this.login.WindowsAuth && this.loginDetails.WindowsUserDomain) {
 
                             const message = 'You are currently operating in <b>offline mode</b> on this device. You have <b>'
@@ -583,17 +582,17 @@ export class GoLogin implements OnDestroy {
             this.signalRService.startConnection();
 
             if (this.user.password) {
-                this.user.password = UtilService.getHashForText(this.user.password);
+                this.user.password = HashingService.getHashForText(this.user.password);
             }
             if (this.user.userName) {
-                this.user.userName = UtilService.getHashForText(this.user.userName);
+                this.user.userName = HashingService.getHashForText(this.user.userName);
             }
 
             PouchDBService.UpsertSingleDoc(this.user, EXP_SYSTEM).then(() => {
 
                 if (this.user.AuthorizedSites.length === 1) {
                     if (AppStateService.get('SelectedSite') && JSON.parse(AppStateService.get('SelectedSite')).SchoolId === this.user.AuthorizedSites[0].SchoolId) {
-                        this.pouchDBService.setupData().then(() => { });
+                        this.setupDbService.setupData().then(() => { });
                     } else {
                         let selectedSite = {};
                         // to make sure that the user downloads all students for the particular school when a different user logs in
@@ -601,7 +600,7 @@ export class GoLogin implements OnDestroy {
                         selectedSite = JSON.stringify(this.user.AuthorizedSites[0]);
                         AppStateService.set('SelectedSite', selectedSite);
                         this.deviceService.checkDeviceName().then(() => {
-                            this.pouchDBService.setupData().then(() => {
+                            this.setupDbService.setupData().then(() => {
                             });
                         });
                     }
@@ -616,11 +615,12 @@ export class GoLogin implements OnDestroy {
 
                     if (this.CheckIfselectedSiteIsAuthourised()) {
                         this.deviceService.checkDeviceName().then(() => {
-                            this.pouchDBService.setupData().then(() => {
+                            this.setupDbService.setupData().then(() => {
                             });
                         });
                     } else {
-                        this.pouchDBService.syncEXPSettings().then(() => {
+
+                        this.deviceControlsService.syncEXPSettings().then(() => {
                             AppStateService.remove('SelectedSite');
                             // this.utilService.setLoader(false);
                             this._nav.navigateRoot('school-selection');

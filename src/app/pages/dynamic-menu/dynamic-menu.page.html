@@ -457,7 +457,7 @@
                 </ion-button>
               </ion-col>
               <ion-col size="4">
-                <ion-button default expand="block" (click)="ShowallergyPopover($event)"
+                <ion-button default expand="block" (click)="ShowallergyPopover()"
                   [style.border]="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
         || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
         this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
@@ -567,7 +567,7 @@
               {{item.Price | currency:'USD':true:'1.2-2'}}
             </ion-label>
             <ion-label slot="end" class="ion-text-right" style="padding-right: 10px!important"
-              *ngIf="!(item.IsPartOfMeal == true && Meal_Formed==true) && item.ShowPaidPrice == true">
+              *ngIf="!(item.IsPartOfMeal == true && mealFormed==true) && item.ShowPaidPrice == true">
               {{item.PaidPrice | currency:'USD':true:'1.2-2'}}
             </ion-label>
 
@@ -666,7 +666,7 @@
     </div>
   </ion-col>
   <ion-col size-md="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
-    [ngClass]="{'ion-hide' : patronId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue(currentTab) == 'advanced')}">
+    [ngClass]="{'ion-hide' : patronId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue('currentTab') == 'advanced')}">
     <page-patron-lookup [page]="type"></page-patron-lookup>
   </ion-col>
 </ion-row>

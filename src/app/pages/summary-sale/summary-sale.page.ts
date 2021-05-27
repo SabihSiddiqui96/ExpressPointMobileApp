@@ -4,17 +4,17 @@ import { NavController, PopoverController, ModalController, AlertController, Pla
 import * as _ from 'lodash';
 import { Network } from '@ionic-native/network/ngx';
 import { AppStateService } from '../../services/app-state.service';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 import { UtilService } from '../../services/util.service';
 import { Events } from '../../services/events.service';
-import { PouchDBService, EXP_COMMON, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
+import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
-import { TerminalSaleStatusDoc, TransactionService } from '../../services/transaction.service';
+import { TransactionService } from '../../services/transaction.service';
 import { Router } from '@angular/router';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 @Component({
   selector: 'app-summary-sale',
@@ -455,7 +455,7 @@ export class SummarySalePage implements OnInit {
         'Comment': '',
         'SummarySaleCounts': this.summaryMealCount,
         'IsSynced': false,
-        'TransactionDate': this.utilService.getCurrentTime()
+        'TransactionDate': LocalTimerService.getCurrentTime()
       };
 
       this.manualSale.push(summarySaleDoc);

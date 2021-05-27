@@ -3,11 +3,11 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/co
 import { UtilService } from '../../services/util.service';
 import { NavController, Platform } from '@ionic/angular';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
-import { LoginPage } from '../../pages/login/login.page';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SettingService } from '../../services/setting.service';
 import { AppStateService } from '../../services/app-state.service';
 import { Events } from '../../services/events.service';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 enum PasswordSystemSettingsType {
   MinimumPasswordLength = 1,
@@ -107,7 +107,7 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
     }
     this.versionNumber = utilService.versionNumber;
     this.isIOS = this.platform.is('ios');
-    this.copyRightYear = this.utilService.getCurrentYear();
+    this.copyRightYear = LocalTimerService.getCurrentYear();
     this.initPasswordSystemSettingList();
 
   }
@@ -472,7 +472,7 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
           }, error => {
 
             console.log(error);
-            resolve();
+            resolve(null);
           });
 
     });

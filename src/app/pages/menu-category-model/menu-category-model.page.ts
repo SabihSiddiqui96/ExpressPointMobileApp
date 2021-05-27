@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Components } from '@ionic/core';
 import { NavController, ModalController } from '@ionic/angular';
 
 import { UtilService } from '../../services/util.service';

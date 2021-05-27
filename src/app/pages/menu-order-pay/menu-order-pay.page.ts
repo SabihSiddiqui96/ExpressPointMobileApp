@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy, Renderer } from '@angular/core';
-import { Components } from '@ionic/core';
+// import { Components } from '@ionic/core';
 import { NavController, AlertController, NavParams, ModalController } from '@ionic/angular';
 
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
@@ -314,7 +314,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public hasAlaCarte: boolean = false;
     public navIsMealFormed: boolean;
     public isElectron: boolean = false;
-    public static isCompleteTransactionProcessing: boolean = false;
+    public  isCompleteTransactionProcessing: boolean = false;
     public showSelectAccount: boolean = false;
     public isLoadingPrevPatron = false;
     public depositeStudentAmount = 0.00;
@@ -960,7 +960,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.cashtendAmount = this.cardAmount.replace('$', '');
             }
         }
-        MenuOrderPayPage.isCompleteTransactionProcessing = true;
+        this.isCompleteTransactionProcessing = true;
         this.saveInProgress = true;
 
 
@@ -984,7 +984,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
         if (this.cashpaymentOption === 'check' && this.navIsSpecialAccount === true && this.changeDue > 0) {
             this.saveInProgress = false;
-            MenuOrderPayPage.isCompleteTransactionProcessing = false;
+            this.isCompleteTransactionProcessing = false;
             this.popupMessageService.showMessage(PopupMessageCode.E07356);
             // this.utilService.showToast('Check amount for special accounts must be the exact amount due.');
 
@@ -995,13 +995,13 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.navOrderData.CheckNumber = this.cashCheckNum;
                 if (!this.navOrderData.CheckNumber && !this.isPrincipleAccountClicked) {
                     this.saveInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07357);
                     // this.utilService.showToast('Please enter the check number');
                     return;
                 } else if (this.cashCheckNum != null && this.cashCheckNum.length < 3) {
                     this.saveInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    this.isCompleteTransactionProcessing = false;
                     this.utilService.showToast('Please enter the proper check number')
                     return;
                 } else {
@@ -1017,13 +1017,13 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 if (!this.navOrderData.CardNumber && !this.isPrincipleAccountClicked) {
 
                     this.saveInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07494);
                     // this.utilService.showToast('Please enter the card number');
                     return;
                 } else if (this.navOrderData.CardNumber != null && (this.navOrderData.CardNumber.length < 4)) {
                     this.saveInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07495);
                     // this.utilService.showToast('Please enter the proper card number');
                     return;
@@ -1040,7 +1040,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 } else {
                     if (!this.validateTransaction()) {
                         this.saveInProgress = false;
-                        MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                        this.isCompleteTransactionProcessing = false;
                         return;
                     }
                 }
@@ -1110,7 +1110,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.event.subscribe('menu-order-popup:close', (userEventData) => {
             this.event.destroy('menu-order-popup:close');
             this.event.destroy('menu-order:pay');
-            MenuOrderPayPage.isCompleteTransactionProcessing = false;
+            this.isCompleteTransactionProcessing = false;
             this.close();
         });
 

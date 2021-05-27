@@ -100,7 +100,7 @@ export class SystemDBService {
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';
-        resolve();
+        resolve(null);
       });
     });
   }

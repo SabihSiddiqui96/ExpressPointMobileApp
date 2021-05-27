@@ -23,6 +23,10 @@ import { SettingService } from '../../services/setting.service';
 import { Status } from '../../services/enums/device-status';
 import { AuthService } from '../../services/auth.service';
 import { SignalRService } from '../../services/SignalR.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { HashingService } from '../../services/hashing.service';
+import { SetupDbService } from '../../services/setup-db.service';
+import { DeviceControlsService } from '../../services/device-controls.service';
 
 @Component({
   selector: 'app-login',
@@ -75,10 +79,14 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     public transactionService: TransactionService, public deviceService: DeviceService,
     public platform: Platform, public pouchQuery: PouchQueriesService, public electronService: ElectronService,
     public router: Router, public appStateService: AppStateService,
-    public settingService: SettingService, private authService: AuthService, public signalRService: SignalRService) {
+    public settingService: SettingService, private authService: AuthService,
+    public signalRService: SignalRService,
+    public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) {
 
-    super(_nav, loading, alertCtrl, network, sessionTimeOut, event, pouchDBService, modalCtrl, utilService, http,
-      deviceService, pouchQuery, router, appStateService, settingService, signalRService);
+    super(_nav, loading, alertCtrl, network, sessionTimeOut, event, pouchDBService,
+      modalCtrl, utilService, http,
+      deviceService, pouchQuery, router, appStateService,
+      settingService, signalRService, setupDbService, deviceControlsService);
     this.isCordovaApp = UtilService.isCordovaApp;
     if (UtilService.isCordovaApp) {
 
@@ -101,7 +109,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       });
 
     }
-    this.copyRightYear = this.utilService.getCurrentYear();
+    this.copyRightYear = LocalTimerService.getCurrentYear();
     this.utilService.setLoader(true);
     this.loginUrl = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).loginUrl : '' || null;
     this.districtName = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).districtName : '';
@@ -370,14 +378,14 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
         if (this.utilService.isElectronApp()) {
           this.electronService.ipcRenderer.send('app-ready');
           this.electronService.ipcRenderer.on('device', (event, data) => {
-            deviceInfo.uuid = UtilService.getSHA1_HashForText(data.SystemUUID);
+            deviceInfo.uuid = HashingService.getSHA1_HashForText(data.SystemUUID);
             // When App is deactivated from Primeroedge website, UUID should be brought again. 
           });
         }
         AppStateService.reset();
         AppStateService.set('DeviceInfo', JSON.stringify(deviceInfo));
         AppStateService.set('DeviceIpAddress', JSON.stringify(deviceIpAddress));
-        this.pouchDBService.ResetDB().then(() => {
+        this.setupDbService.ResetDB().then(() => {
           // AppStateService.set('DeviceInfo', deviceInfo);
           this._nav.navigateRoot('device-connection');
           this.utilService.setLoader(false);

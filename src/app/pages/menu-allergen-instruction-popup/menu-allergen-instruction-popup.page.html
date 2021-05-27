@@ -10,7 +10,7 @@
   <h2 *ngIf="patronDetails.allergy_count >0">
     Allergies
   </h2>
-  <p style="color: #555; font-size: 1.1em;" class="text-center;" *ngIf="!patronDetails.allergy_count >0">
+  <p style="color: #555; font-size: 1.1em;" class="text-center;" *ngIf="!(patronDetails.allergy_count >0)">
     No allergies have been specified for this student.
   </p>
   <ion-list lines="none" *ngIf="patronDetails.allergy_count >0">

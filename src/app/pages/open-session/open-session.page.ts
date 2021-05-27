@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
-import { HostListener, ViewChild, ElementRef } from '@angular/core';
+import { ViewChild, ElementRef } from '@angular/core';
 import {
   NavController,
   PopoverController,
@@ -17,7 +17,7 @@ import { AppStateService } from '../../services/app-state.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
-import { NavigationExtras, RouterEvent, NavigationEnd } from '@angular/router';
+import { RouterEvent, NavigationEnd } from '@angular/router';
 import { Router } from '@angular/router';
 import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
@@ -885,7 +885,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     //           this.clearDenominations(balMode);
     //           if (popupMessageDoc[0]['DontShowMe'] === 1) {
     //             popupMessageDoc[0]['ChkShowValue'] = this.chkShow;
-    //             PouchDBService.UpsertDocs(popupMessageDoc, EXP_COMMON).then((resolve, reject) => { resolve(); });
+    //             PouchDBService.UpsertDocs(popupMessageDoc, EXP_COMMON).then((resolve, reject) => { resolve(null); });
     //           }
     //         }
     //       }

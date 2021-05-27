@@ -1,12 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Components } from '@ionic/core';
 import { NavController, PopoverController, AlertController, LoadingController } from '@ionic/angular';
-import { LogoutPage } from '../../pages/logout/logout.page';
-import { CloseSessionPage } from '../../pages/close-session/close-session.page';
 
 import { TransactionDetailsPopupPage } from '../../pages/transaction-details-popup/transaction-details-popup.page';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { PouchDBService } from '../../services/pouch-db.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
@@ -18,6 +15,7 @@ import { Events } from '../../services/events.service';
 import { AppStateService } from '../../services/app-state.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
+import { SetupDbService } from '../../services/setup-db.service';
 
 @Component({
   selector: 'app-user-details-popup',
@@ -48,7 +46,7 @@ export class UserDetailsPopupPage implements OnInit {
     public event: Events, public alertCtrl: AlertController, public loading: LoadingController,
     public pouchDBService: PouchDBService, private utilService: UtilService,
     public deviceService: DeviceService, public popupMessageService: PopupMessageService,
-    public router: Router, public appStateService: AppStateService) {
+    public router: Router, public appStateService: AppStateService, public setupDbService: SetupDbService) {
 
 
     // this.loader = this.loading.create({
@@ -129,8 +127,9 @@ export class UserDetailsPopupPage implements OnInit {
     AppStateService.set('SelectedSite', JSON.stringify(value));
 
     // this.loader.present();
-    this.pouchDBService.ResetDB().then(() => {
-      this.pouchDBService.setupData().then(() => {
+
+    this.setupDbService.ResetDB().then(() => {
+      this.setupDbService.setupData().then(() => {
 
         if (this.deviceInfo) {
           this.http.SaveDeviceInfo().subscribe(data => {

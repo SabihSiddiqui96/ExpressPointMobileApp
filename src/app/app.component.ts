@@ -46,6 +46,7 @@ import { Router } from "@angular/router";
 import { AuthService } from './services/auth.service';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SignalRService } from './services/SignalR.service';
+import { SetupDbService } from "./services/setup-db.service";
 
 declare var Fullscreen: any;
 @Component({
@@ -168,7 +169,7 @@ export class AppComponent {
     public appStateService: AppStateService,
     public settingService: SettingService,
     public authService: AuthService,
-    public keyboard: Keyboard, public signalRService: SignalRService
+    public keyboard: Keyboard, public signalRService: SignalRService,public setupDbService:SetupDbService
   ) {
     if (AppStateService.get("login_details")) {
       const loginDetails = JSON.parse(AppStateService.get("login_details"));
@@ -824,7 +825,7 @@ export class AppComponent {
           .PostDeviceHeartBeat()
           .then((data) => {
             this.utilService.isAppOnline = currentAppConnectionState;
-            resolve();
+            resolve(null);
           })
           .catch((err) => {
             console.log(err);
@@ -894,7 +895,7 @@ export class AppComponent {
                 }
               )
             }
-            resolve();
+            resolve(null);
           },
           (error) => {
             this.utilService.isAppOnline = currentAppConnectionState;
@@ -918,7 +919,7 @@ export class AppComponent {
               this.variableOfflineMessage = this.normalOfflineMessage;
               this.isForceOffline = false;
               this.network.removeOfflineMode();
-              resolve();
+              resolve(null);
             });
           })
           .catch((e) => {
@@ -926,10 +927,10 @@ export class AppComponent {
             this.network.setForceOffline(
               this.network.forceOfflineDriver.server
             );
-            resolve();
+            resolve(null);
           });
       } else {
-        resolve();
+        resolve(null);
       }
     });
   }
@@ -1753,7 +1754,7 @@ export class AppComponent {
     // });
 
     // this.loader.present();
-    this.pouchDBService.setupData().then(() => {
+    this.setupDbService.setupData().then(() => {
       if (this.deviceInfo) {
         this.http.SaveDeviceInfo().subscribe((data) => {
           if (data.IsValid === true) {

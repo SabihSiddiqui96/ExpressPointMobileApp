@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, OnDestroy } from '@angular/core';
 
 import { NavController, PopoverController, ModalController, Platform, LoadingController, IonInput } from '@ionic/angular';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
@@ -6,7 +6,6 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
 import * as _ from 'lodash';
 import { Network } from '@ionic-native/network/ngx';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
-import { IonDigitKeyboardCmp } from '../../../components/ion-digit-keyboard/components/ion-digit-keyboard-cmp/ion-digit-keyboard-cmp';
 // import { SchoolSelection } from '../../pages/school-selection/school-selection';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { LookupService, Direction } from '../../services/lookup.service';

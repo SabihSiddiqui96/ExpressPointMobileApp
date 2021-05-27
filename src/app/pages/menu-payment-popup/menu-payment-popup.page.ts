@@ -1,8 +1,8 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { Components } from '@ionic/core';
-import { NavController, AlertController, PopoverController, ModalController } from '@ionic/angular';
+import { NavController, AlertController, ModalController } from '@ionic/angular';
 
-import { PaymentsPage, DoPayment } from '../../pages/payments/payments.page';
+import { DoPayment } from '../../pages/payments/payments.page';
 import { LookupService } from '../../services/lookup.service';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
 import { UtilService } from '../../services/util.service';
@@ -11,7 +11,6 @@ import { TransactionService } from '../../services/transaction.service';
 import { SettingService } from '../../services/setting.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
-import { EXP_TRANSACTIONS, EXP_COMMON, EXP_PERSON } from '../../services/pouch-db.service';
 import { Router } from '@angular/router';
 import { PouchDBService } from '../../services/pouch-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';

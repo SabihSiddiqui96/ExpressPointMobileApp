@@ -3,7 +3,6 @@ import { Component, OnInit, NgZone, OnDestroy, ElementRef } from '@angular/core'
 import { NavController, PopoverController, ModalController, AlertController } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { QuickClassroomSalePage } from '../../pages/classroom-sale/quick-classroom-sale.page';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 import { MenuPaymentPopupPage } from '../../pages/menu-payment-popup/menu-payment-popup.page';
 import * as _ from 'lodash';

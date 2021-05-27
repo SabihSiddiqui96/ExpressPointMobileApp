@@ -51,33 +51,6 @@ ngOnInit() {
         this.isElectronApp = this.utilService.isElectronApp();
   }
 
-  public logoutAppWithTransactionCheck() {
-    this.transactionService.getAllTransactions().then((transactions) => {
-      let notSentTransactions: any = [];
-      this.transactions = transactions;
-      if (transactions.length > 0) {
-        notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsSynced === false);
-
-        if (notSentTransactions.length > 0) {
-          this.hasNotSentTransactions = true;
-        } else {
-          this.hasNotSentTransactions = false;
-        }
-
-      } else {
-        this.hasNotSentTransactions = false;
-      }
-      this._nav.navigateRoot('login');
-      // if (this.hasNotSentTransactions) {
-      //   this._nav.navigateRoot(LoginPage);
-      // } else {
-      //   this.utilService.publishIpcEvent('ElectronAppClose');
-
-      // }
-
-    });
-  }
-
   public SaveDataForOfflineUse() {
     return new Promise((resolve, reject) => {
 
@@ -200,7 +173,7 @@ ngOnInit() {
         'AllSiteSettings': allSiteSettings
       }
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
-        resolve();
+        resolve(null);
       });
 
     });

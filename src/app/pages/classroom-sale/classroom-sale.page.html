@@ -49,7 +49,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length ==0">Grade: None Available</ion-label>
             <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length >0">Select a Grade ...</ion-label>
-            <ion-icon *ngIf="!gradeList.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classHomeroom')">
             <ion-label *ngIf="filter.selected_homeroom!=-1 ">Selected Homeroom:
@@ -59,7 +59,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_homeroom == -1 && homeRoomList.length >0">Select a Homeroom ...
             </ion-label>
-            <ion-icon *ngIf="!homeRoomList.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealtype')">
             <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
@@ -69,7 +69,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
             </ion-label>
-            <ion-icon *ngIf="!mealTypes.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="mealTypes.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealitem')">
             <ion-label *ngIf="filter.selected_menuitem >= 0">Selected Item:
@@ -79,7 +79,7 @@
               Item: None Available</ion-label>
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0">Select an Item ...</ion-label>
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
-            <ion-icon *ngIf="!gradeList.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
         </ion-list>
         <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
@@ -95,7 +95,7 @@
             <ion-label *ngIf="selectedSpecialRosterId ==-1 && specialRosterList.length>0 ">Select a Roster ...
             </ion-label>
             <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available</ion-label>
-            <ion-icon *ngIf="!gradeList.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealtype')">
             <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
@@ -105,7 +105,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
             </ion-label>
-            <ion-icon *ngIf="!gradeList.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealitem')">
             <ion-label *ngIf="filter.selected_menuitem >= 0 ">Selected Item:
@@ -116,7 +116,7 @@
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0 && filter.selected_mealtype ==-1">
               Select an Item ...</ion-label>
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
-            <ion-icon *ngIf="!gradeList.length ==0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
           </ion-item>
         </ion-list>
         <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
@@ -174,7 +174,7 @@
               <strong>Select All</strong>
             </ion-label>
 
-            <ion-checkbox slot="end" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons($event)" title="Select All">
+            <ion-checkbox slot="end" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons()" title="Select All">
             </ion-checkbox>
 
           </ion-item>

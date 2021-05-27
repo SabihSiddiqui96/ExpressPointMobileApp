@@ -7,20 +7,9 @@ import {
   AlertController,
 } from "@ionic/angular";
 import { UserDetailsPopupPage } from "../../pages/user-details-popup/user-details-popup.page";
-import { MenuServicePage } from "../../pages/menu-service/menu-service.page";
-import { OpenSessionPage } from "../../pages/open-session/open-session.page";
-import { ClassroomSalePage } from "../../pages/classroom-sale/classroom-sale.page";
-import { PreOrdersPage } from "../../pages/pre-orders/pre-orders.page";
-import { PaymentsPage } from "../../pages/payments/payments.page";
-import { LogoutPage } from "../../pages/logout/logout.page";
-import { CloseSessionPage } from "../../pages/close-session/close-session.page";
 import { AllPopupPage } from "../../pages/all-popup/all-popup.page";
 import { LoadingController } from "@ionic/angular";
-import { DynamicMenuPage } from "../../pages/dynamic-menu/dynamic-menu.page";
-import { TransactionDetailsPopupPage } from "../../pages/transaction-details-popup/transaction-details-popup.page";
-import { DeviceConfigurationPage } from "../../pages/device-configuration/device-configuration.page";
 
-import { LoginPage } from "../../pages/login/login.page";
 import { LookupService } from "../../services/lookup.service";
 
 import { PouchQueriesService } from "../../services/Database/pouch-queries.service";
@@ -32,7 +21,6 @@ import { SessionTimeoutService } from "../../services/session-timeout.service";
 import { SettingService } from "../../services/setting.service";
 import { Events } from "../../services/events.service";
 import * as _ from "lodash";
-import { SummarySalePage } from "../../pages/summary-sale/summary-sale.page";
 import { NavigationExtras, Router } from "@angular/router";
 import { LoadingService } from "../../services/loading.service";
 
@@ -295,14 +283,14 @@ export class ServiceSelectionPage implements OnInit {
           this.displayDetails.site_name = JSON.parse(
             AppStateService.get("SelectedSite")
           ).SiteNameWithCode;
-          resolve();
+          resolve(null);
         }), () => {
-          resolve();
+          resolve(null);
         };
       } else {
         AppStateService.remove("SelectedSite");
         AppStateService.remove("site_details");
-        resolve();
+        resolve(null);
       }
 
     });
@@ -339,7 +327,7 @@ export class ServiceSelectionPage implements OnInit {
               OpenSession: this.openSession,
             });
           });
-          resolve();
+          resolve(null);
         }
       );
       setTimeout(() => {
@@ -459,7 +447,7 @@ export class ServiceSelectionPage implements OnInit {
         })
         .then(() => {
           this.checkSession().then(() => {
-            resolve();
+            resolve(null);
           })
         })
     });

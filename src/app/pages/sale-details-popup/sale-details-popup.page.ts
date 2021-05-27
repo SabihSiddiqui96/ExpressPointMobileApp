@@ -2,9 +2,6 @@ import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import { Components } from '@ionic/core';
 import { Renderer } from '@angular/core';
 import { NavController, PopoverController } from '@ionic/angular';
-import { LogoutPage } from '../../pages/logout/logout.page';
-import { CloseSessionPage } from '../../pages/close-session/close-session.page';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import * as _ from 'lodash';
 import { AppStateService } from '../../services/app-state.service';
 import { Router } from '@angular/router';
@@ -94,7 +91,7 @@ export class SaleDetailsPopupPage implements OnInit {
       }
 
       this.transactionDetails.IsfromSameDay = ((this.transactionDetails.dateTime) === new Date().getDate()) ? true : false;
-      resolve();
+      resolve(null);
     });
 
   }

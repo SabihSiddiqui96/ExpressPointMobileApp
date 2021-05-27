@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { UtilService } from '../util.service';
 import { AppStateService } from '../app-state.service';
 import { SettingService } from '../setting.service';
+import { HashingService } from '../hashing.service';
 declare var require: any;
 
 PouchDB.plugin(require('pouchdb-upsert'));
@@ -119,7 +120,7 @@ export class PouchQueriesService {
     }
 
     let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN')
- 
+
     /**
      * in Advanced Patron Search: SearchByPin setting behave the opposite way
      * 
@@ -421,8 +422,8 @@ export class PouchQueriesService {
   public static AuthenticateUser(userName, password): any {
 
     const args = {
-      userName: UtilService.getHashForText(userName),
-      password: UtilService.getHashForText(password)
+      userName: HashingService.getHashForText(userName),
+      password: HashingService.getHashForText(password)
     };
 
     return new Promise<FilteredDocs>((resolve) => {
@@ -469,7 +470,7 @@ export class PouchQueriesService {
   public static AuthenticateUserName(userName): any {
 
     const args = {
-      userName: UtilService.getHashForText(userName)
+      userName: HashingService.getHashForText(userName)
     };
 
     return new Promise<FilteredDocs>((resolve) => {
@@ -1214,11 +1215,11 @@ export class PouchQueriesService {
                   newSessionDoc._id = 'OpenSession--' + data;
                   EXP_TRANSACTIONS.remove(doc);
                   newSessionDoc.isSentToServer = true; // to not post this do to server again
-                  PouchDBService.UpsertSingleDoc(newSessionDoc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(newSessionDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                 });
           }
         });
-        resolve();
+        resolve(null);
       });
     });
   }
@@ -1239,21 +1240,21 @@ export class PouchQueriesService {
                   console.log('Posted Transaction');
                   doc.saleData.IsSynced = true;
                   // doc.saleData.IsSent = true
-                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                 },
                 error => {
                   console.log(error);
-                  resolve();
+                  resolve(null);
                 }
               );
-              // PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+              // PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
 
             } else {
-              resolve();
+              resolve(null);
             }
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1272,12 +1273,12 @@ export class PouchQueriesService {
               },
               error => { console.log(error); },
               () => {
-                resolve();
+                resolve(null);
               }
             );
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1295,20 +1296,20 @@ export class PouchQueriesService {
                 data => {
                   console.log('Posted reviews');
                   doc.Review.IsSynced = true;
-                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                 },
                 error => { console.log(error); },
                 () => {
-                  resolve();
+                  resolve(null);
                 }
               );
             } else {
-              resolve();
+              resolve(null);
             }
 
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1330,7 +1331,7 @@ export class PouchQueriesService {
           });
         }
       }, () => {
-        resolve();
+        resolve(null);
       });
     });
   }
@@ -1348,20 +1349,20 @@ export class PouchQueriesService {
                   if (data) {
                     console.log('Posted session checks');
                     doc.IsSynced = data;
-                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                   }
                 },
                 error => { console.log(error); },
                 () => {
-                  resolve();
+                  resolve(null);
                 }
               );
             }
 
           });
-          resolve();
+          resolve(null);
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1380,20 +1381,20 @@ export class PouchQueriesService {
                   if (data) {
                     console.log('Posted session cards');
                     doc.IsSynced = data;
-                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                   }
                 },
                 error => { console.log(error); },
                 () => {
-                  resolve();
+                  resolve(null);
                 }
               );
             }
 
           });
-          resolve();
+          resolve(null);
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1414,11 +1415,11 @@ export class PouchQueriesService {
               },
               error => { console.log(error); },
               () => {
-                resolve();
+                resolve(null);
               });
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1440,11 +1441,11 @@ export class PouchQueriesService {
               },
               error => { console.log(error); },
               () => {
-                resolve();
+                resolve(null);
               });
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1465,12 +1466,12 @@ export class PouchQueriesService {
               },
               error => { console.log(error); },
               () => {
-                resolve();
+                resolve(null);
               }
             );
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1492,12 +1493,12 @@ export class PouchQueriesService {
                 },
                 error => { console.log(error); },
                 () => {
-                  resolve();
+                  resolve(null);
                 }
               );
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1539,13 +1540,13 @@ export class PouchQueriesService {
           data => { },
           error => { console.log(error); reject(); },
           () => {
-            resolve();
+            resolve(null);
           }
         );
 
         // });
       } else {
-        resolve();
+        resolve(null);
       }
     });
   }
@@ -1566,17 +1567,17 @@ export class PouchQueriesService {
                 data => {
                   console.log('Posted Summary Sale' + JSON.stringify(data));
                   doc.IsSynced = true;
-                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                 },
                 error => { console.log(error); },
                 () => {
-                  resolve();
+                  resolve(null);
                 });
             }
 
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1594,11 +1595,11 @@ export class PouchQueriesService {
                 data => {
                   console.log('Posted Terminal Status' + JSON.stringify(data));
                   doc.IsSynced = true;
-                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                 },
                 error => { console.log(error); },
                 () => {
-                  resolve();
+                  resolve(null);
                 });
             }
           });
@@ -1625,20 +1626,20 @@ export class PouchQueriesService {
                 data => {
                   console.log('Posted default menu for terminal' + JSON.stringify(data));
                   doc.IsSynced = true;
-                  PouchDBService.UpsertSingleDoc(doc, EXP_STANDARD_MENUS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(doc, EXP_STANDARD_MENUS).then(() => { resolve(null); });
                 },
                 error => {
                   console.log(error); reject();
                 },
                 () => {
-                  resolve();
+                  resolve(null);
                 });
             } else {
-              resolve();
+              resolve(null);
             }
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1662,21 +1663,21 @@ export class PouchQueriesService {
                 data => {
                   console.log('Post Terminal Serving Line Dynamic menu for dynamic case' + JSON.stringify(data));
                   doc.IsSynced = true;
-                  PouchDBService.UpsertSingleDoc(doc, EXP_DYNAMIC_MENUS).then(() => { resolve(); });
+                  PouchDBService.UpsertSingleDoc(doc, EXP_DYNAMIC_MENUS).then(() => { resolve(null); });
                 },
                 error => {
                   console.log(error); reject();
                 },
                 () => {
-                  resolve();
+                  resolve(null);
                 });
             } else {
-              resolve();
+              resolve(null);
             }
 
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1698,11 +1699,11 @@ export class PouchQueriesService {
               },
               error => { console.log(error); reject(); },
               () => {
-                resolve();
+                resolve(null);
               });
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1725,11 +1726,11 @@ export class PouchQueriesService {
               },
               error => { console.log(error); reject(); },
               () => {
-                resolve();
+                resolve(null);
               });
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1746,11 +1747,11 @@ export class PouchQueriesService {
   //                 },
   //                 error => { console.log(error); },
   //                 () => {
-  //                     resolve();
+  //                     resolve(null);
   //                 });
 
   //         } else {
-  //             resolve();
+  //             resolve(null);
   //         }
   //     });
   // }
@@ -1793,7 +1794,7 @@ export class PouchQueriesService {
 
           });
         } else {
-          // resolve();
+          // resolve(null);
         }
       }).then(() => {
         PouchQueriesService.GetAllMarkedForReviews().then((res) => {
@@ -1835,7 +1836,7 @@ export class PouchQueriesService {
           });
         });
       }).then(() => {
-        resolve();
+        resolve(null);
 
       });
     });
@@ -1929,7 +1930,7 @@ export class PouchQueriesService {
               }
             });
             AppStateService.set('cleanedDb', true);
-            resolve();
+            resolve(null);
 
           }
         });
@@ -1951,7 +1952,7 @@ export class PouchQueriesService {
             }
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
 
@@ -1965,7 +1966,7 @@ export class PouchQueriesService {
             }
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -1987,7 +1988,7 @@ export class PouchQueriesService {
             }
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -2005,11 +2006,11 @@ export class PouchQueriesService {
                   data => {
                     console.log(' Force Posted Transaction');
                     doc.saleData.IsSynced = true;
-                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(); });
+                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                   },
                   error => {
                     console.log(error);
-                    resolve();
+                    resolve(null);
                   }
                 );
               }
@@ -2017,10 +2018,10 @@ export class PouchQueriesService {
           });
 
         } else {
-          resolve();
+          resolve(null);
         }
       }).then(() => {
-        resolve();
+        resolve(null);
       });
     });
   }

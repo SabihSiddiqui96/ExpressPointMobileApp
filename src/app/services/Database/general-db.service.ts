@@ -67,19 +67,19 @@ export class GeneralDBService {
                 this.syncStatus = 'Success';                
                 PouchDBService.UpsertDocs(settings, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -130,19 +130,19 @@ export class GeneralDBService {
               console.log('Orders before push' + JSON.stringify(preOrders));
                 PouchDBService.UpsertOrderDocs(preOrders, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "D" } });
-              resolve();
+              resolve(null);
             }
 
           },
             error => {
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -178,12 +178,12 @@ export class GeneralDBService {
               this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(sites, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "D" } });
-              resolve();
+              resolve(null);
             }
 
 
@@ -192,7 +192,7 @@ export class GeneralDBService {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteDetails : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -222,12 +222,12 @@ export class GeneralDBService {
                 this.syncStatus = 'Success';                
                 PouchDBService.UpsertDocs(denominations, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "D" } });
-              resolve();
+              resolve(null);
             }
 
           },
@@ -235,7 +235,7 @@ export class GeneralDBService {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncDenominations : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -254,7 +254,7 @@ export class GeneralDBService {
             EXP_COMMON.remove(doc);
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
 
@@ -283,19 +283,19 @@ export class GeneralDBService {
               this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(mealTypes, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "D" } });
-              resolve();
+              resolve(null);
             }
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncMealTypes : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
 
@@ -325,18 +325,18 @@ export class GeneralDBService {
               this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(priceTypes, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "D" } });
-                    resolve();
+                    resolve(null);
                 });
             } else {
                 this.syncStatus = 'Success';
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "D" } });
-              resolve();
+              resolve(null);
             }
           },
             error => {
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncPriceTypes : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -366,14 +366,14 @@ export class GeneralDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(crediLimits, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncCreditLimits : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncCreditLimits : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -391,7 +391,7 @@ export class GeneralDBService {
             EXP_COMMON.remove(doc);
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
 
@@ -418,14 +418,14 @@ export class GeneralDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(grades, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncGrades : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncGrades : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -443,7 +443,7 @@ export class GeneralDBService {
             EXP_COMMON.remove(doc);
           });
         } else {
-          resolve();
+          resolve(null);
         }
       });
 
@@ -466,14 +466,14 @@ export class GeneralDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(homeRooms, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncHomeRooms : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncHomeRooms : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -501,14 +501,14 @@ export class GeneralDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(specialRosters, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncSpecialRosters : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncSpecialRosters : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -539,14 +539,14 @@ export class GeneralDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(reviewTypes, EXP_COMMON).then(() => {
                     this.events.publish('data:syncDetails', { SiteSettings: { SyncReviewTypes : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncReviewTypes : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -560,17 +560,17 @@ export class GeneralDBService {
   //       this.http.GetSiteSettings().subscribe(siteSettings => {
   //         AppStateService.set('SiteSettings', JSON.stringify(siteSettings));
   //         this.syncStatus = 'Success';
-  //         resolve();
+  //         resolve(null);
 
   //       },
   //         error => {
   //           this.syncStatus = 'Failed';
   //           console.log(error);
-  //           resolve();
+  //           resolve(null);
   //         });
   //     } else {
   //       this.syncStatus = 'Failed';
-  //       resolve();
+  //       resolve(null);
 
   //     }
   //   });
@@ -585,19 +585,19 @@ export class GeneralDBService {
           AppStateService.set('AllSiteSettings', JSON.stringify(allSiteSettings));
             this.syncStatus = 'Success';
             this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "D" } });
-          resolve();
+          resolve(null);
 
         },
           error => {
             this.syncStatus = 'Failed';
               console.log(error);
               this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "F" } });
-            resolve();
+            resolve(null);
           });
       } else {
           this.syncStatus = 'Failed';
           this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings : "F" } });
-        resolve();
+        resolve(null);
 
       }
     });
@@ -637,14 +637,14 @@ export class GeneralDBService {
             PouchDBService.UpsertDocs(popupupMessages, EXP_COMMON).then(() => {
                 PopupMessageService.popupMessagesBuffered = popupupMessages;
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncPopupMessages : "D" } });
-              resolve();
+              resolve(null);
             });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { SiteSettings: { SyncPopupMessages : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }

@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
-import { NgZone, ViewEncapsulation, HostListener } from '@angular/core';
+import { NgZone, ViewEncapsulation } from '@angular/core';
 import { NavController, PopoverController } from '@ionic/angular';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 import * as _ from 'lodash';
-import { Observable, fromEvent } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { Network } from '@ionic-native/network/ngx';
 import { GeneralDBService } from '../../services/Database/general-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';

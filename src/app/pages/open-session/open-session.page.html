@@ -50,12 +50,6 @@
               </ion-col>
 
 
-              <!-- <ion-input slot="start" *ngIf="denomination.Type=='COINS'" custom-tb no-margin type="tel" placeholder="0" maxlength="5" id="{{denomination.DenominationId}}"
-                (ionChange)="changeQuantity(i,denomination.Quantity,'COINS')" [(ngModel)]="denomination.Quantity" value="{{denomination.Quantity}}"
-                (ionFocus)="onFocus($event,i,'COINS')" name="{{denomination.DenominationId}}" (keyup)="onKey($event,i,'COINS')"
-                (ionFocus)="_appservice.inputFocus('focus')" (ionBlur)="_appservice.inputFocus('blur')">
-              </ion-input> -->
-
               <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':true:'1.2-2'}}
               </ion-col>
             </ion-row>
@@ -91,11 +85,6 @@
                   (click)="incrDenominationCnt(denomination.DenominationId, denomination.Quantity )"></ion-icon>
               </ion-col>
 
-              <!-- <ion-input slot="start" custom-tb *ngIf="denomination.Type=='BILLS'" no-margin type="tel" placeholder="0" maxlength="5" id="{{denomination.DenominationId}}"
-                (ionChange)="changeQuantity(i,denomination.Quantity,'BILLS')" [(ngModel)]="denomination.Quantity" value="{{denomination.Quantity}}"
-                (ionFocus)="onFocus($event,i,'BILLS')" name="{{denomination.DenominationId}}" (keyup)="onKey($event,i,'BILLS')"
-                (ionFocus)="_appservice.inputFocus('focus')" (ionBlur)="_appservice.inputFocus('blur')">
-              </ion-input> -->
               <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':true:'1.2-2'}}
               </ion-col>
             </ion-row>
@@ -128,10 +117,10 @@
     <ion-col size="12" size-lg="6" push-lg="3" class="ion-text-center ion-align-self-center">
       <h1 class="openbalhead ion-text-center"> Opening Balance&nbsp;</h1>
       <input type="text" id="openingBalance" (click)="setActiveOpeningBalance('openingBalance',total)"
-        (ionFocus)="_appservice.inputFocus('focus');"
         [ngClass]="{'active-input-label-openingbalance': balanceMode == 'openingBalance', 'input-label-openingBalance': balanceMode != 'openingBalance'}"
         [(ngModel)]="total">
       <!-- [disabled]=true -->
+      <!-- (ionFocus)="_appservice.inputFocus('focus');" -->
     </ion-col>
     <ion-col size="12" size-lg="3" push-lg="3" class="ion-align-self-center">
       <ion-button expand="block" size="large" color="slate" (click)="openSession()" [disabled]="saveInProgress">

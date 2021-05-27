@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AppStateService } from '../services/app-state.service';
-import { UtilService } from './util.service';
 
 export let LOGIN_URL = '';
 export let API_URL = '';
@@ -23,8 +22,8 @@ export class UrlsService {
       LOGIN_URL = url + '/';
     }
 
-// Replace all the various old apis with new ones , Will be removed in later releases
-    LOGIN_URL = UtilService.ReplaceAllinString(LOGIN_URL,
+    // Replace all the various old apis with new ones , Will be removed in later releases
+    LOGIN_URL = this.ReplaceAllinString(LOGIN_URL,
       { expresspointappapis: 'expresspointcoreapis', expresspointapis: 'expresspointcoreapis' })
 
 
@@ -41,5 +40,17 @@ export class UrlsService {
   public setDeviceConnectionURL(URL) {
     console.log(URL);
     AppStateService.set('DeviceConnectionUrl', URL);
+  }
+  
+  /**
+   *
+   * @param str string in which the substring to be replaced
+   * @param replaceMap Mapping object for itemToBeReplaced : itemReplacedBy
+   */
+   public  ReplaceAllinString(str, replaceMap) {
+    const regex = new RegExp(Object.keys(replaceMap).join('|'), 'gi');
+    return str.replace(regex, (matched) => {
+      return replaceMap[matched.toLowerCase()]
+    })
   }
 }

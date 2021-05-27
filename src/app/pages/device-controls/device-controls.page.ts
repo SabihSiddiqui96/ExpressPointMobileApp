@@ -3,15 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { NavController, ModalController, AlertController } from '@ionic/angular';
 import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { UtilService } from '../../services/util.service';
 import { AppStateService } from '../../services/app-state.service';
 import { TransactionService } from '../../services/transaction.service';
-import { Observable, interval } from 'rxjs';
-import { DeviceConnectionPage } from '../device-connection/device-connection.page';
+import { interval } from 'rxjs';
 import { ElectronService } from '../../services/electron.service';
 import { SettingService } from '../../services/setting.service';
-import { LogoutPage } from '../logout/logout.page';
 import { DeviceService } from '../../services/device.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { PopupMessageService } from '../../services/popup-message.service';
@@ -19,6 +16,7 @@ import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { DeviceConfigurationPage } from '../device-configuration/device-configuration.page';
+import { SetupDbService } from '../../services/setup-db.service';
 
 @Component({
   selector: 'app-device-controls',
@@ -68,7 +66,8 @@ export class DeviceControlsPage implements OnInit {
     public http: HttpService,
     public popupMessageService: PopupMessageService,
     private zone: NgZone,
-    public router: Router, public appStateService: AppStateService, public settingService: SettingService
+    public router: Router, public appStateService: AppStateService,
+    public settingService: SettingService, private setupDbService: SetupDbService
   ) {
     this.syncedPersonData = false;
     this.syncedMenusData = false;
@@ -120,22 +119,22 @@ export class DeviceControlsPage implements OnInit {
   }
 
   public SyncPersonData() {
-    this.utilService.setLoader(true);
-    this._PouchDBService.setupPersonData().then(() => {
-      this.syncedPersonData = true;
-      this.utilService.setLoader(false);
-        PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
-        PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
-        PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0; 
-    });
+    // this.utilService.setLoader(true);
+    // this._PouchDBService.setupPersonData().then(() => {
+    //   this.syncedPersonData = true;
+    //   this.utilService.setLoader(false);
+    //   PouchDBService.EXP_PERSON_QUICK_MATCH.splice(0, PouchDBService.EXP_PERSON_QUICK_MATCH.length);
+    //   PouchDBService.EXP_PERSON_QUICK_MATCH.length = 0;
+    //   PouchDBService.EXP_PERSON_QUICK_MATCH_COUNT = 0;
+    // });
   }
 
   public SyncMenusData() {
-    this.utilService.setLoader(true);
-    this._PouchDBService.setupMenusData().then(() => {
-      this.syncedMenusData = true;
-      this.utilService.setLoader(false);
-    });
+    // this.utilService.setLoader(true);
+    // this._PouchDBService.setupMenusData().then(() => {
+    //   this.syncedMenusData = true;
+    //   this.utilService.setLoader(false);
+    // });
   }
 
   public goToServicePage() {
@@ -153,7 +152,7 @@ export class DeviceControlsPage implements OnInit {
       this.utilService.setLoader(true);
 
 
-      this._PouchDBService.ResetDB().then(() => {
+      this.setupDbService.ResetDB().then(() => {
         this.utilService.setLoader(false);
         // this.router.navigateByUrl('device-connection');
         if (this.timerSubscription) {

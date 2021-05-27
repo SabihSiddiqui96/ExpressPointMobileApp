@@ -50,14 +50,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(dynamicMenuDetails, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncDynamicMenuDetails : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncDynamicMenuDetails : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -87,14 +87,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(dynamicMenuItemCategories, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncMenuItemCategories : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncMenuItemCategories : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -127,14 +127,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(dynamicMenuCalendars, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncMenuCalendars : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncMenuCalendars : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -168,14 +168,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(dynamicMenuComboRules, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncComboRules : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncComboRules : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -203,14 +203,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(dynamicMenuItemcategoryDetails, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncDynamicMenuItemCategoryDetail : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncDynamicMenuItemCategoryDetail : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
 
@@ -256,14 +256,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(terminalDefaultMenu, EXP_STANDARD_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncGetDefaultMenusForTerminal : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncGetDefaultMenusForTerminal : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -306,14 +306,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(terminalDefaultMenu, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncGetDefaultServingLineForTerminal : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncGetDefaultServingLineForTerminal : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }
@@ -343,14 +343,14 @@ export class DynamicMenusDBService {
             this.syncStatus = 'Success';
                 PouchDBService.UpsertDocs(dynamicCarryOverDetails, EXP_DYNAMIC_MENUS).then(() => {
                     this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncCarryOverDetails : "D" } });
-                    resolve();
+                    resolve(null);
                 });
           },
           error => {
               this.syncStatus = 'Failed';
               this.events.publish('data:syncDetails', { DynamicMenusDB: { SyncCarryOverDetails : "F" } });
             console.log(error);
-            resolve();
+            resolve(null);
           });
     });
   }

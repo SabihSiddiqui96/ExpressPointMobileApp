@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 
-import { HostListener, ViewChild, ElementRef } from '@angular/core';
+import { ViewChild, ElementRef } from '@angular/core';
 import { NavController, ModalController, AlertController } from '@ionic/angular';
 
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 import { CloseSessionCheckPage } from '../../pages/close-session-check/close-session-check.page';
 import { CloseSessionCardPage } from '../../pages/close-session-card/close-session-card.page';
 import * as _ from 'lodash';

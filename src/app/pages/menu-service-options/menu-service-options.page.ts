@@ -1,10 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Components } from '@ionic/core';
-import { ViewChild } from '@angular/core';
 import {
   NavController, PopoverController, ModalController
 } from '@ionic/angular';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
 
 import { Network } from '@ionic-native/network/ngx';
 import { MenuServicePage } from '../../pages/menu-service/menu-service.page';

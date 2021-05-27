@@ -66,7 +66,7 @@ export class MenuSoldPopupPage implements OnInit {
           console.log(this.previousSalesItemized);
 
         }
-        resolve();
+        resolve(null);
       }).then(() => {
         this.loadingService.dismiss(this.loadingID);
       });

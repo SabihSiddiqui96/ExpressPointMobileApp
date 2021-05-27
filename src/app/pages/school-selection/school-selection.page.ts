@@ -6,8 +6,6 @@ import {
 } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { LoadingController } from '@ionic/angular';
-import { ServiceSelectionPage } from '../../pages/service-selection/service-selection.page';
-import { DeviceIdentificationPopupPage } from '../../pages/device-identification-popup/device-identification-popup.page';
 import { Network } from '@ionic-native/network/ngx';
 import { PouchDBService } from '../../services/pouch-db.service';
 import { UtilService } from '../../services/util.service';
@@ -18,6 +16,7 @@ import { SessionTimeoutService } from '../../services/session-timeout.service';
 import { SettingService } from '../../services/setting.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { SetupDbService } from '../../services/setup-db.service';
 
 @Component({
   selector: 'app-school-selection',
@@ -50,7 +49,7 @@ export class SchoolSelectionPage implements OnInit {
     public loading: LoadingController, public pouchDBService: PouchDBService, public utilService: UtilService,
     public http: HttpService, public deviceService: DeviceService,
     private sessionTimeOut: SessionTimeoutService, public router: Router,
-    public appStateService: AppStateService, public settingService: SettingService) {
+    public appStateService: AppStateService, public settingService: SettingService,public setupDbService:SetupDbService) {
 
     this.isElectronApp = this.utilService.isElectronApp();
     // this.loader = this.loading.create({
@@ -123,8 +122,8 @@ export class SchoolSelectionPage implements OnInit {
 
       // check if we need to show the message if patron is visiting
 
-
-      this.pouchDBService.setupData().then(() => {
+      
+      this.setupDbService.setupData().then(() => {
 
         // this.loading.dismiss();
 

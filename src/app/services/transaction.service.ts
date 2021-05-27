@@ -285,11 +285,11 @@ export class TransactionService {
                     if (sessionDocs.length > 0) {
                         AppStateService.set('session_id', sessionDocs[0].SessionId)
                     }
-                    resolve();
+                    resolve(null);
                 });
             }
             else {
-                resolve()
+                resolve(null)
             }
         });
     }
@@ -335,7 +335,7 @@ export class TransactionService {
                 }
             }).then(() => {
                 AppStateService.set('TransactionStats', JSON.stringify(stats));
-                resolve();
+                resolve(null);
             });
         });
     }
@@ -352,7 +352,7 @@ export class TransactionService {
                     },
                     error => {
                         console.log(error);
-                        resolve();
+                        resolve(null);
                     });
         });
 
@@ -362,7 +362,7 @@ export class TransactionService {
     public forcePostTransactions() {
         return new Promise((resolve) => {
             this.pouchQuery.forcePostTransactions().then(() => {
-                resolve();
+                resolve(null);
             });
         });
 
@@ -371,28 +371,28 @@ export class TransactionService {
 
     public SaveTerminalSaleStatus(terminalsaledoc: TerminalSaleStatusDoc) {
         return new Promise((resolve) => {
-            PouchDBService.UpsertSingleDoc(terminalsaledoc, EXP_TRANSACTIONS).then(() => { resolve(); });
+            PouchDBService.UpsertSingleDoc(terminalsaledoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
         });
     }
 
 
     public SaveSuspiciousTransaction(suspiciousTransactionDoc: SuspiciousTransactionDoc) {
         return new Promise((resolve) => {
-            PouchDBService.UpsertSingleDoc(suspiciousTransactionDoc, EXP_TRANSACTIONS).then(() => { resolve(); });
+            PouchDBService.UpsertSingleDoc(suspiciousTransactionDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
         });
     }
 
 
     public SaveSessionCheck(sessionCheckDoc) {
         return new Promise((resolve) => {
-            PouchDBService.UpsertSingleDoc(sessionCheckDoc, EXP_TRANSACTIONS).then(() => { resolve(); });
+            PouchDBService.UpsertSingleDoc(sessionCheckDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
         });
     }
 
 
     public SaveSessionCard(sessionCardDoc) {
         return new Promise((resolve) => {
-            PouchDBService.UpsertSingleDoc(sessionCardDoc, EXP_TRANSACTIONS).then(() => { resolve(); });
+            PouchDBService.UpsertSingleDoc(sessionCardDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
         });
     }
 

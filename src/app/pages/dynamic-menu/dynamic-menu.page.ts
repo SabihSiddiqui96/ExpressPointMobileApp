@@ -39,6 +39,8 @@ import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { TransactionTypes } from '../../services/enums/transaction-types'
 import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { ConfettiService } from '../../services/confetti.service';
 
 enum Contributors {
     Fruit = 1,
@@ -1394,8 +1396,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 then((data) => {
                     this.restrictableAlaCarteItems = data.rows[0].doc.RestrictableAlaCarteItems;
                     console.log('Restrictable Ala Items' + JSON.stringify(this.restrictableAlaCarteItems));
-                    resolve();
-                }).catch((err) => { console.log(err); resolve(); });
+                    resolve(null);
+                }).catch((err) => { console.log(err); resolve(null); });
 
         });
 
@@ -1407,8 +1409,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 then((data) => {
                     this.restrictableCategories = data.rows[0].doc.RestrictableAlaCarteCategories;
                     console.log('Restrictable Categories' + JSON.stringify(this.restrictableCategories));
-                    resolve();
-                }).catch((err) => { console.log(err); resolve(); });
+                    resolve(null);
+                }).catch((err) => { console.log(err); resolve(null); });
 
         });
 
@@ -1421,8 +1423,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const siteSettings = data.rows[0].doc;
                     this.maxAlaCarteCountBySite = siteSettings.MaxALCbySite;
                     this.isSiteCEP = siteSettings.IsCEP;
-                    resolve();
-                }).catch((err) => { console.log(err); resolve(); });
+                    resolve(null);
+                }).catch((err) => { console.log(err); resolve(null); });
 
         });
 
@@ -1473,9 +1475,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         this.selectedMealType = -1;
                     }
                     //  this.utilService.setLoader(false);
-                    resolve();
+                    resolve(null);
                 })
-                .catch((err) => { console.log(err); resolve(); });
+                .catch((err) => { console.log(err); resolve(null); });
 
         });
 
@@ -1554,9 +1556,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public gridClick(menuItem) {
 
-        setTimeout( () => {
+        setTimeout(() => {
             (document.activeElement as HTMLElement).blur();
-        }, 0);      
+        }, 0);
 
         if (this.isStaticMenuSelected === true) {
             if (menuItem.emptygrid === true) {
@@ -2673,10 +2675,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public ShowAddDollarPopover(myEvent) {
 
-        setTimeout( () => {
+        setTimeout(() => {
             (document.activeElement as HTMLElement).blur();
-        }, 0);      
-        
+        }, 0);
+
         const modal = this.modalCtrl.create({
             component: MenuPaymentPopupPage,
             componentProps: {
@@ -2837,7 +2839,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.lookUpService.menuPayselectAccountClick = false;
 
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 this.popupMessageService.showMessage(PopupMessageCode.E06438);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                 return;
@@ -2861,9 +2863,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
             }
 
-            setTimeout( () => {
+            setTimeout(() => {
                 (document.activeElement as HTMLElement).blur();
-            }, 0);      
+            }, 0);
 
             const modal = this.modalCtrl.create({
                 component: MenuOrderPayPage,
@@ -2893,7 +2895,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
                     this.makeSalePay();
                 } else {
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 }
             });
         } else {
@@ -2917,7 +2919,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             const personSaledetails: Array<PersonSaledetailsModel> = new Array<PersonSaledetailsModel>();
 
 
-            const currentTime = this.utilService.getTime('time');
+            const currentTime = LocalTimerService.getTime('time');
 
             // to Take out pictures from device
             this.patronDetails.Image = null;
@@ -3313,7 +3315,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     }
                     this.utilService.setLoader(false);
                     this.transactionInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     this.isMarked = false;
                     this.deviceTransactionId = null;
                     this.utilService.setLoader(false);
@@ -3351,7 +3353,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     }
                     // this.voidOrder();
                     this.transactionInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 })
                     .then(() => {
                         this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
@@ -3440,12 +3442,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     })
                     .catch(err => {
                         this.transactionInProgress = false;
-                        MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                         console.log(err);
                     });
             } else {
                 this.transactionInProgress = false;
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
             }
         });
     }
@@ -3620,7 +3622,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (!this.sepChargeLimit && projectedBalance >= creditLimit) {
             this.CheckIfOnlyReimbursableMealsAreAllowed(false, projectedBalance, paymentAmount, accountBalance, transactionType); this.transactionInProgress = false;
-            MenuOrderPayPage.isCompleteTransactionProcessing = false;
+            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
             return;
         }
 
@@ -3633,7 +3635,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 this.CheckIfOnlyReimbursableMealsAreAllowed(true, projectedBalance, paymentAmount, accountBalance, transactionType);
                 this.transactionInProgress = false;
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 return;
 
             } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 2) {
@@ -3659,11 +3661,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     await res.present();
                 });
                 this.transactionInProgress = false;
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 return false;
             } else {
                 this.transactionInProgress = false;
-                MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 // show message ("Please enter a cash amount greater than or equal to the sale amount.")
                 this.popupMessageService.showMessage(PopupMessageCode.E06440);
                 // this.utilService.showToast('Please enter a cash amount greater than or equal to the transaction amount.');
@@ -3711,7 +3713,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         await res.present();
                     });
                     this.transactionInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     return false;
                 } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
@@ -3722,7 +3724,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     // this.popupMessageService.showMessage(PopupMessageCode.E12441);
                     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
                     this.transactionInProgress = false;
-                    MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     return false;
                 }
 
@@ -3730,7 +3732,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         }
         this.transactionInProgress = false;
-        MenuOrderPayPage.isCompleteTransactionProcessing = false;
+        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
     }
 
 
@@ -4433,9 +4435,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                     if (carryOvers.length > 0) {
                         this.dynamicMenuItems = carryOvers[0].doc.MenuItems;
-                        resolve();
+                        resolve(null);
                     } else {
-                        resolve();
+                        resolve(null);
                     }
                 });
         });
@@ -4679,8 +4681,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const gradeIndex = grades.length - 1;
                     this.highestGradeId = grades[gradeIndex].GradeId;
                 }
-                resolve();
-            }).catch((err) => { console.log(err); resolve(); });
+                resolve(null);
+            }).catch((err) => { console.log(err); resolve(null); });
 
         });
 
@@ -5672,7 +5674,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public onReviewTypeChange(reviewType, reviewTypeDescription, reviewTypeCd) {
-        const currentTime = this.utilService.getTime('time');
+        const currentTime = LocalTimerService.getTime('time');
         this.isMarked = true;
         const review = {
             'ReviewTypeCd': reviewTypeCd,
@@ -5846,7 +5848,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const d1 = this.renderer2.createElement('CANVAS');
                     const nextId = "mycanvas" + UtilService.confettiID++;
                     d1.id = nextId;
-                    let confettiSettings = UtilService.getConfettiSettings(nextId);
+                    let confettiSettings = ConfettiService.getConfettiSettings(nextId);
                     this.renderer.setElementClass(d1, "mycanvas", true);
 
                     const textWidth = (this.elConfettiHolder.nativeElement).scrollWidth;
@@ -6002,8 +6004,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if (res.rows.length > 0) {
                         this.allCategories = res.rows.map(row => row.doc);
                     }
-                    resolve();
-                }).catch((err) => { console.log(err); resolve(); });
+                    resolve(null);
+                }).catch((err) => { console.log(err); resolve(null); });
 
         });
 

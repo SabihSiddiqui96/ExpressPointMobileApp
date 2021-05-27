@@ -119,7 +119,7 @@ export class PopupMessageService {
                 const popupMessageDoc = this.getPopupMessageDocByMessageCode(messageData, messageCode);
                 if (popupMessageDoc[0].MessageType === 'Toast') {
                     this.showToast(popupMessageDoc, messageCode, params);
-                    resolve();
+                    resolve(null);
                 } else {
                     this.showDialog(popupMessageDoc, messageCode, params, enableBackdropDismiss).then((input) => {
                         resolve(input);

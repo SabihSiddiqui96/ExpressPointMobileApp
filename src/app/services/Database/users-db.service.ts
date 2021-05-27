@@ -30,11 +30,11 @@ export class UsersDBService {
                     PouchDBService.UpsertDocs(data, EXP_USERS).then(() => {
                         this.syncStatus = 'Success';
                         this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "D" } });
-                        resolve();
+                        resolve(null);
                     });
                 } else {
                     this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "D" } });
-                    resolve();
+                    resolve(null);
                 }
             },
                 error => {
@@ -42,7 +42,7 @@ export class UsersDBService {
                     this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "F" } });
                     AppStateService.set('SetupComplete', false);
                     console.log(error);
-                    resolve();
+                    resolve(null);
                 });
         });
     }

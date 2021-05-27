@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 
 import { StorageService } from './storage.service';
 import CryptoJS from 'crypto-js';
+import { HashingService } from './hashing.service';
+
 export interface InternalStateType {
   [key: string]: any;
 }
@@ -61,10 +63,10 @@ export class AppStateService {
     if (prop === 'login_details') {
       const inputVal = JSON.parse(value);
       if (inputVal.password) {
-        inputVal.password = this.getHashForText(inputVal.password);
+        inputVal.password = HashingService.getHashForText(inputVal.password);
       }
       if (inputVal.userName) {
-        inputVal.userName = this.getHashForText(inputVal.userName);
+        inputVal.userName = HashingService.getHashForText(inputVal.userName);
       }
       value = JSON.stringify(inputVal);
     }
@@ -111,26 +113,26 @@ export class AppStateService {
     return JSON.parse(JSON.stringify(object));
   }
 
-  /**
-   *
-   * @param inputStr Returns SHA-256 hash for input if not already hashed
-   */
-  public static getHashForText(inputStr) {
-    if (inputStr) {
-      if (this.isStringHashed(inputStr)) {
-        return inputStr;
-      } else {
-        return CryptoJS.SHA256(inputStr).toString(CryptoJS.enc.Hex);
-      }
-    }
-  }
+  // /**
+  //  *
+  //  * @param inputStr Returns SHA-256 hash for input if not already hashed
+  //  */
+  // public static getHashForText(inputStr) {
+  //   if (inputStr) {
+  //     if (this.isStringHashed(inputStr)) {
+  //       return inputStr;
+  //     } else {
+  //       return CryptoJS.SHA256(inputStr).toString(CryptoJS.enc.Hex);
+  //     }
+  //   }
+  // }
 
-  /**
-  *
-  * @param inputStr Checks if input string is hashed - Assuming SHA-256 hashing
-  * username and passwords are not 64 characters long in practical - safe catch to verify hashed
-  */
-  public static isStringHashed(inputStr) {
-    return inputStr.length === 64;
-  }
+  // /**
+  // *
+  // * @param inputStr Checks if input string is hashed - Assuming SHA-256 hashing
+  // * username and passwords are not 64 characters long in practical - safe catch to verify hashed
+  // */
+  // public static isStringHashed(inputStr) {
+  //   return inputStr.length === 64;
+  // }
 }
