@@ -62,7 +62,7 @@
             </ion-toolbar>
         </ion-header>
         <ion-content vh-100 top-margin (click)="emptySpaceClick()">
-            <div *ngIf="menuGrid.hasOwnProperty('Buttons')" class="menu-static">
+            <div *ngIf="menuGrid | hasProp:'Buttons'" class="menu-static">
                 <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
                     <ion-col *ngFor="let grid of grid_row; let j=index;" style="width:20%">
                         <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0">
@@ -597,14 +597,14 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     <ion-row>
                         <ion-col size="4">
                             <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
-                                [disabled]="enablePay()">
+                                [disabled]="disablePay">
                                 <!-- (patronDetails.isSpecialAccount==true && orderData.items.length === 0) || transactionInProgress -->
                                 Pay
                             </ion-button>
                         </ion-col>
                         <ion-col size="8">
                             <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)"
-                                [disabled]="enableCharge() || transactionInProgress">
+                                [disabled]="disableCharge|| transactionInProgress">
                                 Charge
                                 <!-- (patronDetails.isSpecialAccount==true && orderData.totalAmount>=0.00) || transactionInProgress -->
                                 <!-- <span *ngIf="patronDetails.Balance >= 0 && patronDetails.isSpecialAccount==false"
@@ -675,7 +675,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
       </ion-buttons>
   </ion-col> -->
     <ion-col size-md="4" size-sm="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
-        [ngClass]="{'ion-hide' : patronDetails.PersonId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue('currentTab') == 'advanced')}">
+        [ngClass]="{'ion-hide' : patronDetails.PersonId!=null || (this.countQ  != 0 && getLocalStorageValue('currentTab') == 'advanced')}">
         <page-patron-lookup [page]="type"></page-patron-lookup>
     </ion-col>
 </ion-row>

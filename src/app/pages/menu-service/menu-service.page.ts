@@ -255,6 +255,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public countQ;
     public personName: string;
     public loadingID;
+    public disablePay: boolean = false;
+    public disableCharge :boolean = false;
 
 
 
@@ -513,7 +515,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.canLoadPrevPatron = false;
         this.subscribeForLeavingPatron();
         this.subscribeForLoadingPatron();
-        this.enablePay();
+        this.disablePay = this.enablePay();
 
 
         this.event.destroy('default-terminal-menu:save');
@@ -537,15 +539,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
         });
 
 
-        this.event.subscribe('windowResized', (userEventData) => {
-            this.hideLargeImage();
-            if (this.router.url.endsWith('menu-service')) {
-                this.setTransactionListHeight();
-            }
-        });
-        this.event.subscribe('patronLargeImagehide', (userEventData) => {
-            this.hideLargeImage();
-        });
+        // this.event.subscribe('windowResized', (userEventData) => {
+           // this.hideLargeImage();
+            // if (this.router.url.endsWith('menu-service')) {
+            //     this.setTransactionListHeight();
+            // }
+        // });
+        // this.event.subscribe('patronLargeImagehide', (userEventData) => {
+            // this.hideLargeImage();
+        // });
 
         this.event.subscribe('close-review-popup:close', (userEventData) => {
             // this.event.destroy('close-review-popup:close');
@@ -853,7 +855,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.largeImageToShow = true;
                 this.largeImageSrc = image;
                 if (this.patronDetails) {
-                    this.showLargeImage(1000);
+                    // this.showLargeImage(1000);
                 }
             } else {
                 this.largeImageToShow = false;
@@ -924,13 +926,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.event.publish('patron:newPatronLoaded', JSON.stringify(this.patronDetails));
         // this.event.publish('patron-loaded', { 'patronDetails': this.patronDetails });
         if (this.largeImageToShow) {
-            this.showLargeImage(1000);
+            // this.showLargeImage(1000);
         }
 
         // }
     }
 
     public hideLargeImage() {
+
         document.querySelector('.PatronLargeImage').setAttribute('src', '');
         document.querySelector('.PatronLargeImage').setAttribute('width', 0 + 'px');
         document.querySelector('.PatronLargeImage').setAttribute('height', 0 + 'px');
@@ -938,6 +941,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             + 0 + 'px;' + 'margin-left:' + 0 + 'px;background-repeat: no-repeat;');
         this.largeImageIsShowing = false;
         this.clearLargeImageTimouts();
+
     }
 
     public clearLargeImageTimouts() {
@@ -1003,21 +1007,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
     // To set patron properties based on previous sales count
     public setPreviousSaleCounts() {
         const previousSales = this.patronDetails.PreviousSales;
-        // const date = new Date();
-        // const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
-        // const today = new Date().setHours(0, 0, 0, 0);
+
         let previousALCCount = 0;
         let previousALCAmt = 0;
 
         if (previousSales) {
 
-            // const prevSalesByMealType = _.find(previousSales,
-            //     (o) => o.MealTypeId === this.selectedMealType && JSON.stringify(o).includes(day)); // && o.SalesByMealType.Date===day
-
             /**
              * Re-Adding  the Date filter for  PA and Online Yesterday's Meal issues
              */
-            // const prevSalesByMealType = previousSales;
             const prevSalesByMealType = _.filter(previousSales,
                 (o) => o.MealTypeId === this.selectedMealType);
 
@@ -1031,13 +1029,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
              * at the time of opening sesssion on a new date
              */
 
-
-            // prevSalesByMealType.SalesByMealType = _.map(prevSalesByMealType.SalesByMealType, s => {
-            //     if (today === new Date(_.toInteger(s.Date)).setHours(0, 0, 0, 0)) {
-            //         return s;
-            //     }
-            // })
-
             let soldItemsByMealType = [];
             if (prevSalesByMealType) {
                 const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
@@ -1050,16 +1041,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             const alaCarteItems = _.filter(allItems, (o) => o.IsReimbursable === false ||
                 (o.IsReimbursable === true && o.IsSecondMeal === true));
 
-            // const restItems = _.filter(allItems, item => {
-            //     const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.MenuItemId);
-            //     if (isRestrictedItem !== -1) {
-            //         return item;
-            //     }
-            // });
-
-            // if (restItems.length > 0) {
-            //     this.restrictedAlacarteCount = restItems.length - 1;
-            // }
 
 
             if (alaCarteItems.length > 0) {
@@ -1595,11 +1576,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
         } else {
             this.showItemsInCategory(grid.RefId);
         }
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
     }
 
     public deleteMenuFromCart(index) {
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
 
         if (this.mealCount >= 1) {
             // tslint:disable-next-line:max-line-length
@@ -2148,6 +2129,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
         });
 
 
+        this.disableCharge = this.enableCharge()
+        this.disablePay = this.enablePay()
+
+
     }
 
     public checkOrderItems(menuItemDescription) {
@@ -2546,7 +2531,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
     public makeSale(transactionType) {
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
 
@@ -2730,7 +2715,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public showChargePopup() {
         // this.deviceTransactionId = this.generateUUID();
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
         if (this.orderData.items.length > 0) {
 
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
@@ -3568,7 +3553,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public goToLookUp() {
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
         /**************************keep this?****************************** */
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
@@ -3633,10 +3618,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
     public showBalance() {
         this.hideBalSetting = 0;
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
     }
     public getReviews() {
-        this.event.publish('patronLargeImagehide', null);
+       // this.event.publish('patronLargeImagehide', null);
         this.isMarkForReviewClicked = true;
         console.log('Mark for review cliked ---' + this.isMarkForReviewClicked);
         this.transactionService.getAllReviewReasons().then((reviews) => {
@@ -3921,6 +3906,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public enablePay() {
+      
         const itemLen = this.orderData.items.length;
         const totAmount = this.orderData.totalAmount;
         if (this.transactionInProgress) {
@@ -3935,6 +3921,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public enableCharge() {
+
         const itemLen = this.orderData.items.length;
         const totAmount = this.orderData.totalAmount;
         const isSpecialAccount = this.patronDetails.isSpecialAccount;
@@ -3960,7 +3947,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public emptySpaceClick() {
-        this.event.publish('patronLargeImagehide', null);
+        //// this.event.publish('patronLargeImagehide', null);
     }
 
     public getMealCategories() {
@@ -4058,7 +4045,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.largeImageToShow = true;
                 this.largeImageSrc = image;
                 if (this.selectedAccountDetails) {
-                    this.showLargeImage(1000);
+                    // this.showLargeImage(1000);
                 }
             } else {
                 this.largeImageToShow = false;
@@ -4104,7 +4091,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
         }
         if (this.largeImageToShow) {
-            this.showLargeImage(1000);
+            // this.showLargeImage(1000);
         }
         setTimeout(() => {
             this.displayDetails = true;

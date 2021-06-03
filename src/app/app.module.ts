@@ -97,6 +97,7 @@ import { SignalRService } from './services/SignalR.service';
 import { HashingService } from './services/hashing.service'
 import { LocalTimerService } from './services/local-timer.service';
 import { DeviceControlsService } from './services/device-controls.service';
+import { HasPropPipe } from './pipes/hasProperty.pipe';
 
 @NgModule({
     declarations: [
@@ -142,7 +143,8 @@ import { DeviceControlsService } from './services/device-controls.service';
         TransactionDetailsPopupPage,
         PatronListModalPage,
         CloseSessionPage,
-        QuickClassroomSalePage
+        QuickClassroomSalePage,
+        HasPropPipe
     ],
     entryComponents: [
 
