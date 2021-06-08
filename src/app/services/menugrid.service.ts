@@ -1,10 +1,6 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import { Network } from '@ionic-native/network/ngx';
-import { ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { PouchQueriesService } from '../services/Database/pouch-queries.service';
-import { UtilService } from '../services/util.service';
-import { HttpService } from '../services/HTTP/http.service';
 import { AppStateService } from '../services/app-state.service';
 import * as _ from 'lodash';
 import { SettingService } from '../services/setting.service';
@@ -20,10 +16,7 @@ export class MenugridService {
   public taxMeal: number;
 
   // Constructor
-  constructor(public network: Network, public toastCtrl: ToastController,
-    public loadingCtrl: LoadingController, public alertCtrl: AlertController,
-    private utilService: UtilService, public http: HttpService, public appStateService: AppStateService,
-    public settingService: SettingService) {
+  constructor() {
   }
   // tslint:disable-next-line:use-life-cycle-interface
   public ngOnInit() {
@@ -32,7 +25,7 @@ export class MenugridService {
   // #StartRegion Common methods
 
   public getMealTypes(schoolId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let mealTypes: any = [];
       PouchQueriesService.GetMealTypes()
         .then((res) => {
@@ -70,7 +63,7 @@ export class MenugridService {
     }
 
     // this.utilService.setLoader(true);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let defaultMenuGridId: number = 0;
 
       PouchQueriesService.GetDefaultTerminalMenuGrid(terminalId, mealId).then(
@@ -320,9 +313,9 @@ export class MenugridService {
           }
           break;
 
-          default:
-            item.IsPartOfMeal = false;
-            break;
+        default:
+          item.IsPartOfMeal = false;
+          break;
       }
     });
     return orderItems;
@@ -346,7 +339,7 @@ export class MenugridService {
 
 
   public CheckMealTypeByTime(mealTypes, mealTypeId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       const time = new Date();
       const stime =

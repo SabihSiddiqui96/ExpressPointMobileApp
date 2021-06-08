@@ -1,14 +1,10 @@
 import { Injectable } from '@angular/core';
 
-import { Device } from '@ionic-native/device/ngx';
 import PouchDB from 'pouchdb';
 import pouchdbUpsert from 'pouchdb-upsert';
 import cordovaSqlitePlugin from 'pouchdb-adapter-cordova-sqlite';
-import { LoadingController, Platform } from '@ionic/angular';
-import { AppStateService } from './app-state.service';
-import { SettingService } from '../services/setting.service';
+import { Platform } from '@ionic/angular';
 import { UtilService } from '../services/util.service';
-import { ElectronService } from './electron.service';
 import ForerunnerDB from 'forerunnerdb';
 // import { SignalRService } from '../services/SignalR.service';
 
@@ -26,7 +22,6 @@ export let EXP_PERSON_IN_MEMORY;
 export let EXP_USERS;
 
 
-declare function require(name: string);
 declare var sqlitePlugin: any;
 
 PouchDB.plugin(cordovaSqlitePlugin);
@@ -55,10 +50,7 @@ export class PouchDBService {
     //     public settingService: SettingService, public signalRService: SignalRService) {
     // }
 
-    constructor(public loading: LoadingController,
-        public platform: Platform, public utilService: UtilService,
-        public electronService: ElectronService, public device: Device, public appStateService: AppStateService,
-        public settingService: SettingService) {
+    constructor(private platform: Platform) {
         }
     private deviceId;
 
@@ -186,7 +178,7 @@ export class PouchDBService {
             return new Promise((resolve, reject) => {
                 this.pouchForCordova().then(() => {
                     resolve(null);
-                }).catch(error => {
+                }).catch(() => {
                     reject();
                 });
             });
@@ -194,7 +186,7 @@ export class PouchDBService {
             return new Promise((resolve, reject) => {
                 this.pouchForNonCordova().then(() => {
                     resolve(null);
-                }).catch(error => {
+                }).catch(() => {
                     reject();
                 });
             });
@@ -452,27 +444,27 @@ export class PouchDBService {
     public vacuumSQLite() {
         const general = sqlitePlugin.openDatabase({ name: 'EXP_COMMON.db' });
         general.transaction(t => {
-            t.executeSql('VACUUM', [], function (tx, res) { });
+            t.executeSql('VACUUM', [], function () { });
         });
 
         const staticMenus = sqlitePlugin.openDatabase({ name: 'EXP_STANDARD_MENUS.db' });
         staticMenus.transaction(t => {
-            t.executeSql('VACUUM', [], function (tx, res) { });
+            t.executeSql('VACUUM', [], function () { });
         });
 
         const dynamicMenus = sqlitePlugin.openDatabase({ name: 'EXP_DYNAMIC_MENUS.db' });
         dynamicMenus.transaction(t => {
-            t.executeSql('VACUUM', [], function (tx, res) { });
+            t.executeSql('VACUUM', [], function () { });
         });
 
         const persons = sqlitePlugin.openDatabase({ name: 'EXP_PERSON.db' });
         persons.transaction(t => {
-            t.executeSql('VACUUM', [], function (tx, res) { });
+            t.executeSql('VACUUM', [], function () { });
         });
 
         const transactions = sqlitePlugin.openDatabase({ name: 'EXP_TRANSACTIONS.db' });
         transactions.transaction(t => {
-            t.executeSql('VACUUM', [], function (tx, res) { });
+            t.executeSql('VACUUM', [], function () { });
         });
     }
 
@@ -496,31 +488,9 @@ export class PouchDBService {
         return uuid;
     }
     public SaveSystemDBValues() {
-        return new Promise((resolve, reject) => {
+        return new Promise(() => {
 
         });
-    }
-    private getDeviceID() {
-        if (this.utilService.isElectronApp()) {
-            // this.electronService.ipcRenderer.send('app-ready');
-            // this.electronService.ipcRenderer.on('device', (event, data) => {
-            //     alert('Data Device ID' + data.deviceId);
-            //     return this.deviceId = data.deviceId;
-            // });
-            return this.deviceId = JSON.parse(AppStateService.get('DeviceInfo')).uuid;
-        } else if (UtilService.isCordovaApp) {
-            return this.deviceId = this.device.uuid;
-        } else {
-            return this.deviceId = JSON.parse(AppStateService.get('DeviceInfo')).uuid;
-            // if (AppStateService.get('uuid')) {
-            //     return this.deviceId = AppStateService.get('uuid');
-            // } else {
-            //     this.deviceId = this.generateUUID();
-            //     AppStateService.set('uuid', this.deviceId);
-            //     return this.deviceId;
-            // }
-
-        }
     }
 
     public static CreatePersonDBIndex() {

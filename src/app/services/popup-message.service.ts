@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 
-import { AppStateService } from './app-state.service';
 import { PouchQueriesService } from '../services/Database/pouch-queries.service';
 import { Events } from '../services/events.service';
 import { ToastController, AlertController } from '@ionic/angular';
@@ -17,9 +16,8 @@ export class PopupMessageService {
     public chkShow: boolean = false;
     public static popupMessagesBuffered;
 
-    constructor(public alertCtrl: AlertController,
-        public toastCtrl: ToastController, public event: Events,
-        public appStateService: AppStateService) { }
+    constructor(private alertCtrl: AlertController,
+        private toastCtrl: ToastController, private event: Events) { }
 
     public getBufferedPopupMessages() {
         return new Promise((resolve, reject) => {

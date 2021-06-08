@@ -9,7 +9,7 @@ import { SystemDBService } from '../services/Database/system-db.service';
 })
 export class SystemService {
 
-  constructor(public systemDb: SystemDBService) { }
+  constructor(private systemDb: SystemDBService) { }
 
   public RestoreLocalStorage() {
 

@@ -14,7 +14,6 @@ import { PopupMessageCode } from '../services/enums/popup-message-codes';
 import { Events } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { BehaviorSubject } from 'rxjs';
-import { SiteSettingCodes } from './enums/site-setting-codes';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -37,11 +36,10 @@ export class LookupService {
 
     public menuPayselectAccountClick: boolean = false;
 
-    constructor(public loader: LoadingController, private utilService: UtilService, private http: HttpService,
-        public popupMessageService: PopupMessageService,
+    constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
+        private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
-        public electronService: ElectronService, public appStateService: AppStateService,
-        public settingService: SettingService) {
+        private electronService: ElectronService) {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
             if (userEventData.selected_patron) {
@@ -169,7 +167,7 @@ export class LookupService {
     }
 
     public lookupAndPushPersonToQ(queueInput) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.pouchDBLookup(queueInput.PIN).then(results => { // changed this to local pin look up to not
                 // lookup the students when they are from peripheral
                 if ((<any>results).length === 1) { // Unique result: Person Can be inserted in the Q without further processing
@@ -194,8 +192,8 @@ export class LookupService {
 
 
     public lookupFromNonUniquePIN(queueInput, index?) {   // Second lookup, requiring cashier interaction: On server
-        return new Promise((resolve, reject) => {
-            this.lookupByPIN(queueInput.PersonName, queueInput.InputDirection).then(results => {
+        return new Promise((resolve) => {
+            this.lookupByPIN(queueInput.PersonName, queueInput.InputDirection).then(() => {
 
                 // this.handlePersonResults()
                 if (index) {
@@ -211,7 +209,7 @@ export class LookupService {
 
 
     public showPatronModel(patronList, isFromQueue, isFromAdvPatronSearch: boolean) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const isVisitingPatronAllowed = (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) ? true : false;
             this.modalCtrl.create({
                 component: PatronListModalPage,
@@ -312,7 +310,7 @@ export class LookupService {
             this.CanServeVisitingAdults = false;
 
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             this.pouchDBLookup(pin).then(() => {
 
@@ -336,7 +334,7 @@ export class LookupService {
 
 
     public pouchDBLookup(pin) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             // fetching all partial PIN results and filtering here is 'useExactPIN' is set to true
             PouchQueriesService.PINLookup(pin).then((data) => {
                 this.lookupResults = data.rows.map(row => row.doc);
@@ -362,17 +360,12 @@ export class LookupService {
     }
 
     public serverLookup(pin, schoolId) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
 
                 if (isNetworkOnline) {
                     if ((this.CanServeVisitingAdults || (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0))) && this.utilService.isNetworkOnline()) {
-                        const loading = this.loader.create({
-                            message: 'The patron appears to be visiting. Fetching details from the server...'
-                        }).then(async (res) => {
-                            await res.present();
-                        });
                         this.http.PatronLookup(pin, schoolId).
                             subscribe
                             (
@@ -384,7 +377,7 @@ export class LookupService {
                                         this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
                                     }
                                     resolve(this.lookupResults);
-                                }, error => { this.loader.dismiss(); });
+                                }, () => { this.loader.dismiss(); });
                     } else {
                         resolve([]);
                     }
@@ -399,7 +392,7 @@ export class LookupService {
 
     // Added in Lookup refactor
     public handlePersonResults(fromAdvPatronSearch?: boolean, inputDirection = Direction.None) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (this.lookupResults.length === 0) {
                 let params = []
                 if (fromAdvPatronSearch) {
@@ -458,7 +451,7 @@ export class LookupService {
 
     public getPersonInfoByPersonId(personId) {
         // tslint:disable-next-line:no-shadowed-variable
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.utilService.setLoader(true);
             this.http.GetPersonDetailsByPersonId(personId).
                 subscribe
@@ -475,7 +468,7 @@ export class LookupService {
 
     public GetPreviousSalesByAccountId(accountId) {
         // tslint:disable-next-line:no-shadowed-variable
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.utilService.setLoader(true);
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
                 if (isNetworkOnline) {
@@ -520,7 +513,7 @@ export class LookupService {
     public AdvancedPatronlookup(selectedsite, firstname,
         lastname, externalId) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             // Selected Site ID = 00000000-0000-0000-0000-000000000000 for Other Site
             if (selectedsite.toString() !== '00000000-0000-0000-0000-000000000000') {
@@ -542,7 +535,7 @@ export class LookupService {
                         }
                         this.handlePersonResults(true).then(() => {
                             this.utilService.setLoader(false);
-                        }).catch((err) => this.utilService.setLoader(false));
+                        }).catch(() => this.utilService.setLoader(false));
                         resolve(this.lookupResults);
                     }).catch((err) => console.log(err));
             } else {
@@ -561,11 +554,6 @@ export class LookupService {
                 // this.utilService.showToast('Please connect to a network to search for students from other schools.');
             } else {
 
-                const loading = this.loader.create({
-                    message: 'The patron appears to be visiting. Fetching details from the server...'
-                }).then(async (res) => {
-                    await res.present();
-                });
                 const postData = {
                     'SelectedSchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
                     'LastName': lastname,
@@ -598,7 +586,7 @@ export class LookupService {
 
     // To set patron properties based on previous sales count
     public setPreviousSales(patron) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const previousSales = patron.PreviousSales;
             let selectedMealType = 0;
             if (AppStateService.get('mealType')) {

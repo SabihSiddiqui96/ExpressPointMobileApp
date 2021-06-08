@@ -6,12 +6,10 @@ import { GeneralDBService } from "./Database/general-db.service";
 import { PersonDBService } from "./Database/person-db.service";
 import { PouchQueriesService } from "./Database/pouch-queries.service";
 import { StaticMenusDBService } from "./Database/static-menus-db.service";
-import { SystemDBService } from "./Database/system-db.service";
 import { UsersDBService } from "./Database/users-db.service";
 import { LocalTimerService } from "./local-timer.service";
 import { PouchDBService, EXP_COMMON, EXP_DYNAMIC_MENUS, EXP_PERSON, EXP_PERSON_IN_MEMORY, EXP_STANDARD_MENUS, EXP_SYSTEM, EXP_TRANSACTIONS, EXP_USERS } from "./pouch-db.service";
 import { SettingService } from "./setting.service";
-import { UtilService } from "./util.service";
 import { StatusPopupPage } from '../pages/status-popup/status-popup.page';
 
 
@@ -22,10 +20,10 @@ import { StatusPopupPage } from '../pages/status-popup/status-popup.page';
 export class SetupDbService {
 
 
-    constructor(public generalDB: GeneralDBService, public dynamicMenusDB: DynamicMenusDBService,
-        public staticMenusDB: StaticMenusDBService, public personDB: PersonDBService,
-         public systemDb: SystemDBService, public usersDb: UsersDBService,
-          public pouchDBService: PouchDBService, public popoverCtrl: PopoverController) {
+    constructor(private generalDB: GeneralDBService, private dynamicMenusDB: DynamicMenusDBService,
+        private staticMenusDB: StaticMenusDBService, private personDB: PersonDBService,
+        private usersDb: UsersDBService,
+        private pouchDBService: PouchDBService, private popoverCtrl: PopoverController) {
 
     }
     public syncList = { 'SiteSettings': 'InProgress', 'StaticMenus': 'InProgress', 'Students': 'InProgress', 'Users': 'InProgress' };

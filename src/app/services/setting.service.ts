@@ -1,11 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { PouchQueriesService } from '../services/Database/pouch-queries.service';
-import { LoadingController } from '@ionic/angular';
-import { ModalController } from '@ionic/angular';
 import * as _ from 'lodash';
 import { AppStateService } from './app-state.service';
-import { Events } from '../services/events.service';
 import { DefaultSettingValue } from './enums/default-setting-value';
 
 @Injectable({
@@ -13,7 +9,7 @@ import { DefaultSettingValue } from './enums/default-setting-value';
 })
 export class SettingService {
 
-  constructor(public appStateService: AppStateService) {
+  constructor() {
 
   }
 

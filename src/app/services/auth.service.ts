@@ -15,7 +15,7 @@ export class AuthService {
     public get authData(): Observable<any> {
         return this._authData.asObservable();
     }
-    constructor(public http: HttpService) {
+    constructor(private http: HttpService) {
 
     }
 

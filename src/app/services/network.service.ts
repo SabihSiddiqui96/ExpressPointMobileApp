@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 
 import { Network } from '@ionic-native/network/ngx';
 import { UtilService } from '../services/util.service';
-import { Platform, AlertController } from '@ionic/angular';
 import { AppStateService } from '../services/app-state.service';
 import { Events } from '../services/events.service';
 
@@ -16,8 +15,8 @@ export class NetworkService {
   public serverFrequentNotReachable = 'ExpressPoint is experiencing a problem connecting to the server.';
   public forceOfflineDriver;
   public forceOfflineReason;
-  constructor(public platform: Platform, private network: Network, public utilService: UtilService,
-    private event: Events, public alertCtrl: AlertController, public appStateService: AppStateService) {
+  constructor(private network: Network, private utilService: UtilService,
+    private event: Events) {
     enum forceOfflineDriver {
       server = 1,
       network = 2
@@ -200,11 +199,11 @@ export class NetworkService {
       // Works in IE, but Chrome and firefox browsers are currently not supporting these events
       // so currently only timeouts can handle this using offline counter
       const _thisRef = this;
-      window.addEventListener('online', function (e) {
+      window.addEventListener('online', function () {
         _thisRef.event.publish('networkService:checkServerConnection', {});
       }, false);
 
-      window.addEventListener('offline', function (e) {
+      window.addEventListener('offline', function () {
         _thisRef.isOnline = false;
         console.log('network change - disconnected!');
         _thisRef.setNetworkStatusForApp();
@@ -216,7 +215,7 @@ export class NetworkService {
 
   public subscribeForServerChanges() {
     const _thisRef = this;
-    this.event.subscribe('networkService:apiFailure', (data) => {
+    this.event.subscribe('networkService:apiFailure', () => {
       // We update server counters only post login
       if (AppStateService.get('login_details')) {
         _thisRef.setServerStatusForApp();

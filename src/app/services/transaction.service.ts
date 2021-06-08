@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
 
 import { PouchQueriesService } from '../services/Database/pouch-queries.service';
-import { LoadingController, AlertController, NavController } from '@ionic/angular';
+import { AlertController, NavController } from '@ionic/angular';
 import { AppStateService } from './app-state.service';
 import { HttpService } from '../services/HTTP/http.service';
 import { PouchDBService, EXP_TRANSACTIONS } from '../services/pouch-db.service';
 import { UtilService } from '../services/util.service';
 import { Events as CustomEvents } from '../services/events.service';
 import { ElectronService } from './electron.service';
-import { LogoutPage } from '../pages/logout/logout.page';
-import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 
 @Injectable({
@@ -23,13 +21,12 @@ export class TransactionService {
     private subject = new Subject<any>();
     public pendingTransactionMsg = 'Not all of the transactions have been sent. Do you want to continue shutting down ExpressPoint ?';
 
-    constructor(public http: HttpService, private pouchQuery: PouchQueriesService,
-        private utilService: UtilService, public electronService: ElectronService,
-        public alertCtrl: AlertController, public event: CustomEvents, public navCtrl: NavController,
-        public router: Router, public appStateService: AppStateService) {
+    constructor(private http: HttpService, private pouchQuery: PouchQueriesService,
+        private utilService: UtilService, private electronService: ElectronService,
+        private alertCtrl: AlertController, private event: CustomEvents, private navCtrl: NavController) {
 
         if (this.utilService.isElectronApp()) {
-            this.electronService.ipcRenderer.on('Check-For-transactions', (event, data) => {
+            this.electronService.ipcRenderer.on('Check-For-transactions', () => {
                 console.log('Check-For-pending transactions called...');
 
                 let isOpenSession;
@@ -124,7 +121,7 @@ export class TransactionService {
     }
 
     public getAllTransactions(): any {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             PouchQueriesService.GetAllPendingTransactions().then((res) => {
                 this.transactions = res.rows.map(row => row.doc);
@@ -137,7 +134,7 @@ export class TransactionService {
 
 
     public getUpdatedTransactions(): any {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             // EXP_TRANSACTIONS.changes({ live: true, since: 'now', include_docs: true }).on('change', (change) => {
 
@@ -204,12 +201,12 @@ export class TransactionService {
     }
 
     public hasPendingTransactions(): any {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             let notSentTransactions: any = [];
             let hasPendingTransactions: boolean = false;
 
-            this.getAllTransactions().then((transactions) => {
+            this.getAllTransactions().then(() => {
                 // this.Transactions = transactions
                 notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsSynced === false);
 
@@ -226,9 +223,9 @@ export class TransactionService {
     }
 
     public areTransactionsProcessed(): any {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let notProcessed: boolean = false;
-            this.getAllTransactions().then((transactions) => {
+            this.getAllTransactions().then(() => {
                 notProcessed = this.transactions.find((doc) => doc.saleData.IsProcessed === false);
                 resolve(notProcessed);
             });
@@ -272,7 +269,7 @@ export class TransactionService {
     // }
 
     public CheckSessionInAppState() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (AppStateService.get('session_id') === null || AppStateService.get('session_id') === undefined) {
                 PouchQueriesService.GetAllOpenSessions().then(data => {
 

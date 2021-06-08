@@ -7,7 +7,7 @@ import { AppStateService } from '../services/app-state.service';
 })
 export class SwitchHandsService {
 
-  constructor(public appStateService: AppStateService) {
+  constructor() {
     //
   }
 

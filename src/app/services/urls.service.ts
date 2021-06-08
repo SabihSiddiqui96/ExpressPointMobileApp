@@ -12,7 +12,7 @@ export let SC_URL = 'https://apis.schoolcafe.com/api/';
 })
 export class UrlsService {
 
-  constructor(public appStateService: AppStateService) {
+  constructor() {
 
   }
   public setURL(url) {

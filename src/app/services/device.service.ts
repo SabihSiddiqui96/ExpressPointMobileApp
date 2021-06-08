@@ -32,12 +32,12 @@ export class DeviceService {
 
   public deviceDetails = { DeviceStatusId: null, uuid: null };
 
-  constructor(public network: Network, public toastCtrl: ToastController,
-    public loadingCtrl: LoadingController, public alertCtrl: AlertController,
-    private utilService: UtilService, public http: HttpService,
-    public device: Device, public urlHandler: UrlsService,
-    public electronService: ElectronService, public systemService: SystemService,
-    public appStateService: AppStateService, public event: Events
+  constructor(private network: Network, private toastCtrl: ToastController,
+    private loadingCtrl: LoadingController, private alertCtrl: AlertController,
+    private utilService: UtilService, private http: HttpService,
+    private device: Device, private urlHandler: UrlsService,
+    private electronService: ElectronService, private systemService: SystemService,
+    private appStateService: AppStateService, private event: Events
   ) {
   }
 

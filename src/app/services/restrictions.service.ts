@@ -1,18 +1,11 @@
 import { Injectable } from '@angular/core';
 
-import { NgZone } from '@angular/core';
-import { PopoverController, ModalController, AlertController } from '@ionic/angular';
 import * as _ from 'lodash';
-import { Network } from '@ionic-native/network/ngx';
 import { PouchQueriesService } from '../services/Database/pouch-queries.service';
-import { EXP_COMMON, EXP_PERSON } from '../services/pouch-db.service';
-import { UtilService } from '../services/util.service';
 import { AppStateService } from '../services/app-state.service';
-import { HttpService } from '../services/HTTP/http.service';
 import { SettingService } from '../services/setting.service';
 import { PopupMessageCode } from '../services/enums/popup-message-codes';
 import { PopupMessageService } from '../services/popup-message.service';
-import { Events } from '../services/events.service';
 
 
 @Injectable({
@@ -55,17 +48,7 @@ export class RestrictionsService {
     public sepChargeLimit: boolean = false;
 
     constructor(
-        public popoverCtrl: PopoverController,
-        public zone: NgZone,
-        public http: HttpService,
-        public event: Events,
-        // public patronLookup: PatronLookup,
-        public network: Network,
-        public utilService: UtilService,
-        public modalCtrl: ModalController,
-        public popupMessageService: PopupMessageService,
-        public alertCtrl: AlertController, public appStateService: AppStateService,
-        public settingService: SettingService) {
+        private popupMessageService: PopupMessageService) {
 
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -707,22 +690,6 @@ export class RestrictionsService {
     }
 
     public showDialog(title, message) { // For temporary purpose. Once new pop up messages are inserted into database will remove it
-        const confirm = this.alertCtrl.create({
-            header: title, // popupMessageDoc.Header,
-            message: '<strong>' + message + '</strong>', // popupMessageDoc[0]['MessageDescription'],
-            cssClass: 'customAlertCss',
-            buttons: [
-                {
-                    text: 'Ok',
-                    handler: () => {
-
-                    }
-                }
-            ],
-            backdropDismiss: false
-        }).then(async (res) => {
-            await res.present();
-        });
     }
 
     public showConfirm() {

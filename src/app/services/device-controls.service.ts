@@ -5,7 +5,7 @@ import { GeneralDBService } from "./Database/general-db.service";
     providedIn: 'root'
 })
 export class DeviceControlsService {
-    constructor(public generalDB: GeneralDBService) {
+    constructor(private generalDB: GeneralDBService) {
 
     }
 

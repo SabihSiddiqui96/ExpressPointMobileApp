@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 
-import { Idle, DEFAULT_INTERRUPTSOURCES, DocumentInterruptSource } from '@ng-idle/core';
+import { Idle, DocumentInterruptSource } from '@ng-idle/core';
 // import { Observable } from 'rxjs/Observable';
 import { AlertController } from '@ionic/angular';
-import { AppStateService } from './app-state.service';
 import { SettingService } from './setting.service';
 import { Observable } from 'rxjs';
 
@@ -18,8 +17,7 @@ export class SessionTimeoutService {
   public dismiss: any;
   public timeOutWarning = null;
 
-  constructor(public idle: Idle, private alertCtrl: AlertController, public appStateService: AppStateService,
-    public settingService: SettingService) {
+  constructor(private idle: Idle, private alertCtrl: AlertController) {
     this.dismissObserver = null; // subscription on app.component that takes care of navigation to root
 
     this.dismiss = Observable.create(observer => {
