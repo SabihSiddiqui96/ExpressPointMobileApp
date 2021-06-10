@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 
-import PouchDB from 'pouchdb';
+// import PouchDB from 'pouchdb';
 import pouchdbUpsert from 'pouchdb-upsert';
+// import * as worker from 'worker-pouch'
+
+import PouchDB from 'pouchdb-browser';
+import WorkerPouch from 'worker-pouch';
 import cordovaSqlitePlugin from 'pouchdb-adapter-cordova-sqlite';
 import { Platform } from '@ionic/angular';
 import { UtilService } from '../services/util.service';
@@ -23,11 +27,14 @@ export let EXP_USERS;
 
 
 declare var sqlitePlugin: any;
+// var PouchDB = require('pouchdb');
+// PouchDB.plugin(cordovaSqlitePlugin);
+// PouchDB.adapter('worker', require('worker-pouch'));
+// PouchDB.plugin(worker)
 
-PouchDB.plugin(cordovaSqlitePlugin);
 PouchDB.plugin(pouchdbUpsert);
 
-
+(<any>PouchDB).adapter('worker', WorkerPouch);
 
 @Injectable({
     providedIn: 'root'
@@ -51,7 +58,7 @@ export class PouchDBService {
     // }
 
     constructor(private platform: Platform) {
-        }
+    }
     private deviceId;
 
     // public static  ResetDB(includeSystemDb = true) {
@@ -166,7 +173,7 @@ export class PouchDBService {
 
     // }
 
-    public   initializePouchDB() {
+    public initializePouchDB() {
 
         this.fDB = new ForerunnerDB();
         this.dbName = this.fDB.db('myTestdb');
@@ -220,16 +227,22 @@ export class PouchDBService {
 
         return new Promise((resolve) => {
 
-            function checkIDBAdapter() {
+            // function checkIDBAdapter() {
+            //     return Promise.resolve(null).then(() => {
+            //         EXP_COMMON = new PouchDB('EXP_COMMON', { adapter: 'idb', revs_limit: 1, auto_compaction: true });
+            //         return EXP_COMMON.info();
+            //     }).then(() => true).catch(() => false);
+            // }
+            function checkWebWorkerAdapter() {
                 return Promise.resolve(null).then(() => {
-                    EXP_COMMON = new PouchDB('EXP_COMMON', { adapter: 'idb', revs_limit: 1, auto_compaction: true });
+                    EXP_COMMON = new PouchDB('EXP_COMMON', { adapter: 'worker', revs_limit: 1, auto_compaction: true });
                     return EXP_COMMON.info();
                 }).then(() => true).catch(() => false);
             }
 
-            checkIDBAdapter().then((result) => {
+            checkWebWorkerAdapter().then((result) => {
                 idbSupported = result;
-                const adapter = idbSupported ? 'idb' : 'websql';
+                const adapter = idbSupported ? 'worker' : 'websql';
                 // adapter = 'memory';
                 if (!idbSupported) {
                     EXP_COMMON = new PouchDB('EXP_COMMON', { adapter: adapter, revs_limit: 1, auto_compaction: true });
@@ -344,7 +357,7 @@ export class PouchDBService {
             }))
             .then((doc) => {
                 db.bulkDocs(doc);
-                if (db.name === 'EXP_PERSON') {                    
+                if (db.name === 'EXP_PERSON') {
                     EXP_PERSON_IN_MEMORY.upsert(doc);
                 }
             });

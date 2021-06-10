@@ -169,7 +169,7 @@ export class AppComponent {
     public appStateService: AppStateService,
     public settingService: SettingService,
     public authService: AuthService,
-    public keyboard: Keyboard, public signalRService: SignalRService,public setupDbService:SetupDbService
+    public keyboard: Keyboard, public signalRService: SignalRService, public setupDbService: SetupDbService
   ) {
     if (AppStateService.get("login_details")) {
       const loginDetails = JSON.parse(AppStateService.get("login_details"));

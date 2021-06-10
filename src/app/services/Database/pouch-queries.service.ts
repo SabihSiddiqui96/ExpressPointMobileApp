@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import PouchDB from 'pouchdb';
-import PouchdbFind from 'pouchdb-find';
+// import PouchDB from 'pouchdb';
+// import PouchdbFind from 'pouchdb-find';
 import { PouchDBService, EXP_COMMON, EXP_DYNAMIC_MENUS, EXP_STANDARD_MENUS, EXP_PERSON, EXP_TRANSACTIONS, EXP_SYSTEM, EXP_PERSON_IN_MEMORY, EXP_USERS } from '../pouch-db.service';
 import { HttpService } from '../HTTP/http.service';
 import * as _ from 'lodash';
@@ -11,8 +11,8 @@ import { SettingService } from '../setting.service';
 import { HashingService } from '../hashing.service';
 declare var require: any;
 
-PouchDB.plugin(require('pouchdb-upsert'));
-PouchDB.plugin(PouchdbFind);
+// PouchDB.plugin(require('pouchdb-upsert'));
+// PouchDB.plugin(PouchdbFind);
 
 @Injectable({
   providedIn: 'root'
