@@ -1,3 +1,4 @@
+import { MenuServiceModule } from './pages/menu-service/menu-service.module';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
@@ -207,7 +208,8 @@ import { HasPropPipe } from './pipes/hasProperty.pipe';
         ReactiveFormsModule,
         KeyDownListenerModule,
         NgIdleModule.forRoot(),
-        IonicModule.forRoot({ mode: 'md' })
+        IonicModule.forRoot({ mode: 'md' }),
+        MenuServiceModule
     ],
     providers: [
         StatusBar,

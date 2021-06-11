@@ -46,6 +46,8 @@ import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
+import { MenuServiceToolbarComponent, MenuServiceToolbarEvent } from './components/menu-service-toolbar/menu-service-toolbar.component';
+import { Subscription } from 'rxjs';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -98,10 +100,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // this.event.destroy('all_categories:show');
             this.showAllCategories();
         });
+
+        this.subscribeToMenuServicePopupEvents();
     }
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
+
+    @ViewChild(MenuServiceToolbarComponent, { static: false })
+    public menuServiceToolbarComponent;
 
     public type = 'MenuService';
     // public patronId = null;
@@ -113,14 +120,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     };
     // public setting={}
     public dayOfWeek = '0';
-    public days = [{ 'value': 0, 'label': 'Sunday' },
-    { 'value': 1, 'label': 'Monday' },
-    { 'value': 2, 'label': 'Tuesday' },
-    { 'value': 3, 'label': 'Wednesday' },
-    { 'value': 4, 'label': 'Thursday' },
-    { 'value': 5, 'label': 'Friday' },
-    { 'value': 6, 'label': 'Saturday' },
-    ];
     public paymentValidation;
     public tempMealTypeId = 0;
     public defaultMealTypeId = 0;
@@ -256,8 +255,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public personName: string;
     public loadingID;
     public disablePay: boolean = false;
-    public disableCharge :boolean = false;
-
+    public disableCharge: boolean = false;
+    private popupSubscription: Subscription;
 
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
@@ -540,13 +539,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
         // this.event.subscribe('windowResized', (userEventData) => {
-           // this.hideLargeImage();
-            // if (this.router.url.endsWith('menu-service')) {
-            //     this.setTransactionListHeight();
-            // }
+        // this.hideLargeImage();
+        // if (this.router.url.endsWith('menu-service')) {
+        //     this.setTransactionListHeight();
+        // }
         // });
         // this.event.subscribe('patronLargeImagehide', (userEventData) => {
-            // this.hideLargeImage();
+        // this.hideLargeImage();
         // });
 
         this.event.subscribe('close-review-popup:close', (userEventData) => {
@@ -1576,11 +1575,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
         } else {
             this.showItemsInCategory(grid.RefId);
         }
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
     }
 
     public deleteMenuFromCart(index) {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
 
         if (this.mealCount >= 1) {
             // tslint:disable-next-line:max-line-length
@@ -2531,7 +2530,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
     public makeSale(transactionType) {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
 
@@ -2715,7 +2714,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public showChargePopup() {
         // this.deviceTransactionId = this.generateUUID();
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         if (this.orderData.items.length > 0) {
 
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
@@ -3441,85 +3440,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.event.publish('patron-released', { 'patronDetails': null });
     }
 
-    public showPopup(type) {
-
-        // if (this.patronDetails.PersonId == null) {
-        if (this.patronDetails.PersonId != null && (type === 'mealType' || type === 'dayOfWeek' || type === 'menuType')) {
-            this.popupMessageService.showMessage(PopupMessageCode.E05341);
-            // this.utilService.showToast('Please complete the current transaction before switching menus.');
-        } else {
-            let postData = {};
-
-            switch (type) {
-                case 'dayOfWeek': postData = { 'type': type, 'data': this.days, 'selectedValue': this.dayOfWeek }; break;
-                case 'mealType': postData = { 'type': type, 'data': this.mealTypes, 'selectedValue': this.selectedMealType }; break;
-                case 'menuType': postData = { 'type': type, 'data': this.menuTypes, 'selectedValue': this.selectedMenuType }; break;
-                case 'ReviewTypes': postData = { 'type': type, 'data': this.reviewReasons, 'selectedValue': this.reviewType }; break;
-            }
-
-            if (postData['data'].length > 0) {
-
-                if (type == 'ReviewTypes') {
-                    this.popoverCtrl.create({
-                        component: AllPopupPage,
-                        componentProps: postData,
-                        backdropDismiss: false,
-                        cssClass: 'user_ppup center_ppup'
-                    }).then(async (res) => {
-                        await res.present();
-                    });
-
-                }
-                else {
-                    this.popoverCtrl.create({
-                        component: AllPopupPage,
-                        componentProps: postData
-                        , cssClass: this.utilService.popupCenter.cssClass
-                    }).then(async (res) => {
-                        await res.present();
-                    });
-
-                }
-
-
-
-                this.event.subscribe('menu-service-popup', (userEventData) => {
-                    if (userEventData.selectedData) {
-                        const selectedData = userEventData.selectedData;
-                        console.log(selectedData);
-                        const typeOption = userEventData.type;
-
-                        switch (typeOption) {
-                            case 'dayOfWeek': this.dayOfWeek = selectedData.value;
-                                this.dayChange(); break;
-
-                            case 'mealType': this.tempMealTypeId = selectedData.value;
-                                this.tempMealTypeName = selectedData.label;
-                                AppStateService.set('mealType', this.tempMealTypeId);
-                                this.changeMealType(this.tempMealTypeId, this.tempMealTypeName);
-                                break;
-
-                            case 'menuType': this.selectedMenuType = selectedData.value!== undefined ? selectedData.value : this.selectedMenuType;
-                                this.selectedMenuTypeName = selectedData.label!== undefined ? selectedData.label :this.selectedMenuTypeName;
-                                this.changeMenuType();
-                                break;
-                            case 'ReviewTypes': this.reviewType = selectedData.value;
-                                const reviewTypeDescription = selectedData.label;
-                                const reviewTypeCd = selectedData.key;
-                                this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
-                                break;
-                        }
-                    }
-                });
-            }
-
-            //     }
-            // else {
-            //         this.utilService.showToast('Please complete this transaction before changing the menu.');
-            //     }
-        }
-        // }
-    }
     public generateUUID() {
         let d = new Date().getTime();
         if (window.performance && typeof window.performance.now === 'function') {
@@ -3553,7 +3473,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public goToLookUp() {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         /**************************keep this?****************************** */
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
@@ -3618,10 +3538,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
     public showBalance() {
         this.hideBalSetting = 0;
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
     }
     public getReviews() {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         this.isMarkForReviewClicked = true;
         console.log('Mark for review cliked ---' + this.isMarkForReviewClicked);
         this.transactionService.getAllReviewReasons().then((reviews) => {
@@ -3632,7 +3552,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.isMarkForReviewClicked = false;
                 // this.utilService.showToast('No Review type available.');
             } else {
-                this.showPopup('ReviewTypes');
+                this.menuServiceToolbarComponent.showReviewTypePopup();
             }
         });
     }
@@ -3906,7 +3826,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public enablePay() {
-      
+
         const itemLen = this.orderData.items.length;
         const totAmount = this.orderData.totalAmount;
         if (this.transactionInProgress) {
@@ -3926,7 +3846,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const totAmount = this.orderData.totalAmount;
         const isSpecialAccount = this.patronDetails.isSpecialAccount;
 
-   if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
+        if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
             const projBal = this.selectedAccountDetails.Balance - this.orderData.totalAmount;
             if (itemLen > 0 && totAmount >= 0.00 && projBal >= 0) { // To enable Charge button when account is linked to adult
                 return false;
@@ -4129,6 +4049,22 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
+    public onToolbarEvent(event: MenuServiceToolbarEvent) {
+        switch (event) {
+            case MenuServiceToolbarEvent.OpenTransactionViewer:
+                this.openTransactionViewer();
+                break;
+
+            case MenuServiceToolbarEvent.ShowAllCategories:
+                this.showAllCategories();
+                break
+
+            default:
+                console.error("unknown toolbar event");
+                break
+        }
+    }
+
     private calcAlaTotal(items) { // To calculate sum of only categorical restricted ala carte items
         this.alacarteTotal = 0.00;
         const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
@@ -4148,6 +4084,44 @@ export class MenuServicePage implements OnInit, OnDestroy {
             return this.alacarteTotal;
         } else {
             return this.alacarteTotal;
+        }
+    }
+
+    private subscribeToMenuServicePopupEvents() {
+        this.popupSubscription = this.event.subscribe('menu-service-popup', (userEventData) => {
+            if (userEventData.selectedData) {
+                const selectedData = userEventData.selectedData;
+                console.log(selectedData);
+                const typeOption = userEventData.type;
+
+                switch (typeOption) {
+                    case 'dayOfWeek': this.dayOfWeek = selectedData.value;
+                        this.dayChange(); break;
+
+                    case 'mealType': this.tempMealTypeId = selectedData.value;
+                        this.tempMealTypeName = selectedData.label;
+                        AppStateService.set('mealType', this.tempMealTypeId);
+                        this.changeMealType(this.tempMealTypeId, this.tempMealTypeName);
+                        break;
+
+                    case 'menuType': this.selectedMenuType = selectedData.value !== undefined ? selectedData.value : this.selectedMenuType;
+                        this.selectedMenuTypeName = selectedData.label !== undefined ? selectedData.label : this.selectedMenuTypeName;
+                        this.changeMenuType();
+                        break;
+
+                    case 'ReviewTypes': this.reviewType = selectedData.value;
+                        const reviewTypeDescription = selectedData.label;
+                        const reviewTypeCd = selectedData.key;
+                        this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
+                        break;
+                }
+            }
+        });
+    }
+
+    private unsubscribeToMenuServicePopupEvents() {
+        if (this.popupSubscription) {
+            this.popupSubscription.unsubscribe();
         }
     }
 }

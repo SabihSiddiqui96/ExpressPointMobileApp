@@ -1,73 +1,20 @@
 <ion-row vh-100 bg-theme>
     <ion-col size="12" size-md="8" size-sm="8" [attr.push-md]="swapRight==true ? 4: 0"
-        [attr.push-sm]="swapRight==true ? 4: 0" class="panel-main">
-        <ion-header>
-            <ion-toolbar color="slate">
-                <ion-row style="align-items: center ">
-                    <!--<ion-col col-1>
-                    <ion-button default expand="block" fill="clear" transparent (click)="popoverClick($event)">
-                      <ion-icon name="menu"></ion-icon>
-                    </ion-button>
-                  </ion-col>-->
-                    <!-- <ion-col col-1>
-                      <ion-button default expand="block" fill="clear" transparent (click)="goToServicePage()">
-                          <ion-icon name="arrow-round-back"></ion-icon>
-                      </ion-button>
-                  </ion-col> -->
-                    <ion-col size="1">
-                        <!-- <ion-buttons> -->
-                        <!-- <ion-button default expand="block" (click)="showOptions($event)">
-                              <ion-icon name="menu"></ion-icon>
-                          </ion-button> -->
-                        <ion-menu-toggle>
-                            <ion-button class="btn-full-size-icon" fill="clear" [ngClass]="{'ion-hide':swapRight}"
-                                push-md="4">
-                                <ion-icon slot="icon-only" name="menu">
-                                </ion-icon>
-                            </ion-button>
-                        </ion-menu-toggle>
-                        <!-- </ion-buttons> -->
-                    </ion-col>
-                    <ion-col size="2">
-                        <ion-button default expand="block" (click)="showPopup('dayOfWeek')">
-                            <span>{{days[dayOfWeek].label}}</span>
-                        </ion-button>
-                    </ion-col>
-                    <ion-col size="2">
-                        <ion-button default expand="block" (click)="showPopup('mealType')">
-                            <span *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</span>
-                            <span *ngIf="selectedMealType == -1">Meal
-                                Type</span>
-                        </ion-button>
-                    </ion-col>
-                    <ion-col size="5">
-                        <ion-button default expand="block" (click)="showPopup('menuType')">
-                            <span *ngIf="selectedMenuType != -1">{{selectedMenuTypeName}}</span>
-                            <span *ngIf="selectedMenuType == -1">Menu</span>
-                        </ion-button>
-                    </ion-col>
-                    <ion-col size="1">
-                        <ion-button class="btn-full-size-icon" default expand="block" fill="clear"
-                            (click)="showAllCategories()">
-                            <ion-icon slot="icon-only" name="apps"></ion-icon>
-                        </ion-button>
-                    </ion-col>
-                    <ion-col size="1">
-                        <ion-button class="btn-full-size-icon" expand="block" (click)="openTransactionViewer()">
-                            <ion-icon slot="icon-only" name="ios-paper">
-                            </ion-icon>
-                        </ion-button>
-                    </ion-col>
-                </ion-row>
-            </ion-toolbar>
-        </ion-header>
+        [attr.push-sm]="swapRight==true ? 4: 0" class="panel-main" style="padding:0">
+        <app-menu-service-toolbar [personId]="patronDetails.PersonId" [dayOfWeek]="dayOfWeek" [mealTypes]="mealTypes"
+            [selectedMealType]="selectedMealType" [selectedMealTypeName]="selectedMealTypeName" [menuTypes]="menuTypes"
+            [selectedMenuType]="selectedMenuType" [selectedMenuTypeName]="selectedMenuTypeName"
+            [reviewReasons]="reviewReasons" [reviewType]="reviewType" [swapRight]="swapRight"
+            (changes)="onToolbarEvent($event)">
+        </app-menu-service-toolbar>
         <ion-content vh-100 top-margin (click)="emptySpaceClick()">
-            <div *ngIf="menuGrid | hasProp:'Buttons'" class="menu-static">
+            <div *ngIf="menuGrid.hasOwnProperty('Buttons')" class="menu-static">
                 <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
                     <ion-col *ngFor="let grid of grid_row; let j=index;" style="width:20%">
                         <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0">
-                            <ion-button [tabindex]="i+j" expand="block" [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor"
-                                [style.display]="" [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
+                            <ion-button [tabindex]="i+j" expand="block"
+                                [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor" [style.display]=""
+                                [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
                                 [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
                                 [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
                                 (click)="gridClick(grid);">
@@ -94,7 +41,6 @@
                             <ion-icon name="menu" slot="icon-only"></ion-icon>
                         </ion-button>
                     </ion-menu-toggle>
-                    <!-- <ion-buttons right> -->
                     <ion-row>
                         <ion-col size="3">
                             <ion-button class="btn-full-size-icon" default expand="block" (click)="makeSale(0)">
@@ -170,7 +116,8 @@
                                     </ion-button>
                                 </ion-col>
                                 <ion-col size="3" size-md="3" size-sm="3">
-                                    <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn" *ngIf = "canLoadPrevPatron"
+                                    <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                                        *ngIf="canLoadPrevPatron"
                                         [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
                                         style="height:3.6rem; font-size: 65%;" [disabled]="!canLoadPrevPatron">
                                         &lt; &lt; &nbsp;Previous
@@ -226,7 +173,8 @@
                                                         [style.font-size.rem]="((isElectronApp === true) && ((patronDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                                                         [ngClass]="{'color-green': patronDetails.Balance > 0, 'color-red': patronDetails.Balance < 0 }"
                                                         [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'"
-                                                        (click)="showBalance()">{{patronDetails.Balance | currency:'USD':true:'1.2-2'}}
+                                                        (click)="showBalance()">{{patronDetails.Balance |
+                                                        currency:'USD':true:'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
                                                                 <ion-icon name="arrow-round-forward">
                                                                 </ion-icon>
@@ -234,8 +182,8 @@
                                                         &nbsp; <span [ngClass]="{'color-green': ((patronDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -
                                                     orderData.totalAmount) ) < 0, 'color-black': ((patronDetails.Balance -
                                                     orderData.totalAmount) ) == 0 }">{{patronDetails.Balance -
-                                                        orderData.totalAmount |
-                                                        currency:'USD':true:'1.2-2'}}</span></label>
+                                                            orderData.totalAmount |
+                                                            currency:'USD':true:'1.2-2'}}</span></label>
                                                     <p>Transaction :
                                                         <b>{{transactionNumber}}</b>
                                                     </p>
@@ -253,9 +201,6 @@
                                                             *ngIf="patronDetails.IsSecondMeal==true">Meal(s)</span>
                                                     </ion-button>
                                                 </ion-col>
-                                                <!-- <ion-col size="0" style="padding: 5px;"
-                                                    *ngIf="(patronDetails.GradeId && patronDetails.HadSale===true)">
-                                                </ion-col> -->
                                             </ion-row>
                                         </ion-grid>
                                     </ion-label>
@@ -271,8 +216,6 @@
                                 </ion-col>
                                 <ion-col>
                                     <ion-avatar float-right style="width: auto !important;">
-                                        <!-- <ion-icon name="contact" *ngIf="!patronImage && patronDetails.IsStudent"></ion-icon> -->
-
                                         <img src="{{patronImage}}" *ngIf="patronImage" (click)="showLargeImage(10)"
                                             style="padding-right:3px!important;">
 
@@ -297,44 +240,6 @@
                     </ion-label>
 
                 </ion-item-divider>
-                <!-- <ion-item-divider *ngIf="patronDetails.isSpecialAccount==false" class="patron-info-actions">
-                  <ion-row>
-
-                      <ion-col col-4 *ngIf="!hideAddFunds">
-                          <ion-button default expand="block" icon-start (click)="ShowAddDollarPopover($event)"
-                              *ngIf="patronDetails.isSpecialAccount==false"
-                              [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'">
-                              Add Funds
-                          </ion-button>
-                      </ion-col>
-
-                      <ion-col col-4>
-                          <ion-button default expand="block" icon-start (click)="ShowallergyPopover($event)"
-                              [style.border]="(this.allergenCount > 0  || this.patronDetails.SpecialInstruction_count > 0
-      || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
-      this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
-      || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')? '4px solid #b22222':''">
-                              Alerts
-                              <span
-                                  *ngIf="(this.allergenCount > 0  || this.patronDetails.SpecialInstruction_count > 0
-      || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
-      this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
-      || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')">*</span>
-
-                          </ion-button>
-                      </ion-col>
-                      <ion-col col-4>
-                          <ion-button default expand="block" icon-start (click)="getReviews()"
-                              [style.border]="isMarked ? '4px solid #27FA58':''" [disabled]='isMarkForReviewClicked'>
-                              Mark for Review
-                              <span *ngIf='isMarked'>*</span>
-                              <div class="spinMarkForReview" *ngIf='isMarkForReviewClicked'>
-                                  <ion-spinner name="bubbles"></ion-spinner>
-                              </div>
-                          </ion-button>
-                      </ion-col>
-                  </ion-row>
-              </ion-item-divider> -->
             </ion-list>
 
             <ion-list lines="none" *ngIf="displayDetails" class="panel-patron-info" style="margin-top: 0;">
@@ -391,16 +296,18 @@
                                                         [style.font-size.rem]="((isElectronApp === true) && ((selectedAccountDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                                                         [ngClass]="{'color-green': selectedAccountDetails.Balance > 0, 'color-red': selectedAccountDetails.Balance < 0 }"
                                                         [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? ' ': 'none'"
-                                                        (click)="showBalance()">{{selectedAccountDetails.Balance | currency:'USD':true:'1.2-2'}}
+                                                        (click)="showBalance()">{{selectedAccountDetails.Balance |
+                                                        currency:'USD':true:'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
-                                                                <ion-icon name="arrow-round-forward" style="vertical-align: text-top;">
+                                                                <ion-icon name="arrow-round-forward"
+                                                                    style="vertical-align: text-top;">
                                                                 </ion-icon>
                                                             </span></span>
                                                         &nbsp; <span [ngClass]="{'color-green': ((selectedAccountDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -
                                         orderData.totalAmount) ) < 0, 'color-black': ((selectedAccountDetails.Balance -
                                         orderData.totalAmount) ) == 0 }">{{selectedAccountDetails.Balance -
-                                            orderData.totalAmount |
-                                            currency:'USD':true:'1.2-2'}}</span></label>
+                                                            orderData.totalAmount |
+                                                            currency:'USD':true:'1.2-2'}}</span></label>
                                                     <p>Transaction :
                                                         <b>{{transactionNumber}}</b>
                                                     </p>
@@ -425,10 +332,6 @@
                                         </ion-grid>
                                     </ion-label>
                                 </ion-col>
-                                <!-- <ion-icon item-end name="rewind" color="slate" *ngIf="selectedAccountDetails.InputDirection == 1"></ion-icon>
-                    <ion-icon item-end name="fastforward" color="slate" *ngIf="selectedAccountDetails.InputDirection == 2">
-                    </ion-icon> -->
-
                                 <ion-col>
                                     <ion-avatar float-right style="width: auto !important;">
                                         <a (click)="showLargeImage(10)">
@@ -493,7 +396,6 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                             </ion-col>
                         </ion-row>
                     </ion-grid>
-                    <!--class="patron-info-actions"-->
                 </ion-item-divider>
             </ion-list>
             <ion-list class="transaction-item-header ion-no-padding ion-no-margin">
@@ -558,11 +460,11 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                 </ion-col>
                                 <ion-col size="3" style="align-self: center;">
                                     <ion-label class="ion-text-right" style="padding-right: 10px!important"
-                                        *ngIf=" !item.ShowPaidPrice ">
+                                        *ngIf="!(item.IsPartOfMeal == true && Meal_Formed==true) && item.ShowPaidPrice == false">
                                         {{item.Price | currency:'USD':true:'1.2-2'}}
                                     </ion-label>
                                     <ion-label class="ion-text-right" style="padding-right: 10px!important"
-                                        *ngIf=" item.ShowPaidPrice">
+                                        *ngIf="!(item.IsPartOfMeal == true && Meal_Formed==true) && item.ShowPaidPrice == true">
                                         {{item.PaidPrice | currency:'USD':true:'1.2-2'}}
                                     </ion-label>
                                 </ion-col>
@@ -597,23 +499,15 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     <ion-row>
                         <ion-col size="4">
                             <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
-                                [disabled]="disablePay">
+                                [disabled]="enablePay()">
                                 <!-- (patronDetails.isSpecialAccount==true && orderData.items.length === 0) || transactionInProgress -->
                                 Pay
                             </ion-button>
                         </ion-col>
                         <ion-col size="8">
                             <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)"
-                                [disabled]="disableCharge|| transactionInProgress">
+                                [disabled]="enableCharge() || transactionInProgress">
                                 Charge
-                                <!-- (patronDetails.isSpecialAccount==true && orderData.totalAmount>=0.00) || transactionInProgress -->
-                                <!-- <span *ngIf="patronDetails.Balance >= 0 && patronDetails.isSpecialAccount==false"
-                                  class="btn-transaction-charge-amount">
-                                  {{orderData.totalAmount | currency:'USD':true:'1.2-2'}}
-                              </span> -->
-                                <!-- <div class="spinLogin" *ngIf="transactionInProgress">
-                                  <ion-spinner name="bubbles"></ion-spinner>
-                              </div> -->
                             </ion-button>
                         </ion-col>
                     </ion-row>
@@ -667,16 +561,8 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
         </div>
 
     </ion-col>
-    <!-- <ion-col col-md-1 col-sm-1>
-      <ion-buttons>
-          <ion-button default expand="block" (click)="showOptions($event)" >
-            <ion-icon name="menu"></ion-icon>
-          </ion-button>
-      </ion-buttons>
-  </ion-col> -->
     <ion-col size-md="4" size-sm="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
-        [ngClass]="{'ion-hide' : patronDetails.PersonId!=null || (this.countQ  != 0 && getLocalStorageValue('currentTab') == 'advanced')}">
+        [ngClass]="{'ion-hide' : patronDetails.PersonId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue(currentTab) == 'advanced')}">
         <page-patron-lookup [page]="type"></page-patron-lookup>
     </ion-col>
 </ion-row>
-<!--|| lookUpService.getQ().length != 0-->
