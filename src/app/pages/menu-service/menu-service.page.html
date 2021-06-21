@@ -7,28 +7,10 @@
             [reviewReasons]="reviewReasons" [reviewType]="reviewType" [swapRight]="swapRight"
             (changes)="onToolbarEvent($event)">
         </app-menu-service-toolbar>
-        <ion-content vh-100 top-margin (click)="emptySpaceClick()">
-            <div *ngIf="menuGrid.hasOwnProperty('Buttons')" class="menu-static">
-                <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
-                    <ion-col *ngFor="let grid of grid_row; let j=index;" style="width:20%">
-                        <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0">
-                            <ion-button [tabindex]="i+j" expand="block"
-                                [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor" [style.display]=""
-                                [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
-                                [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
-                                [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
-                                (click)="gridClick(grid);">
-                                {{grid.ButtonDescription}}&ensp;
-                                <ion-icon name="alert" [style.display]="grid.restrictedItem==false? 'none' : ''">
-                                </ion-icon>
-                                <ion-icon name="restaurant" [style.display]="grid.IsReimbursable==false? 'none' : ' '">
-                                </ion-icon>
-                            </ion-button>
-                        </div>
-                    </ion-col>
-                </ion-row>
-            </div>
-        </ion-content>
+        <app-menu-grid [menuGrid]="menuGrid" [patronDetails]="patronDetails" [orderData]="orderData"
+            [mealCount]="mealCount" [isSecondMeal]="isSecondMeal" [secondMealPriceType]="secondMealPriceType"
+            (changes)="onMenuGridEvent($event)">
+        </app-menu-grid>
     </ion-col>
     <ion-col class="panel-main ion-no-padding"
         [ngClass]="{'ion-hide' : patronDetails.PersonId==null, 'pad-tablet':(isElectronApp===false), 'pad-electron': (isElectronApp===true)}"
@@ -424,7 +406,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     </ion-grid>
                 </ion-item-divider>
             </ion-list>
-            <ion-content scrollY="true" class="transaction-item-list" (click)="emptySpaceClick()">
+            <ion-content scrollY="true" class="transaction-item-list">
                 <ion-list class="ion-no-padding ion-no-margin">
                     <ion-item-divider *ngIf="orderData.items.length == 0">
                         <ion-label>
