@@ -33,7 +33,7 @@ export class MenuGridComponent {
     @Input() mealCount: any;
     @Input() isSecondMeal: any;
     @Input() secondMealPriceType: any;
-    @Output() changes: EventEmitter<ChangeEvent> = new EventEmitter();
+    @Output() changes: EventEmitter<MenuGridEvent> = new EventEmitter();
 
     constructor(
         private popupMessageService: PopupMessageService,
