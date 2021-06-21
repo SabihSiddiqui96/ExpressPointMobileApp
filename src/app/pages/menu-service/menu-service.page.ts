@@ -3827,16 +3827,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public enablePay() {
 
-        const itemLen = this.orderData.items.length;
-        const totAmount = this.orderData.totalAmount;
         if (this.transactionInProgress) {
             return true;
-        } else if (this.patronDetails.isSpecialAccount == true && itemLen === 0) {
-            return true;
-        } else if (this.patronDetails.isSpecialAccount == true && itemLen > 0 && totAmount === 0.00) {
-            return true;
-        } else {
-            return false;
         }
     }
 
