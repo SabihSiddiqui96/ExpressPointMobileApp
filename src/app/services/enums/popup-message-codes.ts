@@ -182,6 +182,8 @@ export enum PopupMessageCode { // refer PR_PopupMessage_Detail table
     E12476 = 'E12476',
     E12479 = 'E12479',
     E12480 = 'E12480',
+    E12510 = 'E12510',
+    E12511 = 'E12511',
 
     // 13 Menu Payment Popup
     E13361 = 'E13361',
