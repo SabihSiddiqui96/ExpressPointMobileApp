@@ -161,6 +161,6 @@ export class MenuServiceToolbarComponent implements OnInit {
     }
 
     private isPersonIdValid() {
-        return this.personId != null;
+        return this.personId !== null;
     }
 }
