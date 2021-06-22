@@ -52,17 +52,17 @@ export class MenuGridComponent {
         }
 
         if (grid.IsCategory === false) {
-            this.addMenuToCart(grid);
+            this.addMenuToCart(grid, this.patronDetails);
         } else {
             this.showItemsInCategory(grid.RefId);
         }
         // this.event.publish('patronLargeImagehide', null);
     }
 
-    public addMenuToCart(menuItem) {
+    public addMenuToCart(menuItem, patronDetails) {
 
         console.log('***************');
-        console.log(menuItem);
+        console.log(menuItem, patronDetails);
 
         if (this.checkOrderItems(menuItem.ButtonDescription)) {
             for (let i = 0; i < this.orderData.items.length; i++) {
@@ -83,15 +83,15 @@ export class MenuGridComponent {
             }
         }
 
-        if (this.patronDetails.PersonId) {
+        if (patronDetails.PersonId) {
             if (menuItem.restrictedItem === true) {
                 this.popupMessageService.showMessage(PopupMessageCode.E05366);
                 // this.utilService.showToast('Student restrictions do not allow the sale of this item.');
                 return;
             }
-            let priceTypeId = this.patronDetails['PriceTypeId'];
+            let priceTypeId = patronDetails['PriceTypeId'];
 
-            if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
+            if (patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
                 this.changes.emit({
                     type: MenuGridEventType.SetMealCount,
                     payload: 1
@@ -106,8 +106,8 @@ export class MenuGridComponent {
                     //   if (this.patronDetails['GradeId'] ||
                     //     (this.patronDetails.isSpecialAccount == true &&
                     //         JSON.parse(AppStateService.get('patron_details')).FullName == 'Student') // IsStudent Check
-                    if (this.patronDetails.IsStudent === true ||
-                        (this.patronDetails.isSpecialAccount === true &&
+                    if (patronDetails.IsStudent === true ||
+                        (patronDetails.isSpecialAccount === true &&
                             JSON.parse(AppStateService.get('patron_details')).FullName === 'Student')
                     ) {
 
@@ -124,7 +124,7 @@ export class MenuGridComponent {
                         })
                     } else { // adult
 
-                        priceTypeId = this.patronDetails['PriceTypeId'];
+                        priceTypeId = patronDetails['PriceTypeId'];
                         this.changes.emit({
                             type: MenuGridEventType.SetMealCount,
                             payload: this.mealCount + 1
@@ -223,7 +223,7 @@ export class MenuGridComponent {
                         this.event.subscribe('menu_subcategory:select', (userEventData) => {
                             this.event.destroy('menu_subcategory:select');
                             if (userEventData.subgrid) {
-                                this.addMenuToCart(userEventData.subgrid);
+                                this.addMenuToCart(userEventData.subgrid, this.patronDetails);
                             }
                         });
                     } else {

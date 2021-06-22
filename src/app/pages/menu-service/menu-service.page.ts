@@ -921,8 +921,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.isDefaultMenuItemRestricted = false;
                 }
 
-                if (this.isDefaultMenuItemRestricted === false) {
-                    this.menuGridComponent.addMenuToCart(this.defaultMenuItemDetails);
+                if (this.isDefaultMenuItemRestricted === false && this.patronDetails) {
+                    this.menuGridComponent.addMenuToCart(
+                        this.defaultMenuItemDetails, this.patronDetails);
                 }
             }
         }
@@ -3863,6 +3864,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public onMenuGridEvent(event: MenuGridEvent) {
+        console.log('rcvd event - menu-grid', event);
         switch (event.type) {
             case MenuGridEventType.SetMealCount:
                 this.mealCount = event.payload;
