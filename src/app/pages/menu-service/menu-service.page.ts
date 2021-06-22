@@ -957,44 +957,44 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public showLargeImage(timeoutVal) {
-        this.hideLargeImage();
-        this.showLargeImageTimeout = setTimeout(() => {
-            try {
+        // this.hideLargeImage();
+        // this.showLargeImageTimeout = setTimeout(() => {
+        //     try {
 
-                const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
-                    .getBoundingClientRect().top + window.scrollY);
+        //         const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
+        //             .getBoundingClientRect().top + window.scrollY);
 
-                let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
-                    .getBoundingClientRect().left + window.scrollX);
+        //         let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
+        //             .getBoundingClientRect().left + window.scrollX);
 
-                const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture'))
-                    .getBoundingClientRect().top + window.scrollY);
-                const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
+        //         const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture'))
+        //             .getBoundingClientRect().top + window.scrollY);
+        //         const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
 
-                //Calculate the exact picture width and height and show only if image available
-                if (pictureTop && pictureStartX && topPosFooter) {
-                    let pictureWidth = rightXFooter - pictureStartX;
-                    let pictureHeight = topPosFooter - pictureTop - 10;
-                    let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
-                    let diffDisp = (pictureWidth - newWidthHeight);
-                    pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
-                    pictureWidth = newWidthHeight;
-                    pictureHeight = newWidthHeight;
-                    document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
-                    document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
-                    document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
-                    document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
-                        + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
-                }
-                this.largeImageIsShowing = true;
-            } catch (e) {
-                console.log('Caught in error while enlarging picture...');
-            }
+        //         //Calculate the exact picture width and height and show only if image available
+        //         if (pictureTop && pictureStartX && topPosFooter) {
+        //             let pictureWidth = rightXFooter - pictureStartX;
+        //             let pictureHeight = topPosFooter - pictureTop - 10;
+        //             let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
+        //             let diffDisp = (pictureWidth - newWidthHeight);
+        //             pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
+        //             pictureWidth = newWidthHeight;
+        //             pictureHeight = newWidthHeight;
+        //             document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
+        //             document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
+        //             document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
+        //             document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
+        //                 + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
+        //         }
+        //         this.largeImageIsShowing = true;
+        //     } catch (e) {
+        //         console.log('Caught in error while enlarging picture...');
+        //     }
 
-            this.hideLargeImageTimeout = setTimeout(() => {
-                this.hideLargeImage();
-            }, 5000);
-        }, timeoutVal);
+        //     this.hideLargeImageTimeout = setTimeout(() => {
+        //         this.hideLargeImage();
+        //     }, 5000);
+        // }, timeoutVal);
     }
 
     public setCreditLimit() {
