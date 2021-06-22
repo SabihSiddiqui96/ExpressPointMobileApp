@@ -610,19 +610,17 @@ export class RestrictionsService {
                     return false;
                 } else if (this.settingActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
-                        this.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12510);
                         return false;
                     } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal) && reimProjBal < creditLimit) {
-                        this.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12511);
                         return false;
                     }
                     // this.popupMessageService.showMessage(PopupMessageCode.E12441);
                     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
                     return true;
                 }
-
-
-            }
+            } 
         }
 
     }
