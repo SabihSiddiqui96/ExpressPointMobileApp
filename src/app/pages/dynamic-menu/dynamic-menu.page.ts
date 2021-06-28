@@ -1765,7 +1765,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         // let item =this.orderData.items[index]
         // this.adjustTrayQuantities(item);
-
+        this.changeMealFormedStatus();
 
         this.calculateTotals();
 
@@ -2353,12 +2353,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // Group Grain, Milk, Meat: Atleast 1 from the group
             this.LUNCH_CASE_3 = (this.trayMeat >= this.requiredMeat || this.trayGrain >= this.requiredGrain || this.trayMilk >= this.requiredMilk);
 
-            if (this.mealFormed) {
-                this.LUNCH_CASE_4 = true;
-            } else {
+
+            // Took this out for https://primeroedge.freshdesk.com/a/tickets/154992
+            // if (this.mealFormed) {
+            //     this.LUNCH_CASE_4 = true;
+            // } else {
                 this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
                 ));
-            }
+            // }
 
             totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
 
