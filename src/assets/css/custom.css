@@ -1498,7 +1498,7 @@ ion-header ion-toolbar {
 }
 @media only screen and (min-height: 600px) {
   .center_ppup .popover-content {
-    top: calc(50% - (800px / 2)) !important;
+    top: calc(50% - (600px / 2)) !important;
   }
 }
 
