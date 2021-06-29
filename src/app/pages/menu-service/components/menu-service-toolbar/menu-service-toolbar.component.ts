@@ -129,11 +129,11 @@ export class MenuServiceToolbarComponent implements OnInit {
         });
     }
 
-    public showReviewTypePopup() {
+    public showReviewTypePopup(reviewReasons, reviewType) {
         const postData = {
             type: PopupType.ReviewTypes,
-            data: this.reviewReasons,
-            selectedValue: this.reviewType
+            data: reviewReasons,
+            selectedValue: reviewType
         }
 
         this.popoverCtrl.create({

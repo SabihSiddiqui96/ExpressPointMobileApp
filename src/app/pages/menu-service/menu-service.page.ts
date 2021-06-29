@@ -321,6 +321,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
 
+
+
             this.event.publish('patron-hamburger:showhide', { 'switchHands': true });
             this.event.publish('change-banner-side', { 'shiftRight': this.swapRight });
         });
@@ -3362,7 +3364,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.isMarkForReviewClicked = false;
                 // this.utilService.showToast('No Review type available.');
             } else {
-                this.menuServiceToolbarComponent.showReviewTypePopup();
+                this.menuServiceToolbarComponent.showReviewTypePopup(this.reviewReasons, this.reviewType);
             }
         });
     }
