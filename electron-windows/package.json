@@ -3,7 +3,7 @@
   "productName": "ExpressPoint",
   "description": "Point Of Service, Powered by PrimeroEdge",
   "author": "Cybersoft Technologies Inc.",
-  "version": "2.1.9",
+  "version": "2.2.0",
   "homepage": "https://primeroedge.com/",
   "main": "main.js",
   "private": true,
