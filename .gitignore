@@ -29,3 +29,9 @@ npm-debug.log*
 /platforms
 /plugins
 /www
+/electron/node_modules
+/electron/dist
+/electron/src/renderer
+/electron/ExpressPointPeripherals
+/electron/Peripherals
+
