@@ -52,17 +52,17 @@ export class MenuGridComponent {
         }
 
         if (grid.IsCategory === false) {
-            this.addMenuToCart(grid, this.patronDetails);
+            this.addMenuToCart(grid, this.patronDetails, this.mealCount);
         } else {
             this.showItemsInCategory(grid.RefId);
         }
         // this.event.publish('patronLargeImagehide', null);
     }
 
-    public addMenuToCart(menuItem, patronDetails) {
+    public addMenuToCart(menuItem, patronDetails, mealCount) {
 
         console.log('***************');
-        console.log(menuItem, patronDetails);
+        console.log(menuItem, patronDetails, mealCount);
 
         if (this.checkOrderItems(menuItem.ButtonDescription)) {
             for (let i = 0; i < this.orderData.items.length; i++) {
@@ -91,7 +91,7 @@ export class MenuGridComponent {
             }
             let priceTypeId = patronDetails['PriceTypeId'];
 
-            if (patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
+            if (patronDetails['IsSecondMeal'] === true && mealCount === 0) {
                 this.changes.emit({
                     type: MenuGridEventType.SetMealCount,
                     payload: 1
@@ -102,7 +102,7 @@ export class MenuGridComponent {
 
             if (menuItem.IsReimbursable === true) { // && !this.patronDetails.IsSecondMeal
 
-                if (this.mealCount >= 1) {
+                if (mealCount >= 1) {
                     //   if (this.patronDetails['GradeId'] ||
                     //     (this.patronDetails.isSpecialAccount == true &&
                     //         JSON.parse(AppStateService.get('patron_details')).FullName == 'Student') // IsStudent Check
@@ -127,7 +127,7 @@ export class MenuGridComponent {
                         priceTypeId = patronDetails['PriceTypeId'];
                         this.changes.emit({
                             type: MenuGridEventType.SetMealCount,
-                            payload: this.mealCount + 1
+                            payload: mealCount + 1
                         });
                         this.changes.emit({
                             type: MenuGridEventType.ConfirmedCartMenuItem,
@@ -142,7 +142,7 @@ export class MenuGridComponent {
 
                     this.changes.emit({
                         type: MenuGridEventType.SetMealCount,
-                        payload: this.mealCount + 1
+                        payload: mealCount + 1
                     });
                     this.changes.emit({
                         type: MenuGridEventType.ConfirmedCartMenuItem,
@@ -223,7 +223,7 @@ export class MenuGridComponent {
                         this.event.subscribe('menu_subcategory:select', (userEventData) => {
                             this.event.destroy('menu_subcategory:select');
                             if (userEventData.subgrid) {
-                                this.addMenuToCart(userEventData.subgrid, this.patronDetails);
+                                this.addMenuToCart(userEventData.subgrid, this.patronDetails, this.mealCount);
                             }
                         });
                     } else {

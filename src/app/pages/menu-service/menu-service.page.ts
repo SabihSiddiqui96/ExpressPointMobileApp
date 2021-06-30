@@ -925,7 +925,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 if (this.isDefaultMenuItemRestricted === false && this.patronDetails) {
                     this.menuGridComponent.addMenuToCart(
-                        this.defaultMenuItemDetails, this.patronDetails);
+                        this.defaultMenuItemDetails, this.patronDetails, 0);
                 }
             }
         }
