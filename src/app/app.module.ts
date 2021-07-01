@@ -1,3 +1,4 @@
+import { SharedComponentsModule } from './shared-components/shared-components.module';
 import { MenuServiceModule } from './pages/menu-service/menu-service.module';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -209,6 +210,7 @@ import { HasPropPipe } from './pipes/hasProperty.pipe';
         KeyDownListenerModule,
         NgIdleModule.forRoot(),
         IonicModule.forRoot({ mode: 'md' }),
+        SharedComponentsModule,
         MenuServiceModule
     ],
     providers: [

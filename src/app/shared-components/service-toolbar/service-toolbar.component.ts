@@ -1,9 +1,9 @@
-import { UtilService } from './../../../../services/util.service';
-import { PopupMessageService } from './../../../../services/popup-message.service';
+import { UtilService } from '../../services/util.service';
+import { PopupMessageService } from '../../services/popup-message.service';
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import { PopupMessageCode } from '../../../../services/enums/popup-message-codes';
+import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { PopoverController } from '@ionic/angular';
-import { AllPopupPage } from '../../../all-popup/all-popup.page';
+import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
 
 enum PopupType {
     DayOfWeek = "dayOfWeek",
@@ -12,17 +12,17 @@ enum PopupType {
     ReviewTypes = "ReviewTypes"
 }
 
-export enum MenuServiceToolbarEvent {
+export enum ServiceToolbarEvent {
     ShowAllCategories,
     OpenTransactionViewer
 }
 
 @Component({
-    selector: 'app-menu-service-toolbar',
-    templateUrl: './menu-service-toolbar.component.html',
-    styleUrls: ['./menu-service-toolbar.component.scss'],
+    selector: 'app-service-toolbar',
+    templateUrl: './service-toolbar.component.html',
+    styleUrls: ['./service-toolbar.component.scss'],
 })
-export class MenuServiceToolbarComponent implements OnInit {
+export class ServiceToolbarComponent implements OnInit {
 
     @Input() personId: string;
 
@@ -45,7 +45,7 @@ export class MenuServiceToolbarComponent implements OnInit {
 
     // TODO: Usage of the following can be cleaned up
     @Input() swapRight: any;
-    @Output() changes: EventEmitter<MenuServiceToolbarEvent> = new EventEmitter();
+    @Output() changes: EventEmitter<ServiceToolbarEvent> = new EventEmitter();
 
     public days = [
         { 'value': 0, 'label': 'Sunday' },
@@ -147,11 +147,11 @@ export class MenuServiceToolbarComponent implements OnInit {
     }
 
     public showAllCategories() {
-        this.changes.emit(MenuServiceToolbarEvent.ShowAllCategories);
+        this.changes.emit(ServiceToolbarEvent.ShowAllCategories);
     }
 
     public openTransactionViewer() {
-        this.changes.emit(MenuServiceToolbarEvent.OpenTransactionViewer);
+        this.changes.emit(ServiceToolbarEvent.OpenTransactionViewer);
     }
 
     private displayPersonSelectedPopup() {

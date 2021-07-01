@@ -47,7 +47,7 @@ import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
-import { MenuServiceToolbarComponent, MenuServiceToolbarEvent } from './components/menu-service-toolbar/menu-service-toolbar.component';
+import { ServiceToolbarComponent, ServiceToolbarEvent } from '../../shared-components/service-toolbar/service-toolbar.component';
 import { Subscription } from 'rxjs';
 
 enum SuspiciousActivityTypes {
@@ -108,8 +108,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
 
-    @ViewChild(MenuServiceToolbarComponent, { static: false })
-    public menuServiceToolbarComponent;
+    @ViewChild(ServiceToolbarComponent, { static: false })
+    public serviceToolbarComponent;
 
     @ViewChild(MenuGridComponent, { static: false })
     public menuGridComponent;
@@ -3364,7 +3364,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.isMarkForReviewClicked = false;
                 // this.utilService.showToast('No Review type available.');
             } else {
-                this.menuServiceToolbarComponent.showReviewTypePopup(this.reviewReasons, this.reviewType);
+                this.serviceToolbarComponent.showReviewTypePopup(this.reviewReasons, this.reviewType);
             }
         });
     }
@@ -3849,13 +3849,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
-    public onToolbarEvent(event: MenuServiceToolbarEvent) {
+    public onToolbarEvent(event: ServiceToolbarEvent) {
         switch (event) {
-            case MenuServiceToolbarEvent.OpenTransactionViewer:
+            case ServiceToolbarEvent.OpenTransactionViewer:
                 this.openTransactionViewer();
                 break;
 
-            case MenuServiceToolbarEvent.ShowAllCategories:
+            case ServiceToolbarEvent.ShowAllCategories:
                 this.showAllCategories();
                 break
 
