@@ -224,7 +224,7 @@ export class GoLogin implements OnDestroy {
                                 return;
                             }
                             if (this.utilService.isElectronApp()) {
-                                if (this.isWindowsAuth) {
+                                if (this.isWindowsAuth && this.login.WindowsAuth) {
                                     this.showWinAuthAlert('Windows Authentication', 'You cannot be validated through Windows' +
                                         ' Please enter your user credentials.', false);
                                 } else {
