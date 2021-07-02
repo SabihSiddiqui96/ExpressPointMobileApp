@@ -1,53 +1,56 @@
-<ion-toolbar color="slate">
-    <ion-row style="align-items: center ">
+<ion-header>
+    <ion-toolbar color="slate">
+        <ion-row style="align-items: center ">
 
-        <!-- Menu Button -->
-        <ion-col size="1">
-            <ion-menu-toggle>
-                <ion-button class="btn-full-size-icon" fill="clear" [ngClass]="{'ion-hide':swapRight}" push-md="4">
-                    <ion-icon slot="icon-only" name="menu">
+            <!-- Menu Button -->
+            <ion-col size="1">
+                <ion-menu-toggle>
+                    <ion-button class="btn-full-size-icon" fill="clear" [ngClass]="{'ion-hide':swapRight}" push-md="4">
+                        <ion-icon slot="icon-only" name="menu">
+                        </ion-icon>
+                    </ion-button>
+                </ion-menu-toggle>
+            </ion-col>
+
+            <!-- Day of week -->
+            <ion-col size="2">
+                <ion-button default expand="block" (click)="showDayOfWeekPopup()">
+                    <span>{{days[dayOfWeek].label}}</span>
+                </ion-button>
+            </ion-col>
+
+            <!-- Meal Type -->
+            <ion-col size="2">
+                <ion-button default expand="block" (click)="showMealTypePopup()">
+                    <span *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</span>
+                    <span *ngIf="selectedMealType == -1">Meal
+                        Type</span>
+                </ion-button>
+            </ion-col>
+
+            <!-- Menu Type -->
+            <ion-col size="5">
+                <ion-button default expand="block" (click)="showMenuTypePopup()">
+                    <span *ngIf="selectedMenuType != -1">{{selectedMenuTypeName}}</span>
+                    <span *ngIf="selectedMenuType == -1">Menu</span>
+                </ion-button>
+            </ion-col>
+
+            <!-- Categories -->
+            <ion-col size="1">
+                <ion-button class="btn-full-size-icon" default expand="block" fill="clear"
+                    (click)="showAllCategories()">
+                    <ion-icon slot="icon-only" name="apps"></ion-icon>
+                </ion-button>
+            </ion-col>
+
+            <!-- Transaction viewer -->
+            <ion-col size="1">
+                <ion-button class="btn-full-size-icon" expand="block" (click)="openTransactionViewer()">
+                    <ion-icon slot="icon-only" name="ios-paper">
                     </ion-icon>
                 </ion-button>
-            </ion-menu-toggle>
-        </ion-col>
-
-        <!-- Day of week -->
-        <ion-col size="2">
-            <ion-button default expand="block" (click)="showDayOfWeekPopup()">
-                <span>{{days[dayOfWeek].label}}</span>
-            </ion-button>
-        </ion-col>
-
-        <!-- Meal Type -->
-        <ion-col size="2">
-            <ion-button default expand="block" (click)="showMealTypePopup()">
-                <span *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</span>
-                <span *ngIf="selectedMealType == -1">Meal
-                    Type</span>
-            </ion-button>
-        </ion-col>
-
-        <!-- Menu Type -->
-        <ion-col size="5">
-            <ion-button default expand="block" (click)="showMenuTypePopup()">
-                <span *ngIf="selectedMenuType != -1">{{selectedMenuTypeName}}</span>
-                <span *ngIf="selectedMenuType == -1">Menu</span>
-            </ion-button>
-        </ion-col>
-
-        <!-- Categories -->
-        <ion-col size="1">
-            <ion-button class="btn-full-size-icon" default expand="block" fill="clear" (click)="showAllCategories()">
-                <ion-icon slot="icon-only" name="apps"></ion-icon>
-            </ion-button>
-        </ion-col>
-
-        <!-- Transaction viewer -->
-        <ion-col size="1">
-            <ion-button class="btn-full-size-icon" expand="block" (click)="openTransactionViewer()">
-                <ion-icon slot="icon-only" name="ios-paper">
-                </ion-icon>
-            </ion-button>
-        </ion-col>
-    </ion-row>
-</ion-toolbar>
+            </ion-col>
+        </ion-row>
+    </ion-toolbar>
+</ion-header>
