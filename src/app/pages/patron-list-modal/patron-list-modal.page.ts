@@ -75,7 +75,6 @@ export class PatronListModalPage implements OnInit {
                         if (patron.PersonId) {
                             this.http.GetPersonImage(patron.PersonId).subscribe(data => {
                                 if (data != null) {
-                                    console.log(data);
                                     patron.Image = data;
                                 }
                             }, e => { console.log(e); }, () => {

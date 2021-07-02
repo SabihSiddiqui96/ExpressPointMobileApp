@@ -1724,8 +1724,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.allSiteSettings = JSON.parse(AppStateService.get('AllSiteSettings'));
         // console.log(JSON.stringify(this.allSiteSettings));
         this.allSiteSettings.map(setting => {
-            console.log('---AllSiteSetting---');
-            console.log(setting.SiteSettingCode.trim());
+        
             switch (setting.SiteSettingCode.trim()) {
                 case SiteSettingCodes[SiteSettingCodes.ENNEWSTD]:
                     if (setting.SiteSettingValue === "1") {

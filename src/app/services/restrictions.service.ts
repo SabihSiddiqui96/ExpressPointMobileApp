@@ -368,7 +368,6 @@ export class RestrictionsService {
         PouchQueriesService.GetRestrictableItems().
             then((data) => {
                 this.restrictableAlaCarteItems = data.rows[0].doc.RestrictableAlaCarteItems;
-                console.log('Restrictable Ala Carte Items' + this.restrictableAlaCarteItems);
             });
     }
 

@@ -96,7 +96,7 @@ export class MenuGridComponent {
                     type: MenuGridEventType.SetMealCount,
                     payload: 1
                 });
-
+                mealCount = 1
                 this.isSecondMeal = true;
             }
 

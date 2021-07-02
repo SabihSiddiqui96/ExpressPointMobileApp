@@ -41,6 +41,7 @@ export class Events {
             // subject = this.channels[topic];
             // subject.next(data);
             // Or you can create a new subject for future subscribers
+            this.channels[topic] = new Subject<any>();
             return;
         }
 
