@@ -1,3 +1,4 @@
+import { ServiceToolbarEvent } from './../../shared-components/service-toolbar/service-toolbar.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
 import { NavController, AlertController, PopoverController, ModalController, Platform } from '@ionic/angular';
@@ -2358,8 +2359,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // if (this.mealFormed) {
             //     this.LUNCH_CASE_4 = true;
             // } else {
-                this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
-                ));
+            this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
+            ));
             // }
 
             totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
@@ -6159,6 +6160,22 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         } else {
             return false;
+        }
+    }
+
+    public onToolbarEvent(event: ServiceToolbarEvent) {
+        switch (event) {
+            case ServiceToolbarEvent.OpenTransactionViewer:
+                this.openTransactionViewer();
+                break;
+
+            case ServiceToolbarEvent.ShowAllCategories:
+                this.showAllCategories();
+                break
+
+            default:
+                console.error("unknown toolbar event");
+                break
         }
     }
 
