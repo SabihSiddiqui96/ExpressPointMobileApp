@@ -1,12 +1,12 @@
 <ion-row vh-100 bg-theme>
     <ion-col size="12" size-md="8" size-sm="8" [attr.push-md]="swapRight==true ? 4: 0"
         [attr.push-sm]="swapRight==true ? 4: 0" class="panel-main" style="padding:0">
-        <app-menu-service-toolbar [personId]="patronDetails.PersonId" [dayOfWeek]="dayOfWeek" [mealTypes]="mealTypes"
+        <app-service-toolbar [personId]="patronDetails.PersonId" [dayOfWeek]="dayOfWeek" [mealTypes]="mealTypes"
             [selectedMealType]="selectedMealType" [selectedMealTypeName]="selectedMealTypeName" [menuTypes]="menuTypes"
             [selectedMenuType]="selectedMenuType" [selectedMenuTypeName]="selectedMenuTypeName"
             [reviewReasons]="reviewReasons" [reviewType]="reviewType" [swapRight]="swapRight"
             (changes)="onToolbarEvent($event)">
-        </app-menu-service-toolbar>
+        </app-service-toolbar>
         <ion-content vh-100 top-margin style="position:absolute">
             <app-menu-grid [menuGrid]="menuGrid" [patronDetails]="patronDetails" [orderData]="orderData"
                 [mealCount]="mealCount" [isSecondMeal]="isSecondMeal" [secondMealPriceType]="secondMealPriceType"
