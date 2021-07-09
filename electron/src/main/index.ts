@@ -248,7 +248,8 @@ function print58m(printData: any) {
 ipcMain.on('print', (evnt: any, arg: any) => {
   print58m(arg).then((result) => {
     if (result) {
-      mainWindow.webContents.print({ silent: true }, (success) => {
+      mainWindow.webContents.print({ margins: { marginType: 'printableArea' }, silent: true }, (success) => {
+
         console.log('---mainWindow---');
         console.log(success);
 

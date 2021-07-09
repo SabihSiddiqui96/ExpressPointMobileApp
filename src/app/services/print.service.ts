@@ -141,6 +141,133 @@ export class PrintService {
         return receiptFormat.trim();
 
     }
+    
+    public getCloseSessionReportFormat(closeSessionFormat: CloseSessionPrintFormat): string {
+        let receiptFormat: string = '';
+        console.log('----closeSessionFormat-----');
+        console.log(JSON.stringify(closeSessionFormat));
+
+
+
+        receiptFormat = `<table cellpadding="0" cellspacing="7">
+           
+            <tr>
+                <td colspan="2"><strong>POS Closing Receipt</strong></td>
+            </tr>
+
+            <tr>
+              <td colspan="2">Generated on:</td>
+           </tr>
+
+           <tr>
+            <td colspan="2">` + closeSessionFormat.Date + `</td>
+            </tr>
+            <tr>
+            <td colspan="2">Terminal Name:</td>
+            </tr>
+
+            <tr>
+                <td colspan="2">` + closeSessionFormat.TerminalName + `</td>
+            </tr> <tr>
+            <td colspan="2">School:</td>
+            </tr>
+
+            <tr>
+            <td colspan="2">` + closeSessionFormat.SiteName + `</td>
+            </tr> <tr>
+            <td colspan="2">User:</td>
+            </tr>
+
+            <tr>
+            <td colspan="2">` + closeSessionFormat.UserName + `</td>
+            </tr>
+
+           `;
+
+        receiptFormat = receiptFormat.trim() +
+            `
+            <tr>
+            <td colspan="2">---------------------------------</td>
+            </tr>
+            <tr>
+                <td ><strong>Coins</strong></td>
+                <td style="width:100px"><strong>Qty</strong></td>
+                <td style="width:100px"><strong>Amount</strong></td>
+            </tr>`;
+
+        closeSessionFormat.DenominationsCoins.forEach(coin => {
+            receiptFormat = receiptFormat.trim() + `   <tr>
+        <td>`+ coin['Description'] + `:</td><td style="word-wrap: break-word;width:100px">`
+                + coin['Quantity'] + `</td> <td>` + '$ ' + coin['Total'] + `</td>
+        </tr>`;
+        });
+
+        receiptFormat = receiptFormat.trim() +
+            `
+            <tr>
+            <td colspan="2">---------------------------------</td>
+            </tr>
+            <tr>
+                <td ><strong>Bills</strong></td>
+                <td style="width:100px"><strong>Qty</strong></td>
+                <td style="width:100px"><strong>Amount</strong></td>
+            </tr>`;
+
+        closeSessionFormat.DenominationsBills.forEach(bill => {
+            receiptFormat = receiptFormat.trim() + `   <tr>
+        <td>`+ bill['Description'] + `:</td><td style="word-wrap: break-word;width:100px">`
+                + bill['Quantity'] + `</td> <td>` + '$ ' + bill['Total'] + `</td>
+        </tr>`;
+        });
+
+        if (closeSessionFormat.Checks.length > 0) {
+            receiptFormat = receiptFormat.trim() +
+                ` <tr>
+                <td colspan="2">---------------------------------</td>
+                </tr>
+                <tr>
+                <td><strong>Checks</strong></td>
+                <td style="width:100px"><strong>Amount</strong></td>
+            </tr>`;
+
+            closeSessionFormat.Checks.forEach(check => {
+                receiptFormat = receiptFormat.trim() + `   <tr>
+        <td>`+ check['CheckNumber'] + `:</td><td style="word-wrap: break-word;width:100px">`
+                    + '$ ' + check['Amount'] + `</td>`;
+            });
+        }
+        receiptFormat = receiptFormat.trim() +
+        `
+        <tr>
+        <td colspan="2">---------------------------------</td>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Totals</strong></td>
+        </tr>`;
+        receiptFormat = receiptFormat.trim() +
+            ` 
+            <tr>
+            </tr>
+            <tr>
+                <td>Total Cash: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.TotalCash).toFixed(2) + `</td>
+            </tr>
+            <tr>
+                <td>Total Checks: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.TotalChecks).toFixed(2) + `</td>
+            </tr>
+            <tr>
+                <td>Total closing: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.TotalClosing).toFixed(2) + `</td>
+            </tr>
+            <tr>
+                <td>Opening Balance: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.OpeningBalance).toFixed(2) + `</td>
+            </tr>
+            <tr>
+                <td>Net Balance: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.NetBalance).toFixed(2) + `</td>
+            </tr>
+            </table>`;
+
+        return receiptFormat.trim();
+
+    }
 
 }
 
@@ -173,5 +300,26 @@ export class TransactionDetailPrintFormat {
     public CardNumber: string;
 
 
+}
+
+
+
+
+export interface CloseSessionPrintFormat {
+     TerminalName: string;
+     UserName: string
+     SiteName: string;
+     DenominationsCoins: any[];
+     DenominationsBills: any[];
+     Checks: any[];
+     Cards: any[];
+     OpeningBalance: string;
+     ClosingBalance: number;
+     TotalCash: number;
+     TotalChecks: number;
+     TotalCard: number;
+     NetBalance: number;
+     TotalClosing: number;
+     Date: string;
 }
 
