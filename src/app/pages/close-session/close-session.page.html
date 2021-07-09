@@ -160,22 +160,29 @@
 </ion-content>
 <ion-footer class="ion-align-self-center" no-shadow>
   <ion-row padding class="ion-justify-content-center">
-    <ion-col size="12" size-lg="6" push-lg="3" class="ion-align-self-center">
-      <h1 style="line-height: 6.5rem; margin: 0;" class="ion-text-center">Closing Balance
-        {{total | currency:'USD':true:'1.2-2'}}
-      </h1>
-    </ion-col>
-    <ion-col size="12" size-lg="3" push-lg="3" class="ion-align-self-center">
-      <ion-button expand="block" size="large" color="slate" (click)="checkCloseSession()" [disabled]="saveInProgress">
-        Close Service
-        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
-      </ion-button>
-    </ion-col>
-    <ion-col size="12" size-lg="3" pull-lg="9" class="ion-align-self-center">
+    <ion-col size="3" size-md='2' class="ion-align-self-auto">
       <ion-button expand="block" size="large" (click)="clearQuantity()">
         <ion-icon slot="start" name="backspace"></ion-icon>
         Cancel
       </ion-button>
     </ion-col>
+    <ion-col size="3" size-md='4' class="ion-align-self-auto">
+      <h1 style="line-height: 6.5rem; margin: 0;" class="ion-text-center">Closing Balance
+        {{total | currency:'USD':true:'1.2-2'}}
+      </h1>
+    </ion-col>
+    <ion-col size="3" class="ion-align-self-auto">
+      <ion-button expand="block" size="large" color="slate" (click)="PrintCloseSessionReport()">
+        Print session
+      </ion-button>
+    </ion-col>
+    <ion-col size="3" class="ion-align-self-auto">
+      <ion-button expand="block" size="large" color="slate" (click)="checkCloseSession()" [disabled]="saveInProgress">
+        Close Service
+        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+      </ion-button>
+    </ion-col>
+
+
   </ion-row>
 </ion-footer>

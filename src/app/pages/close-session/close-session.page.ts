@@ -17,7 +17,7 @@ import { SettingService } from '../../services/setting.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
-
+import { CloseSessionPrintFormat, PrintService } from '../../services/print.service';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -113,7 +113,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         public popupMessageService: PopupMessageService, private pouchQuery: PouchQueriesService,
         public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public keyboard: Keyboard,
-        private elementRef: ElementRef) {
+        private elementRef: ElementRef, public printService: PrintService) {
 
         this.isCordovaApp = UtilService.isCordovaApp;
         if (UtilService.isCordovaApp) {
@@ -344,13 +344,13 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                     if (input) {
                         input.setAttribute('type', 'tel');
                         input.setAttribute('pattern', '[0-9]');
-                    }                    
+                    }
                 } else {
                     const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
                     if (input) {
                         input.setAttribute('type', 'text');
                         input.setAttribute('pattern', '[0-9]');
-                    }                    
+                    }
                 }
             }
             for (let i = 0; i < this.denominationDetailsBills.length; i++) {
@@ -359,12 +359,12 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                     if (input) {
                         input.setAttribute('type', 'tel');
                         input.setAttribute('pattern', '[0-9]');
-                    }                    
+                    }
                 } else {
                     const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
                     if (input) {
                         input.setAttribute('type', 'text');
-                    }                    
+                    }
                 }
             }
         }, 3000);
@@ -724,9 +724,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         PouchQueriesService.GetAllOpenSessions().then(data => {
 
             let sessionDocs = data.rows.map(row => row.doc);
+            let openingBalance = 0;
+
             sessionDocs = sessionDocs.filter(s => {
                 return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
-                Number(s.OpenedBy)=== JSON.parse(AppStateService.get('login_details')).UserId
+                    Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             });
 
@@ -734,6 +736,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             sessionDocs.map(doc => {
                 doc.isStillOpen = false;
                 sid = doc.SessionId;
+                openingBalance = doc.OpeningBalance
                 PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => {
                 });
             });
@@ -742,7 +745,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             this.pouchQuery.PostSessionCard().then(() => { });
 
             PouchDBService.UpsertSingleDoc(closeSessionDoc, EXP_TRANSACTIONS).then(() => {
-
+                this.PrintCloseSessionReport();
                 AppStateService.set('removedSessionId', sid);
                 AppStateService.remove('openingBalance');
                 AppStateService.remove('session_id');
@@ -787,6 +790,59 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
+    public PrintCloseSessionReport() {
+        if (this.utilService.isElectronApp()) {
+
+
+            const now = new Date();
+
+            PouchQueriesService.GetAllOpenSessions().then(data => {
+
+                let sessionDocs = data.rows.map(row => row.doc);
+
+                let openingBalance = 0;
+
+                sessionDocs = sessionDocs.filter(s => {
+                    return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+                        Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
+                        && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                });
+
+                if (sessionDocs.length > 0) {
+
+                    sessionDocs.map(doc => {
+                        openingBalance = doc.OpeningBalance
+                    });
+                    const CloseSessionPrintFormat: CloseSessionPrintFormat = {
+                        'TerminalName': JSON.parse(AppStateService.get('DeviceInfo')).TerminalName,
+                        'UserName': JSON.parse(AppStateService.get('login_details')).Name,
+                        'SiteName': JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode,
+                        'DenominationsCoins': this.denominationDetailsCoins,
+                        'DenominationsBills': this.denominationDetailsBills,
+                        'Checks': this.checkList,
+                        'Cards': this.cardList,
+                        'OpeningBalance': Number(openingBalance).toFixed(2),
+                        'ClosingBalance': this.total,
+                        'TotalCash': this.denominationTotalBills + this.denominationTotalCoins,
+                        'TotalChecks': this.checkTotal,
+                        'TotalCard': this.cardTotal,
+                        'TotalClosing': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal,
+                        'NetBalance': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal - openingBalance,
+                        'Date': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
+                            { hour: 'numeric', minute: 'numeric', hour12: true })
+                    };
+
+                    const receiptFormat = this.printService.getCloseSessionReportFormat(CloseSessionPrintFormat);
+
+                    this.utilService.publishIpcEvent('print', {
+                        data: [{ html: receiptFormat }],
+                        preview: false, copies: 1
+                    });
+                }
+                // this.esrr === 1 ? 2 :
+            });
+        }
+    }
 
     public setActiveField(denominationId, denominationQty) {
 
