@@ -69,6 +69,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     public saveInProgress: boolean = false;
     public cardList = [];
     public cardTotal: number = 0;
+    public IsElectron: boolean = false;
 
     public hideChecks: boolean = false;
     public onKeyDownCallback;
@@ -116,6 +117,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         private elementRef: ElementRef, public printService: PrintService) {
 
         this.isCordovaApp = UtilService.isCordovaApp;
+        this.IsElectron = this.utilService.isElectronApp();
         if (UtilService.isCordovaApp) {
 
             this.keyboardShowSubscription = this.events.subscribe("keyboard:willshow", (data) => {
