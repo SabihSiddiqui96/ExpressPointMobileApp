@@ -232,7 +232,7 @@ autoUpdater.on('checking-for-update', i => {
 
 function print58m(printData: any) {
   return new Promise((resolve, reject) => {
-    mainWindow = new BrowserWindow({ width: 500, height: 500, show: false, webPreferences: { nodeIntegration: true } });
+    mainWindow = new BrowserWindow({ width: 500, height: 500, show: true, webPreferences: { nodeIntegration: true } });
     mainWindow.loadURL(path.join(__dirname, 'PrintPreview.html'));
     // mainWindow.hide();
 
