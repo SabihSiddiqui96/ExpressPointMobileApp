@@ -560,6 +560,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                     this.denominationDetailsCoins[index].Quantity = 0;
                     this.denominationDetailsCoins[index].Total = 0;
                 }
+                this.denominationDetailsCoins[index].Total = parseFloat(this.denominationDetailsCoins[index].Total).toFixed(2)
             } else {
                 this.denominationDetailsCoins[index].Quantity = 0;
                 this.denominationDetailsCoins[index].Total = 0;
