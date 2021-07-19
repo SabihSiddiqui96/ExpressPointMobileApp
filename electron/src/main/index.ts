@@ -247,19 +247,19 @@ function print58m(printData: any) {
 
 ipcMain.on('print', (evnt: any, arg: any) => {
   print58m(arg).then((result) => {
-    // if (result) {
-    //   mainWindow.webContents.print({ margins: { marginType: 'printableArea' }, silent: true }, (success) => {
+    if (result) {
+      mainWindow.webContents.print({ margins: { marginType: 'printableArea' }, silent: true }, (success) => {
 
-    //     console.log('---mainWindow---');
-    //     console.log(success);
+        console.log('---mainWindow---');
+        console.log(success);
 
-    //   mainWindow.hide();
-    //       mainWindow.close();
-    //       setTimeout(() => {
-    //         win.focus();
-    //       }, 200);
-    //   });
-    // }
+      mainWindow.hide();
+          mainWindow.close();
+          setTimeout(() => {
+            win.focus();
+          }, 200);
+      });
+    }
   });
 });
 
