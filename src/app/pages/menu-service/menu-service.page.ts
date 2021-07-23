@@ -66,6 +66,7 @@ enum SuspiciousActivityTypes {
     providers: [Network, PatronLookupPage, SwitchHandsService]
 })
 export class MenuServicePage implements OnInit, OnDestroy {
+    public printAllSetting: Number;
 
 
     public ngOnInit() {
@@ -361,7 +362,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.printAuto = parseInt(SettingService.getSettingValue('PRINTAUTO'));
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
-
+        this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
         this.dayOfWeek = wDay[day.getUTCDay()];
@@ -2042,7 +2043,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         });
 
 
-      
+
 
 
     }
@@ -2907,7 +2908,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (!this.bonusAmount) {
                     this.bonusAmount = 0;
                 }
-                if (this.utilService.isElectronApp() && this.printAuto === 1) {
+                if (this.utilService.isElectronApp()
+                    && (this.printAllSetting === 1
+                        || (this.printAuto === 1
+                            && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
                     const transactionReceiptData: TransactionDetailPrintFormat = {
                         'PersonName': this.patronDetails.PersonName,
                         'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
@@ -3651,7 +3655,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const totAmount = this.orderData.totalAmount;
         const isSpecialAccount = this.patronDetails.isSpecialAccount;
 
-        if (isSpecialAccount === true  && Object.keys(this.selectedAccountDetails).length !== 0) {
+        if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
             const projBal = this.selectedAccountDetails.Balance - this.orderData.totalAmount;
             if (itemLen > 0 && totAmount >= 0.00 && projBal >= 0) { // To enable Charge button when account is linked to adult
                 return false;
