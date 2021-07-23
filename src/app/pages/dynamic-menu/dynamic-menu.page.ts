@@ -301,6 +301,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public displayDetails: boolean = false;
     public sepChargeLimit: boolean = false;
     public loadingID;
+    public printAllSetting: number;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
@@ -391,6 +392,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
+        this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
+
 
         /**
        * Use the site Terminal if the Device Terminal is not set.
@@ -2358,8 +2361,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // if (this.mealFormed) {
             //     this.LUNCH_CASE_4 = true;
             // } else {
-                this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
-                ));
+            this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
+            ));
             // }
 
             totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
@@ -3258,7 +3261,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 if (!this.bonusAmount) {
                     this.bonusAmount = 0;
                 }
-                if (this.utilService.isElectronApp() && this.printAuto === 1) {
+                if (this.utilService.isElectronApp()
+                    && (this.printAllSetting === 1
+                        || (this.printAuto === 1
+                            && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
                     const now = new Date();
                     const transactionReceiptData: TransactionDetailPrintFormat = {
                         'PersonName': this.patronDetails.PersonName,
