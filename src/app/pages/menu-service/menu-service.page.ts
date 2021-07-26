@@ -66,7 +66,7 @@ enum SuspiciousActivityTypes {
     providers: [Network, PatronLookupPage, SwitchHandsService]
 })
 export class MenuServicePage implements OnInit, OnDestroy {
-    public printAllSetting: Number;
+    public printAllSetting: Number = 0;
 
 
     public ngOnInit() {

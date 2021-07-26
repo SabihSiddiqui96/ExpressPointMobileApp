@@ -106,6 +106,7 @@ export class DoPayment {
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
     public content_height;
+    public printAllSetting: number = 0;
 
     constructor(public navCtrl: NavController, public alertCtrl: AlertController, public event: Events,
         public lookUpService: LookupService, public utilService: UtilService,
@@ -154,6 +155,8 @@ export class DoPayment {
         this.printAuto = parseInt(SettingService.getSettingValue('PRINTAUTO'));
         this.hideEligibility = parseInt(SettingService.getSettingValue('HIDELGBLTY'));
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
+        this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
+
         // });
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -714,7 +717,11 @@ export class DoPayment {
                 'CreatedDate': UTC
             };
             // PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then(() => {
-            if (this.utilService.isElectronApp() && this.printAuto === 1) {
+            if (this.utilService.isElectronApp()
+                && (this.printAllSetting === 1
+                    || this.printAuto === 1
+                )) {
+
                 var paymentReceiptData: TransactionDetailPrintFormat = {
                     'PersonName': this.navPatronDetails.PersonName,
                     'Identifier': this.navPatronDetails.Identifier,
