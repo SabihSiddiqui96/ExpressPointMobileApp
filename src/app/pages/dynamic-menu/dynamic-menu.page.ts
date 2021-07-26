@@ -301,7 +301,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public displayDetails: boolean = false;
     public sepChargeLimit: boolean = false;
     public loadingID;
-    public printAllSetting: number;
+    public printAllSetting: number = 0;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
