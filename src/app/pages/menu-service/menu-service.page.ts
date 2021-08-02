@@ -67,6 +67,7 @@ enum SuspiciousActivityTypes {
 })
 export class MenuServicePage implements OnInit, OnDestroy {
     public printAllSetting: Number = 0;
+    public localStorageValue:string = 'currentTab';
 
 
     public ngOnInit() {
