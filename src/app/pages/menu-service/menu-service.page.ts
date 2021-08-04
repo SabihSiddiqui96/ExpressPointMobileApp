@@ -3287,7 +3287,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public getLocalStorageValue(key) {
-        console.log(this.patronDetails);
         return AppStateService.get(key);
     }
 
