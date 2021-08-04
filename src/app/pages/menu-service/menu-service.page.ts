@@ -3287,6 +3287,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public getLocalStorageValue(key) {
+        console.log(this.patronDetails);
         return AppStateService.get(key);
     }
 
@@ -3295,33 +3296,37 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
-        if (this.orderData.items.length === 0) {
-            this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
-            this.event.publish('enablePrevPatronPatronLookup', {});
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            this.restrictedAlacarteCount = 0;
-            this.alacarteTotal = 0.00;
-            this.patronDetails = {};
-            this.patronDetails.PersonId = null;
-            this.patronImage = null;
-            this.mealCount = 0;
-            this.orderData = {
-                accountBalance: 0.00,
-                subTotal: 0.00,
-                tax: 0.00,
-                totalAmount: 0.00,
-                items: [],
-                IsDeposit: false,
-                IsCheck: false,
-                CheckNumber: '',
-                IsCard: false,
-                CardNumber: ''
-            };
-            this.bonusAmount = 0;
-            this.event.publish('patron-released', { 'patronDetails': null });
-        } else {
-            this.popupMessageService.showMessage(PopupMessageCode.E05427);
-            // this.utilService.showToast('Please Complete the current transaction.');
+        if(this.patronDetails != null && this.mealCount === 0){
+           this.voidOrder();
+        }else{
+            if (this.orderData.items.length === 0) {
+                this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
+                this.event.publish('enablePrevPatronPatronLookup', {});
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.restrictedAlacarteCount = 0;
+                this.alacarteTotal = 0.00;
+                this.patronDetails = {};
+                this.patronDetails.PersonId = null;
+                this.patronImage = null;
+                this.mealCount = 0;
+                this.orderData = {
+                    accountBalance: 0.00,
+                    subTotal: 0.00,
+                    tax: 0.00,
+                    totalAmount: 0.00,
+                    items: [],
+                    IsDeposit: false,
+                    IsCheck: false,
+                    CheckNumber: '',
+                    IsCard: false,
+                    CardNumber: ''
+                };
+                this.bonusAmount = 0;
+                this.event.publish('patron-released', { 'patronDetails': null });
+            } else {
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                // this.utilService.showToast('Please Complete the current transaction.');
+            }
         }
 
     }
