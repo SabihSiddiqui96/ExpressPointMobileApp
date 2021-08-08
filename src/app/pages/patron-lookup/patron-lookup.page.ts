@@ -1355,7 +1355,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         'PIN': incomingID,
                         'InputDirection': 0
                     }
-                    this.lookUpService.setQ(queueInput);
+                    //if focus is outside the Pin input
+                    if(AppStateService.get('currentTab') !== 'advanced'){
+                        this.lookUpService.setQ(queueInput);
+                    }
                 }
                 incomingID = '';
                 this.inputBuffer = [];
