@@ -546,7 +546,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
 
     </ion-col>
     <ion-col size-md="4" size-sm="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
-        [ngClass]="{'ion-hide' : patronDetails.PersonId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue(localStorageValue) == 'advanced')}">
+        [ngClass]="{'ion-hide' : patronDetails.PersonId!=null}">
         <page-patron-lookup [page]="type"></page-patron-lookup>
     </ion-col>
 </ion-row>

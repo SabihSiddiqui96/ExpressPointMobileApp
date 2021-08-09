@@ -3295,9 +3295,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
-        if(this.patronDetails != null && this.mealCount === 0){
-           this.voidOrder();
-        }else{
             if (this.orderData.items.length === 0) {
                 this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
                 this.event.publish('enablePrevPatronPatronLookup', {});
@@ -3326,8 +3323,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 // this.utilService.showToast('Please Complete the current transaction.');
             }
-        }
-
     }
 
     public showQ() {
