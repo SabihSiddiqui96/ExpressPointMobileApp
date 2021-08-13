@@ -1755,25 +1755,7 @@ export class AppComponent {
 
     // this.loader.present();
     this.setupDbService.setupData().then(() => {
-      if (this.deviceInfo) {
-        this.http.SaveDeviceInfo().subscribe((data) => {
-          if (data.IsValid === true) {
-            this.deviceInfo.TerminalId = data.DeviceTerminalId;
-            this.deviceInfo.TerminalName =
-              deviceInfo.DeviceName + "-" + siteCode[0];
-            AppStateService.set("DeviceInfo", JSON.stringify(this.deviceInfo));
-          }
 
-          if (AppStateService.get("SetupComplete")) {
-            // this.navCtrl.navigateRoot("service-selection");
-            // this.event.publish('site-changed', { 'changedSite': this.displayDetails.site_name });
-          } else {
-            this.utilService.showToast(
-              "Something went wrong while configuring the device. Please try again."
-            );
-          }
-        });
-      }
     });
   }
 
