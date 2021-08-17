@@ -11,6 +11,9 @@ import { LocalTimerService } from "./local-timer.service";
 import { PouchDBService, EXP_COMMON, EXP_DYNAMIC_MENUS, EXP_PERSON, EXP_PERSON_IN_MEMORY, EXP_STANDARD_MENUS, EXP_SYSTEM, EXP_TRANSACTIONS, EXP_USERS } from "./pouch-db.service";
 import { SettingService } from "./setting.service";
 import { StatusPopupPage } from '../pages/status-popup/status-popup.page';
+import { HttpService } from "./HTTP/http.service";
+import { UtilService } from "./util.service";
+import * as _ from "lodash";
 
 
 
@@ -23,7 +26,8 @@ export class SetupDbService {
     constructor(private generalDB: GeneralDBService, private dynamicMenusDB: DynamicMenusDBService,
         private staticMenusDB: StaticMenusDBService, private personDB: PersonDBService,
         private usersDb: UsersDBService,
-        private pouchDBService: PouchDBService, private popoverCtrl: PopoverController) {
+        private pouchDBService: PouchDBService, private popoverCtrl: PopoverController,
+        private http: HttpService, private utilService: UtilService) {
 
     }
     public syncList = { 'SiteSettings': 'InProgress', 'StaticMenus': 'InProgress', 'Students': 'InProgress', 'Users': 'InProgress' };
@@ -45,7 +49,7 @@ export class SetupDbService {
                             Promise.all(setupPromises as any[]).then(() => {
 
                                 console.timeEnd('Setup:ALL');
-                                PouchDBService.CreatePersonDBIndex()
+                                // PouchDBService.CreatePersonDBIndex()
                                 // AppStateService.set('SetupComplete', true);
                                 resolve('Success');
                             },
@@ -54,9 +58,32 @@ export class SetupDbService {
                                     resolve('Fail');
                                 });
                         });
+                    }).then(() => {
+                        let deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"))
+                        let SelectedSite =  JSON.parse(AppStateService.get("SelectedSite"))
+                        let sitecode =  _.split(SelectedSite.SiteNameWithCode, "-", 2);
+                        if (deviceInfo) {
+                            this.http.SaveDeviceInfo().subscribe((data) => {
+                                if (data.IsValid === true) {
+                                    deviceInfo.TerminalId = data.DeviceTerminalId;
+                                    deviceInfo.TerminalName =
+                                        deviceInfo.DeviceName + "-" + sitecode[0];
+                                    AppStateService.set("DeviceInfo", JSON.stringify(deviceInfo));
+                                }
+
+                                if (AppStateService.get("SetupComplete")) {
+                                    // this.navCtrl.navigateRoot("service-selection");
+                                    // this.event.publish('site-changed', { 'changedSite': this.displayDetails.site_name });
+                                } else {
+                                    this.utilService.showToast(
+                                        "Something went wrong while configuring the device. Please try again."
+                                    );
+                                }
+                            });
+                        }
                     });
                 });
-                resolve('Success');
+                // resolve('Success');
             });
         });
 

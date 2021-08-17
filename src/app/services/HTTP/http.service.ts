@@ -444,13 +444,13 @@ export class HttpService {
     //#endregion: GETs
 
     //#region:POSTs
-    public postOpenSession(sessionId, data, total, openDate, terminalId, loginWithoutSetup): any {
+    public postOpenSession(sessionId, data, total, openDate, terminalId, schoolId, loginWithoutSetup): any {
         if (AppStateService.get('SelectedSite')) {
             return this.http.post(API_URL + 'SyncOpenSession',
                 JSON.stringify({
                     'SessionId': sessionId,
                     'OpeningBalance': total,
-                    'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                    'SchoolId': schoolId,
                     'SessionDenominations': data,
                     'OpenSessionDate': openDate,
                     'TerminalId': terminalId,
