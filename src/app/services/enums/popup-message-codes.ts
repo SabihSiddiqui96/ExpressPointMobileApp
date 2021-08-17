@@ -141,6 +141,8 @@ export enum PopupMessageCode { // refer PR_PopupMessage_Detail table
     E08351 = 'E08351',
     E08403 = 'E08403',
     E08447 = 'E08447',
+    E08512 = 'E08512',
+    
 
     // 09 User Details Popup
     E09402 = 'E09402',

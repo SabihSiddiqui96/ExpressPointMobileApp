@@ -212,5 +212,37 @@ export class SetupDbService {
 
     }
 
-  
+    public initializeData() {
+        // initialize the popup messages required
+        return new Promise((resolve) => {
+
+            let popupupMessages = [];
+            const popupMessageDoc = {
+                '_id': 'PopupMessage--' + 212,
+                'MessageCode': 'E08512',
+                'MessageDescription': 'Do you want to continue not downloading the data',
+                'Header': 'CONFIRM',
+                'FootNote': '',
+                'MessageType': 1,
+                'ShowOk': 0,
+                'ShowCancel': 0,
+                'ShowYes': 1,
+                'ShowNo': 1,
+                'ShowNoThanks': 0,
+                'DontShowMe': 0,
+                'ChkShowValue': false
+            };
+            popupupMessages.push(popupMessageDoc);
+
+            PouchDBService.UpsertDocs(popupupMessages, EXP_COMMON).then(() => {
+
+                resolve(null);
+            });
+
+        })
+
+
+    }
+
+
 }

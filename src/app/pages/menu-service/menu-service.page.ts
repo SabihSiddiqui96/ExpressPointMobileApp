@@ -1017,7 +1017,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         let previousALCCount = 0;
         let previousALCAmt = 0;
-
+        const today = new Date();
         if (previousSales) {
 
             /**
@@ -1040,13 +1040,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (prevSalesByMealType) {
                 const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
                 const mealTypeItems = [].concat.apply([], items);
-                soldItemsByMealType = mealTypeItems;
+                soldItemsByMealType = _.filter(mealTypeItems, (s) => {
+                    let date = new Date(_.toInteger(s.Date));
+                    return (date.getDate() === today.getDate()
+                        && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+
+                });
             }
             /**
                 * Calculating all A La carte meals served in previous sales
                 */
-            const alaCarteItems = _.filter(allItems, (o) => o.IsReimbursable === false ||
-                (o.IsReimbursable === true && o.IsSecondMeal === true));
+            const alaCarteItems = _.filter(allItems, (o) => {
+                let date = new Date(_.toInteger(o.Date));
+                return o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                    && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+            });
 
 
 
@@ -1086,7 +1097,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.availableALCCt = null;
                 }
             }
-            // soldItemsByMealType = _.find(soldItems, s => new Date(_.toInteger(s.Date)).setHours(0, 0, 0, 0) === today)
 
             this.patronDetails.soldItems_count = soldItemsByMealType.length;
             if (soldItemsByMealType.length > 0) {

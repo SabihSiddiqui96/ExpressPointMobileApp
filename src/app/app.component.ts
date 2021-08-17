@@ -692,6 +692,8 @@ export class AppComponent {
 
             this.event.publish("pouchDBIntialized", null);
             this.utilService.isPouchDBInitialized = true;
+          }).then(() => {
+            this.setupDbService.initializeData().then(() => { });
           })
           .catch((error) => {
             console.log(error);

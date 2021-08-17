@@ -524,10 +524,13 @@ export class LookupService {
                     then((res) => {
 
                         const docs = res.docs.map((patron) => {
-                            patron['value'] = patron.PersonId;
-                            patron['label'] = patron.PersonName;
-                            patron['Image'] = patron.Image;
-                            return patron;
+                            if (!patron.isSpecialAccount) {
+                                patron['value'] = patron.PersonId;
+                                patron['label'] = patron.PersonName;
+                                patron['Image'] = patron.Image;
+                                return patron;
+                            }
+
                         });
                         this.lookupResults = docs;
                         if (this.serveInactiveStudents === 0) {

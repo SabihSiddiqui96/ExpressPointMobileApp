@@ -1203,7 +1203,7 @@ export class PouchQueriesService {
         sessionDocs.map(doc => {
           if (doc.isSentToServer === false) {
             this.http.postOpenSession(doc.SessionId, doc.SessionDenominations, doc.OpeningBalance,
-              doc.OpenDateWithTime, doc.TerminalId).
+              doc.OpenDateWithTime, doc.TerminalId, doc.LoginWithoutSetup).
               subscribe(
                 data => {
                   newSessionDoc = doc;

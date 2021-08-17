@@ -22,7 +22,8 @@ import { HashingService } from '../../services/hashing.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
-
+import { PopupMessageService } from '../../services/popup-message.service';
+import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 
 export class GoLogin implements OnDestroy {
 
@@ -42,6 +43,7 @@ export class GoLogin implements OnDestroy {
 
     public passwordType: string = 'password';
     public passwordIcon: string = 'eye-off';
+    public LoginWithoutSetup: boolean = false;
 
 
     constructor(public _nav: NavController, public loading: LoadingController, public alertCtrl: AlertController,
@@ -52,7 +54,8 @@ export class GoLogin implements OnDestroy {
         public deviceService: DeviceService, public pouchQuery: PouchQueriesService, public router: Router,
         public appStateService: AppStateService,
         public settingService: SettingService, public signalRService: SignalRService
-        , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
+        , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService,
+        public popupService: PopupMessageService) { // , public settingService:SettingService
 
         AppStateService.set('AllCatRemainOpen', false);
     }
@@ -182,6 +185,8 @@ export class GoLogin implements OnDestroy {
         if (AppStateService.get('selectedDistrict')) {
             if (JSON.parse(AppStateService.get('selectedDistrict')).loginUrl !== '') {
                 const date = new Date();
+
+                AppStateService.set('LoginWithoutSetup', this.LoginWithoutSetup);
                 // this.utilService.setLoader(true);
                 this.http.getLoginToken(this.login).
                     subscribe
@@ -592,7 +597,8 @@ export class GoLogin implements OnDestroy {
 
                 if (this.user.AuthorizedSites.length === 1) {
                     if (AppStateService.get('SelectedSite') && JSON.parse(AppStateService.get('SelectedSite')).SchoolId === this.user.AuthorizedSites[0].SchoolId) {
-                        this.setupDbService.setupData().then(() => { });
+                        if (!this.LoginWithoutSetup)
+                            this.setupDbService.setupData().then(() => { });
                     } else {
                         let selectedSite = {};
                         // to make sure that the user downloads all students for the particular school when a different user logs in
@@ -600,8 +606,13 @@ export class GoLogin implements OnDestroy {
                         selectedSite = JSON.stringify(this.user.AuthorizedSites[0]);
                         AppStateService.set('SelectedSite', selectedSite);
                         this.deviceService.checkDeviceName().then(() => {
-                            this.setupDbService.setupData().then(() => {
-                            });
+                            if (!this.LoginWithoutSetup) {
+                                this.setupDbService.setupData().then(() => {
+                                });
+                            } else {
+                                this._nav.navigateRoot("service-selection");
+                            }
+
                         });
                     }
 
@@ -615,16 +626,26 @@ export class GoLogin implements OnDestroy {
 
                     if (this.CheckIfselectedSiteIsAuthourised()) {
                         this.deviceService.checkDeviceName().then(() => {
-                            this.setupDbService.setupData().then(() => {
-                            });
+                            if (!this.LoginWithoutSetup) {
+                                this.setupDbService.setupData().then(() => {
+                                });
+                            } else {
+                                this._nav.navigateRoot("service-selection");
+                            }
                         });
                     } else {
+                        if (!this.LoginWithoutSetup) {
+                            this.deviceControlsService.syncEXPSettings().then(() => {
+                                AppStateService.remove('SelectedSite');
+                                // this.utilService.setLoader(false);
+                                this._nav.navigateRoot('school-selection');
+                            });
+                        } else {
+                            this.utilService.showToast('The user does not have access to the school that has data downloaded,'
+                                + 'Please login after unchecking the Login Without data download toggle ')
+                            return
+                        }
 
-                        this.deviceControlsService.syncEXPSettings().then(() => {
-                            AppStateService.remove('SelectedSite');
-                            // this.utilService.setLoader(false);
-                            this._nav.navigateRoot('school-selection');
-                        });
 
                     }
                 }
@@ -657,7 +678,19 @@ export class GoLogin implements OnDestroy {
         }
 
     }
+    public OnChangeLoginWithoutSetup(event) {
 
+        this.LoginWithoutSetup = event.detail['checked'];
+        if (this.LoginWithoutSetup) {
+            this.popupService.showMessage(PopupMessageCode.E08512, [], false).then((result) => {
+                if (result) {
+
+                } else {
+                    this.LoginWithoutSetup = false
+                }
+            })
+        }
+    }
 
     // public getUserDetailsOffline() {
     //   PouchQueriesService.GetUser().then((res) => {
