@@ -93,12 +93,13 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
     public pouchQuery: PouchQueriesService, public router: Router, public appStateService: AppStateService,
     public settingService: SettingService, public electronService: ElectronService, private authService: AuthService,
     public signalRService: SignalRService,
-    public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) {
+    public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService,
+    public popupService: PopupMessageService) {
 
     super(navCtrl, loading, alertCtrl, network, sessionTimeOut,
       event, pouchDBService, modalCtrl, utilService, http,
       deviceService, pouchQuery, router, appStateService, settingService,
-      signalRService, setupDbService, deviceControlsService);
+      signalRService, setupDbService, deviceControlsService, popupService);
 
     this.isCordovaApp = UtilService.isCordovaApp;
     this.isElectronApp = this.utilService.isElectronApp();

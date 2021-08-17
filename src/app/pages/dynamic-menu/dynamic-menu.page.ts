@@ -1135,6 +1135,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public setPreviousSalesCount() {
         const previousSales = this.patronDetails.PreviousSales;
         let previousALCAmt = 0;
+        const today = new Date();
         if (previousSales) {
             // var SoldItemsByMealType = _.find(previousSales, (o) => { return o.MealTypeId === this.DefaultMealTypeId });
             const prevSalesByMealType = _.find(previousSales,
@@ -1151,12 +1152,22 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (prevSalesByMealType) {
                 const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
                 const mealTypeItems = [].concat.apply([], items);
-                soldItemsByMealType = mealTypeItems;
-                soldItemsByMealType = prevSalesByMealType.SalesByMealType;
+                soldItemsByMealType = _.filter(mealTypeItems, (s) => {
+                    let date = new Date(_.toInteger(s.Date));
+                    return (date.getDate() === today.getDate()
+                        && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+
+                });
             }
 
-            const alaCarteItems = _.filter(allItems, (o) => o.IsReimbursable === false ||
-                (o.IsReimbursable === true && o.IsSecondMeal === true));
+            const alaCarteItems = _.filter(allItems, (o) => {
+                let date = new Date(_.toInteger(o.Date));
+                return o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                    && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+            });
 
             /**
              * Commented out below snippet as its duplicate will undo if needed

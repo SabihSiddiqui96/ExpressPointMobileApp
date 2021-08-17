@@ -507,7 +507,7 @@ export class PouchDBService {
     }
 
     public static CreatePersonDBIndex() {
-        EXP_PERSON.createIndex({ index: { fields: ['FirstName,  LastName, HomeRoomId, HomeRoomName, SpecialRosterid '] } });
+        // EXP_PERSON.createIndex({ index: { fields: ['FirstName,  LastName, HomeRoomId, HomeRoomName, SpecialRosterid '] } });
 
     }
 }
