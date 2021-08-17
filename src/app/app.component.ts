@@ -1216,7 +1216,9 @@ export class AppComponent {
   public transactionStatusFromServer() {
     this.utilService.isNetworkOnline().then((isNetworkOnline) => {
       if (isNetworkOnline) {
-        this.transactionService.getAllTransactionswithStatus().then(() => { });
+        this.transactionService.getAllTransactionswithStatus().then((data) => { 
+          console.log(data); 
+        });
       }
     });
   }
@@ -1235,6 +1237,7 @@ export class AppComponent {
       );
       return;
     }
+
     this.isAlaCarteItemAdded = false;
     if (this.selectedPatron !== "") {
       this.popupMessageService.showMessage(PopupMessageCode.E01311);
