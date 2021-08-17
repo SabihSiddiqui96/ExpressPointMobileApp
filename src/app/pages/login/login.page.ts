@@ -418,7 +418,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     this.transactionService.getAllPendingSummarySale().then((summary) => {
       let notSentSummaryTransaction: any = [];
       if(summary.length > 0){
-        notSentSummaryTransaction = summary.filter((doc) => doc.saleData.IsSynced === false);
+        notSentSummaryTransaction = summary.filter((doc) => doc.IsSynced === false);
         if (notSentSummaryTransaction.length > 0) {
           this.hasNotSentTransactions = true;
         } else {

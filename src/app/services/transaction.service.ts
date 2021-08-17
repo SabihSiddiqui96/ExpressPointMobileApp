@@ -232,7 +232,7 @@ export class TransactionService {
 
                 this.getAllPendingSummarySale().then((summarytransaction) => {
                     if(summarytransaction){
-                        if(summarytransaction.filter((doc) => doc.saleData.IsSynced === false).length > 0){
+                        if(summarytransaction.filter((doc) => doc.IsSynced === false).length > 0){
                             hasPendingSummaryTransaction = true;
                         }
                     }
