@@ -148,7 +148,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public enableVisitor = false;
     public enableProgAdult = false;
     public SearchByText: string;
-    public AdvancedPinLookupLabel : string
+    public AdvancedPinLookupLabel: string
     public selectAccuntClick: boolean = false;
     public menuPayselectAcctClick: boolean = false;
     public isKeyboardOpen: boolean;
@@ -342,10 +342,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.GetGradesBySchool();
                             this.AdvancePatronSchoolList();
                             this.setActiveField('externalId');
+                            if (changeFocus === 0) {
+                                this.patronAccount = 'advanced';
+                                this.advancedPatron = 'by_patron';
+                            }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
                                     this.patronPinId.setFocus();
-                                }
+                                } 
                             }, 500);
 
                         }
@@ -1724,7 +1728,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.allSiteSettings = JSON.parse(AppStateService.get('AllSiteSettings'));
         // console.log(JSON.stringify(this.allSiteSettings));
         this.allSiteSettings.map(setting => {
-        
+
             switch (setting.SiteSettingCode.trim()) {
                 case SiteSettingCodes[SiteSettingCodes.ENNEWSTD]:
                     if (setting.SiteSettingValue === "1") {
