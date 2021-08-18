@@ -82,6 +82,8 @@ export class TransactionService {
                         }
                     }
                 });
+
+
             });
         }
 
@@ -124,6 +126,17 @@ export class TransactionService {
         return new Promise((resolve) => {
 
             PouchQueriesService.GetAllPendingTransactions().then((res) => {
+                this.transactions = res.rows.map(row => row.doc);
+                resolve(this.transactions);
+
+            });
+        });
+    }
+
+    public getAllPendingSummarySale(): any {
+        return new Promise((resolve) => {
+
+            PouchQueriesService.GetAllPendingSummarySale().then((res) => {
                 this.transactions = res.rows.map(row => row.doc);
                 resolve(this.transactions);
 
@@ -205,6 +218,7 @@ export class TransactionService {
 
             let notSentTransactions: any = [];
             let hasPendingTransactions: boolean = false;
+            let hasPendingSummaryTransaction :boolean = false;
 
             this.getAllTransactions().then(() => {
                 // this.Transactions = transactions
@@ -215,8 +229,15 @@ export class TransactionService {
                 } else {
                     hasPendingTransactions = false;
                 }
-                resolve(hasPendingTransactions);
 
+                this.getAllPendingSummarySale().then((summarytransaction) => {
+                    if(summarytransaction){
+                        if(summarytransaction.filter((doc) => doc.IsSynced === false).length > 0){
+                            hasPendingSummaryTransaction = true;
+                        }
+                    }
+                    resolve(hasPendingTransactions || hasPendingSummaryTransaction);
+                })
             });
         });
 
