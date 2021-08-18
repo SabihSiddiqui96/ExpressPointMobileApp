@@ -1217,7 +1217,6 @@ export class AppComponent {
     this.utilService.isNetworkOnline().then((isNetworkOnline) => {
       if (isNetworkOnline) {
         this.transactionService.getAllTransactionswithStatus().then((data) => { 
-          console.log(data); 
         });
       }
     });
