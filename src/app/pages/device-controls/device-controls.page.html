@@ -37,11 +37,10 @@
           <ion-toggle slot="end" color="slate" [(ngModel)]="openOSK" (ionChange)="setOpenOSK($event)">
           </ion-toggle>
         </ion-item>
-        <ion-item *ngIf='this.utilService.isAppOnline &&  !this.isUserLoggedIn' lines="none" class="bg-transparent"
-          style="padding-top: 4px;">
-          <label style="color:red;font-weight:bold">Login Without Data Download ?</label>
-          <ion-toggle slot="end" class="ion-float-right" color="slate" [(ngModel)]="LoginWithoutSetup"
-            (ionChange)="OnChangeLoginWithoutSetup($event)">
+
+        <ion-item *ngIf='this.utilService.isAppOnline ' lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Login Without Data Download ?</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="LoginWithoutSetup" (ionChange)="OnChangeLoginWithoutSetup($event)">
           </ion-toggle>
         </ion-item>
 
