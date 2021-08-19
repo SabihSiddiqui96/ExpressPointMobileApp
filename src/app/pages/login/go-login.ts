@@ -22,8 +22,6 @@ import { HashingService } from '../../services/hashing.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
-import { PopupMessageService } from '../../services/popup-message.service';
-import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 
 export class GoLogin implements OnDestroy {
 
@@ -54,8 +52,8 @@ export class GoLogin implements OnDestroy {
         public deviceService: DeviceService, public pouchQuery: PouchQueriesService, public router: Router,
         public appStateService: AppStateService,
         public settingService: SettingService, public signalRService: SignalRService
-        , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService,
-        public popupService: PopupMessageService) { // , public settingService:SettingService
+        , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
+
 
         AppStateService.set('AllCatRemainOpen', false);
     }
@@ -185,8 +183,9 @@ export class GoLogin implements OnDestroy {
         if (AppStateService.get('selectedDistrict')) {
             if (JSON.parse(AppStateService.get('selectedDistrict')).loginUrl !== '') {
                 const date = new Date();
+                if (AppStateService.get('LoginWithoutSetup') !== undefined)
+                    this.LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
 
-                AppStateService.set('LoginWithoutSetup', this.LoginWithoutSetup);
                 // this.utilService.setLoader(true);
                 this.http.getLoginToken(this.login).
                     subscribe
@@ -678,25 +677,6 @@ export class GoLogin implements OnDestroy {
         }
 
     }
-    public OnChangeLoginWithoutSetup(event) {
 
-        this.LoginWithoutSetup = event.detail['checked'];
-        if (this.LoginWithoutSetup) {
-            this.popupService.showMessage(PopupMessageCode.E08512, [], false).then((result) => {
-                if (result) {
-
-                } else {
-                    this.LoginWithoutSetup = false
-                }
-            })
-        }
-    }
-
-    // public getUserDetailsOffline() {
-    //   PouchQueriesService.GetUser().then((res) => {
-    //     console.clear()
-    //     console.log(res)
-    //   })
-    // }
 
 }

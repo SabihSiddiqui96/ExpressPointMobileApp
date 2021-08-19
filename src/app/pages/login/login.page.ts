@@ -27,7 +27,6 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { HashingService } from '../../services/hashing.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
-import { PopupMessageService } from '../../services/popup-message.service';
 
 @Component({
   selector: 'app-login',
@@ -83,13 +82,12 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     public router: Router, public appStateService: AppStateService,
     public settingService: SettingService, private authService: AuthService,
     public signalRService: SignalRService,
-    public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService,
-    public popupService: PopupMessageService) {
+    public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) {
 
     super(_nav, loading, alertCtrl, network, sessionTimeOut, event, pouchDBService,
       modalCtrl, utilService, http,
       deviceService, pouchQuery, router, appStateService,
-      settingService, signalRService, setupDbService, deviceControlsService,popupService);
+      settingService, signalRService, setupDbService, deviceControlsService);
     this.isCordovaApp = UtilService.isCordovaApp;
     if (UtilService.isCordovaApp) {
 

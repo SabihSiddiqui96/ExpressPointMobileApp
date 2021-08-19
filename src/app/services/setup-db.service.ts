@@ -60,8 +60,8 @@ export class SetupDbService {
                         });
                     }).then(() => {
                         let deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"))
-                        let SelectedSite =  JSON.parse(AppStateService.get("SelectedSite"))
-                        let sitecode =  _.split(SelectedSite.SiteNameWithCode, "-", 2);
+                        let SelectedSite = JSON.parse(AppStateService.get("SelectedSite"))
+                        let sitecode = _.split(SelectedSite.SiteNameWithCode, "-", 2);
                         if (deviceInfo) {
                             this.http.SaveDeviceInfo().subscribe((data) => {
                                 if (data.IsValid === true) {
@@ -247,7 +247,9 @@ export class SetupDbService {
             const popupMessageDoc = {
                 '_id': 'PopupMessage--' + 212,
                 'MessageCode': 'E08512',
-                'MessageDescription': 'Do you want to continue not downloading the data',
+                'MessageDescription': 'Current student data, menu updates, and settings will not be downloaded from the server.'
+                    + 'This will result in using local data for all meal service. Account balances and updates may not be the same as what is currently on the server.'
+                    + 'Do you still want to continue without downloading data ?',
                 'Header': 'CONFIRM',
                 'FootNote': '',
                 'MessageType': 1,
@@ -267,8 +269,6 @@ export class SetupDbService {
             });
 
         })
-
-
     }
 
 
