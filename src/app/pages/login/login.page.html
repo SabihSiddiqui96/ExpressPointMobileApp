@@ -107,12 +107,7 @@
           Back
         </ion-button>
       </div>
-      <div *ngIf='this.utilService.isAppOnline'>
-        <label style="color:red;font-weight:bold">Login Without Data Download ?</label>
-        <ion-toggle slot="end" class="ion-float-right" color="slate" [(ngModel)]="LoginWithoutSetup"
-          (ionChange)="OnChangeLoginWithoutSetup($event)">
-        </ion-toggle>
-      </div>
+     
 
       <h2 *ngIf="hasNotSentTransactions== false && transactions.length> 0" style="color:green ;text-align:center">All
         Transactions have been sent to the server.</h2>

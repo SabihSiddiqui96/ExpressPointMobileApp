@@ -52,6 +52,7 @@ export class DeviceControlsPage implements OnInit {
   public openOSK: boolean = false;
   public pnpPeripherals: boolean = true;
   public MULTIREAD: boolean = false;
+  public LoginWithoutSetup: boolean = false;
 
   // public loader: any;
   constructor(public navCtrl: NavController,
@@ -366,5 +367,19 @@ export class DeviceControlsPage implements OnInit {
     this.openOSK = event.detail.checked;
     UtilService.openOSK = event.detail.checked;
     AppStateService.set('OpenOSK', event.detail.checked);
+  }
+  public OnChangeLoginWithoutSetup(event) {
+
+    this.LoginWithoutSetup = event.detail['checked'];
+    if (this.LoginWithoutSetup) {
+      this.popupMessageService.showMessage(PopupMessageCode.E08512, [], false).then((result) => {
+        if (result) {
+          AppStateService.set('LoginWithoutSetup', true);
+        } else {
+          this.LoginWithoutSetup = false
+          AppStateService.set('LoginWithoutSetup', false);
+        }
+      })
+    }
   }
 }
