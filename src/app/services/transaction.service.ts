@@ -234,6 +234,8 @@ export class TransactionService {
                     if(summarytransaction){
                         if(summarytransaction.filter((doc) => doc.IsSynced === false).length > 0){
                             hasPendingSummaryTransaction = true;
+                        }else{
+                            hasPendingTransactions = false;
                         }
                     }
                     resolve(hasPendingTransactions || hasPendingSummaryTransaction);
