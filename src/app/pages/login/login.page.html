@@ -114,7 +114,7 @@
         </ion-toggle>
       </div>
 
-      <h2 *ngIf="hasNotSentTransactions== false && transactions.length> 0" style="color:green ;text-align:center">All
+      <h2 *ngIf="(hasNotSentTransactions== false && transactions.length> 0) || (hasNotSentTransactions== false && summaryTransactions.length> 0)" style="color:green ;text-align:center">All
         Transactions have been sent to the server.</h2>
       <h2 *ngIf="hasNotSentTransactions == true" style="color:orange ;text-align:center">Some transactions are still on
         the device. Please do not close the app.</h2>
