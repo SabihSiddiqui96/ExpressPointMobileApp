@@ -33,7 +33,7 @@
               <ion-segment [(ngModel)]="patronAccount">
                 <ion-segment-button value="patron_pin" (click)="patronPinClick()">
                   <ion-label class="color-white">
-                    PIN
+                    {{PinIdLabel}}
                   </ion-label>
                 </ion-segment-button>
                 <ion-segment-button value="advanced" (click)="advancePatronClick()">
@@ -210,8 +210,9 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
-                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="{{AdvancedPinLookupLabel}}"
-                      (click)="setActiveField('externalId')" [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
+                      placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
+                      [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event);handleKeyDown($event)">
                       <!-- (keyup)=""> -->
                     </ion-input>
@@ -352,8 +353,9 @@
                   </ion-item>
                 </ion-col>
                 <ion-col size="3" size-md="3" size-sm="3" *ngIf="!hidePrevPatron">
-                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn" *ngIf= "canLoadPrevPatron"
-                    [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" [disabled]="!canLoadPrevPatron">
+                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                    *ngIf="canLoadPrevPatron" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
+                    [disabled]="!canLoadPrevPatron">
                     &lt;&lt; &nbsp;Previous
                   </ion-button>
                 </ion-col>
@@ -690,8 +692,9 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
-                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="{{AdvancedPinLookupLabel}}"
-                      (click)="setActiveField('externalId')" [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
+                      placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
+                      [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event);handleKeyDown($event)">
                       <!-- (keyup)=""> -->
                     </ion-input>

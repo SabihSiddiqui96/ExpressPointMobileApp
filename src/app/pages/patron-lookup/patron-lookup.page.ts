@@ -155,6 +155,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public keyboardShowSubscription;
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
+    public PinIdLabel: string;
 
     constructor(
         public modalCtrl: ModalController,
@@ -349,7 +350,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
                                     this.patronPinId.setFocus();
-                                } 
+                                }
                             }, 500);
 
                         }
@@ -1763,9 +1764,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup
                         this.SearchByText = 'Enter a PIN';
                         this.AdvancedPinLookupLabel = 'Patron Id'
+                        this.PinIdLabel = 'PIN'
                     } else {
                         this.SearchByText = 'Enter an ID';
                         this.AdvancedPinLookupLabel = 'PIN'
+                        this.PinIdLabel = 'Patron Id'
                     }
                     break;
             }
