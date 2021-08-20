@@ -1768,7 +1768,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     } else {
                         this.SearchByText = 'Enter an ID';
                         this.AdvancedPinLookupLabel = 'PIN'
-                        this.PinIdLabel = 'ID'
+                        this.PinIdLabel = 'Patron Id'
                     }
                     break;
             }
