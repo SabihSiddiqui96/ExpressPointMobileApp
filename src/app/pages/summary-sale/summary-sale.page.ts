@@ -15,6 +15,7 @@ import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { TransactionService } from '../../services/transaction.service';
 import { Router } from '@angular/router';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { SettingService } from '../../services/setting.service';
 
 @Component({
   selector: 'app-summary-sale',
@@ -64,7 +65,8 @@ export class SummarySalePage implements OnInit {
   // public isOpenSession: boolean = false;
   public isIOS: boolean = false;
   public transactionInProgress: boolean = false
-
+  public allMenuItemsPrices: any = [];
+  private priceMode: number = 0;
   public keyboardSettings: IonDigitKeyboardOptions = {
     align: 'center',
     width: '2%',
@@ -111,6 +113,7 @@ export class SummarySalePage implements OnInit {
       this.terminalId = JSON.parse(AppStateService.get('site_details')).TerminalId;
     }
 
+    this.priceMode = Number(SettingService.getSettingValue('PRICEMODE'))
     // if (AppStateService.get('session_id')) {
     //     this.sessionId = AppStateService.get('session_id');
     //     this.isOpenSession = true;
@@ -183,6 +186,36 @@ export class SummarySalePage implements OnInit {
     });
   }
 
+  public GetPriceFoMenuItem() {
+    return new Promise((resolve, reject) => {
+      PouchQueriesService.GetAllPriceDocsByMenuItemId(this.filter.selected_menuitem).then((prices) => {
+        this.allMenuItemsPrices = prices
+        resolve(null)
+      })
+    })
+
+  }
+  public getPrice(priceTypeId) {
+
+    if (this.priceMode === 1) {
+      return true
+    }
+    let siteTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
+
+    const priceDoc = _.find(this.allMenuItemsPrices.rows,
+      {
+        'key': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId,
+        'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId
+      }
+    );
+
+    if (priceDoc) {
+      return true;
+    }
+    return false
+
+  }
+
   public getPriceTypes() {
     const summarySale = [];
     // const manualSaleId = this.generateUUID();
@@ -211,14 +244,19 @@ export class SummarySalePage implements OnInit {
             summarySaleDoc.PriceType = 'Student';
             summarySaleDoc.Show = 1;
           } else {
-            summarySaleDoc.Show = 1;
+            /**
+             * Check if prices exist for all the pricetypes except ones for a student(free,reduced,paid)
+             * 
+             * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
+             */
+            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId) ? 1 : 2;
           }
           summarySale.push(summarySaleDoc);
         });
       }
       this.zone.run(() => {
         this.summaryMealCount = summarySale;
-        this.summaryMealCount = this.summaryMealCount.filter(m => m.Show === 1);
+        this.summaryMealCount = this.summaryMealCount.filter(m => m.Show >= 1);
       });
     }).catch(err => console.log(err));
     // console.log('PRice Types from DB' + JSON.stringify(this.priceTypeIDs));
@@ -276,7 +314,9 @@ export class SummarySalePage implements OnInit {
               break;
             case 'classMealitem': this.filter.selected_menuitem = selectedData.value;
               this.filter.selected_menuitem_name = selectedData.label;
-              this.getPriceTypes();
+              this.GetPriceFoMenuItem().then(() => {
+                this.getPriceTypes();
+              })
               break;
           }
         }
