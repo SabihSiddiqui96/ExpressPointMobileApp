@@ -157,6 +157,12 @@ export class SummarySalePage implements OnInit {
         }
       } else if (userEventData.number === 9) { // Tab key is pressed
         console.log('Tab key' + this.summaryMealCount[event.index + 1]);
+
+        let nextElement = _.filter(this.summaryMealCount, (o) => o.Show == 1 && o.Index > event.index)
+
+        console.clear()
+        console.log(event.index)
+        console.log(nextElement)
         const mealCountArrLen = this.summaryMealCount.length;
         const currElement = event.index + 1 >= mealCountArrLen ? null : this.summaryMealCount[event.index + 1];
         if (currElement !== null) {
@@ -169,6 +175,12 @@ export class SummarySalePage implements OnInit {
 
       } else if (userEventData.number === 13) { // Enter key is pressed
         console.log('Enter key');
+
+        let nextElement = _.filter(this.summaryMealCount, (o) => o.Show == 1 && o.Index > event.index)
+
+        console.clear()
+        console.log(event.index)
+        console.log(nextElement)
         const mealCountArrLen = this.summaryMealCount.length;
         const currElement = event.index + 1 >= mealCountArrLen ? null : this.summaryMealCount[event.index + 1];
         if (currElement !== null) {
@@ -227,22 +239,27 @@ export class SummarySalePage implements OnInit {
       });
       if (priceTypeDoc.length > 0) {
         const priceTypes = priceTypeDoc;
+        let index = 0
         priceTypes.map(data => {
           const summarySaleDoc = {
             'PriceTypeId': data.PriceTypeId,
             'PriceType': data.PriceTypeDescription,
             'MealCount': 0,
-            'Show': 1
+            'Show': 1,
+            'Index': 0
           };
 
           if (data.PriceTypeDescription === 'Reduced') {
             summarySaleDoc.Show = 0;
+
             summarySale.push(summarySaleDoc);
           } else if (data.PriceTypeDescription === 'Paid') {
             summarySaleDoc.Show = 0;
           } else if (data.PriceTypeDescription === 'Free') {
             summarySaleDoc.PriceType = 'Student';
             summarySaleDoc.Show = 1;
+            summarySaleDoc.Index = index
+            index++
           } else {
             /**
              * Check if prices exist for all the pricetypes except ones for a student(free,reduced,paid)
@@ -250,12 +267,19 @@ export class SummarySalePage implements OnInit {
              * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
              */
             summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId) ? 1 : 2;
+            summarySaleDoc.Index = index
+            index++
           }
+
+
+
           summarySale.push(summarySaleDoc);
         });
       }
       this.zone.run(() => {
         this.summaryMealCount = summarySale;
+        console.clear()
+        console.log(this.summaryMealCount)
         this.summaryMealCount = this.summaryMealCount.filter(m => m.Show >= 1);
       });
     }).catch(err => console.log(err));
@@ -435,11 +459,17 @@ export class SummarySalePage implements OnInit {
       this.customKeys = '';
 
       if (summaryIndex >= 0) {
-        if (summaryIndex + 1 < this.summaryMealCount.length) {
-          this.activeField = this.summaryMealCount[summaryIndex + 1].PriceTypeId;
+        let nextElement = _.find(this.summaryMealCount, (o) => o.Show == 1 && o.Index > summaryIndex)
+        if (nextElement) {
+          if (nextElement.Index < this.summaryMealCount.length) {
+            this.activeField = this.summaryMealCount[nextElement.Index].PriceTypeId;
+          } else {
+            this.activeField = this.summaryMealCount[0].PriceTypeId;
+          }
         } else {
           this.activeField = this.summaryMealCount[0].PriceTypeId;
         }
+
       }
 
     }
