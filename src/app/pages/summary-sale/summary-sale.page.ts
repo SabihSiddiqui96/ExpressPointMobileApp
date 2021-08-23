@@ -158,11 +158,6 @@ export class SummarySalePage implements OnInit {
       } else if (userEventData.number === 9) { // Tab key is pressed
         console.log('Tab key' + this.summaryMealCount[event.index + 1]);
 
-        let nextElement = _.filter(this.summaryMealCount, (o) => o.Show == 1 && o.Index > event.index)
-
-        console.clear()
-        console.log(event.index)
-        console.log(nextElement)
         const mealCountArrLen = this.summaryMealCount.length;
         const currElement = event.index + 1 >= mealCountArrLen ? null : this.summaryMealCount[event.index + 1];
         if (currElement !== null) {
@@ -175,12 +170,6 @@ export class SummarySalePage implements OnInit {
 
       } else if (userEventData.number === 13) { // Enter key is pressed
         console.log('Enter key');
-
-        let nextElement = _.filter(this.summaryMealCount, (o) => o.Show == 1 && o.Index > event.index)
-
-        console.clear()
-        console.log(event.index)
-        console.log(nextElement)
         const mealCountArrLen = this.summaryMealCount.length;
         const currElement = event.index + 1 >= mealCountArrLen ? null : this.summaryMealCount[event.index + 1];
         if (currElement !== null) {
