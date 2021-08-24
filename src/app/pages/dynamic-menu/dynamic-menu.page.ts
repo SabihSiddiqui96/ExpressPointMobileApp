@@ -302,7 +302,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public sepChargeLimit: boolean = false;
     public loadingID;
     public printAllSetting: number = 0;
-
+    private ALACASREST: boolean = false;
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
@@ -393,7 +393,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
-
+        this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
 
         /**
        * Use the site Terminal if the Device Terminal is not set.
@@ -4989,7 +4989,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         console.log(this.patronDetails['AvailableAmountForAlaCartePurchases']);
 
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
-                            this.patronDetails['AvailableAmountForAlaCartePurchases'] != null) {
+                            this.patronDetails['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
                             this.popupMessageService.showMessage(PopupMessageCode.E06430);
                             // this.utilService.showToast('A la carte dollar amount restriction has been reached for this patron.');
