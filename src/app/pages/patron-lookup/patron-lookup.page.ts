@@ -300,7 +300,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined ) {
+            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
                 if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
@@ -346,10 +346,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.GetGradesBySchool();
                             this.AdvancePatronSchoolList();
 
-                            if (changeFocus === 0) {
+                            if (changeFocus === 0 && this.patronAccount === 'advanced') {
                                 this.setActiveField('externalId');
                                 this.patronAccount = 'advanced';
                                 this.advancedPatron = 'by_patron';
+                            } else {
+                                this.patronAccount = 'patron_pin';
                             }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
