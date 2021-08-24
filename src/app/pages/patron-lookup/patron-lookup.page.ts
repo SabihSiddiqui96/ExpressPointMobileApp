@@ -300,7 +300,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined && !this.utilService.isElectronApp()) {
+            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined ) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
                 if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
