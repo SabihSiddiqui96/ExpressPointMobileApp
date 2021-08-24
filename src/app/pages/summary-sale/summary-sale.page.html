@@ -73,7 +73,7 @@
                   (click)="setActiveField(summary.PriceTypeId,summary.MealCount)"
                   [ngClass]="{'active-input-label': summary.PriceTypeId == activeField, 'inactive-input-label': summary.PriceTypeId != activeField}"
                   [(ngModel)]="summary.MealCount" appKeyDownEvent itemIndex="i">
-                <label *ngIf="summary.Show === 2"> NOT SET</label>
+                <label *ngIf="summary.Show === 2"> PRICE NOT SET</label>
               </ion-col>
               <!-- <ion-col col-12 col-lg-5 col-md-5 class="ion-justify-content-center" *ngIf="isIOS">
                               <ion-label slot="end" text-right width-100 (click)="changeActiveInput('amount')"
