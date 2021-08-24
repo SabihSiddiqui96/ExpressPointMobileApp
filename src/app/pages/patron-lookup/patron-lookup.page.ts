@@ -300,12 +300,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined && !this.utilService.isElectronApp()) {
+            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
-                setTimeout(() => {
-                    this.patronSearchId.setFocus();
-                }, 500);
+                if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
+                    setTimeout(() => {
+                        this.patronSearchId.setFocus();
+                    }, 500);
+                }
+
             } else {
                 //  this.resetPatronData()
                 setTimeout(() => {
@@ -342,10 +345,13 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.getSpecialRostersList();
                             this.GetGradesBySchool();
                             this.AdvancePatronSchoolList();
-                            this.setActiveField('externalId');
-                            if (changeFocus === 0) {
+
+                            if (changeFocus === 0 && this.patronAccount === 'advanced') {
+                                this.setActiveField('externalId');
                                 this.patronAccount = 'advanced';
                                 this.advancedPatron = 'by_patron';
+                            } else {
+                                this.patronAccount = 'patron_pin';
                             }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {

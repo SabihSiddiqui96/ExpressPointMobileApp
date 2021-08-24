@@ -15,6 +15,7 @@ import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { TransactionService } from '../../services/transaction.service';
 import { Router } from '@angular/router';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { SettingService } from '../../services/setting.service';
 
 @Component({
   selector: 'app-summary-sale',
@@ -64,7 +65,8 @@ export class SummarySalePage implements OnInit {
   // public isOpenSession: boolean = false;
   public isIOS: boolean = false;
   public transactionInProgress: boolean = false
-
+  public allMenuItemsPrices: any = [];
+  private priceMode: number = 0;
   public keyboardSettings: IonDigitKeyboardOptions = {
     align: 'center',
     width: '2%',
@@ -111,6 +113,7 @@ export class SummarySalePage implements OnInit {
       this.terminalId = JSON.parse(AppStateService.get('site_details')).TerminalId;
     }
 
+    this.priceMode = Number(SettingService.getSettingValue('PRICEMODE'))
     // if (AppStateService.get('session_id')) {
     //     this.sessionId = AppStateService.get('session_id');
     //     this.isOpenSession = true;
@@ -154,6 +157,7 @@ export class SummarySalePage implements OnInit {
         }
       } else if (userEventData.number === 9) { // Tab key is pressed
         console.log('Tab key' + this.summaryMealCount[event.index + 1]);
+
         const mealCountArrLen = this.summaryMealCount.length;
         const currElement = event.index + 1 >= mealCountArrLen ? null : this.summaryMealCount[event.index + 1];
         if (currElement !== null) {
@@ -183,6 +187,36 @@ export class SummarySalePage implements OnInit {
     });
   }
 
+  public GetPriceFoMenuItem() {
+    return new Promise((resolve, reject) => {
+      PouchQueriesService.GetAllPriceDocsByMenuItemId(this.filter.selected_menuitem).then((prices) => {
+        this.allMenuItemsPrices = prices
+        resolve(null)
+      })
+    })
+
+  }
+  public getPrice(priceTypeId) {
+
+    if (this.priceMode === 1) {
+      return true
+    }
+    let siteTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
+
+    const priceDoc = _.find(this.allMenuItemsPrices.rows,
+      {
+        'key': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId,
+        'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId
+      }
+    );
+
+    if (priceDoc) {
+      return true;
+    }
+    return false
+
+  }
+
   public getPriceTypes() {
     const summarySale = [];
     // const manualSaleId = this.generateUUID();
@@ -194,31 +228,48 @@ export class SummarySalePage implements OnInit {
       });
       if (priceTypeDoc.length > 0) {
         const priceTypes = priceTypeDoc;
+        let index = 0
         priceTypes.map(data => {
           const summarySaleDoc = {
             'PriceTypeId': data.PriceTypeId,
             'PriceType': data.PriceTypeDescription,
             'MealCount': 0,
-            'Show': 1
+            'Show': 1,
+            'Index': 0
           };
 
           if (data.PriceTypeDescription === 'Reduced') {
             summarySaleDoc.Show = 0;
+
             summarySale.push(summarySaleDoc);
           } else if (data.PriceTypeDescription === 'Paid') {
             summarySaleDoc.Show = 0;
           } else if (data.PriceTypeDescription === 'Free') {
             summarySaleDoc.PriceType = 'Student';
             summarySaleDoc.Show = 1;
+            summarySaleDoc.Index = index
+            index++
           } else {
-            summarySaleDoc.Show = 1;
+            /**
+             * Check if prices exist for all the pricetypes except ones for a student(free,reduced,paid)
+             * 
+             * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
+             */
+            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId) ? 1 : 2;
+            summarySaleDoc.Index = index
+            index++
           }
+
+
+
           summarySale.push(summarySaleDoc);
         });
       }
       this.zone.run(() => {
         this.summaryMealCount = summarySale;
-        this.summaryMealCount = this.summaryMealCount.filter(m => m.Show === 1);
+        console.clear()
+        console.log(this.summaryMealCount)
+        this.summaryMealCount = this.summaryMealCount.filter(m => m.Show >= 1);
       });
     }).catch(err => console.log(err));
     // console.log('PRice Types from DB' + JSON.stringify(this.priceTypeIDs));
@@ -276,7 +327,9 @@ export class SummarySalePage implements OnInit {
               break;
             case 'classMealitem': this.filter.selected_menuitem = selectedData.value;
               this.filter.selected_menuitem_name = selectedData.label;
-              this.getPriceTypes();
+              this.GetPriceFoMenuItem().then(() => {
+                this.getPriceTypes();
+              })
               break;
           }
         }
@@ -395,11 +448,17 @@ export class SummarySalePage implements OnInit {
       this.customKeys = '';
 
       if (summaryIndex >= 0) {
-        if (summaryIndex + 1 < this.summaryMealCount.length) {
-          this.activeField = this.summaryMealCount[summaryIndex + 1].PriceTypeId;
+        let nextElement = _.find(this.summaryMealCount, (o) => o.Show == 1 && o.Index > summaryIndex)
+        if (nextElement) {
+          if (nextElement.Index < this.summaryMealCount.length) {
+            this.activeField = this.summaryMealCount[nextElement.Index].PriceTypeId;
+          } else {
+            this.activeField = this.summaryMealCount[0].PriceTypeId;
+          }
         } else {
           this.activeField = this.summaryMealCount[0].PriceTypeId;
         }
+
       }
 
     }
