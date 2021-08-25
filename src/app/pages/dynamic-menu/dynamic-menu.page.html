@@ -654,7 +654,7 @@
     </div>
   </ion-col>
   <ion-col size-md="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
-    [ngClass]="{'ion-hide' : patronId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue('currentTab') == 'advanced')}">
+    [ngClass]="{'ion-hide' : patronDetails.PersonId!=null}">
     <page-patron-lookup [page]="type"></page-patron-lookup>
   </ion-col>
 </ion-row>
