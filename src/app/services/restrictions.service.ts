@@ -46,7 +46,7 @@ export class RestrictionsService {
     public orderData: any;
     public cashtendAmount: any = 0.00;
     public sepChargeLimit: boolean = false;
-
+    public ALACASREST: boolean = false;
     constructor(
         private popupMessageService: PopupMessageService) {
 
@@ -77,6 +77,8 @@ export class RestrictionsService {
         this.settingChargeReimbursableMealsOnly = Boolean(parseInt(SettingService.getSettingValue('RMUTCHARLT')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
+        this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
+
         this.setRestrictableItems();
         this.setRestrictableCategories();
         this.setSiteSettings();
@@ -133,7 +135,7 @@ export class RestrictionsService {
             return restriction;
         }
         if ((this.alacarteTotal + this.menuItemPrice) > student['AvailableAmountForAlaCartePurchases'] &&
-            student['AvailableAmountForAlaCartePurchases'] != null) {
+            student['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
             restriction.ChargeRestriction = true;
             // restriction.Description = 'A La Carte dollar amount restriction has been reached for this patron.';
             restriction.Description = PopupMessageCode.E12431;
@@ -619,7 +621,7 @@ export class RestrictionsService {
                     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
                     return true;
                 }
-            } 
+            }
         }
 
     }
