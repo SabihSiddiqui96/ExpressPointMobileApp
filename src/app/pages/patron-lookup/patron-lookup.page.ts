@@ -689,6 +689,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
 
     }
+
     public gotoAdvOtherSchoolSearch() {
 
         const siteList = [];

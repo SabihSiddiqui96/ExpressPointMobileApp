@@ -722,7 +722,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
                 if (this.depositChangeDue) {
                     this.changeDue = 0.00;
-                    this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00'
+                    if(this.navPatronDetails.Balance > 0 && this.cashtendAmount > this.navOrderData.accountBalance){
+                        this.depositAmount = (this.cashtendAmount - this.navOrderData.accountBalance).toFixed(2);
+                    }else{
+                        this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00'
+                    }
                 } else {
 
 
@@ -766,7 +770,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
                         } else {
                             const changDue = amnt - this.navOrderData.totalAmount;
-                            this.changeDue = changDue > 0 ? changDue : 0.00;
+                            if(this.navPatronDetails.Balance > 0 && this.cashtendAmount > this.navOrderData.accountBalance){
+                                this.changeDue = this.cashtendAmount - this.navOrderData.accountBalance;
+                            }else{
+                                this.changeDue = changDue > 0 ? changDue : 0.00;
+                            }
                             if (this.depositChangeDue) {
                                 this.depositAmount = '$' + this.changeDue.toFixed(2);
                                 this.oldDepositAmnt = '$0.00';

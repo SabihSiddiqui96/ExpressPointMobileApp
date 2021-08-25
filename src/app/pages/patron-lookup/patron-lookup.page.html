@@ -133,7 +133,7 @@
                               Selected Site
                             </ion-label>
                           </ion-list-header>
-                          <ion-item lines="none" *ngFor="let site of siteList">
+                          <ion-item lines="none" *ngFor="let site of siteList" (change)=changeSchool(selectedSite)>
 
                             <ion-label>{{site.SiteNameWithCode}}</ion-label>
                             <ion-radio slot="end" id="{{site.SchoolId}}" color="slate" value="{{site.SchoolId}}"
@@ -152,11 +152,16 @@
                     </ion-col>
                   </ion-row>
 
+                  <ng-container *ngIf="selectedSite && selectedSite === '00000000-0000-0000-0000-000000000000'">
+                    <ion-row>
+                      <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                    </ion-row>
+                  </ng-container>
+
                   <!-- Non iOS -->
                   <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
-
                     <ion-input type="text" [(ngModel)]="patronSearch.firstname" placeholder="First Name"
                       (click)="setActiveField('firstName')" [ngClass]="firstNameClass"
                       (keyup)="checkAlphaNumeric($event); handleKeyDown($event)">
@@ -416,7 +421,7 @@
                 <ion-item lines="none">
 
                   <ion-label slot="start" position="fixed">Site</ion-label>
-                  <ion-select [(ngModel)]="selectedSite">
+                  <ion-select [(ngModel)]="selectedSite" >
                     <ion-select-option value="{{site.SchoolId}}" *ngFor="let site of siteList;let i = index;">
                       {{site.SiteNameWithCode}}
                     </ion-select-option>
@@ -426,7 +431,11 @@
 
 
                 <!-- Non iOS -->
-
+                <ng-container *ngIf="selectedSite && selectedSite === '00000000-0000-0000-0000-000000000000'">
+                  <ion-row>
+                    <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                  </ion-row>
+                </ng-container>
                 <!-- <ion-item lines="none" *ngIf="!isIOS"> -->
                 <ion-item lines="none">
                   <ion-label slot="start" position="fixed">First Name</ion-label>
@@ -661,6 +670,12 @@
                   </ion-row>
                   <!-- Non iOS -->
                   <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
+                    <ng-container *ngIf="selectedSite && selectedSite === '00000000-0000-0000-0000-000000000000'">
+                      <ion-row>
+                        <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                      </ion-row>
+                    </ng-container>
+                    
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
 
@@ -732,6 +747,8 @@
                   </ion-select>
 
                 </ion-item>
+                <ion-label>Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+
                 <!-- Non iOS -->
                 <ion-item *ngIf="!isIOS">
                   <ion-label item-start fixed>First Name</ion-label>
