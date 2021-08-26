@@ -3836,6 +3836,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public voidOrder() {
         this.isMarked = false;
         this.reviewType = 0;
+        this.menuItemsArr = [];
         if (this.isStaticMenuSelected) {
             if (this.menuGrid['Buttons'].length) {
                 for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
