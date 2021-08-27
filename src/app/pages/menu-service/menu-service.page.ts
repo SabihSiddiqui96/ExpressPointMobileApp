@@ -3200,7 +3200,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public voidOrder() {
         this.isMarked = false;
         this.reviewType = 0;
-
+        this.menuItemsArr = [];
         if (this.menuGrid['Buttons'].length) {
             for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
                 this.menuGrid['Buttons'][k]['restrictedItem'] = false;
