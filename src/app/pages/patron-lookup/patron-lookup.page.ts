@@ -155,11 +155,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public keyboardShowSubscription;
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
-<<<<<<< HEAD
     public eventType:string;
-=======
     public PinIdLabel: string;
->>>>>>> develop
 
     constructor(
         public modalCtrl: ModalController,
