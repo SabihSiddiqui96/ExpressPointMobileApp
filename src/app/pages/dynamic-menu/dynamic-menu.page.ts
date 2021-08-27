@@ -1663,9 +1663,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable)
             this.changeMealFormedStatus();
             this.calculateTotals();
+            setTimeout(() => {
             this.transactionInProgress = false;
             this.disableCharge = this.enableCharge()
             this.disablePay = this.enablePay()
+            },50)
         }
     }
 
@@ -1785,9 +1787,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.changeMealFormedStatus();
 
         this.calculateTotals();
-        this.transactionInProgress = false;
-        this.disableCharge = this.enableCharge()
-        this.disablePay = this.enablePay()
+        setTimeout(() => {
+            this.transactionInProgress = false;
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
+        }, 50)
 
     }
 
@@ -2544,8 +2548,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
 
         });
-        this.disableCharge = this.enableCharge()
-        this.disablePay = this.enablePay()
+        setTimeout(() => {
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
+        }, 50)
     }
 
 
@@ -5140,9 +5146,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
 
         });
-        this.disableCharge = this.enableCharge()
-        this.disablePay = this.enablePay()
-
+        setTimeout(() => {
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
+        }, 50)
     }
 
     public addMenuToCartForStaticMenus(menuItem) {
