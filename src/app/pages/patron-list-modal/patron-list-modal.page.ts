@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Components } from '@ionic/core';
-import { NavController } from '@ionic/angular';
+import { ModalController, NavController } from '@ionic/angular';
 import { AppStateService } from '../../services/app-state.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 })
 export class PatronListModalPage implements OnInit {
 
-    @Input() modal: Components.IonModal;
+    @Input() modalController: ModalController;
     @Input() patron_list;
     @Input() isFromQueue;
     @Input() isFromAdvPatronSearch;
@@ -63,9 +63,13 @@ export class PatronListModalPage implements OnInit {
 
     }
 
-    public dismiss() {
-        this.modal.dismiss();
-    }
+    dismiss() {
+        // using the injected ModalController this page
+        // can "dismiss" itself and optionally pass back data
+        this.modalController.dismiss({
+          'dismissed': true
+        });
+      }
 
     public getPatronImages(list) {
         return list.map((patron) => {

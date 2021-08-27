@@ -214,9 +214,11 @@ export class LookupService {
             this.modalCtrl.create({
                 component: PatronListModalPage,
                 componentProps: {
-                    'patron_list': patronList, 'isFromQueue': isFromQueue,
-                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed
-                }
+                    'modalController': this.modalCtrl,'patron_list': patronList, 'isFromQueue': isFromQueue,
+                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
+                },
+                showBackdrop:true,
+                backdropDismiss:false
             }).then(async (res) => {
                 await res.present().then(() => {
                     resolve('Success');

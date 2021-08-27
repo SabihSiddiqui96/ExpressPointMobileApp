@@ -4052,7 +4052,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
-            //this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
 
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;

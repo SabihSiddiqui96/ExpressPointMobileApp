@@ -155,6 +155,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public keyboardShowSubscription;
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
+    public eventType:string;
 
     constructor(
         public modalCtrl: ModalController,
@@ -1216,8 +1217,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.event.destroy("menu-service-popup");
                 if (userEventData.selectedData) {
                     const selectedData = userEventData.selectedData;
-                    const eventType = userEventData.type;
-                    switch (eventType) {
+                    //const eventType = userEventData.type ? '':this.eventType;
+                    if(userEventData.type !== ''){
+                        this.eventType = userEventData.type;
+                    }
+                    switch (this.eventType) {
                         case 'patronSites':
                             this.selectedSite = selectedData.value;
                             this.selectedSiteName = selectedData.label;
@@ -1230,12 +1234,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.onChangeGrade();
                             break;
                         case 'patronHomeroom':
-                            this.selectedHomeroom = selectedData.value;
-                            this.selectedHomeroomName = selectedData.label;
-                            this.returnToWhatPage = 'HomeRoom'; // Saketh for Back to Homeroom Sale
-                            AppStateService.set('HomeroomId', this.selectedHomeroom);
-
-                            this.getPatronList();
+                            if(selectedData.value && selectedData.label){
+                                this.selectedHomeroom = selectedData.value;
+                                this.selectedHomeroomName = selectedData.label;
+                                this.returnToWhatPage = 'HomeRoom'; // Saketh for Back to Homeroom Sale
+                                AppStateService.set('HomeroomId', this.selectedHomeroom);
+    
+                                this.getPatronList();
+                            }
+                           
                             break;
                         case 'patronPatron':
                             this.selectedHomeroomPatronId = selectedData.value;
