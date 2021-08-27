@@ -589,13 +589,13 @@
           <ion-row>
             <ion-col size="4">
               <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
-                [disabled]="enablePay()">
+                [disabled]="disablePay">
                 <!-- [disabled]="(patronDetails.isSpecialAccount==true && orderData.items.length === 0) || isValidMenuItemArray"> -->
                 Pay
               </ion-button>
             </ion-col>
             <ion-col size="8">
-              <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)" [disabled]="enableCharge()">
+              <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)" [disabled]="disableCharge">
                 <!-- [disabled]="(patronDetails.isSpecialAccount==true && orderData.totalAmount>=0.00) || isValidMenuItemArray"> -->
                 Charge
                 <!-- <span

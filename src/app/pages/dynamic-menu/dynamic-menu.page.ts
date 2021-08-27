@@ -227,7 +227,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public terminalId: any;
     public terminalName: any;
     public systemMenuItem;
-
+    public disablePay: boolean = false;
+    public disableCharge: boolean = false;
 
     public isDepositByEXNEGBAL: any;
     public amountTowardsBalance: any;
@@ -1662,7 +1663,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable)
             this.changeMealFormedStatus();
             this.calculateTotals();
-
+            this.transactionInProgress = false;
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
         }
     }
 
@@ -1782,6 +1785,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.changeMealFormedStatus();
 
         this.calculateTotals();
+        this.transactionInProgress = false;
+        this.disableCharge = this.enableCharge()
+        this.disablePay = this.enablePay()
 
     }
 
@@ -2538,7 +2544,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
 
         });
-
+        this.disableCharge = this.enableCharge()
+        this.disablePay = this.enablePay()
     }
 
 
@@ -5133,6 +5140,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
 
         });
+        this.disableCharge = this.enableCharge()
+        this.disablePay = this.enablePay()
+
     }
 
     public addMenuToCartForStaticMenus(menuItem) {

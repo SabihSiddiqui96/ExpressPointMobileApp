@@ -1636,6 +1636,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const cartItems = [];
         let itemPrice = 0.00;
         let IsTaxable: boolean;
+      
         if (deleteAllMeals) {
             for (let i = 0; i < this.orderData.items.length; i++) {
 
@@ -1710,7 +1711,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.orderData.items.splice(index, 1);
 
         }
-
+        
 
         // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable, this.taxMeal, this.taxPercent);
         // this.orderData.subTotal = this.orderData.subTotal - itemPrice;
@@ -1728,6 +1729,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.cashtendAmount = this.orderData.accountBalance;
         this.calculateTotals(itemPrice, false);
         this.isSecondMeal = false;
+        this.transactionInProgress = false;
+        this.disableCharge = this.enableCharge()
+        this.disablePay = this.enablePay()
+
     }
 
     public checkALCRestrictions(menuItem, priceTypeId) {
@@ -3182,6 +3187,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public clearAllItemsinCart() {
 
         this.restrictedAlacarteCount = 0;
+        this.menuItemsArr = []
         this.alacarteTotal = 0.00;
         this.mealCount = 0;
         this.orderData = {
