@@ -833,7 +833,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 .getBoundingClientRect().top + window.scrollY;
             const topPosMenulist = (this.elRef.nativeElement.querySelector('.transaction-item-list'))
                 .getBoundingClientRect().top + window.scrollY;
-            const calHeight = (topPosFooter - topPosMenulist) + 'px !important';
+            const calHeight = (topPosFooter - topPosMenulist) - 11 + 'px !important';
             this.elRef.nativeElement.querySelector('.transaction-item-list').setAttribute('style', 'height: ' + calHeight);
         }, 500);
     }

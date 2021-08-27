@@ -219,7 +219,8 @@ export class QuickClassroomSalePage {
         this.modalCtrl.create({
             component: MenuAllergensPopupPage,
             componentProps: { 'patronDetails': student, 'SpecialInstruction': student.SpecialInstruction },
-            cssClass: this.utilService.popupCenter.cssClass
+            cssClass: this.utilService.popupCenter.cssClass,
+            backdropDismiss: false
         }).then(async (res) => {
             await res.present();
         });

@@ -214,8 +214,8 @@ export class MenuGridComponent {
                                 'subMenuGridName': categoryName,
                                 'DefaultMenuItemId': 0,
                                 'PatronId': this.patronDetails.PersonId
-
-                            }
+                            },
+                            backdropDismiss: false
                         }).then(async (res) => {
                             await res.present();
                         });
