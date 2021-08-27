@@ -84,6 +84,9 @@ export class HttpInterceptorService {
     if (request.url.indexOf('SaveDeviceHeartbeat') !== -1) {
       finalTimeout = TIMEOUT_HEARTBEAT;
     }
+    if (request.url.indexOf('SyncAllUsers') !== -1) {
+      finalTimeout = 300 * 1000; // Set 300 seconds as timeout for SyncAllUsers Api
+    }
     return httpHandler.handle(request).pipe(timeout(finalTimeout),
       tap((event: HttpEvent<any>) => { }, (err: any) => {
         if (err instanceof HttpErrorResponse) {

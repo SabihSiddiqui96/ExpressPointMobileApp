@@ -67,7 +67,7 @@ enum SuspiciousActivityTypes {
 })
 export class MenuServicePage implements OnInit, OnDestroy {
     public printAllSetting: Number = 0;
-    public localStorageValue:string = 'currentTab';
+    public localStorageValue: string = 'currentTab';
 
 
     public ngOnInit() {
@@ -263,7 +263,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public disablePay: boolean = false;
     public disableCharge: boolean = false;
     private popupSubscription: Subscription;
-
+    private ALACASREST: boolean = false;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -364,6 +364,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
+        this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
         this.dayOfWeek = wDay[day.getUTCDay()];
@@ -487,7 +488,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }
                     this.alacarteTotal = this.calcAlaTotal(this.orderData['items']);
                     if (this.alacarteTotal > this.patronDetails['AvailableAmountForALCPurchases'] &&
-                        this.patronDetails['AvailableAmountForALCPurchases'] != null) { // check for ala carte dollar restrictions
+                        this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) { // check for ala carte dollar restrictions
                         this.popupMessageService.showMessage(PopupMessageCode.E05429);
                         this.orderData.items[i].Quantity = qty;
                         this.orderData.items[i].Price = price;
@@ -1892,7 +1893,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.patronDetails.IsStudent === true) { // IsStudent Check
 
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
-                            this.patronDetails['AvailableAmountForALCPurchases'] != null) {
+                            this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
                             this.popupMessageService.showMessage(PopupMessageCode.E05429);
                             // this.utilService.showToast('A La Carte dollar amount restriction has been reached for this patron.');
@@ -3305,34 +3306,34 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
-            if (this.orderData.items.length === 0) {
-                this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
-                this.event.publish('enablePrevPatronPatronLookup', {});
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-                this.restrictedAlacarteCount = 0;
-                this.alacarteTotal = 0.00;
-                this.patronDetails = {};
-                this.patronDetails.PersonId = null;
-                this.patronImage = null;
-                this.mealCount = 0;
-                this.orderData = {
-                    accountBalance: 0.00,
-                    subTotal: 0.00,
-                    tax: 0.00,
-                    totalAmount: 0.00,
-                    items: [],
-                    IsDeposit: false,
-                    IsCheck: false,
-                    CheckNumber: '',
-                    IsCard: false,
-                    CardNumber: ''
-                };
-                this.bonusAmount = 0;
-                this.event.publish('patron-released', { 'patronDetails': null });
-            } else {
-                this.popupMessageService.showMessage(PopupMessageCode.E05427);
-                // this.utilService.showToast('Please Complete the current transaction.');
-            }
+        if (this.orderData.items.length === 0) {
+            this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
+            this.event.publish('enablePrevPatronPatronLookup', {});
+            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            this.restrictedAlacarteCount = 0;
+            this.alacarteTotal = 0.00;
+            this.patronDetails = {};
+            this.patronDetails.PersonId = null;
+            this.patronImage = null;
+            this.mealCount = 0;
+            this.orderData = {
+                accountBalance: 0.00,
+                subTotal: 0.00,
+                tax: 0.00,
+                totalAmount: 0.00,
+                items: [],
+                IsDeposit: false,
+                IsCheck: false,
+                CheckNumber: '',
+                IsCard: false,
+                CardNumber: ''
+            };
+            this.bonusAmount = 0;
+            this.event.publish('patron-released', { 'patronDetails': null });
+        } else {
+            this.popupMessageService.showMessage(PopupMessageCode.E05427);
+            // this.utilService.showToast('Please Complete the current transaction.');
+        }
     }
 
     public showQ() {

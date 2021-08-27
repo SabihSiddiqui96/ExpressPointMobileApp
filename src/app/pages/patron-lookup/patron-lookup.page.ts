@@ -155,7 +155,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public keyboardShowSubscription;
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
+<<<<<<< HEAD
     public eventType:string;
+=======
+    public PinIdLabel: string;
+>>>>>>> develop
 
     constructor(
         public modalCtrl: ModalController,
@@ -300,12 +304,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined && !this.utilService.isElectronApp()) {
+            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
-                setTimeout(() => {
-                    this.patronSearchId.setFocus();
-                }, 500);
+                if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
+                    setTimeout(() => {
+                        this.patronSearchId.setFocus();
+                    }, 500);
+                }
+
             } else {
                 //  this.resetPatronData()
                 setTimeout(() => {
@@ -342,15 +349,18 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.getSpecialRostersList();
                             this.GetGradesBySchool();
                             this.AdvancePatronSchoolList();
-                            this.setActiveField('externalId');
-                            if (changeFocus === 0) {
+
+                            if (changeFocus === 0 && this.patronAccount === 'advanced') {
+                                this.setActiveField('externalId');
                                 this.patronAccount = 'advanced';
                                 this.advancedPatron = 'by_patron';
+                            } else {
+                                this.patronAccount = 'patron_pin';
                             }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
                                     this.patronPinId.setFocus();
-                                } 
+                                }
                             }, 500);
 
                         }
@@ -1771,9 +1781,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup
                         this.SearchByText = 'Enter a PIN';
                         this.AdvancedPinLookupLabel = 'Patron Id'
+                        this.PinIdLabel = 'PIN'
                     } else {
                         this.SearchByText = 'Enter an ID';
                         this.AdvancedPinLookupLabel = 'PIN'
+                        this.PinIdLabel = 'Patron Id'
                     }
                     break;
             }

@@ -49,8 +49,8 @@ export class StatusPopupPage implements OnInit {
                 this.syncList.SiteSettings === "Failed" ||
                 this.syncList.Students === "Failed" ||
                 this.syncList.StaticMenus === "Failed" ||
-                this.syncList.DynamicMenus === "Failed" ||
-                this.syncList.Users === "Failed"
+                this.syncList.DynamicMenus === "Failed" 
+                // || this.syncList.Users === "Failed"
             ) {
                 this.error = true;
                 return;
@@ -74,8 +74,9 @@ export class StatusPopupPage implements OnInit {
                 this.syncList.SiteSettings === "Success" &&
                 this.syncList.StaticMenus === "Success" &&
                 syncDynamicMenus &&
-                syncStudents && this.syncList.Users === "Success"
+                syncStudents
             ) {
+                // && this.syncList.Users === "Success"
                 this.error = false;
                 // let statusPopupTimer = setTimeout(async () => {
                 // if (
