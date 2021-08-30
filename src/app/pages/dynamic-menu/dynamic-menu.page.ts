@@ -1151,7 +1151,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             let soldItemsByMealType = [];
             if (prevSalesByMealType) {
-                const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
+                //  items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
+                const items = prevSalesByMealType.SalesByMealType
                 const mealTypeItems = [].concat.apply([], items);
                 soldItemsByMealType = _.filter(mealTypeItems, (s) => {
                     let date = new Date(_.toInteger(s.Date));
@@ -1664,10 +1665,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.changeMealFormedStatus();
             this.calculateTotals();
             setTimeout(() => {
-            this.transactionInProgress = false;
-            this.disableCharge = this.enableCharge()
-            this.disablePay = this.enablePay()
-            },50)
+                this.transactionInProgress = false;
+                this.disableCharge = this.enableCharge()
+                this.disablePay = this.enablePay()
+            }, 50)
         }
     }
 
@@ -3604,8 +3605,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.postSaleTransaction(transactionType);
                 }
             } else {
-                this.verifyChargeLimits(transactionType);
-                // this.utilService.showAlert('You cannot charge this payment because of insufficent balance.');
+                if (this.verifyChargeLimits(transactionType)) {
+                    this.postSaleTransaction(transactionType)
+                }
+                //  this.utilService.showAlert('You cannot charge this payment because of insufficent balance.');
             }
             return;
         } else {
@@ -3749,15 +3752,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     return false;
                 } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
-                        this.restrictService.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12510);
+                        // this.restrictService.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
                     } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal) && reimProjBal < creditLimit) {
-                        this.restrictService.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12511);
+                        // this.restrictService.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
                     }
                     // this.popupMessageService.showMessage(PopupMessageCode.E12441);
                     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
-                    this.transactionInProgress = false;
+                    // this.transactionInProgress = false;
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                    return false;
+                    return true;
                 }
 
 
