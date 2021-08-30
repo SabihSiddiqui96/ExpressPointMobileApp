@@ -2838,8 +2838,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             if (transactionType === 2) {
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-            console.log('12')
-                  
+                    console.log('12')
+
                     this.postSaleTransaction(transactionType);
                 } else {
                     this.chargeOrder(transactionType);
@@ -2848,7 +2848,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 const message = 'Do you want to void this sale?';
                 this.popupMessageService.showMessage(PopupMessageCode.E06401).then((bool) => {
                     if (bool) {
-            console.log('13')
+                        console.log('13')
 
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
@@ -3084,7 +3084,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
 
-            const updatedPatronDetails = this.patronDetails;
+            const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;
             const payment = parseFloat(paymentAmnt.toFixed(2));
             const saleToatal = this.orderData.totalAmount;

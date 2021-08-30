@@ -1636,7 +1636,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const cartItems = [];
         let itemPrice = 0.00;
         let IsTaxable: boolean;
-      
+
         if (deleteAllMeals) {
             for (let i = 0; i < this.orderData.items.length; i++) {
 
@@ -1711,7 +1711,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.orderData.items.splice(index, 1);
 
         }
-        
+
 
         // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable, this.taxMeal, this.taxPercent);
         // this.orderData.subTotal = this.orderData.subTotal - itemPrice;
@@ -2724,7 +2724,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
 
-            const updatedPatronDetails = this.patronDetails;
+            const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;
 
             const payment = Math.round(paymentAmnt * 100) / 100;
