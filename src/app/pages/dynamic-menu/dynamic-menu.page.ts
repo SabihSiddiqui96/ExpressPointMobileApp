@@ -2195,8 +2195,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             return i.IsPartOfMeal;
         });
         const aLCItems = items.filter(i => {
-            return !i.IsPartOfMeal;
+            return !i.IsPartOfMeal
         });
+
+        if (this.mealCount >= 1) {
+            this.alacarteCount = aLCItems.length
+        } else {
+            this.alacarteCount = items.length
+        }
         const value = this.checkALCInItems(aLCItems);
         if (value !== '') {
             this.adjustTrayQuantities(value);
@@ -2398,6 +2404,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
+                this.mealCount = 0;
                 this.mealFormed = false;
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
@@ -2405,6 +2412,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
+
+                this.mealCount = 0;
                 this.mealFormed = false;
             }
         }
@@ -2836,53 +2845,201 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.orderData.IsCard = false;
             this.orderData.CardNumber = '';
 
-            if (transactionType === 2) {
-                if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-                    console.log('12')
+            // if (transactionType === 2) {
+            //     if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+            //         console.log('12')
 
+            //         this.postSaleTransaction(transactionType);
+            //     } else {
+            //         this.chargeOrder(transactionType);
+            //     }
+            // } else if (transactionType === 0) {
+            //     const message = 'Do you want to void this sale?';
+            //     this.popupMessageService.showMessage(PopupMessageCode.E06401).then((bool) => {
+            //         if (bool) {
+            //             console.log('13')
+
+            //             this.postSaleTransaction(transactionType);
+            //             this.event.publish('patron-released', { 'patronDetails': null });
+            //         }
+            //     });
+            //     this.transactionInProgress = false;
+            //     // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+            // } else {
+            //     this.transactionInProgress = false;
+            // }
+
+
+            if (transactionType === 2) {
+                const ordDetails = {};
+                ordDetails['orderData'] = this.orderData;
+                ordDetails['alaCount'] = this.alacarteCount;
+                ordDetails['mealCount'] = this.mealCount;
+                ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
+                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['patronDetails'] = this.patronDetails;
+                ordDetails['transactionType'] = transactionType;
+                ordDetails['cashTendAmt'] = this.cashTendAmount;
+                if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
-                    this.chargeOrder(transactionType);
+                    this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
+                    if (this.transactionInProgress) {
+                        this.postSaleTransaction(transactionType);
+                    } else {
+                        const showPrompt = this.restrictService.showConfirm();
+                        const partPayPrompt = this.restrictService.showPartPayPopup();
+                        if (showPrompt) {
+                            // const message = 'Account Balance is below charge limit. Do you still want to continue?';
+                            // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+                            this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
+                                if (bool) {
+                                    this.postSaleTransaction(transactionType);
+                                    this.event.publish('patron-released', { 'patronDetails': null });
+                                }
+                            });
+                        }
+                        if (partPayPrompt) {
+                            this.alertCtrl.create({
+                                header: 'Alert',
+                                message: 'Please enter a partial payment',
+                                cssClass: 'customAlertCss',
+                                buttons: [
+                                    {
+                                        text: 'Pay',
+                                        handler: () => {
+                                            this.showChargePopup();
+                                        }
+                                    },
+                                    {
+                                        text: 'Cancel',
+                                        handler: () => {
+                                            console.log('Cancel clicked');
+                                        }
+                                    }
+                                ]
+                            }).then(async (res) => {
+                                await res.present();
+                            });
+                        }
+                    }
+                    // this.chargeOrder(transactionType);
                 }
             } else if (transactionType === 0) {
-                const message = 'Do you want to void this sale?';
-                this.popupMessageService.showMessage(PopupMessageCode.E06401).then((bool) => {
+                this.transactionInProgress = false;
+                // const message = 'Do you want to void this sale?';
+                // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+                this.popupMessageService.showMessage(PopupMessageCode.E05304).then((bool) => {
                     if (bool) {
-                        console.log('13')
-
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
                 });
-                this.transactionInProgress = false;
-                // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+
             } else {
                 this.transactionInProgress = false;
             }
         }
     }
 
+    // public makeSalePay() {
+    //     if (this.orderData.TransactionType !== 3) {
+    //         this.orderData.TransactionType = 1;
+    //     }
+    //     if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+    //         console.log('1')
+    //         this.postSaleTransaction(this.orderData.TransactionType);
+    //     }
+    //     else {
+    //         this.utilService.selectAccountClick = false;
+    //         this.lookUpService.menuPayselectAccountClick = false;
+
+    //         if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
+    //             //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+    //             this.popupMessageService.showMessage(PopupMessageCode.E06438);
+    //             // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
+    //             return;
+    //         } else {
+    //             this.verifyChargeLimits(this.orderData.TransactionType);
+    //         }
+    //     }
+    // }
     public makeSalePay() {
         if (this.orderData.TransactionType !== 3) {
             this.orderData.TransactionType = 1;
         }
+
         if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-            console.log('1')
             this.postSaleTransaction(this.orderData.TransactionType);
-        }
-        else {
+        } else {
             this.utilService.selectAccountClick = false;
             this.lookUpService.menuPayselectAccountClick = false;
-
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
+                this.transactionInProgress = false;
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                this.popupMessageService.showMessage(PopupMessageCode.E06438);
+                this.popupMessageService.showMessage(PopupMessageCode.E05368);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                 return;
             } else {
-                this.verifyChargeLimits(this.orderData.TransactionType);
+                const ordDetails = {};
+                ordDetails['orderData'] = this.orderData;
+                ordDetails['alaCount'] = this.alacarteCount;
+                ordDetails['mealCount'] = this.mealCount;
+                ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
+                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['patronDetails'] = this.patronDetails;
+                ordDetails['transactionType'] = this.orderData.TransactionType;
+                ordDetails['cashTendAmt'] = this.cashTendAmount;
+                this.transactionInProgress = this.restrictService.verifyChargeLimits(ordDetails); // this.chargeOrder(ordDetails);
+                if (!this.transactionInProgress) {
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                }
+                if (this.transactionInProgress) {
+                    this.postSaleTransaction(this.orderData.TransactionType);
+                } else {
+                    const showPrompt = this.restrictService.showConfirm();
+                    const partPayPrompt = this.restrictService.showPartPayPopup();
+                    if (showPrompt) {
+                        // const message = 'Account Balance is below charge limit. Do you still want to continue?';
+                        // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': this.orderData.TransactionType });
+                        this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
+                            if (bool) {
+                                this.postSaleTransaction(this.orderData.TransactionType);
+                                this.event.publish('patron-released', { 'patronDetails': null });
+                            }
+                            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                        });
+
+                    }
+                    if (partPayPrompt) {
+                        this.alertCtrl.create({
+                            header: 'Alert',
+                            message: 'Please enter a partial payment',
+                            cssClass: 'customAlertCss',
+                            buttons: [
+                                {
+                                    text: 'Pay',
+                                    handler: () => {
+                                        this.showChargePopup();
+                                    }
+                                },
+                                {
+                                    text: 'Cancel',
+                                    handler: () => {
+                                        console.log('Cancel clicked');
+                                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                                    }
+                                }
+                            ]
+                        }).then(async (res) => {
+                            await res.present();
+                        });
+                    }
+                }
+                // this.verifyChargeLimits(this.orderData.TransactionType);
             }
         }
+
     }
 
 
@@ -6231,9 +6388,18 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     private calcAlaTotal(items) {
+
+
         this.alacarteTotal = 0.00;
-        const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
-            (o.IsReimbursable === true && o.isSecondMeal === true));
+        let alaItems = []
+
+        if (this.mealCount >= 1) {
+            alaItems = _.filter(items, (o) => (o.IsReimbursable === false && o.IsPartOfMeal == false) ||
+                (o.IsReimbursable === true && o.isSecondMeal === true));
+        } else {
+            alaItems = items
+        }
+
         if (alaItems.length > 0) {
             alaItems.map(item => {
                 this.alacarteTotal += item.Price;
