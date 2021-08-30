@@ -2683,6 +2683,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         } else if (returnTyp === 'charge-order') {
                             this.verifyChargeLimits(data.transactionType);
                         } else if (returnTyp === 'postSaleTransaction') {
+                            console.log('11')
+
                             this.postSaleTransaction(data.transactionType);
                             this.event.publish('patron-released', { 'patronDetails': null });
                         } else if (returnTyp === 'default_terminal_menu') {
@@ -2836,6 +2838,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             if (transactionType === 2) {
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+            console.log('12')
+                  
                     this.postSaleTransaction(transactionType);
                 } else {
                     this.chargeOrder(transactionType);
@@ -2844,6 +2848,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 const message = 'Do you want to void this sale?';
                 this.popupMessageService.showMessage(PopupMessageCode.E06401).then((bool) => {
                     if (bool) {
+            console.log('13')
+
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
@@ -2861,7 +2867,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.orderData.TransactionType = 1;
         }
         if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-
+            console.log('1')
             this.postSaleTransaction(this.orderData.TransactionType);
         }
         else {
@@ -3602,12 +3608,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E06462, [this.patronDetails.FullName]);
                     this.transactionInProgress = false;
                 } else {
+                    console.log('2')
+
                     this.postSaleTransaction(transactionType);
                 }
             } else {
-                if (this.verifyChargeLimits(transactionType)) {
-                    this.postSaleTransaction(transactionType)
-                }
+                this.verifyChargeLimits(transactionType)
+
                 //  this.utilService.showAlert('You cannot charge this payment because of insufficent balance.');
             }
             return;
@@ -3631,11 +3638,15 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         if (transactionType === 3) { // No charge limits are applied if transaction type is to Principal Account
+            console.log('4')
+
             this.postSaleTransaction(transactionType);
             return true;
         }
 
         if (saleTotal === paymentAmount) {
+            console.log('5')
+
             this.postSaleTransaction(transactionType);
             return true;
         }
@@ -3651,6 +3662,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (projectedBalance >= 0 || paymentAmount >= saleTotal) {
             // allow sale
+            console.log('6')
+
             this.postSaleTransaction(transactionType);
             return true;
         }
@@ -3664,6 +3677,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (!this.sepChargeLimit && projectedBalance < creditLimit) {
             if (this.setting.Setting_ActionWhenBelowChargeLimit === 2 && paymentAmount > 0) {
                 // allow sale
+                console.log('7')
+
                 this.postSaleTransaction(transactionType);
                 return true;
             } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 1) {
@@ -3813,6 +3828,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
                 this.popupMessageService.showMessage(PopupMessageCode.E06484).then((bool) => {
                     if (bool) {
+                        console.log('8')
+
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
@@ -3820,6 +3837,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 return;
             } else {
                 // allow sale
+                console.log('9')
+
                 this.postSaleTransaction(transactionType);
                 return true;
             }
@@ -3840,6 +3859,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
             this.popupMessageService.showMessage(PopupMessageCode.E06484).then((bool) => {
                 if (bool) {
+                    console.log('10')
+
                     this.postSaleTransaction(transactionType);
                     this.event.publish('patron-released', { 'patronDetails': null });
                 }
