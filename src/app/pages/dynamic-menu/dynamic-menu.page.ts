@@ -3750,7 +3750,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.transactionInProgress = false;
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     return false;
-                } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
+                } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3 && this.setting.Setting_ChargeReimbursableMealsOnly) {
+                    // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
+                    this.popupMessageService.showMessage(PopupMessageCode.E12441);
+                    return false;
+                }
+                else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
                         this.popupMessageService.showMessage(PopupMessageCode.E12510);
                         return false
