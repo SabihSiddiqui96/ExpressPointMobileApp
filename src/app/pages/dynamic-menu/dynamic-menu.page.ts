@@ -3753,9 +3753,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
                         this.popupMessageService.showMessage(PopupMessageCode.E12510);
+                        return false
                         // this.restrictService.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
                     } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal) && reimProjBal < creditLimit) {
                         this.popupMessageService.showMessage(PopupMessageCode.E12511);
+                        return false
                         // this.restrictService.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
                     }
                     // this.popupMessageService.showMessage(PopupMessageCode.E12441);
