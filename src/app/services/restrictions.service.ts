@@ -47,6 +47,7 @@ export class RestrictionsService {
     public cashtendAmount: any = 0.00;
     public sepChargeLimit: boolean = false;
     public ALACASREST: boolean = false;
+    public useDynamicMenus: boolean = false;
     constructor(
         private popupMessageService: PopupMessageService) {
 
@@ -62,6 +63,11 @@ export class RestrictionsService {
             this.hideAddFunds = false;
         } else if (SettingService.getSettingValue('SCHPREPAY') === '0') {
             this.hideAddFunds = true;
+        }
+        if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+            this.useDynamicMenus = true;
+        } else {
+            this.useDynamicMenus = false;
         }
 
         /**
@@ -398,7 +404,7 @@ export class RestrictionsService {
         let transactionType: any;
         this.orderData = ordDetails.orderData;
         this.alacarteCount = ordDetails.alaCount;
-        this.mealCount = this.calculateMealCount(this.orderData['items']); // ordDetails.mealCount;
+        this.mealCount = this.useDynamicMenus ? ordDetails.mealCount : this.calculateMealCount(this.orderData['items']); // ordDetails.mealCount;
         this.restrictedAlacarteCount = ordDetails.restAlCcount;
         this.patronDetails = ordDetails.patronDetails;
         this.cashtendAmount = ordDetails.cashTendAmt;
@@ -460,7 +466,7 @@ export class RestrictionsService {
         this.showPrompt = false;
         this.alacarteCount = ordDetails.alaCount;
         // this.mealCount = ordDetails.mealCount;
-        this.mealCount = this.calculateMealCount(this.orderData['items']);
+        this.mealCount = this.useDynamicMenus ? ordDetails.mealCount : this.calculateMealCount(this.orderData['items']);
         this.alacarteTotal = ordDetails.alaTotal;
         this.restrictedAlacarteCount = ordDetails.restAlCcount;
         this.patronDetails = ordDetails.patronDetails;
@@ -533,7 +539,7 @@ export class RestrictionsService {
                 return false;
             }
         } else if (this.sepChargeLimit) { // Work in Progress for US 156550
-            this.alacarteTotal = this.calcAlaTotal(this.orderData["items"]);
+            this.alacarteTotal = this.useDynamicMenus ? ordDetails.alaTotal : this.calcAlaTotal(this.orderData["items"]);
             const alaProjBal = accountBalance - this.alacarteTotal;
             const reimProjBal = accountBalance - (saleTotal - this.alacarteTotal);
 
@@ -721,6 +727,7 @@ export class RestrictionsService {
 
     private calcAlaTotal(items) { // To calculate sum of all Ala-Carte items in an order
         let alacarteTotal = 0.00;
+
         const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
             (o.IsReimbursable === true && o.isSecondMeal === true));
         if (alaItems.length > 0) {
@@ -731,5 +738,6 @@ export class RestrictionsService {
         } else {
             return alacarteTotal;
         }
+
     }
 }
