@@ -596,8 +596,12 @@ export class GoLogin implements OnDestroy {
 
                 if (this.user.AuthorizedSites.length === 1) {
                     if (AppStateService.get('SelectedSite') && JSON.parse(AppStateService.get('SelectedSite')).SchoolId === this.user.AuthorizedSites[0].SchoolId) {
-                        if (!this.LoginWithoutSetup)
+                        if (!this.LoginWithoutSetup) {
                             this.setupDbService.setupData().then(() => { });
+                        } else {
+                            AppStateService.set('SetupComplete', true);
+                            this._nav.navigateRoot("service-selection");
+                        }
                     } else {
                         let selectedSite = {};
                         // to make sure that the user downloads all students for the particular school when a different user logs in
