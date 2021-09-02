@@ -133,7 +133,7 @@
                               Selected Site
                             </ion-label>
                           </ion-list-header>
-                          <ion-item lines="none" *ngFor="let site of siteList" (change)=changeSchool(selectedSite)>
+                          <ion-item lines="none" *ngFor="let site of siteList">
 
                             <ion-label>{{site.SiteNameWithCode}}</ion-label>
                             <ion-radio slot="end" id="{{site.SchoolId}}" color="slate" value="{{site.SchoolId}}"
