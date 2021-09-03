@@ -152,7 +152,7 @@
                     </ion-col>
                   </ion-row>
 
-                  <ng-container *ngIf="selectedSite && selectedSite === '00000000-0000-0000-0000-000000000000'">
+                  <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
                     <ion-row>
                       <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
                     </ion-row>
@@ -433,7 +433,7 @@
 
 
                 <!-- Non iOS -->
-                <ng-container *ngIf="selectedSite && selectedSite === '00000000-0000-0000-0000-000000000000'">
+                <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
                   <ion-row>
                     <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
                   </ion-row>
@@ -672,7 +672,7 @@
                   </ion-row>
                   <!-- Non iOS -->
                   <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
-                    <ng-container *ngIf="selectedSite && selectedSite === '00000000-0000-0000-0000-000000000000'">
+                    <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
                       <ion-row>
                         <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
                       </ion-row>
