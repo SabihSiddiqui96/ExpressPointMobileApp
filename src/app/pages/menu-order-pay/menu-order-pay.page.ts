@@ -16,6 +16,7 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { LookupService } from '../../services/lookup.service';
 import { HttpService } from '../../services/HTTP/http.service';
+import { threadId } from 'worker_threads';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -42,6 +43,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.navOrderData = this.orderData;
         this.navIsSpecialAccount = this.isSpecialAccount;
         this.navIsMealFormed = this.isMealFormed;
+        this.amountDue = this.navOrderData.accountBalance;
 
         this.changeDue = 0.00;
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
@@ -319,6 +321,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public isLoadingPrevPatron = false;
     public depositeStudentAmount = 0.00;
     public selectedStudentBalance = 0.00;
+    amountDue = 0.00;
 
     public keyboardSettings: IonDigitKeyboardOptions = {
         align: 'center',
@@ -710,9 +713,22 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public setCashTendered() {
         this.saveInProgress = false;
         let amnt = this.cashtendered;
-
+        /**
+         *  This is for the backspace click would not update the amount tendered field
+         */
+        if (amnt === '') {
+            amnt = '0'
+        }
         if (amnt) {
+
             amnt = this.filterCurrency(amnt);
+
+            this.amountDue = (+amnt - this.navOrderData.accountBalance) > 0 ? (+amnt - this.navOrderData.accountBalance) : (this.navOrderData.accountBalance - +amnt) < 0 ? 0.00 : (this.navOrderData.accountBalance - +amnt)
+            if (this.navOrderData.totalAmount === +amnt) {
+                this.amountDue = 0.00
+            } else {
+                this.amountDue = (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) > 0 ? (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) : 0.00
+            }
             if (!isNaN(amnt)) {
                 this.cashtendAmount = amnt;
                 this.cashtendered = '$' + amnt;
@@ -723,11 +739,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 //if(this.cashtendAmount.toFixed(2) > this.navOrderData.totalAMount)
 
                 if (this.depositChangeDue) {
-                   
+
                     this.changeDue = 0.00;
                     this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00';
                 } else {
-
 
                     if (this.EXNEGBAL) {  // change to true
                         if (this.navPatronDetails['Balance'] < 0) {
@@ -746,7 +761,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             // this.amountTowardsBalance = amountTowardsBal;
                             // this.depositAmount = '$' + amountTowardsBal.toFixed(2);
 
-
                             // this.changeDue = chngDue > 0 ? chngDue : 0.00;
                             // this.isDepositByEXNEGBAL = true; // Check this
 
@@ -755,10 +769,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             /*
                             With EXNEGBAL : the deposit amount would be the
                             minimum of balance to zero or cashTendered- totalAMount
-
+ 
                             if the minimum  of these is less than zero then there wont be a deposit available as
                              amount tendered would be used up by the saletotal entirely
-
+ 
                              Change Due will be calculated based on the deposit amount and totalSaleAmount  and Cashtendered
                             */
                             const tempDepositAmnt = Math.min(amountToZero, this.cashtendAmount - this.orderData.totalAmount)
