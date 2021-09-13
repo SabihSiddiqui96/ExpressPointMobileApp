@@ -23,7 +23,7 @@
           </ion-item>
           <ion-item>
             <ion-label>Amount Due</ion-label>
-            <ion-label text-bold class="color-black ion-text-right">{{navOrderData.accountBalance |
+            <ion-label text-bold class="color-black ion-text-right">{{amountDue |
               currency:'USD':true:'1.2-2'}}
             </ion-label>
           </ion-item>
@@ -159,6 +159,8 @@
         [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
         [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
       </ion-digit-keyboard>
+      <ion-label>Any amount due not covered by the payment will be charged against the patrons balance.</ion-label>
+
     </ion-col>
     <ion-row *ngIf="showPatron">
       <ion-col>
