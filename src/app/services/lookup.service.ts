@@ -322,11 +322,16 @@ export class LookupService {
                     // resolve(this.lookupResults);
                 } else {
                     let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-                    if ((this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) || this.CanServeVisitingAdults) {
+                    if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
                         this.serverLookup(pin, selectedSite).then(() => {
                             this.handlePersonResults(false, inputDirection);
                             // resolve(this.lookupResults);
+                        },(error) => {
+
                         });
+                    }else{
+                        this.lookupResults = [];
+                        this.handlePersonResults(false,inputDirection);
                     }
                 }
                 resolve(null);
@@ -381,9 +386,11 @@ export class LookupService {
                                     resolve(this.lookupResults);
                                 }, () => { this.loader.dismiss(); });
                     } else {
+                        this.lookupResults = [];
                         resolve([]);
                     }
                 } else {
+                    this.lookupResults = [];
                     resolve([]);
                 }
             });
