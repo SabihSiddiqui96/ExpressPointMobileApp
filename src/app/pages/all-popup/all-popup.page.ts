@@ -361,7 +361,7 @@ export class AllPopupPage implements OnInit {
         public popoverCtrl: PopoverController,
         public appStateService: AppStateService,
         public pouchDBService: PouchDBService
-    ) { 
+    ) {
         this.isElectronApp = this.utilService.isElectronApp();
     }
 
@@ -518,14 +518,14 @@ export class AllPopupPage implements OnInit {
         return newArray;
     }
 
-    public select(data,fromPeripheral?) {
+    public select(data, fromPeripheral?) {
         console.log(data);
         // tslint:disable-next-line:no-empty
         // if (this.navType === 'ReviewTypes' && this.selectedValue !== (undefined)) {
 
         // } else
 
-    let navType = fromPeripheral==undefined? this.navType:''
+        let navType = fromPeripheral == undefined ? this.navType : ''
         if (navType === "keyboard") {
             let filteredData = [];
             if (this.title === "Patron") {
@@ -547,7 +547,7 @@ export class AllPopupPage implements OnInit {
             this.navSelectedValue = data.value;
 
 
-            if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+            if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
                 if (navType !== "servingLine") {
                     this.close();
                 }
@@ -556,6 +556,7 @@ export class AllPopupPage implements OnInit {
                     this.close();
                 }
             }
+
 
             if (this.isSortOrderCase(navType)) {
                 this.toShowSortOrder = true;
@@ -757,7 +758,7 @@ export class AllPopupPage implements OnInit {
                     if (/^Shifto/.test(incomingID)) {
                         incomingID = incomingID.replace("Shifto", "O");
                     }
-                    this.select(incomingID,false);
+                    this.select(incomingID, false);
                 }
                 incomingID = "";
                 this.inputBuffer = [];
@@ -839,7 +840,7 @@ export class AllPopupPage implements OnInit {
     public openOnScreenKeyboard() {
         //Check if toggle is enabled in admin settings
         if (this.utilService.isElectronApp()) {
-          this.utilService.openOnScreenKeyboard();
+            this.utilService.openOnScreenKeyboard();
         }
     }
 }

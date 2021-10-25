@@ -1218,7 +1218,7 @@ export class AppComponent {
   public transactionStatusFromServer() {
     this.utilService.isNetworkOnline().then((isNetworkOnline) => {
       if (isNetworkOnline) {
-        this.transactionService.getAllTransactionswithStatus().then((data) => { 
+        this.transactionService.getAllTransactionswithStatus().then((data) => {
         });
       }
     });
@@ -1348,8 +1348,7 @@ export class AppComponent {
 
     this.utilService.setLoader(true);
 
-
-    if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+    if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
       this.useDynamicMenus = true;
     } else {
       this.useDynamicMenus = false;

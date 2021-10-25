@@ -40,9 +40,8 @@ export class MenuSoldPopupPage implements OnInit {
         console.log(this.navPatronDetails.SoldItems);
 
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
-        if (DYNMENU === 1) {
+        if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
           this.useDynamicMenus = true;
-
           const x = _.uniqBy(this.navPatronDetails.SoldItems, 'TransactionNo');
           const transactions = x.map(d => d.TransactionNo);
 

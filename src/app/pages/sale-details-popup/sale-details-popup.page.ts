@@ -31,7 +31,7 @@ export class SaleDetailsPopupPage implements OnInit {
       console.log('Hello MenuSoldPopup Page');
       // console.log(this.patronDetails.SoldItems)
 
-      if ((parseInt(SettingService.getSettingValue('DYNMENU')) === 1)) {
+      if ((parseInt(SettingService.getSettingValue('DYNMENU')) === 1) && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
         this.useDynamicMenus = true;
 
         const x = _.uniqBy(this.menuItems, 'TransactionNo');
