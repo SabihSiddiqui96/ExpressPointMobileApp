@@ -392,7 +392,7 @@ export class PreOrdersPage implements OnInit {
                 // console.log("Prices"+JSON.stringify(this.allMenuPrices));
 
                 const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
-                if (DYNMENU === 1) {
+                if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
 
                     for (let i = 0; i < student.MenuItems.length; i++) {
                         const singleMenu = student.MenuItems[i];

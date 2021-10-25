@@ -155,7 +155,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     if (AppStateService.get('login_details')) {
       const loginDetails = JSON.parse(AppStateService.get('login_details'));
       this.displayDetails.user_name = loginDetails.Name;
-      if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+      if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
         this.useDynamicMenus = true;
       }
     }
@@ -674,7 +674,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
     const sessionDate = AppStateService.get('NewSessionDate');
     const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
-    
+
     if (sessionDate !== undefined) {
       if (currentDate !== sessionDate) {
         AppStateService.set('NewSessionDate', currentDate);

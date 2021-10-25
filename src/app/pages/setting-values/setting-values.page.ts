@@ -26,7 +26,7 @@ export class SettingValuesPage implements OnInit {
             this.chargeLimitSettings = data;
             this.studentLimits = data.filter(obj => obj.Type === 'Student');
             this.adultLimits = data.filter(obj => obj.Type === 'Adult');
-            if ((parseInt(SettingService.getSettingValue('DYNMENU')) === 1)) {
+            if ((parseInt(SettingService.getSettingValue('DYNMENU')) === 1) && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
                 this.hideSyncComboMeals = false;
                 this.getSystemMealComboPrices().then((res: any) => {
                     this.mealComboPrices = res;

@@ -99,7 +99,7 @@ export class ServiceSelectionPage implements OnInit {
         AppStateService.get("login_details")
       ).Name;
     }
-    if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+    if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
       this.useDynamicMenus = true;
     }
     this.displayDetails.date = Date.now();
