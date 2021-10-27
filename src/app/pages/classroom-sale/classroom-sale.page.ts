@@ -230,11 +230,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     public ngOnDestroy() {
-        this.event.destroy('all_categories:show');
-        this.event.destroy('menu_subcategory:select');
-        this.event.destroy('menu-service-popup');
-        this.event.destroy('category_all:select');
-        this.event.destroy('menu_subcategory:select');
+        // this.event.destroy('all_categories:show');
+        // this.event.destroy('menu_subcategory:select');
+        // this.event.destroy('menu-service-popup');
+        // this.event.destroy('category_all:select');
+        // this.event.destroy('menu_subcategory:select');
     }
     public resetHomeroom() {
         this.filter.selected_grade = -1;
