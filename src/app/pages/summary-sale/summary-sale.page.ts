@@ -235,7 +235,8 @@ export class SummarySalePage implements OnInit {
             'PriceType': data.PriceTypeDescription,
             'MealCount': 0,
             'Show': 1,
-            'Index': 0
+            'Index': 0,
+            'RdaGroupId': 0
           };
 
           if (data.PriceTypeDescription === 'Reduced') {
@@ -245,10 +246,35 @@ export class SummarySalePage implements OnInit {
           } else if (data.PriceTypeDescription === 'Paid') {
             summarySaleDoc.Show = 0;
           } else if (data.PriceTypeDescription === 'Free') {
-            summarySaleDoc.PriceType = 'Student';
-            summarySaleDoc.Show = 1;
-            summarySaleDoc.Index = index
-            index++
+            if (this.priceMode === 0) {
+              summarySaleDoc.PriceType = 'Student';
+              summarySaleDoc.Show = 1;
+              summarySaleDoc.Index = index
+              index++
+            } else {
+              PouchQueriesService.GetRdaGradeGroups().then((res) => {
+                const siteRdaGrades = res.rows.map(row => row.doc);
+                if (siteRdaGrades.length > 0) {
+                  siteRdaGrades.map(doc => {
+                    summarySaleDoc.PriceType = 'Student (' + doc.Description + ')';
+                    summarySaleDoc.RdaGroupId = doc.RDAGroupId;
+                    summarySaleDoc.Show = 1;
+                    summarySaleDoc.Index = index
+                    index++
+                  });
+                } else {
+                  summarySaleDoc.PriceType = 'Student';
+                  summarySaleDoc.Show = 1;
+                  summarySaleDoc.Index = index
+                  index++
+                }
+              });
+              // summarySaleDoc.PriceType = 'Student';
+              // summarySaleDoc.Show = 1;
+              // summarySaleDoc.Index = index
+              // index++
+            }
+
           } else {
             /**
              * Check if prices exist for all the pricetypes except ones for a student(free,reduced,paid)
@@ -267,8 +293,6 @@ export class SummarySalePage implements OnInit {
       }
       this.zone.run(() => {
         this.summaryMealCount = summarySale;
-        console.clear()
-        console.log(this.summaryMealCount)
         this.summaryMealCount = this.summaryMealCount.filter(m => m.Show >= 1);
       });
     }).catch(err => console.log(err));

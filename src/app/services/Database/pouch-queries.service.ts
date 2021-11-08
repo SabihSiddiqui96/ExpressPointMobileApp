@@ -575,6 +575,15 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetRdaGradeGroups() {
+
+    return EXP_COMMON.allDocs({
+      startkey: 'RDAGrade',
+      endkey: 'RDAGrade\uffff',
+      include_docs: true
+    });
+  }
+
   public static GetSpecialRosters() {
     return EXP_COMMON.allDocs({
       startkey: 'SpecialRosters',
