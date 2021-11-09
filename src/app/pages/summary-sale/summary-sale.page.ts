@@ -250,30 +250,41 @@ export class SummarySalePage implements OnInit {
             summarySale.push(summarySaleDoc);
           } else if (data.PriceTypeDescription === 'Paid') {
             summarySaleDoc.Show = 0;
-          } else if (data.PriceTypeDescription === 'Free') {
+          } else if (data.PriceTypeDescription === 'Free' || data.PriceTypeDescription === 'Second Meal') {
+            let pricetype = ''
+
+            if (data.PriceTypeDescription === 'Free') {
+              pricetype = 'Student'
+            } else {
+              pricetype = 'Second Meal'
+            }
+
+
             if (this.priceMode === 0) {
-              summarySaleDoc.PriceType = 'Student';
-              summarySaleDoc.Show = 1;
-              summarySaleDoc.Index = index
+              summarySaleDoc.PriceType = pricetype;
               summarySaleDoc.IsStudent = 1
+              summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+              summarySaleDoc.Index = index
+
               index++
             } else {
               PouchQueriesService.GetRdaGradeGroups().then((res) => {
                 const siteRdaGrades = res.rows.map(row => row.doc);
                 if (siteRdaGrades.length > 0) {
                   siteRdaGrades.map(doc => {
-                    summarySaleDoc.PriceType = 'Student (' + doc.Description + ')';
+                    summarySaleDoc.PriceType = pricetype + ' (' + doc.Description + ')';
                     summarySaleDoc.RdaGroupId = doc.RDAGroupId;
-                    summarySaleDoc.Show = 1;
-                    summarySaleDoc.Index = index
                     summarySaleDoc.IsStudent = 1
+                    summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+                    summarySaleDoc.Index = index
+
                     index++
                   });
                 } else {
-                  summarySaleDoc.PriceType = 'Student';
-                  summarySaleDoc.Show = 1;
-                  summarySaleDoc.Index = index
+                  summarySaleDoc.PriceType = pricetype;
                   summarySaleDoc.IsStudent = 1
+                  summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+                  summarySaleDoc.Index = index
                   index++
 
                 }
@@ -290,6 +301,7 @@ export class SummarySalePage implements OnInit {
              * 
              * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
              */
+
             summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;
             summarySaleDoc.Index = index
             index++
