@@ -196,17 +196,21 @@ export class SummarySalePage implements OnInit {
     })
 
   }
-  public getPrice(priceTypeId) {
+  public getPrice(priceTypeId, rdaGroupId, isStudent) {
 
-    if (this.priceMode === 1) {
-      return true
+    let siteTypeId = 0
+    if (this.priceMode === 1 && isStudent === 1) {
+      siteTypeId = 0
+      // return true
+    } else {
+      siteTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
+      rdaGroupId = 0
     }
-    let siteTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
 
     const priceDoc = _.find(this.allMenuItemsPrices.rows,
       {
-        'key': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId,
-        'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId
+        'key': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + rdaGroupId + '--' + siteTypeId,
+        'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + rdaGroupId + '--' + siteTypeId
       }
     );
 
@@ -236,7 +240,8 @@ export class SummarySalePage implements OnInit {
             'MealCount': 0,
             'Show': 1,
             'Index': 0,
-            'RdaGroupId': 0
+            'RdaGroupId': 0,
+            'IsStudent': 0
           };
 
           if (data.PriceTypeDescription === 'Reduced') {
@@ -250,6 +255,7 @@ export class SummarySalePage implements OnInit {
               summarySaleDoc.PriceType = 'Student';
               summarySaleDoc.Show = 1;
               summarySaleDoc.Index = index
+              summarySaleDoc.IsStudent = 1
               index++
             } else {
               PouchQueriesService.GetRdaGradeGroups().then((res) => {
@@ -260,13 +266,16 @@ export class SummarySalePage implements OnInit {
                     summarySaleDoc.RdaGroupId = doc.RDAGroupId;
                     summarySaleDoc.Show = 1;
                     summarySaleDoc.Index = index
+                    summarySaleDoc.IsStudent = 1
                     index++
                   });
                 } else {
                   summarySaleDoc.PriceType = 'Student';
                   summarySaleDoc.Show = 1;
                   summarySaleDoc.Index = index
+                  summarySaleDoc.IsStudent = 1
                   index++
+
                 }
               });
               // summarySaleDoc.PriceType = 'Student';
@@ -281,7 +290,7 @@ export class SummarySalePage implements OnInit {
              * 
              * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
              */
-            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId) ? 1 : 2;
+            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;
             summarySaleDoc.Index = index
             index++
           }
