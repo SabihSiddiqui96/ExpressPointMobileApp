@@ -17,7 +17,7 @@ import { timeout } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
-const TIMEOUT = 20 * 1000;
+const TIMEOUT = 300 * 1000;
 const TIMEOUT_HEARTBEAT = 5 * 1000;
 
 
