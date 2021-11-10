@@ -196,17 +196,21 @@ export class SummarySalePage implements OnInit {
     })
 
   }
-  public getPrice(priceTypeId) {
+  public getPrice(priceTypeId, rdaGroupId, isStudent) {
 
-    if (this.priceMode === 1) {
-      return true
+    let siteTypeId = 0
+    if (this.priceMode === 1 && isStudent === 1) {
+      siteTypeId = 0
+      // return true
+    } else {
+      siteTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
+      rdaGroupId = 0
     }
-    let siteTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
 
     const priceDoc = _.find(this.allMenuItemsPrices.rows,
       {
-        'key': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId,
-        'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + 0 + '--' + siteTypeId
+        'key': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + rdaGroupId + '--' + siteTypeId,
+        'id': 'MenuItemPrice' + this.filter.selected_menuitem + '--' + priceTypeId + '--' + rdaGroupId + '--' + siteTypeId
       }
     );
 
@@ -235,7 +239,9 @@ export class SummarySalePage implements OnInit {
             'PriceType': data.PriceTypeDescription,
             'MealCount': 0,
             'Show': 1,
-            'Index': 0
+            'Index': 0,
+            'RdaGroupId': 0,
+            'IsStudent': 0
           };
 
           if (data.PriceTypeDescription === 'Reduced') {
@@ -244,18 +250,59 @@ export class SummarySalePage implements OnInit {
             summarySale.push(summarySaleDoc);
           } else if (data.PriceTypeDescription === 'Paid') {
             summarySaleDoc.Show = 0;
-          } else if (data.PriceTypeDescription === 'Free') {
-            summarySaleDoc.PriceType = 'Student';
-            summarySaleDoc.Show = 1;
-            summarySaleDoc.Index = index
-            index++
+          } else if (data.PriceTypeDescription === 'Free' || data.PriceTypeDescription === 'Second Meal') {
+            let pricetype = ''
+
+            if (data.PriceTypeDescription === 'Free') {
+              pricetype = 'Student'
+            } else {
+              pricetype = 'Second Meal'
+            }
+
+
+            if (this.priceMode === 0) {
+              summarySaleDoc.PriceType = pricetype;
+              summarySaleDoc.IsStudent = 1
+              summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+              summarySaleDoc.Index = index
+
+              index++
+            } else {
+              PouchQueriesService.GetRdaGradeGroups().then((res) => {
+                const siteRdaGrades = res.rows.map(row => row.doc);
+                if (siteRdaGrades.length > 0) {
+                  siteRdaGrades.map(doc => {
+                    summarySaleDoc.PriceType = pricetype + ' (' + doc.Description + ')';
+                    summarySaleDoc.RdaGroupId = doc.RDAGroupId;
+                    summarySaleDoc.IsStudent = 1
+                    summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+                    summarySaleDoc.Index = index
+
+                    index++
+                  });
+                } else {
+                  summarySaleDoc.PriceType = pricetype;
+                  summarySaleDoc.IsStudent = 1
+                  summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+                  summarySaleDoc.Index = index
+                  index++
+
+                }
+              });
+              // summarySaleDoc.PriceType = 'Student';
+              // summarySaleDoc.Show = 1;
+              // summarySaleDoc.Index = index
+              // index++
+            }
+
           } else {
             /**
              * Check if prices exist for all the pricetypes except ones for a student(free,reduced,paid)
              * 
              * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
              */
-            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId) ? 1 : 2;
+
+            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;
             summarySaleDoc.Index = index
             index++
           }
@@ -267,8 +314,6 @@ export class SummarySalePage implements OnInit {
       }
       this.zone.run(() => {
         this.summaryMealCount = summarySale;
-        console.clear()
-        console.log(this.summaryMealCount)
         this.summaryMealCount = this.summaryMealCount.filter(m => m.Show >= 1);
       });
     }).catch(err => console.log(err));

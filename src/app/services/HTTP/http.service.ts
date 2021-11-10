@@ -222,6 +222,9 @@ export class HttpService {
     }
 
 
+    public SyncRdaGroupsBySchool(): any {
+        return this.http.get(API_URL + 'SyncRdaGroupsBySchool/' + JSON.parse(AppStateService.get('SelectedSite')).SchoolId).pipe(map(res => res));
+    }
     public SyncGradesList(): any {
         return this.http.get(API_URL + 'SyncGradeList/' + JSON.parse(AppStateService.get('SelectedSite')).SchoolId).pipe(map(res => res));
     }
