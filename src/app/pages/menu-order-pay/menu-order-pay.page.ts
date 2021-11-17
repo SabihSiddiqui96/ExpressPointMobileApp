@@ -109,7 +109,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.event.subscribe('numberClick', (userEventData) => {
             const event = userEventData.event;
             if (userEventData.number === 8) {
-                this.numberClick('X');
+                this.numberInput('X');
             } else if (userEventData.number === 9 && event.shiftKey) {
                 if (this.cashpaymentOption === 'cash' || this.cashpaymentOption === 'check') {
                     if (this.cashpaymentOption === 'cash' && this.activeInputField === 'deposit' && this.depositChangeDue) {
@@ -163,7 +163,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 }
             }
             else {
-                this.numberClick(parseInt(event['key']));
+                this.numberInput(parseInt(event['key']));
             }
 
         });
@@ -407,114 +407,117 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     private inputBuffer = [];
 
     public ngOnDestroy() {
-        this.event.destroy('numberClick');
+        this.event.destroy('numberInput');
     }
-    public numberClick(key: any) {
-
-
-        if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
-            this.popupMessageService.showMessage(PopupMessageCode.E07354);
-            // this.utilService.showToast('Payment via Check is disabled for this patron');
-        } else {
-            if (this.activeInputField === 'check' && this.cashCheckNum && key !== 'X' && key !== 'GO') {
-                if (this.cashCheckNum.length >= 10) {
-                    if (this.cashCheckNum.length == 11) {
-                        this.numberClick('X');
+    public numberInput(key: any, isKeyInput:boolean = false) {
+        key.preventDefault();
+        if(isKeyInput){
+            if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
+                this.popupMessageService.showMessage(PopupMessageCode.E07354);
+                // this.utilService.showToast('Payment via Check is disabled for this patron');
+            } else {
+                if (this.activeInputField === 'check' && this.cashCheckNum && key !== 'X' && key !== 'GO') {
+                    if (this.cashCheckNum.length >= 10) {
+                        if (this.cashCheckNum.length == 11) {
+                            this.numberInput('X');
+                        }
+                        this.popupMessageService.showMessage(PopupMessageCode.E07493);
+                        return;
+                        // this.utilService.showToast('Check Number cannot be longer than 10 digits.');
                     }
-                    this.popupMessageService.showMessage(PopupMessageCode.E07493);
-                    return;
-                    // this.utilService.showToast('Check Number cannot be longer than 10 digits.');
                 }
-            }
-            if (key !== 'X' && key !== 'GO') {
-                this.customKeys += key;
-                if (this.activeInputField === 'amount') {
-                    const amt = this.filterCurrency(this.cashtendered);
-                    if (amt === "0.00" && (key === "00" || key === 0)) {
-                        this.customKeys = "";
-                        this.cashtendered = "0";
-                    } else {
+                if (key !== 'X' && key !== 'GO') {
+                    this.customKeys += key;
+                    if (this.activeInputField === 'amount') {
+                        const amt = this.filterCurrency(this.cashtendered);
+                        if (amt === "0.00" && (key === "00" || key === 0)) {
+                            this.customKeys = "";
+                            this.cashtendered = "0";
+                        } else {
+                            this.cashtendered = this.customKeys;
+                        }
+                        if (this.cashtendered.length > 6) {
+                            // this.numberClick('X');
+                            do {
+                                this.numberInput('X');
+                            } while (this.cashtendered.length == 7);
+                        }
+                    }
+                    if (this.activeInputField === 'check') {
+    
+                        this.cashCheckNum = this.customKeys;
+                        if (this.cashCheckNum.length == 11) {
+                            this.numberInput('X');
+                        }
+                    }
+                    if (this.activeInputField === 'deposit') {
+                        const amt = this.filterCurrency(this.depositAmount);
+                        if (amt === "0.00" && (key === "00" || key === 0)) {
+                            this.customKeys = "";
+                            this.depositAmount = "0";
+                        } else {
+                            this.depositAmount = this.customKeys;
+                        }
+                        if (this.depositAmount.length > 6) {
+                            do {
+                                this.numberInput('X');
+                            } while (this.depositAmount.length == 7);
+                        }
+                    }
+                    if (this.activeInputField === 'card') {
+    
+                        this.cashCardNum = this.customKeys;
+    
+                        if (this.cashCardNum.length > 10) {
+    
+                            do {
+                                this.numberInput('X');
+                            } while (this.cashCardNum.length == 11);
+    
+                            this.utilService.showToast('Card Number cannot be longer than 10 digits.')
+                        }
+                    }
+                } else if (key === 'GO') {
+                    // this.searchPatronNormal();
+                    this.customKeys = '';
+                    if (!this.checkPayDisable()) {
+                        this.makeSale();
+                    }
+                } else if (key === 'X') {
+    
+                    this.customKeys = this.customKeys.slice(0, -1);
+                    if (this.activeInputField === 'amount') {
                         this.cashtendered = this.customKeys;
+                        // this.depositAmount = this.customKeys;
                     }
-                    if (this.cashtendered.length > 6) {
-                        // this.numberClick('X');
-                        do {
-                            this.numberClick('X');
-                        } while (this.cashtendered.length == 7);
+                    if (this.activeInputField === 'check') {
+                        this.cashCheckNum = this.customKeys;
                     }
-                }
-                if (this.activeInputField === 'check') {
-
-                    this.cashCheckNum = this.customKeys;
-                    if (this.cashCheckNum.length == 11) {
-                        this.numberClick('X');
-                    }
-                }
-                if (this.activeInputField === 'deposit') {
-                    const amt = this.filterCurrency(this.depositAmount);
-                    if (amt === "0.00" && (key === "00" || key === 0)) {
-                        this.customKeys = "";
-                        this.depositAmount = "0";
-                    } else {
+                    if (this.activeInputField === 'deposit') {
                         this.depositAmount = this.customKeys;
                     }
-                    if (this.depositAmount.length > 6) {
-                        do {
-                            this.numberClick('X');
-                        } while (this.depositAmount.length == 7);
+                    if (this.activeInputField === 'card') {
+                        this.cashCardNum = this.customKeys;
                     }
                 }
-                if (this.activeInputField === 'card') {
-
-                    this.cashCardNum = this.customKeys;
-
-                    if (this.cashCardNum.length > 10) {
-
-                        do {
-                            this.numberClick('X');
-                        } while (this.cashCardNum.length == 11);
-
-                        this.utilService.showToast('Card Number cannot be longer than 10 digits.')
-                    }
-                }
-            } else if (key === 'GO') {
-                // this.searchPatronNormal();
-                this.customKeys = '';
-                if (!this.checkPayDisable()) {
-                    this.makeSale();
-                }
-            } else if (key === 'X') {
-
-                this.customKeys = this.customKeys.slice(0, -1);
                 if (this.activeInputField === 'amount') {
-                    this.cashtendered = this.customKeys;
-                    // this.depositAmount = this.customKeys;
-                }
-                if (this.activeInputField === 'check') {
-                    this.cashCheckNum = this.customKeys;
+                    const classOb = this;
+                    setTimeout(function () {
+                        classOb.buttonPriceActive = 0;
+                        classOb.setCashTendered();
+                    }, 50);
                 }
                 if (this.activeInputField === 'deposit') {
-                    this.depositAmount = this.customKeys;
+                    const classOb = this;
+                    setTimeout(function () {
+                        classOb.buttonPriceActive = 0;
+                        classOb.setDepositAmount();
+                    }, 50);
                 }
-                if (this.activeInputField === 'card') {
-                    this.cashCardNum = this.customKeys;
-                }
-            }
-            if (this.activeInputField === 'amount') {
-                const classOb = this;
-                setTimeout(function () {
-                    classOb.buttonPriceActive = 0;
-                    classOb.setCashTendered();
-                }, 50);
-            }
-            if (this.activeInputField === 'deposit') {
-                const classOb = this;
-                setTimeout(function () {
-                    classOb.buttonPriceActive = 0;
-                    classOb.setDepositAmount();
-                }, 50);
             }
         }
+
+      
     }
 
 

@@ -157,7 +157,7 @@
         [visible]="keyboardSettings.visible" [leftActionOptions]="keyboardSettings.leftActionOptions"
         [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
         [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
-        [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
+        [theme]="keyboardSettings.theme" (buttonClick)="numberInput($event,true)">
       </ion-digit-keyboard>
       <ion-label>Any amount due not covered by the payment will be charged against the patrons balance.</ion-label>
 
