@@ -293,6 +293,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**
          * Use the site Terminal if the Device Terminal is not set.
          */
+         PatronLookupPage.onKeyUpCallback = this.patronLookup.onPeripheralKey.bind(this);
         if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') != null) {
             this.terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
             this.terminalName = JSON.parse(AppStateService.get('DeviceInfo')).TerminalName;

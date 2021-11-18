@@ -553,6 +553,7 @@ export class SummarySalePage implements OnInit {
   }
 
   public saveSummarySale() {
+    this.customKeys = '';
     if (!this.transactionInProgress) {
       this.transactionInProgress = true;
       const summarySaleDoc = {
