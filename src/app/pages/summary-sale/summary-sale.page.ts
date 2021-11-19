@@ -67,6 +67,7 @@ export class SummarySalePage implements OnInit {
   public transactionInProgress: boolean = false
   public allMenuItemsPrices: any = [];
   private priceMode: number = 0;
+  isMealCount:boolean = false;
   public keyboardSettings: IonDigitKeyboardOptions = {
     align: 'center',
     width: '2%',
@@ -428,6 +429,7 @@ export class SummarySalePage implements OnInit {
   }
 
   public IncrementMealCount(priceTypeId, mealCount) {
+    this.isMealCount = true;
     mealCount++;
 
     const summaryIndex = _.findIndex(
@@ -460,6 +462,12 @@ export class SummarySalePage implements OnInit {
   }
 
   public numberClick(key: any) {
+    if(this.isMealCount){
+      this.customKeys = '';
+      this.isMealCount = false;
+    }else{
+      this.isMealCount = false;
+    }
     const summaryIndex = _.findIndex(
       this.summaryMealCount,
       c => c.PriceTypeId === this.activeField
@@ -545,6 +553,7 @@ export class SummarySalePage implements OnInit {
   }
 
   public saveSummarySale() {
+    this.customKeys = '';
     if (!this.transactionInProgress) {
       this.transactionInProgress = true;
       const summarySaleDoc = {
