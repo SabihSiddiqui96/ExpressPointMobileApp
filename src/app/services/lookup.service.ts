@@ -322,11 +322,16 @@ export class LookupService {
                     // resolve(this.lookupResults);
                 } else {
                     let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-                    if ((this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) || this.CanServeVisitingAdults) {
+                    if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
                         this.serverLookup(pin, selectedSite).then(() => {
                             this.handlePersonResults(false, inputDirection);
                             // resolve(this.lookupResults);
+                        },(error) => {
+
                         });
+                    }else{
+                        this.lookupResults = [];
+                        this.handlePersonResults(false,inputDirection);
                     }
                 }
                 resolve(null);
@@ -367,7 +372,7 @@ export class LookupService {
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
 
                 if (isNetworkOnline) {
-                    if ((this.CanServeVisitingAdults || (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0))) && this.utilService.isNetworkOnline()) {
+                    if ((this.CanServeVisitingAdults || this.canServeVisitingPatrons) && this.utilService.isNetworkOnline()) {
                         this.http.PatronLookup(pin, schoolId).
                             subscribe
                             (
@@ -375,15 +380,17 @@ export class LookupService {
                                     this.loader.dismiss();
                                     this.lookupResults = data.patrons;
 
-                                    if (!(this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) && this.CanServeVisitingAdults) {
+                                    if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
                                         this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
                                     }
                                     resolve(this.lookupResults);
                                 }, () => { this.loader.dismiss(); });
                     } else {
+                        this.lookupResults = [];
                         resolve([]);
                     }
                 } else {
+                    this.lookupResults = [];
                     resolve([]);
                 }
             });

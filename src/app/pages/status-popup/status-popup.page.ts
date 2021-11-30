@@ -49,7 +49,7 @@ export class StatusPopupPage implements OnInit {
                 this.syncList.SiteSettings === "Failed" ||
                 this.syncList.Students === "Failed" ||
                 this.syncList.StaticMenus === "Failed" ||
-                this.syncList.DynamicMenus === "Failed" 
+                this.syncList.DynamicMenus === "Failed"
                 // || this.syncList.Users === "Failed"
             ) {
                 this.error = true;
@@ -125,6 +125,9 @@ export class StatusPopupPage implements OnInit {
                                     break;
                                 case 'SyncGrades':
                                     this.progressSiteSettingsLabels.set(key, 'Grades');
+                                    break;
+                                case 'SyncRdaGrades':
+                                    this.progressSiteSettingsLabels.set(key, 'SyncRdaGrades');
                                     break;
                                 case 'SyncPriceTypes':
                                     this.progressSiteSettingsLabels.set(key, 'Price Types');
