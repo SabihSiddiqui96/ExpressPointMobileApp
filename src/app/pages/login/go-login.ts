@@ -1,6 +1,6 @@
 import { NavController, AlertController, ModalController } from '@ionic/angular';
 // import { Keyboard, Network } from 'ionic-native';
-import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
+// import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
 import * as _ from 'lodash';
 import { LoadingController } from '@ionic/angular';
 // import { OnInit } from '@angular/core';
@@ -341,37 +341,40 @@ export class GoLogin implements OnDestroy {
                                                 this._nav.navigateRoot('reset-password');
                                             } else {
 
-                                                const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
-                                                const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
-                                                const value = SettingService.getSettingValue('DTTIMEZONE');
-                                                const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
-                                                // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
-                                                // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
-                                                if (diffTime >= diffThreshold) {
+                                                // const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
+                                                // const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
+                                                // const value = SettingService.getSettingValue('DTTIMEZONE');
+                                                // const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
+                                                // // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
+                                                // // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
+                                                // if (diffTime >= diffThreshold) {
 
-                                                    const alert = this.alertCtrl.create({
-                                                        header: 'Warning',
-                                                        message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings.',
-                                                        backdropDismiss: false,
-                                                        buttons: [
-                                                            {
-                                                                text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
-                                                                handler: () => {
-                                                                    console.log('Clicked');
-                                                                    const openSettings = new OpenNativeSettings();
-                                                                    openSettings.open('date');
-                                                                    this.canProceed = false;
-                                                                    this.disableLogin = false;
-                                                                    this.loginProcessing = false;
-                                                                }
-                                                            }
-                                                        ]
-                                                    }).then(async (res) => {
-                                                        await res.present();
-                                                    });
-                                                } else {
-                                                    this.CheckLogin();
-                                                }
+                                                //     const alert = this.alertCtrl.create({
+                                                //         header: 'Warning',
+                                                //         message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings.',
+                                                //         backdropDismiss: false,
+                                                //         buttons: [
+                                                //             {
+                                                //                 text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+                                                //                 handler: () => {
+                                                //                     console.log('Clicked');
+                                                //                     const openSettings = new OpenNativeSettings();
+                                                //                     openSettings.open('date');
+                                                //                     this.canProceed = false;
+                                                //                     this.disableLogin = false;
+                                                //                     this.loginProcessing = false;
+                                                //                 }
+                                                //             }
+                                                //         ]
+                                                //     }).then(async (res) => {
+                                                //         await res.present();
+                                                //     });
+                                                // } else {
+                                                this.CheckLogin();
+                                                // this.canProceed = false;
+                                                // this.disableLogin = false;
+                                                // this.loginProcessing = false;
+                                                // }
                                             }
 
                                         } else {

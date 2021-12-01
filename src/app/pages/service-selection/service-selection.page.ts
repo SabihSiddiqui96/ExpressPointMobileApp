@@ -9,6 +9,7 @@ import {
 import { UserDetailsPopupPage } from "../../pages/user-details-popup/user-details-popup.page";
 import { AllPopupPage } from "../../pages/all-popup/all-popup.page";
 import { LoadingController } from "@ionic/angular";
+import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
 
 import { LookupService } from "../../services/lookup.service";
 
@@ -201,7 +202,43 @@ export class ServiceSelectionPage implements OnInit {
   }
 
   ngOnInit() {
-    this.initializeServiceSelection(true);
+    const IGTIMZONE = parseInt(SettingService.getSiteSettingValue('IGTIMZONE'));
+    const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
+    const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
+    const value = SettingService.getSettingValue('DTTIMEZONE');
+    const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
+    // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
+    // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
+    if (IGTIMZONE === 0) {
+      if (diffTime >= diffThreshold) {
+
+        const alert = this.alertCtrl.create({
+          header: 'Warning',
+          message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
+          backdropDismiss: false,
+          buttons: [
+            {
+              text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+              handler: () => {
+                console.log('Clicked');
+                const openSettings = new OpenNativeSettings();
+                openSettings.open('date');
+
+                this._nav.navigateRoot("logout");
+              }
+            }
+          ]
+        }).then(async (res) => {
+          await res.present();
+        });
+      } else {
+        this.initializeServiceSelection(true);
+
+      }
+    } else {
+      this.initializeServiceSelection(true);
+    }
+
   }
 
   public ionViewWillEnter() {
@@ -332,7 +369,7 @@ export class ServiceSelectionPage implements OnInit {
       );
       setTimeout(() => {
         PouchQueriesService.PatronSearchByName('', '', 'abdedcfg')
-    }, 500);    
+      }, 500);
     });
 
   }
