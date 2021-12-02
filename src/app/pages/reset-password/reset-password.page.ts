@@ -178,6 +178,7 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
     }
 
     this.minimumSpecialCharacters = SettingService.getSettingValue('MINSPCPASS');
+   
     if (this.minimumSpecialCharacters > 0) {
       const charString = this.minimumSpecialCharacters > 1 ? charStr + sStr : charStr;
       displayText = 'Contain ' + this.minimumSpecialCharacters + ' special ' + charString;
@@ -405,15 +406,17 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
   }
 
   public changePassword() {
+
     if (this.utilService.isAppOnline) {
       this.savePassword.Password = this.resetPassword.newPassword;
 
       if (!this.PasswordValitor(this.resetPassword.newPassword)) {
+       
         this.utilService.showToast('Password does not meet the minimum requirements. Please try again.');
         return false;
       }
-
-      return this.PasswordValitorBrokenRules(this.resetPassword.newPassword).then((data) => {
+// made changes for Password reset 193683
+      return this.PasswordValitorBrokenRules(encodeURIComponent(this.resetPassword.newPassword)).then((data) => {
 
         if (data != "" && data != null) {
           this.utilService.showToast(data);
@@ -481,9 +484,11 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
 
 
   public PasswordValitor(newPassword): boolean {
+    
     let keepValidating = true;
     this.passwordSystemSettingsList.forEach((obj) => {
       if (keepValidating) {
+      
         if (obj.passwordSystemSettingsType === PasswordSystemSettingsType.MinimumPasswordLength) {
           if (newPassword.length < obj.systemSettingValue) {
             keepValidating = false;
@@ -494,6 +499,7 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
           const specialcharArr = this.specialCharacters.split('');
           const newPasswordArr = newPassword.split('');
           if (this.CountSpecialCharacters(specialcharArr, newPasswordArr) < obj.systemSettingValue) {
+            
             keepValidating = false;
 
           }
@@ -572,6 +578,7 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
     let instancesCount: number = 0;
     specialCharacters.forEach(function (specialChar) {
       password.forEach(function (passwordChar) {
+      
         if (passwordChar === specialChar) {
           instancesCount++;
         }
