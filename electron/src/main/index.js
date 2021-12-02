@@ -276,7 +276,7 @@ electron_1.ipcMain.on('ssologin', (event, loginSSOUrl) => {
     });
 });
 electron_1.ipcMain.on('app-ready', () => {
-    SystemUUID = UUID_os + ' ' + UUID_FileSystem + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName;
+    SystemUUID = UUID_os + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName;
     win.webContents.send('device', {
         deviceId: deviceId,
         deviceName: deviceName,
