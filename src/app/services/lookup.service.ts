@@ -214,11 +214,11 @@ export class LookupService {
             this.modalCtrl.create({
                 component: PatronListModalPage,
                 componentProps: {
-                    'modalController': this.modalCtrl,'patron_list': patronList, 'isFromQueue': isFromQueue,
+                    'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
                     'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
                 },
-                showBackdrop:true,
-                backdropDismiss:false
+                showBackdrop: true,
+                backdropDismiss: false
             }).then(async (res) => {
                 await res.present().then(() => {
                     resolve('Success');
@@ -326,12 +326,12 @@ export class LookupService {
                         this.serverLookup(pin, selectedSite).then(() => {
                             this.handlePersonResults(false, inputDirection);
                             // resolve(this.lookupResults);
-                        },(error) => {
+                        }, (error) => {
 
                         });
-                    }else{
+                    } else {
                         this.lookupResults = [];
-                        this.handlePersonResults(false,inputDirection);
+                        this.handlePersonResults(false, inputDirection);
                     }
                 }
                 resolve(null);
@@ -426,7 +426,8 @@ export class LookupService {
                 }
             } else if (this.lookupResults.length > 1) { // && this.lookupResults.length <= 20
                 this.lookupResults.map(PL => {
-                    PL.InputDirection = inputDirection;
+                    if (PL !== undefined)
+                        PL.InputDirection = inputDirection;
                 });
                 this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch).then(() => {
                     resolve('Success');
