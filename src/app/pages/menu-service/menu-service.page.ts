@@ -3246,26 +3246,27 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
         } else {
             if (this.returnToWhatPage === 'SpecialRoster') {
-                this.event.publish('patron-released', {
-                    'menuGrid_Count': this.menuGridCount, 'returnToWhatPage': this.returnToWhatPage
-                    , 'patronRoomSelected': spId
-
+                this.event.publish('patronLookup:ready', {
+                    'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
+                    'returnToWhatPage': this.returnToWhatPage,
+                    'patronRoomSelected': spId
                 });
             } else if (this.returnToWhatPage === 'HomeRoom') {
 
-                this.event.publish('patron-released', {
-                    'menuGrid_Count': this.menuGridCount
-                    , 'returnToWhatPage': this.returnToWhatPage
-                    , 'patronRoomSelected': hmId
-                    , 'patronGradeSelected': gId
-                });
+                this.event.publish('patronLookup:ready', {
+                    'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
+                    'returnToWhatPage': this.returnToWhatPage,
+                    'patronRoomSelected': hmId,
+                    'patronGradeSelected': gId
 
+                });
             } else {
                 if (this.utilService.selectAccountClick === false) {
                     this.event.publish('patronLookup:ready', this.menuGridCount);
                 }
-                // this.utilService.setLoader(false);
             }
+
+            // this.event.publish('patron-released', { 'patronDetails': null });
         }
         this.displayDetails = false;
         this.utilService.selectAccountClick = false;
