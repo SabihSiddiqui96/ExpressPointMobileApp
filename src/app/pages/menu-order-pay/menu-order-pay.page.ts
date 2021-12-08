@@ -37,6 +37,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() orderData;
     @Input() isSpecialAccount;
     @Input() isMealFormed;
+    isEnterKey:boolean = false;
 
     ngOnInit() {
         this.navPatronDetails = this.patronDetails;
@@ -709,6 +710,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.depositAmount = amount;
             this.setDepositAmount();
         }
+    }
+
+    onKeydown(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+       }
     }
 
     public setCashTendered() {

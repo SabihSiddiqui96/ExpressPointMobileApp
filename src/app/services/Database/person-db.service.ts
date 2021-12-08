@@ -82,9 +82,8 @@ export class PersonDBService {
     return new Promise((resolve, reject) => {
 
       this.http.SyncSpecialAccounts().
-        subscribe
-        (
-          data => {
+        subscribe(
+          (data) => {
             const specialAccounts = [];
             if (data != null) {
               data.map(sepcialAccount => {
