@@ -699,6 +699,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     public preSetCashTendered(amount, price) {
+        this.customKeys = '';
         if (this.activeInputField === 'amount') {
             this.buttonPriceActive = price;
             this.cashtendered = amount;
