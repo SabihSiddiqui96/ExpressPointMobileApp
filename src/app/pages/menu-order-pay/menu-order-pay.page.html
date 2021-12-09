@@ -153,7 +153,7 @@
             (click)="preSetCashTendered(button.price,button.value)">${{button.value}}</ion-button>
         </ion-col>
       </ion-row>
-      <ion-digit-keyboard [align]="keyboardSettings.align" [width]="keyboardSettings.width"
+      <ion-digit-keyboard (keydown)="onKeydown($event)" [align]="keyboardSettings.align" [width]="keyboardSettings.width"
         [visible]="keyboardSettings.visible" [leftActionOptions]="keyboardSettings.leftActionOptions"
         [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
         [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
