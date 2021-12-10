@@ -200,6 +200,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.patronSearch.keyword = '';
         });
 
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
+        PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
+
 
         this.event.subscribe('patron-hamburger:showhide', (userEventData) => {
             this.showHideHamburgerIcon();
@@ -255,8 +258,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
 
         document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
-        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
-        PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
+        
 
         if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined) {
             if (AppStateService.get('pnpPeripherals')) {

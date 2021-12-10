@@ -290,6 +290,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.setting = JSON.parse(AppStateService.get('settings'));
         }
 
+        PatronLookupPage.onKeyUpCallback = this.patronLookup.onPeripheralKey.bind(this);
+
         /**
          * Use the site Terminal if the Device Terminal is not set.
          */
