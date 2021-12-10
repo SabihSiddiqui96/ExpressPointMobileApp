@@ -550,7 +550,13 @@ export class LookupService {
                             this.utilService.setLoader(false);
                         }).catch(() => this.utilService.setLoader(false));
                         resolve(this.lookupResults);
-                    }).catch((err) => console.log(err));
+                    }).catch((err) => {
+                        this.lookupResults = [];
+                        this.handlePersonResults(true).then(() => {
+                            this.utilService.setLoader(false);
+                        }).catch(() => this.utilService.setLoader(false));
+                        resolve([]); console.log(err);
+                    });
             } else {
                 this.utilService.setLoader(false);
                 this.patronFromServer(firstname, lastname, externalId);
