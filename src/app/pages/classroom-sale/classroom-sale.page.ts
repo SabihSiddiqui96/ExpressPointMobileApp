@@ -597,7 +597,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'PersonIdentifier': doc.PersonIdentifier
                         };
                     });
-                    students = _.sortBy(students, 'LastName');
+                    students = _.sortBy(students, ['LastName','FirstName']);
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -680,7 +680,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                     });
 
-                    students = _.sortBy(students, 'LastName');
+                    students = _.sortBy(students,['LastName','FirstName']);
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -787,7 +787,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             students = students.filter(r => r.isActive === true);
                         }
 
-                        students = _.sortBy(students, 'LastName');
+                        students = _.sortBy(students, ['LastName','FirstName']);
                         console.log(students);
 
 
@@ -1162,7 +1162,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     console.log(items);
                     console.log(this.classroomSales);
 
-                    this.persons = _.sortBy(this.persons, 'LastName');
+                    this.persons = _.sortBy(this.persons, ['LastName','FirstName']);
                     this.persons.map(person => {
                         person.Image = null;
                         if (person.PersonId === student.PersonId) {
