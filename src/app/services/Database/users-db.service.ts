@@ -17,29 +17,29 @@ export class UsersDBService {
         const promises = [this.GetUsers()];
 
         return Promise.all(promises).then(() => {
-            this.events.publish('data:sync', { 'Users': this.syncStatus });
+            // this.events.publish('data:sync', { 'Users': this.syncStatus });
         });
     }
 
     public GetUsers() {
-        this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "S" } });
+        // this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "S" } });
         return new Promise((resolve, reject) => {
             
             this.http.GetAllUsers().subscribe(data => {
                 if (data) {
                     PouchDBService.UpsertDocs(data, EXP_USERS).then(() => {
                         this.syncStatus = 'Success';
-                        this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "D" } });
+                        // this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "D" } });
                         resolve(null);
                     });
                 } else {
-                    this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "D" } });
+                    // this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "D" } });
                     resolve(null);
                 }
             },
                 error => {
                     this.syncStatus = 'Failed';
-                    this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "F" } });
+                    // this.events.publish('data:syncDetails', { SetupUsersDB: { GetUsers : "F" } });
                     AppStateService.set('SetupComplete', false);
                     console.log(error);
                     resolve(null);
