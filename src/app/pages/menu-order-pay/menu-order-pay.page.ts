@@ -1159,6 +1159,21 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             return false;
         }
 
+        if((this.navPatronDetails.Balance > this.navOrderData.totalAmount) && this.patronDetails.CannotCharge){
+            this.saveInProgress = false;
+            return false;
+        }
+
+        if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance < this.navOrderData.totalAmount) && (cashtendered > this.navOrderData.totalAmount)) {
+            this.saveInProgress = false;
+            return false;
+        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance > this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
+            this.saveInProgress = false;
+            return false;
+        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance < this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
+            return true;
+        }
+
         if (!this.navIsSpecialAccount && cashtendered < this.navOrderData.totalAmount && cashtendered === 0) {
             return true;
         } else if (!this.navIsSpecialAccount && cashtendered > this.navOrderData.totalAmount) {
@@ -1173,15 +1188,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
 
-        if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.accountDetails.Balance < this.navOrderData.totalAmount) && (cashtendered > this.navOrderData.totalAmount)) {
-            this.saveInProgress = false;
-            return false;
-        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.accountDetails.Balance > this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
-            this.saveInProgress = false;
-            return false;
-        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.accountDetails.Balance < this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
-            return true;
-        }
+       
 
 
     }
