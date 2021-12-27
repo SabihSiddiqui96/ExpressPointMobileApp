@@ -2443,6 +2443,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             });
                         }
                     }
+                    if(this.patronDetails.CannotCharge && this.patronDetails.accountBalance > this.orderData.totalAmount){
+                        this.popupMessageService.showMessage(PopupMessageCode.E12513).then(bool => {
+                            if (bool) {
+                                this.postSaleTransaction(transactionType);
+                            }
+                        });
+                    }
                     // this.chargeOrder(transactionType);
                 }
             } else if (transactionType === 0) {
