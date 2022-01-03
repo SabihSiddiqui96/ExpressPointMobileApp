@@ -2419,6 +2419,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 }
                             });
                         }
+                        if(this.restrictService.showNoChargePrompt){
+                            this.popupMessageService.showMessage(PopupMessageCode.E05488)
+                            .then(bool => {
+                                if (bool) {
+                                    this.postSaleTransaction(transactionType);
+                                }
+                            });
+                        }
                         if (partPayPrompt) {
                             this.alertCtrl.create({
                                 header: 'Alert',
