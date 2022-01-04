@@ -79,6 +79,8 @@ export enum PopupMessageCode { // refer PR_PopupMessage_Detail table
     E05504 = 'E05504',
     E05506 = 'E05506',
     E05508 = 'E05508',
+    E05514 = 'E05514',
+
 
     // 06 Dynamic Menu
     E06332 = 'E06332',
