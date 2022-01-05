@@ -7,7 +7,7 @@ import { LookupService } from '../../services/lookup.service';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
 import { UtilService } from '../../services/util.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService } from '../../services/transaction.service';
+import { SuspiciousTransactionDoc, TransactionService } from '../../services/transaction.service';
 import { SettingService } from '../../services/setting.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
@@ -37,7 +37,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
   @Input() patronSelectedData;
   @Input() calledFrom;
   @Input() itemPrice;
-  isEnterKey:boolean = false;
+  isEnterKey: boolean = false;
 
   ngOnInit() {
     this.navPatronDetails = this.patronDetails;
@@ -175,26 +175,28 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     this.event.destroy('numberClick');
   }
 
-  public close(data?) {
+  public close(data?, isClosed: boolean = false) {
 
     let sessionId = null;
     if (AppStateService.get('session_id')) {
       sessionId = AppStateService.get('session_id');
     }
+    if (isClosed) {
+      let suspiciousId = this.utilService.generateUUID();
+      const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+        '_id': 'SuspiciousTransaction--' + suspiciousId,
+        'SessionId': sessionId,
+        'SuspiciousTransactionId': suspiciousId,
+        'TransactionNumber': data,
+        'PersonId': this.navPatronDetails.PersonId,
+        'MenuItems': [],
+        'TransactionType': 'Pre Payment',
+        'SuspiciousActivityType': SuspiciousActivityTypes.CANCELPREPAY,
+        'Comment': 'Cancel Pre Payment on the Add Funds window.'
+      };
 
-    const suspiciousTransactionDoc = {
-      '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-      'SessionId': sessionId,
-      'TransactionNumber': data,
-      'PersonId': this.navPatronDetails.PersonId,
-      'MenuItems': [],
-      'TransactionType': 'Pre Payment',
-      'SuspiciousActivityType': SuspiciousActivityTypes.CANCELPREPAY,
-      'Comment': 'Cancel Pre Payment on the Add Funds window.'
-    };
-
-    this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
+      this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
+    }
     this.modal.dismiss(data);
   }
 
@@ -371,72 +373,72 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
   onKeydown(event) {
     if (event.key === "Enter") {
       event.preventDefault();
-   }
+    }
   }
 
   public numberClick(key: any) {
-      if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
-        this.popupMessageService.showMessage(PopupMessageCode.E13432);
-        // this.utilService.showToast('Payment via Check is disabled for this patron');
-      } else {
-        if (this.activeInputField === 'check' && this.cashCheckNum && key !== 'X' && key !== 'GO') {
-          if (this.cashCheckNum.length >= 10) {
-            if (this.cashCheckNum.length == 11) {
-              this.numberClick('X');
-            }
-            this.utilService.showToast('Check Number cannot be longer than 10 digits.');
-            return;
+    if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
+      this.popupMessageService.showMessage(PopupMessageCode.E13432);
+      // this.utilService.showToast('Payment via Check is disabled for this patron');
+    } else {
+      if (this.activeInputField === 'check' && this.cashCheckNum && key !== 'X' && key !== 'GO') {
+        if (this.cashCheckNum.length >= 10) {
+          if (this.cashCheckNum.length == 11) {
+            this.numberClick('X');
           }
-        }
-  
-        if (key !== 'X' && key !== 'GO') {
-          this.customKeys += key;
-          if (this.activeInputField === 'amount') {
-            const amt = this.filterCurrency(this.cashTopupAmount);
-            if (amt === "0.00" && (key === "00" || key === 0)) {
-              this.customKeys = "";
-              this.cashTopupAmount = "0";
-            } else {
-              this.cashTopupAmount = this.customKeys;
-            }
-            if (this.cashTopupAmount.length > 6) {
-              do {
-                this.numberClick('X');
-              } while (this.cashTopupAmount.length == 7);
-            }
-          }
-          if (this.activeInputField === 'check') {
-            this.cashCheckNum = this.customKeys;
-            if (this.cashCheckNum.length == 11) {
-              this.numberClick('X');
-            }
-          }
-        } else if (key === 'GO') {
-          // this.searchPatronNormal();
-          this.customKeys = '';
-          if (this.cashTopupAmount !== '') {
-            this.checkPayment();
-          }
-        } else if (key === 'X') {
-          this.customKeys = this.customKeys.slice(0, -1);
-          if (this.activeInputField === 'amount') {
-            this.cashTopupAmount = this.customKeys;
-            // this.newBalance = 0;
-            this.cashAmount = 0;
-            this.bonusAmount = 0;
-          }
-          if (this.activeInputField === 'check') {
-            this.cashCheckNum = this.customKeys;
-          }
-        }
-        if (this.activeInputField === 'amount') {
-          const classOb = this;
-          setTimeout(function () {
-            classOb.buttonPriceActive = 0;
-            classOb.setTotalCashTopup();
-          }, 50);
+          this.utilService.showToast('Check Number cannot be longer than 10 digits.');
+          return;
         }
       }
+
+      if (key !== 'X' && key !== 'GO') {
+        this.customKeys += key;
+        if (this.activeInputField === 'amount') {
+          const amt = this.filterCurrency(this.cashTopupAmount);
+          if (amt === "0.00" && (key === "00" || key === 0)) {
+            this.customKeys = "";
+            this.cashTopupAmount = "0";
+          } else {
+            this.cashTopupAmount = this.customKeys;
+          }
+          if (this.cashTopupAmount.length > 6) {
+            do {
+              this.numberClick('X');
+            } while (this.cashTopupAmount.length == 7);
+          }
+        }
+        if (this.activeInputField === 'check') {
+          this.cashCheckNum = this.customKeys;
+          if (this.cashCheckNum.length == 11) {
+            this.numberClick('X');
+          }
+        }
+      } else if (key === 'GO') {
+        // this.searchPatronNormal();
+        this.customKeys = '';
+        if (this.cashTopupAmount !== '') {
+          this.checkPayment();
+        }
+      } else if (key === 'X') {
+        this.customKeys = this.customKeys.slice(0, -1);
+        if (this.activeInputField === 'amount') {
+          this.cashTopupAmount = this.customKeys;
+          // this.newBalance = 0;
+          this.cashAmount = 0;
+          this.bonusAmount = 0;
+        }
+        if (this.activeInputField === 'check') {
+          this.cashCheckNum = this.customKeys;
+        }
+      }
+      if (this.activeInputField === 'amount') {
+        const classOb = this;
+        setTimeout(function () {
+          classOb.buttonPriceActive = 0;
+          classOb.setTotalCashTopup();
+        }, 50);
+      }
+    }
   }
 
   public changeActiveInput(field) {

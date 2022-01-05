@@ -32,7 +32,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
@@ -1647,6 +1647,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     items.push({
                         'Price': this.orderData.items[i]['Price'],
                         'MenuItemId': this.orderData.items[i]['RefId'],
+                        'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
                     });
 
                 }
@@ -1668,19 +1669,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
             this.orderData.items = cartItems;
 
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
         } else {
 
             for (let qty = 0; qty < this.orderData.items[index]['Quantity']; qty++) {
@@ -1688,22 +1676,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 items.push({
                     'Price': this.orderData.items[index]['Price'],
                     'MenuItemId': this.orderData.items[index]['RefId'],
+                    'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
                 });
 
             }
-
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
             // this.itemCount -= this.orderData.items[index].Quantity; // itemCount
             itemPrice = this.orderData.items[index]['Price'];
@@ -1714,21 +1690,21 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         }
 
+        let suspiciousId = this.utilService.generateUUID();
+        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+            '_id': 'SuspiciousTransaction--' + suspiciousId,
+            'SessionId': this.sessionId,
+            'SuspiciousTransactionId': suspiciousId,
+            'TransactionNumber': this.transactionNumber,
+            'PersonId': this.patronDetails.PersonId,
+            'MenuItems': items,
+            'TransactionType': '',
+            'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
+            'Comment': 'Clear items on the POS transaction screen.'
+        };
 
-        // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable, this.taxMeal, this.taxPercent);
-        // this.orderData.subTotal = this.orderData.subTotal - itemPrice;
+        this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
-        // // const amt = this.orderData.tax + this.orderData.subTotal;
-        // this.orderData.totalAmount = this.setAmount();
-
-        // // edited on Jan-16-2017
-        // this.orderData.accountBalance = this.orderData.totalAmount;
-        // // this.orderData.accountBalance = this.setAmount();
-        // /////////////////
-        // let accbal: any = parseFloat(this.orderData.accountBalance);
-        // accbal = (Math.round(accbal * 100) / 100).toFixed(2);
-        // this.cashtendered = '$' + accbal;
-        // this.cashtendAmount = this.orderData.accountBalance;
         this.calculateTotals(itemPrice, false);
         this.isSecondMeal = false;
         this.transactionInProgress = false;
