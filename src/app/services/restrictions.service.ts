@@ -432,8 +432,6 @@ export class RestrictionsService {
                 return false;
             }else {
                 this.popupMessageService.showMessage(PopupMessageCode.E12480);
-                // const message = 'No charges are allowed for this patron. Please ask for cash or void the transaction.';
-                // this.utilService.showWarning(message); // , 'charge-order', { 'transactionType': transactionType }
                 return false;
             }
 
