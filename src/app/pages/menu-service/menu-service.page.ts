@@ -300,6 +300,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.terminalId = JSON.parse(AppStateService.get('site_details')).TerminalId;
         }
 
+        this.patronLookup.bindPeriPheralEvent();
 
         this.event.subscribe('switch-hands:selected', (userEventData) => {
             if (userEventData.left === true) {
@@ -2420,7 +2421,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             });
                         }
                         if(this.restrictService.showNoChargePrompt){
-                            this.popupMessageService.showMessage(PopupMessageCode.E05488)
+                            this.popupMessageService.showMessage(PopupMessageCode.E05514)
                             .then(bool => {
                                 if (bool) {
                                     this.postSaleTransaction(transactionType);
