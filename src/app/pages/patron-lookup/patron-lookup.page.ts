@@ -200,6 +200,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.patronSearch.keyword = '';
         });
 
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
+        PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
+
 
         this.event.subscribe('patron-hamburger:showhide', (userEventData) => {
             this.showHideHamburgerIcon();
