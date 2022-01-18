@@ -172,6 +172,7 @@ export class DoPayment {
     public ngOnDestroy() {
         // this.event.destroy('popover:open');
         this.event.destroy('numberClick');
+        this.event.destroy('peripheral:input');
         if (UtilService.isCordovaApp) {
             this.keyboardShowSubscription.unsubscribe();
             this.keyboardHideSubscription.unsubscribe();

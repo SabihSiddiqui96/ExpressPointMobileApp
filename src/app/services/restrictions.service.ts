@@ -42,6 +42,7 @@ export class RestrictionsService {
     public patronDetails: any;
     public transactionInProgress: boolean;
     public showPrompt: boolean = false;
+    public showNoChargePrompt: boolean = false;
     public partPayPopup: boolean = false;
     public orderData: any;
     public cashtendAmount: any = 0.00;
@@ -426,10 +427,11 @@ export class RestrictionsService {
         if (!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge) { // && this.patronDetails.Balance <= 0
             if (Math.round(this.orderData.totalAmount * 100) / 100 === 0) {
                 return true; // If total item cost is 0.00 debit of 0.00 is allowed even CannotCharge is true.
-            } else {
+            } else if(this.patronDetails.Balance > this.orderData.totalAmount){
+                this.showNoChargePrompt = true;
+                return false;
+            }else {
                 this.popupMessageService.showMessage(PopupMessageCode.E12480);
-                // const message = 'No charges are allowed for this patron. Please ask for cash or void the transaction.';
-                // this.utilService.showWarning(message); // , 'charge-order', { 'transactionType': transactionType }
                 return false;
             }
 

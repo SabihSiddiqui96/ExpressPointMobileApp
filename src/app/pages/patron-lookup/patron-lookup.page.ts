@@ -255,10 +255,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public ngOnInit() {
 
         this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-            document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+            //document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
 
-        document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
-        
+        //document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
+        PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
 
         if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined) {
             if (AppStateService.get('pnpPeripherals')) {
@@ -414,6 +415,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 }
             }
         );
+    }
+
+    public bindPeriPheralEvent(){
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
     }
 
     public changeWidth() {
