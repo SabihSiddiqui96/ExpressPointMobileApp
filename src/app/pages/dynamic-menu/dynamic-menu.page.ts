@@ -26,7 +26,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
 import { MenugridService } from '../../services/menugrid.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
@@ -1641,12 +1641,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             items.push({
                 'Price': this.orderData.items[index]['Price'],
                 'MenuItemId': this.orderData.items[index]['RefId'],
+                'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
             });
 
-
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
+            let suspiciousId = this.utilService.generateUUID();
+            const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+                '_id': 'SuspiciousTransaction--' + suspiciousId,
                 'SessionId': this.sessionId,
+                'SuspiciousTransactionId': suspiciousId,
                 'TransactionNumber': this.transactionNumber,
                 'PersonId': this.patronDetails.PersonId,
                 'MenuItems': items,
@@ -1733,6 +1735,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 items.push({
                     'Price': this.orderData.items[i]['Price'],
                     'MenuItemId': this.orderData.items[i]['RefId'],
+                    'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
                 });
 
                 if (this.orderData.items[i]['IsReimbursable']) {
@@ -1744,44 +1747,36 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             this.orderData.items = cartItems;
 
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
         } else {
 
 
             items.push({
                 'Price': this.orderData.items[index]['Price'],
                 'MenuItemId': this.orderData.items[index]['RefId'],
+                'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
             });
 
-
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
             itemPrice = this.orderData.items[index]['Price'];
             this.orderData.items.splice(index, 1);
         }
+
+
+        let suspiciousId = this.utilService.generateUUID();
+        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+            '_id': 'SuspiciousTransaction--' + suspiciousId,
+            'SessionId': this.sessionId,
+            'SuspiciousTransactionId': suspiciousId,
+            'TransactionNumber': this.transactionNumber,
+            'PersonId': this.patronDetails.PersonId,
+            'MenuItems': items,
+            'TransactionType': '',
+            'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
+            'Comment': 'Clear items on the POS transaction screen.'
+        };
+
+        this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
+
 
         // let item =this.orderData.items[index]
         // this.adjustTrayQuantities(item);

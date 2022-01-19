@@ -9,7 +9,7 @@ import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SettingService } from '../../services/setting.service';
-import { TransactionService, SessionCheckDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
@@ -1069,10 +1069,11 @@ export class PaymentsPage extends DoPayment implements OnInit {
         if (AppStateService.get('session_id')) {
             sessionId = AppStateService.get('session_id');
         }
-
-        const suspiciousTransactionDoc = {
-            '_id': 'SuspiciousTransaction--' + new Date().getTime(),
+        let suspiciousId = this.utilService.generateUUID();
+        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+            '_id': 'SuspiciousTransaction--' + suspiciousId,
             'SessionId': sessionId,
+            'SuspiciousTransactionId': suspiciousId,
             'TransactionNumber': this.transactionNumber,
             'PersonId': this.navPatronDetails.PersonId,
             'MenuItems': [],

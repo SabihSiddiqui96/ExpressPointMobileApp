@@ -508,6 +508,7 @@ export class TerminalSaleStatusDoc {
 export class SuspiciousTransactionDoc {
 
     public _id: string;
+    public SuspiciousTransactionId: string;
     public SessionId: string;
     public TransactionNumber: number;
     public PersonId: string;

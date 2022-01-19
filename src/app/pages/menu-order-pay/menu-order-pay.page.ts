@@ -37,7 +37,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() orderData;
     @Input() isSpecialAccount;
     @Input() isMealFormed;
-    isEnterKey:boolean = false;
+    isEnterKey: boolean = false;
 
     ngOnInit() {
         this.navPatronDetails = this.patronDetails;
@@ -317,7 +317,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public hasAlaCarte: boolean = false;
     public navIsMealFormed: boolean;
     public isElectron: boolean = false;
-    public  isCompleteTransactionProcessing: boolean = false;
+    public isCompleteTransactionProcessing: boolean = false;
     public showSelectAccount: boolean = false;
     public isLoadingPrevPatron = false;
     public depositeStudentAmount = 0.00;
@@ -410,9 +410,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public ngOnDestroy() {
         this.event.destroy('numberInput');
     }
-    public numberInput(key: any, isKeyInput:boolean = false) {
+    public numberInput(key: any, isKeyInput: boolean = false) {
         key.preventDefault();
-        if(isKeyInput){
+        if (isKeyInput) {
             if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
                 this.popupMessageService.showMessage(PopupMessageCode.E07354);
                 // this.utilService.showToast('Payment via Check is disabled for this patron');
@@ -445,7 +445,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         }
                     }
                     if (this.activeInputField === 'check') {
-    
+
                         this.cashCheckNum = this.customKeys;
                         if (this.cashCheckNum.length == 11) {
                             this.numberInput('X');
@@ -466,15 +466,15 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         }
                     }
                     if (this.activeInputField === 'card') {
-    
+
                         this.cashCardNum = this.customKeys;
-    
+
                         if (this.cashCardNum.length > 10) {
-    
+
                             do {
                                 this.numberInput('X');
                             } while (this.cashCardNum.length == 11);
-    
+
                             this.utilService.showToast('Card Number cannot be longer than 10 digits.')
                         }
                     }
@@ -485,7 +485,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         this.makeSale();
                     }
                 } else if (key === 'X') {
-    
+
                     this.customKeys = this.customKeys.slice(0, -1);
                     if (this.activeInputField === 'amount') {
                         this.cashtendered = this.customKeys;
@@ -518,7 +518,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             }
         }
 
-      
+
     }
 
 
@@ -574,23 +574,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     }
 
-    public close() {
+    public close(isClosed: boolean = false) {
 
-        var suspiciousComment;
 
-        var suspiciousActType: number;
-
-        if (this.cashpaymentOption == 'cash') {
-
-            suspiciousComment = 'Cancel Cash Payment on the POS transaction window.'
-            suspiciousActType = SuspiciousActivityTypes.CANCELCASHPAY;
-
-        } else if (this.cashpaymentOption == 'check') {
-
-            suspiciousComment = 'Cancel Check Payment on the POS transaction window.'
-            suspiciousActType = SuspiciousActivityTypes.CANCELCHECKPAY;
-
-        }
 
         const items = [];
 
@@ -612,21 +598,38 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
+        if (isClosed) {
+            let suspiciousComment;
 
-        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
-            '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-            'SessionId': this.sessionId,
-            'TransactionNumber': this.transactionNumber,
-            'PersonId': this.navPatronDetails.PersonId,
-            'MenuItems': items,
-            'TransactionType': 'Payment',
-            'SuspiciousActivityType': suspiciousActType,
-            'Comment': suspiciousComment
-        };
+            let suspiciousActType: number;
+
+            if (this.cashpaymentOption == 'cash') {
+
+                suspiciousComment = 'Cancel Cash Payment on the POS transaction window.'
+                suspiciousActType = SuspiciousActivityTypes.CANCELCASHPAY;
+
+            } else if (this.cashpaymentOption == 'check') {
+
+                suspiciousComment = 'Cancel Check Payment on the POS transaction window.'
+                suspiciousActType = SuspiciousActivityTypes.CANCELCHECKPAY;
+
+            }
+            let suspiciousId = this.utilService.generateUUID();
+            const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+                '_id': 'SuspiciousTransaction--' + suspiciousId,
+                'SessionId': this.sessionId,
+                'SuspiciousTransactionId': suspiciousId,
+                'TransactionNumber': this.transactionNumber,
+                'PersonId': this.navPatronDetails.PersonId,
+                'MenuItems': [],
+                'TransactionType': 'Payment',
+                'SuspiciousActivityType': suspiciousActType,
+                'Comment': suspiciousComment
+            };
 
 
-        this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
+            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
+        }
         this.lookUpService.menuPayselectAccountClick = false;
 
         // this.modal.dismiss();
@@ -717,8 +720,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     onKeydown(event) {
         if (event.key === "Enter") {
-          event.preventDefault();
-       }
+            event.preventDefault();
+        }
     }
 
     public setCashTendered() {
