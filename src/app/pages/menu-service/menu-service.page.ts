@@ -2289,17 +2289,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public ShowsolditemsPopover(myEvent) {
-        if (this.patronDetails.soldItems_count > 0) {
-            this.modalCtrl.create({
-                component: MenuSoldPopupPage,
-                // event: myEvent,
-                componentProps: { 'patronDetails': this.patronDetails },
-                cssClass: this.utilService.popupCenter.cssClass
-            }).then(async (res) => {
-                await res.present();
-            });
+        if(!this.utilService.isMenuSoldPopupOpen){
+            if (this.patronDetails.soldItems_count > 0) {
+                this.modalCtrl.create({
+                    component: MenuSoldPopupPage,
+                    // event: myEvent,
+                    componentProps: { 'patronDetails': this.patronDetails },
+                    cssClass: this.utilService.popupCenter.cssClass
+                }).then(async (res) => {
+                    await res.present();
+                    this.utilService.isMenuSoldPopupOpen = true;
+                });
+            }    
         }
-
+        
     }
     public ShowTransactionConflictPopover() {
         this.alertCtrl.create({

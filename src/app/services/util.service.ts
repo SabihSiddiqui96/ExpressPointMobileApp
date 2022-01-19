@@ -40,6 +40,7 @@ export class UtilService {
   public navOption = { 'animate': false };
   public popupCenter = { cssClass: 'user_ppup center_ppup' };
   public popOption = { cssClass: 'user_ppup' };
+  public isMenuSoldPopupOpen:boolean = false;
 
   constructor(private loadingCtrl: LoadingController, private alertCtrl: AlertController,
     public toastCtrl: ToastController,
