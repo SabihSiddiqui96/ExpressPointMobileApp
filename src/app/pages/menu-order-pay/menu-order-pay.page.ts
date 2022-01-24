@@ -411,7 +411,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.event.destroy('numberInput');
     }
     public numberInput(key: any, isKeyInput: boolean = false) {
-        key.preventDefault();
+        //key.preventDefault();
         if (isKeyInput) {
             if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
                 this.popupMessageService.showMessage(PopupMessageCode.E07354);

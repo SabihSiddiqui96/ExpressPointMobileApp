@@ -2404,6 +2404,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         if(this.restrictService.showNoChargePrompt){
                             this.popupMessageService.showMessage(PopupMessageCode.E05514)
                             .then(bool => {
+                                this.restrictService.showNoChargePrompt = false;
                                 if (bool) {
                                     this.postSaleTransaction(transactionType);
                                 }
