@@ -92,17 +92,20 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
       }
 
     });*/
+    this.changeActiveInput('amount');
 
-    document.querySelector('button').addEventListener('keydown', function (e) {
-      var key = e.keyCode || e.charCode;
-      if (key == 13) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-    });
+    if(document.querySelector('button')!==null){
+      document.querySelector('button').addEventListener('keydown', function (e) {
+        var key = e.keyCode || e.charCode;
+        if (key == 13) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      });
+    }
+   
 
     console.log('Hello MenuPaymentPopup Page');
-    this.changeActiveInput('amount');
     if (this.utilService.isElectronApp()) {
       this.utilService.publishIpcEvent('Open-CashDrawer');
     }
