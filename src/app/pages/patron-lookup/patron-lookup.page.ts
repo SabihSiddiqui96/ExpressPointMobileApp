@@ -255,9 +255,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public ngOnInit() {
 
         this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-            //document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+        document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
 
-        //document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
+        document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
         PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
 
@@ -496,7 +496,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     }
 
-    public checkAlphaNumeric(event) {
+    public checkAlphaNumericFN(event) {
         if (event['keyCode'] === 9) {
             // event.stopPropagation();
             // setTimeout(() => {
@@ -532,8 +532,55 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const field = this.activeField
         if (field === 'firstName') {
             this.patronSearch.firstname = (<HTMLInputElement>event.target).value;
-        } else if (field === 'lastName') {
-            this.patronSearch.lastname = (<HTMLInputElement>event.target).value;
+        }
+        if (code >= 48 && code <= 57) {
+            setTimeout(() => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            });
+            // event.stopPropagation();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public checkAlphaNumericLN(event) {
+        if (event['keyCode'] === 9) {
+            // event.stopPropagation();
+            // setTimeout(() => {
+            console.log('Alphanumeric ---- Stop Propagation')
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // });
+            return false;
+        }
+
+        let inputChar = (<HTMLInputElement>event.target).value;
+
+        const pattern = /^[0-9]+$/;
+        let newInputChar = '';
+
+        // divide input char into char array
+        // and then check each char against regex
+        let chars = inputChar.split('');
+        chars.map(char => {
+            if (!char.match(pattern)) {
+                if (newInputChar !== '') {
+                    newInputChar = newInputChar + char;
+                } else {
+                    newInputChar = char;
+                }
+            }
+        });
+        inputChar = newInputChar;
+        (<HTMLInputElement>event.target).value = inputChar;
+        let code = inputChar.charCodeAt((inputChar.length) - 1);
+        code = (isNaN(code)) ? -1 : code;
+
+        const field = this.activeField
+        if (field === 'firstName') {
+            this.patronSearch.firstname = (<HTMLInputElement>event.target).value;
         }
         if (code >= 48 && code <= 57) {
             setTimeout(() => {
