@@ -4055,6 +4055,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
 
+        this.transactionInProgress = false;
 
         console.log('HomeroomId ' + this.patronDetails.HomeRoomId);
         const spId = AppStateService.get('SpecialRosterId');
@@ -4115,7 +4116,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.selectedAccountDetails = {};
         // this.utilService.setLoader(false);
         this.event.publish('patron-released', { 'patronDetails': null });
-        this.transactionInProgress = false;
     }
 
     public showPopup(type) {
