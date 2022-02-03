@@ -2893,6 +2893,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     this.event.publish('patron-released', { 'patronDetails': null });
                                 }
                             });
+                        }if(this.restrictService.showNoChargePrompt){
+                            this.popupMessageService.showMessage(PopupMessageCode.E05514)
+                            .then(bool => {
+                                this.restrictService.showNoChargePrompt = false;
+                                if (bool) {
+                                    this.postSaleTransaction(transactionType);
+                                }
+                            });
                         }
                         if (partPayPrompt) {
                             this.alertCtrl.create({
