@@ -693,14 +693,14 @@ export class LookupService {
                 if (result.docs.length === 1) {
                     if (patron.SyncedFromServerAt && result.docs[0].SyncedFromServerAt) {
                         let data = patron.SyncedFromServerAt > result.docs[0].SyncedFromServerAt ? patron : result.docs[0];
-                        this.utilService.showToast(patron.SyncedFromServerAt + ' ' + result.docs[0].SyncedFromServerAt)
+                        // this.utilService.showToast(patron.SyncedFromServerAt + ' ' + result.docs[0].SyncedFromServerAt)
                         resolve(data);
                     } else {
                         if (patron.SyncedFromServerAt) {
-                            this.utilService.showToast(patron.SyncedFromServerAt + ' EXPPerson')
+                            // this.utilService.showToast(patron.SyncedFromServerAt + ' EXPPerson')
                             resolve(patron)
                         } else if (result.docs[0].SyncedFromServerAt) {
-                            this.utilService.showToast(result.docs[0].SyncedFromServerAt + ' Inmemory')
+                            // this.utilService.showToast(result.docs[0].SyncedFromServerAt + ' Inmemory')
 
                             resolve(result.docs[0])
                         } else {
