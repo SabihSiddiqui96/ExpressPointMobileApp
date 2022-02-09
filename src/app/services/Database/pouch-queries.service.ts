@@ -467,6 +467,14 @@ export class PouchQueriesService {
     // });
   }
 
+  public static GetDataForOfflineUsefromSystemDB():any{
+    return EXP_SYSTEM.allDocs({
+      startkey:'dataforofflineUse',
+      endkey:'dataforofflineUse',
+      include_docs:true
+    })
+  }
+
   public static AuthenticateUserName(userName): any {
 
     const args = {
