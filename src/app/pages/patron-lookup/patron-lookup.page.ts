@@ -909,9 +909,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 , 'returnToWhatPage': this.returnToWhatPage
             }); // Added returnToWhatPage for the one ron mentioned
         }
-        /*if(this.personsQ.find(f => f.PersonId === this.lookUpService.lookupResults[0].PersonId )){
-            this.lookUpService.popPersonFromQ(this.lookUpService.lookupResults[0].PersonId);
-        }*/
         this.resetPatronData();
 
     }
