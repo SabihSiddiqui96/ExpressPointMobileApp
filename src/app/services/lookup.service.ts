@@ -255,9 +255,11 @@ export class LookupService {
                 });
             } else {
                 //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
-                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result) => {
+                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result:any) => {
                     this.publishEvents(result);
-
+                    if(this.lookupResults.find(f => f.PersonId === result.PersonId)){
+                        this.popPersonFromQ(result.PersonIdentifier);
+                    }
                 })
             }
         } else { // lookup from peripheral yielded non-unique results / no results

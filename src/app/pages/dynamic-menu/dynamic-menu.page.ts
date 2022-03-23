@@ -4300,7 +4300,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         console.log(this.patronDetails);
 
         if (this.orderData.items.length === 0) {
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            //this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             this.lookUpService.populatePersonsFromQ();
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E06428);
