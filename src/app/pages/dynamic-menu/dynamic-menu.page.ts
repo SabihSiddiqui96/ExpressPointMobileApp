@@ -47,7 +47,8 @@ enum Contributors {
     Veg = 2,
     Grain = 8,
     Meat = 11,
-    Milk = 12
+    Milk = 12,
+    FruitJ = 13
 }
 
 
@@ -1835,6 +1836,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public addMenuToCart(menuItem) {
 
 
+        menuItem['Fruit'] = 0
+        menuItem['Grain'] = 0
+        menuItem['Meat'] = 0
+        menuItem['Veg'] = 0
+        menuItem['Milk'] = 0
+
 
         let hasContributions;
         let defaultServingSize;
@@ -1869,7 +1876,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     switch (contribution.ContributorId) {
 
                                         case Contributors.Fruit:
-                                            menuItem['Fruit'] = contribution.Factor;
+                                            menuItem['Fruit'] += contribution.Factor;
                                             // this.Tray_Fruit += contribution.Factor;
                                             break;
 
@@ -1890,6 +1897,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                                         case Contributors.Veg:
                                             menuItem['Veg'] = contribution.Factor;
+                                            // this.Tray_Veg += contribution.Factor;
+                                            break;
+                                        case Contributors.FruitJ:
+                                            menuItem['Fruit'] += contribution.Factor;
                                             // this.Tray_Veg += contribution.Factor;
                                             break;
 
@@ -1992,7 +2003,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                                         menuItem['Veg'] = contribution.Factor;
                                                         this.trayVeg += contribution.Factor;
                                                         break;
-
+                                                    case Contributors.FruitJ:
+                                                        menuItem['Fruit'] += contribution.Factor;
+                                                        this.trayFruit += contribution.Factor;
+                                                        break;
                                                     default:
                                                         menuItem['IsPartOfMeal'] = false;
                                                         break;
@@ -2069,7 +2083,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         switch (contribution.ContributorId) {
 
                                             case Contributors.Fruit:
-                                                menuItem['Fruit'] = contribution.Factor;
+                                                menuItem['Fruit'] += contribution.Factor;
                                                 this.trayFruit += contribution.Factor;
                                                 break;
 
@@ -2091,6 +2105,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                             case Contributors.Veg:
                                                 menuItem['Veg'] = contribution.Factor;
                                                 this.trayVeg += contribution.Factor;
+                                                break;
+                                            case Contributors.FruitJ:
+                                                menuItem['Fruit'] += contribution.Factor;
+                                                this.trayFruit += contribution.Factor;
                                                 break;
 
                                             default:
