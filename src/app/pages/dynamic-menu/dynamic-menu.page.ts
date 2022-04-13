@@ -41,6 +41,7 @@ import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
+import { LogsDBService } from '../../services/Database/logs-db.service';
 
 enum Contributors {
     Fruit = 1,
@@ -314,7 +315,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
-        public pouchDBService: PouchDBService, public settingService: SettingService,
+        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService:LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
@@ -4266,7 +4267,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-
+            this.logDBService.logData({
+                event : 'Add person to Queue',
+                patronId : this.patronDetails.PersonId,
+                type: 'Info',
+                data: this.patronDetails,
+                queueCount: this.lookUpService.personsQ
+              })
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};

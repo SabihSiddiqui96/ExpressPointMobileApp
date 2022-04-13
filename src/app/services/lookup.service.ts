@@ -87,7 +87,7 @@ export class LookupService {
 
 
         this.lookupAndPushPersonToQ(queueInput).then(() => {
-            if (this.personsQ.length === 1 && AppStateService.get('patron_details') === undefined &&
+            if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
                 AppStateService.get('currentTab') !== 'advanced') {
                 this.selectPatron(this.personsQ[0]);
             }

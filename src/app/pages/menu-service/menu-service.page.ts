@@ -49,6 +49,7 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
 import { ServiceToolbarComponent, ServiceToolbarEvent } from '../../shared-components/service-toolbar/service-toolbar.component';
 import { Subscription } from 'rxjs';
+import { LogsDBService } from '../../services/Database/logs-db.service';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -274,6 +275,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public pouchQuery: PouchQueriesService,
+        public logDBService: LogsDBService,
         public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         AppStateService.remove('patron_details');
@@ -3334,6 +3336,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            this.logDBService.logData({
+                event : 'Add person to Queue',
+                patronId : this.patronDetails.PersonId,
+                type: 'Info',
+                data: this.patronDetails,
+                queueCount: this.lookUpService.personsQ
+              })
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};

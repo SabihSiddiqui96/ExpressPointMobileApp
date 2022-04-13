@@ -24,6 +24,7 @@ export let EXP_TRANSACTIONS;
 export let EXP_SYSTEM;
 export let EXP_PERSON_IN_MEMORY;
 export let EXP_USERS;
+export let EXP_LOGS;
 
 
 declare var sqlitePlugin: any;
@@ -213,6 +214,8 @@ export class PouchDBService {
             EXP_TRANSACTIONS = new PouchDB('EXP_TRANSACTIONS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any );
             EXP_SYSTEM = new PouchDB('EXP_SYSTEM', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true } as any );
             EXP_USERS = new PouchDB('EXP_USERS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
+            EXP_LOGS = new PouchDB('EXP_LOGS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
+
 
             // this.vacuumSQLite();
             //  this.deviceId = this.device.uuid;
@@ -254,7 +257,7 @@ export class PouchDBService {
                 EXP_TRANSACTIONS = new PouchDB('EXP_TRANSACTIONS', { adapter: adapter, revs_limit: 1, auto_compaction: true });
                 EXP_SYSTEM = new PouchDB('EXP_SYSTEM', { adapter: adapter, revs_limit: 1, auto_compaction: true });
                 EXP_USERS = new PouchDB('EXP_USERS', { adapter: adapter, revs_limit: 1, auto_compaction: true });
-
+                EXP_LOGS = new PouchDB('EXP_LOGS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
                 // this.vacuumSQLite();
                 resolve(null);
             });
@@ -359,6 +362,25 @@ export class PouchDBService {
                 db.bulkDocs(doc);
                 if (db.name === 'EXP_PERSON') {
                     EXP_PERSON_IN_MEMORY.upsert(doc);
+                }
+            });
+    }
+
+    public static UpsertLogs(docs, db) {
+        return db.allDocs({ include_docs: true })
+            .then(res => docs.map(doc => {
+                const row = res.rows.find(r => r.id === doc._id);
+                if (!row || row.error) {
+                    return doc;
+                }
+                return Object.assign({}, doc, {
+                    _rev: row.value.rev
+                });
+            }))
+            .then((doc) => {
+                db.bulkDocs(doc);
+                if (db.name === 'EXP_LOGS') {
+                    EXP_LOGS.upsert(doc);
                 }
             });
     }
