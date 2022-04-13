@@ -3341,8 +3341,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 patronId : this.patronDetails.PersonId,
                 type: 'Info',
                 data: this.patronDetails,
-                queueCount: this.lookUpService.personsQ
-              })
+                queueCount: this.lookUpService.personsQ.length
+              });
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};
