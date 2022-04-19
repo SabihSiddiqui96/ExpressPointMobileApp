@@ -2409,7 +2409,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // if (this.mealFormed) {
         //     this.LUNCH_CASE_4 = true;
         // } else {
-        this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
+        this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1) : ((this.trayFruit + this.trayVeg) >= 0.5)
         ));
         // }
 
@@ -2420,7 +2420,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (this.selectedMealTypeName === 'Lunch') {
             if (this.LUNCH_CASE_2 && this.LUNCH_CASE_3 && fulfilledComponentCount >= 3
-                && totalContribution >= 2.5 && this.LUNCH_CASE_4) {
+                && totalContribution >= 2 && this.LUNCH_CASE_4) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
@@ -2429,7 +2429,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
             if ((this.BREAKFAST_CASE_1) || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3
-                && totalContribution >= 2.5 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2)) {
+                && totalContribution >= 2 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2)) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
