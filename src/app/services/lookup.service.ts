@@ -254,7 +254,13 @@ export class LookupService {
                     }
                 });
             } else {
-                this.publishEvents(patron);
+                //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
+                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result:any) => {
+                    this.publishEvents(result);
+                    if(this.lookupResults.find(f => f.PersonId === result.PersonId)){
+                        this.popPersonFromQ(result.PersonIdentifier);
+                    }
+                })
             }
         } else { // lookup from peripheral yielded non-unique results / no results
             this.lookupFromNonUniquePIN(patron).then(() => {
@@ -681,6 +687,33 @@ export class LookupService {
 
         });
 
+    }
+
+    public CheckPreviousSalesOnInMemoryDBByDate(patron) {
+        return new Promise((resolve) => {
+            PouchQueriesService.GetStudentInfo(patron.PersonId).then((result) => {
+                if (result.docs.length === 1) {
+                    if (patron.SyncedFromServerAt && result.docs[0].SyncedFromServerAt) {
+                        let data = patron.SyncedFromServerAt > result.docs[0].SyncedFromServerAt ? patron : result.docs[0];
+                        // this.utilService.showToast(patron.SyncedFromServerAt + ' ' + result.docs[0].SyncedFromServerAt)
+                        resolve(data);
+                    } else {
+                        if (patron.SyncedFromServerAt) {
+                            // this.utilService.showToast(patron.SyncedFromServerAt + ' EXPPerson')
+                            resolve(patron)
+                        } else if (result.docs[0].SyncedFromServerAt) {
+                            // this.utilService.showToast(result.docs[0].SyncedFromServerAt + ' Inmemory')
+
+                            resolve(result.docs[0])
+                        } else {
+                            resolve(result.docs[0])
+                        }
+                    }
+                } else {
+                    resolve(patron)
+                }
+            })
+        })
     }
 
 }

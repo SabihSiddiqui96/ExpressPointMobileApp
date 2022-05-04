@@ -3264,7 +3264,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
-
+            
+            if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
+                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            }
+            if (paymentAmnt > this.orderData.totalAmount) {
+                this.orderData.IsDeposit = true
+            }
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
@@ -4320,7 +4326,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         console.log(this.patronDetails);
 
         if (this.orderData.items.length === 0) {
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            //this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             this.lookUpService.populatePersonsFromQ();
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E06428);

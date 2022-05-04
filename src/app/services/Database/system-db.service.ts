@@ -59,7 +59,7 @@ export class SystemDBService {
 
       let SSOAuthDetails;
       if (AppStateService.get('SSOAuthDetails')) {
-          SSOAuthDetails = AppStateService.get('SSOAuthDetails');
+        SSOAuthDetails = AppStateService.get('SSOAuthDetails');
       }
 
       let lastLoggedInUser;
@@ -96,7 +96,8 @@ export class SystemDBService {
         'WindowsCredentials': windowsCredentials,
         'SSOAuthDetails': SSOAuthDetails,
         'DeviceConnectionUrl': DeviceConnectionUrl,
-        'TranDbDestroyedDate': TranDbDestroyedDate
+        'TranDbDestroyedDate': TranDbDestroyedDate,
+        'LastLoggedInUser': lastLoggedInUser
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';
@@ -104,4 +105,6 @@ export class SystemDBService {
       });
     });
   }
+  
+
 }
