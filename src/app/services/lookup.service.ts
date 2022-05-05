@@ -15,6 +15,7 @@ import { Events } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { BehaviorSubject } from 'rxjs';
 import { LogsDBService } from './Database/logs-db.service';
+import { LogType } from './enums/log-type';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -190,7 +191,7 @@ export class LookupService {
                 this.logDBService.logData({
                     event : 'Lookup Person success',
                     patronId : queueInput.PIN,
-                    type: 'Info',
+                    type: LogType.INFO,
                     data: results[0],
                     queueCount: this.personsQ.length
                   });
@@ -199,7 +200,7 @@ export class LookupService {
                 this.logDBService.logData({
                     event : 'Lookup Person failed',
                     patronId : queueInput.PIN,
-                    type: 'Info',
+                    type: LogType.INFO,
                     data: queueInput,
                     queueCount: this.personsQ.length
                   });

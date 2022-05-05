@@ -13,28 +13,67 @@ import { UtilService } from "../util.service";
 export class LogsDBService {
 
   syncStatus: string;
+  terminalId: string;
+   currentDateTime =
+  ("00" + (new Date().getMonth() + 1)).slice(-2) + "/" +
+  ("00" + new Date().getDate()).slice(-2) + "/" +
+  new Date().getFullYear() + " " +
+  ("00" + new Date().getHours()).slice(-2) + ":" +
+  ("00" + new Date().getMinutes()).slice(-2) + ":" +
+  ("00" + new Date().getSeconds()).slice(-2);
 
-  constructor(private http: HttpService, public utilService: UtilService, public events: Events, public appStateService: AppStateService) { }
+  constructor(private http: HttpService, public utilService: UtilService, public events: Events, public appStateService: AppStateService) { 
+    let deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"));
+    this.terminalId = deviceInfo.TerminalId;
+  }
 
   logData(logData:any){
-    let inputLogData = {
-      event : logData.event,
-      patronId: logData.patronId,
-      type: logData.type,
-      data: logData.data,
-      _id: this.utilService.generateUUID()
+    let inputLogData;
+    if(this.terminalId!== null){
+      inputLogData = {
+        terminalId : this.terminalId,
+        event : logData.event,
+        patronId: logData.patronId,
+        type: logData.type,
+        data: logData.data,
+        datetime: this.currentDateTime,
+        _id: this.utilService.generateUUID()
+      }
+    }else {
+      inputLogData = {
+        event : logData.event,
+        patronId: logData.patronId,
+        type: logData.type,
+        data: logData.data,
+        datetime: this.currentDateTime,
+        _id: this.utilService.generateUUID()
+      }
     }
+   
     PouchDBService.UpsertSingleDoc(inputLogData, EXP_LOGS).then(() => {
       this.syncStatus = 'Success';
     });
   }
 
   logError(logData:any){
-    let errorLogData = {
-      request : logData.event,
-      error : logData.patronId,
-      code: logData.type,
-      _id: this.utilService.generateUUID()
+    let errorLogData;
+    if(this.terminalId !== null){
+      errorLogData = {
+        terminalId : this.terminalId,
+        request : logData.event,
+        error : logData.patronId,
+        code: logData.type,
+        _id: this.utilService.generateUUID(),
+        datetime: this.currentDateTime
+      }
+    }else {
+      errorLogData = {
+        request : logData.event,
+        error : logData.patronId,
+        code: logData.type,
+        _id: this.utilService.generateUUID(),
+        datetime: this.currentDateTime
+      }
     }
     PouchDBService.UpsertSingleDoc(errorLogData, EXP_LOGS).then(() => {
       this.syncStatus = 'Success';
