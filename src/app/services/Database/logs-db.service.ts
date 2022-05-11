@@ -39,15 +39,6 @@ export class LogsDBService {
         datetime: this.currentDateTime,
         _id: this.utilService.generateUUID()
       }
-    }else {
-      inputLogData = {
-        event : logData.event,
-        patronId: logData.patronId,
-        type: logData.type,
-        data: logData.data,
-        datetime: this.currentDateTime,
-        _id: this.utilService.generateUUID()
-      }
     }
    
     PouchDBService.UpsertSingleDoc(inputLogData, EXP_LOGS).then(() => {
@@ -60,14 +51,6 @@ export class LogsDBService {
     if(this.terminalId !== null){
       errorLogData = {
         terminalId : this.terminalId,
-        request : logData.event,
-        error : logData.patronId,
-        code: logData.type,
-        _id: this.utilService.generateUUID(),
-        datetime: this.currentDateTime
-      }
-    }else {
-      errorLogData = {
         request : logData.event,
         error : logData.patronId,
         code: logData.type,
