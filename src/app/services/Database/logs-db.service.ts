@@ -44,6 +44,7 @@ export class LogsDBService {
     PouchDBService.UpsertSingleDoc(inputLogData, EXP_LOGS).then(() => {
       this.syncStatus = 'Success';
     });
+    this.http.saveErrorLogs(inputLogData);
   }
 
   logError(logData:any){
@@ -61,6 +62,7 @@ export class LogsDBService {
     PouchDBService.UpsertSingleDoc(errorLogData, EXP_LOGS).then(() => {
       this.syncStatus = 'Success';
     });
+    this.http.saveErrorLogs(errorLogData);
   }
 
 }

@@ -505,6 +505,10 @@ export class HttpService {
         return this.http.post(API_URL + 'Recordtransaction', orderData, { responseType: 'text' }).pipe(map(res => res));
     }
 
+    public saveErrorLogs(errorLog) {
+        return this.http.post(API_URL + 'SaveErrorLog', errorLog, { responseType: 'text' }).pipe(map(res => res));
+    }
+
     public SaveReviewRecord(orderData): any {
         return this.http.post(API_URL + 'SyncReviews', orderData, { responseType: 'text' }).pipe(map(res => res));
     }
