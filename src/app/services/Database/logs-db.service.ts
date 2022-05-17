@@ -27,42 +27,43 @@ export class LogsDBService {
     this.terminalId = deviceInfo.TerminalId;
   }
 
+
+  /*{
+    "TerminalId": 0,
+    "EventName": 0,
+    "EventType": 0,
+    "Data": "string",
+    "QueueCount": 0,
+    "ErrorLogTime": "2022-05-11T17:33:17.366Z"
+  }*/
   logData(logData:any){
     let inputLogData;
     if(this.terminalId!== null){
       inputLogData = {
-        terminalId : this.terminalId,
-        event : logData.event,
-        patronId: logData.patronId,
-        type: logData.type,
-        data: logData.data,
-        datetime: this.currentDateTime,
-        _id: this.utilService.generateUUID()
+        TerminalId : this.terminalId,
+        EventName : logData.event,
+        EventType: logData.type,
+        Data: JSON.stringify(logData.data),
+        QueueCount: logData.queueCount,
+        ErrorLogTime: new Date().toISOString(),
       }
     }
-   
-    PouchDBService.UpsertSingleDoc(inputLogData, EXP_LOGS).then(() => {
-      this.syncStatus = 'Success';
-    });
-    this.http.saveErrorLogs(inputLogData);
+    this.http.saveErrorLogs(inputLogData).subscribe((res) => console.log(res));
   }
 
   logError(logData:any){
     let errorLogData;
     if(this.terminalId !== null){
       errorLogData = {
-        terminalId : this.terminalId,
-        request : logData.event,
-        error : logData.patronId,
-        code: logData.type,
-        _id: this.utilService.generateUUID(),
-        datetime: this.currentDateTime
+        TerminalId: this.terminalId,
+        EventName: 0,
+        EventType: 0,
+        Data: logData.patronId,
+        QueueCount: 0,
+        ErrorLogTime: this.currentDateTime
       }
     }
-    PouchDBService.UpsertSingleDoc(errorLogData, EXP_LOGS).then(() => {
-      this.syncStatus = 'Success';
-    });
-    this.http.saveErrorLogs(errorLogData);
+    this.http.saveErrorLogs(JSON.stringify(errorLogData)).subscribe((res) => console.log(res));;
   }
 
 }

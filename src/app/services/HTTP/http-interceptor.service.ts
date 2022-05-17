@@ -119,7 +119,7 @@ export class HttpInterceptorService {
 
   public handleHTTPError(err, request) {
     const errStatus = err.status;
-    this.logDBService.logError({request : request,error : err,code: err.status});
+    //this.logDBService.logError({request : request,error : err,code: err.status});
     switch (errStatus) {
       case 400: // being handled in login component
         break;

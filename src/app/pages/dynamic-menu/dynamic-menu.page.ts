@@ -42,6 +42,8 @@ import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.s
 import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
 import { LogsDBService } from '../../services/Database/logs-db.service';
+import { LogType } from '../../services/enums/log-type';
+import { EventType } from '../../services/enums/event-type';
 
 enum Contributors {
     Fruit = 1,
@@ -4268,12 +4270,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             this.logDBService.logData({
-                event : 'Add person to Queue',
+                event : EventType.QUEUE,
                 patronId : this.patronDetails.PersonId,
-                type: 'Info',
+                type: LogType.INFO,
                 data: this.patronDetails,
-                queueCount: this.lookUpService.personsQ
-              })
+                queueCount: this.lookUpService.personsQ.length
+              });
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};
