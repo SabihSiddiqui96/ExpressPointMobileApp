@@ -723,7 +723,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             event.preventDefault();
         }
     }
-
+    /**
+     * Sets cash tendered
+    /**
+     * Sets cash tendered
+     */
     public setCashTendered() {
         this.saveInProgress = false;
         let amnt = this.cashtendered;
@@ -737,11 +741,21 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
             amnt = this.filterCurrency(amnt);
 
-            this.amountDue = (+amnt - this.navOrderData.accountBalance) > 0 ? (+amnt - this.navOrderData.accountBalance) : (this.navOrderData.accountBalance - +amnt) < 0 ? 0.00 : (this.navOrderData.accountBalance - +amnt)
-            if (this.navOrderData.totalAmount === +amnt) {
+            this.amountDue = (+amnt - Math.abs(this.navOrderData.accountBalance)) > 0 ? (+amnt - this.navOrderData.accountBalance) : (this.navOrderData.accountBalance - +amnt) < 0 ? 0.00 : (this.navOrderData.accountBalance - +amnt)
+            console.clear()
+            console.log({ 'amntD': this.amountDue, 'accountBalance': this.navOrderData.accountBalance })
+            console.log(this.navOrderData)
+            if (this.navOrderData.totalAmount <= +amnt) {
                 this.amountDue = 0.00
             } else {
-                this.amountDue = (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) > 0 ? (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) : 0.00
+                /**
+              If the balance is greater than 0 then we need to consider the balance plus the amount tendered to calculate Amount Due
+      *  if the balance is less than 0 then we should not consider the patron balance to calculate amount due
+      */
+                if (this.navPatronDetails.Balance > 0)
+                    this.amountDue = (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) > 0 ? (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) : 0.00
+                else
+                    this.amountDue = this.navOrderData.totalAmount - +amnt
             }
             if (!isNaN(amnt)) {
                 this.cashtendAmount = amnt;
@@ -1176,7 +1190,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             return false;
         }
 
-        if((this.navPatronDetails.Balance > this.navOrderData.totalAmount) && this.patronDetails.CannotCharge){
+        if ((this.navPatronDetails.Balance > this.navOrderData.totalAmount) && this.patronDetails.CannotCharge) {
             this.saveInProgress = false;
             return false;
         }
@@ -1205,7 +1219,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
 
-       
+
 
 
     }
