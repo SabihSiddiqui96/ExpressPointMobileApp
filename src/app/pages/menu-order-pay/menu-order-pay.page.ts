@@ -742,9 +742,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             amnt = this.filterCurrency(amnt);
 
             this.amountDue = (+amnt - Math.abs(this.navOrderData.accountBalance)) > 0 ? (+amnt - this.navOrderData.accountBalance) : (this.navOrderData.accountBalance - +amnt) < 0 ? 0.00 : (this.navOrderData.accountBalance - +amnt)
-            console.clear()
-            console.log({ 'amntD': this.amountDue, 'accountBalance': this.navOrderData.accountBalance })
-            console.log(this.navOrderData)
+
             if (this.navOrderData.totalAmount <= +amnt) {
                 this.amountDue = 0.00
             } else {
@@ -761,9 +759,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.cashtendAmount = amnt;
                 this.cashtendered = '$' + amnt;
                 let chngDue = (+amnt + this.patronDetails.Balance) - (this.navOrderData.totalAmount);
-                if(chngDue>0){
+                if (chngDue > 0) {
                     this.changeDue = chngDue;
-                }else {
+                } else {
                     this.changeDue = 0.00;
                 }
                 let amountTowardsBal = 0.00;
@@ -774,6 +772,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
                     this.changeDue = 0.00;
                     this.depositAmount = ((+amnt + this.patronDetails.Balance) - (this.navOrderData.totalAmount)).toFixed(2);
+                    this.depositAmount = this.depositAmount > 0.00 ? '$' + this.depositAmount : '$' + '0.00'
                     //this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00';
                 } else {
 
