@@ -760,8 +760,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             if (!isNaN(amnt)) {
                 this.cashtendAmount = amnt;
                 this.cashtendered = '$' + amnt;
-                let chngDue = +amnt - this.navOrderData.totalAmount;
-                this.changeDue = chngDue > 0 ? chngDue : 0.00;
+                let chngDue = (+amnt + this.patronDetails.Balance) - (this.navOrderData.totalAmount);
+                if(chngDue>0){
+                    this.changeDue = chngDue;
+                }else {
+                    this.changeDue = 0.00;
+                }
                 let amountTowardsBal = 0.00;
 
                 //if(this.cashtendAmount.toFixed(2) > this.navOrderData.totalAMount)
@@ -769,7 +773,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 if (this.depositChangeDue) {
 
                     this.changeDue = 0.00;
-                    this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00';
+                    this.depositAmount = ((+amnt + this.patronDetails.Balance) - (this.navOrderData.totalAmount)).toFixed(2);
+                    //this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00';
                 } else {
 
                     if (this.EXNEGBAL) {  // change to true
@@ -808,9 +813,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             this.depositAmount = tempDepositAmnt > 0 ? '$' + tempDepositAmnt.toFixed(2) : '$' + '0.00'
                             // this.depositAmount = tempDepositAmnt > 0 ? '$' + (tempDepositAmnt + Number(this.navOrderData.totalAmount)).toFixed(2) : '$' + '0.00'
 
-                            this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
+                            //this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
+                            this.changeDue = (this.cashtendAmount + this.patronDetails.Balance) - (this.navOrderData.totalAmount);
+
                         } else {
-                            const changDue = amnt - this.navOrderData.totalAmount;
+                            let changDue = (+amnt + this.patronDetails.Balance) - (this.navOrderData.totalAmount);
                             this.changeDue = changDue > 0 ? changDue : 0.00;
                             if (this.depositChangeDue) {
                                 this.depositAmount = '$' + this.changeDue.toFixed(2);
