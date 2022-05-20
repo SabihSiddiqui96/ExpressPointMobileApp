@@ -758,7 +758,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             if (!isNaN(amnt)) {
                 this.cashtendAmount = amnt;
                 this.cashtendered = '$' + amnt;
-                let chngDue = (+amnt ) - (this.navOrderData.totalAmount);
+                let chngDue = (+amnt) - (this.navOrderData.totalAmount);
                 if (chngDue > 0) {
                     this.changeDue = chngDue;
                 } else {
@@ -771,7 +771,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 if (this.depositChangeDue) {
 
                     this.changeDue = 0.00;
-                    this.depositAmount = ((+amnt ) - (this.navOrderData.totalAmount)).toFixed(2);
+                    this.depositAmount = ((+amnt) - (this.navOrderData.totalAmount)).toFixed(2);
                     this.depositAmount = this.depositAmount > 0.00 ? '$' + this.depositAmount : '$' + '0.00'
                     //this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00';
                 } else {
@@ -813,7 +813,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             // this.depositAmount = tempDepositAmnt > 0 ? '$' + (tempDepositAmnt + Number(this.navOrderData.totalAmount)).toFixed(2) : '$' + '0.00'
 
                             //this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
-                            this.changeDue = (this.cashtendAmount ) - (this.navOrderData.totalAmount);
+                            this.changeDue = ((this.cashtendAmount) - (this.navOrderData.totalAmount) - (tempDepositAmnt > 0 ? tempDepositAmnt : 0));
 
                         } else {
                             let changDue = (+amnt) - (this.navOrderData.totalAmount);
