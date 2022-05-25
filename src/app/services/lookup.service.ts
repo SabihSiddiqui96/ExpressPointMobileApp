@@ -14,6 +14,9 @@ import { PopupMessageCode } from '../services/enums/popup-message-codes';
 import { Events } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { BehaviorSubject } from 'rxjs';
+import { LogsDBService } from './Database/logs-db.service';
+import { LogType } from './enums/log-type';
+import { EventType } from './enums/event-type';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -37,6 +40,7 @@ export class LookupService {
     public menuPayselectAccountClick: boolean = false;
 
     constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
+        private logDBService:LogsDBService,
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
         private electronService: ElectronService) {
@@ -84,10 +88,10 @@ export class LookupService {
 
     public setQ(queueInput) {
         this.getSettingValuesRequired(); // Added this to get the setting values in lookup using peripherals
-
+        
 
         this.lookupAndPushPersonToQ(queueInput).then(() => {
-            if (this.personsQ.length === 1 && AppStateService.get('patron_details') === undefined &&
+            if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
                 AppStateService.get('currentTab') !== 'advanced') {
                 this.selectPatron(this.personsQ[0]);
             }
@@ -185,7 +189,22 @@ export class LookupService {
                     });
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
+                this.logDBService.logData({
+                    event : EventType.LOOKUP,
+                    patronId : queueInput.PIN,
+                    type: LogType.INFO,
+                    data: results[0],
+                    queueCount: this.personsQ.length
+                  });
                 resolve(null);
+            },(error)=> {
+                this.logDBService.logData({
+                    event : EventType.LOOKUP,
+                    patronId : queueInput.PIN,
+                    type: LogType.ERROR,
+                    data: queueInput,
+                    queueCount: this.personsQ.length
+                  });
             });
         });
     }
