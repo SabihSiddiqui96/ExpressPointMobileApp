@@ -1,4 +1,5 @@
 export enum EventType {
-    QUEUE = 1
+    QUEUE = 1,
+    LOOKUP = 2
 
 }

@@ -16,6 +16,7 @@ import { ElectronService } from './electron.service';
 import { BehaviorSubject } from 'rxjs';
 import { LogsDBService } from './Database/logs-db.service';
 import { LogType } from './enums/log-type';
+import { EventType } from './enums/event-type';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -189,7 +190,7 @@ export class LookupService {
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
                 this.logDBService.logData({
-                    event : 'Lookup Person success',
+                    event : EventType.LOOKUP,
                     patronId : queueInput.PIN,
                     type: LogType.INFO,
                     data: results[0],
@@ -198,7 +199,7 @@ export class LookupService {
                 resolve(null);
             },(error)=> {
                 this.logDBService.logData({
-                    event : 'Lookup Person failed',
+                    event : EventType.LOOKUP,
                     patronId : queueInput.PIN,
                     type: LogType.INFO,
                     data: queueInput,
