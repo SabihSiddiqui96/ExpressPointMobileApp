@@ -201,7 +201,7 @@ export class LookupService {
                 this.logDBService.logData({
                     event : EventType.LOOKUP,
                     patronId : queueInput.PIN,
-                    type: LogType.INFO,
+                    type: LogType.ERROR,
                     data: queueInput,
                     queueCount: this.personsQ.length
                   });
