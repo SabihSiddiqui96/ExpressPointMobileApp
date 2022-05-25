@@ -2675,493 +2675,490 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             }
 
-            this.calculateOrderTotals(items).then(() => {
-
-                let paymentAmnt = this.orderData.totalAmount;
-                if (transactionType === 1) {
-                    if (this.setting.EXNEGBAL) {
-                        if (this.isDepositByEXNEGBAL === true) {
-                            if (this.orderData.IsDeposit === true) {
-                                paymentAmnt = parseFloat(this.cashtendAmount);
-                            } else {
-                                paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
-                                this.orderData.IsDeposit = true;
-                            }
+            let paymentAmnt = this.orderData.totalAmount;
+            if (transactionType === 1) {
+                if (this.setting.EXNEGBAL) {
+                    if (this.isDepositByEXNEGBAL === true) {
+                        if (this.orderData.IsDeposit === true) {
+                            paymentAmnt = parseFloat(this.cashtendAmount);
                         } else {
-                            // console.clear()
-                            // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
-                            if (this.orderData.IsDeposit === true) {
-                                paymentAmnt = parseFloat(this.cashtendAmount);
-                            } else {
-                                /**
-                                 * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-                                 */
-                                if (this.cashtendAmount < this.orderData.totalAmount) {
-                                    paymentAmnt = parseFloat(this.cashtendAmount);
-
-                                } else {
-                                    paymentAmnt = parseFloat(this.orderData.totalAmount);
-                                }
-                                //   this.orderData.IsDeposit = true
-                            }
+                            paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
+                            this.orderData.IsDeposit = true;
                         }
                     } else {
-                        paymentAmnt = parseFloat(this.cashtendAmount);
-                        if (this.cashtendAmount > this.orderData.totalAmount) {
-                            if (this.orderData.IsDeposit === false) {
-                                paymentAmnt = this.orderData.totalAmount;
+                        // console.clear()
+                        // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
+                        if (this.orderData.IsDeposit === true) {
+                            paymentAmnt = parseFloat(this.cashtendAmount);
+                        } else {
+                            /**
+                             * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+                             */
+                            if (this.cashtendAmount < this.orderData.totalAmount) {
+                                paymentAmnt = parseFloat(this.cashtendAmount);
+
+                            } else {
+                                paymentAmnt = parseFloat(this.orderData.totalAmount);
                             }
-                            if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                                paymentAmnt = this.orderData.totalAmount;
-                            }
+                            //   this.orderData.IsDeposit = true
                         }
                     }
-                    /* not sure if to add this or not */
-                    if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                        paymentAmnt = this.orderData.totalAmount;
+                } else {
+                    paymentAmnt = parseFloat(this.cashtendAmount);
+                    if (this.cashtendAmount > this.orderData.totalAmount) {
+                        if (this.orderData.IsDeposit === false) {
+                            paymentAmnt = this.orderData.totalAmount;
+                        }
+                        if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+                            paymentAmnt = this.orderData.totalAmount;
+                        }
                     }
-                    /* not sure if to add this or not */
                 }
-
-
-                const now = new Date();
-                const UTC = now.getTime();
-                const localOffset = (-1) * now.getTimezoneOffset() * 60000;
-                const currentTime = Math.round(new Date(UTC + localOffset).getTime());
-
-                // let TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
-                AppStateService.set('TransactionNumber', this.transactionNumber);
-
-                if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
-                    paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+                /* not sure if to add this or not */
+                if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+                    paymentAmnt = this.orderData.totalAmount;
                 }
-                if (paymentAmnt > this.orderData.totalAmount) {
-                    this.orderData.IsDeposit = true
-                }
+                /* not sure if to add this or not */
+            }
 
-                // For visitor Sale using Student balance : Payment Amount should be Total Amount
-                if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-                    paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
-                }
 
-                const updatedPatronDetails = Object.assign({}, this.patronDetails);
-                const balance = this.patronDetails.Balance;
+            const now = new Date();
+            const UTC = now.getTime();
+            const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+            const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
-                const payment = Math.round(paymentAmnt * 100) / 100;
-                const saleTotal = this.orderData.totalAmount;
-                if (transactionType === 1) {
-                    updatedPatronDetails.Balance = balance - (saleTotal - payment);
-                } else if (transactionType === 2) {
-                    updatedPatronDetails.Balance = balance - saleTotal;
-                }
+            // let TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+            AppStateService.set('TransactionNumber', this.transactionNumber);
 
-                const sortedItems = this.sortMenuItems(items);
+            if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
+                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            }
+            if (paymentAmnt > this.orderData.totalAmount) {
+                this.orderData.IsDeposit = true
+            }
 
-                let paymentData, paymentDoc;
-                if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
-                    && this.orderData.IsDeposit) {
-                    paymentData = {
-                        'PaymentAmount': Math.round(parseFloat(this.cashtendAmount) * 100) / 100,
-                        'Balance': parseFloat(this.selectedAccountDetails.Balance),
-                        'AccountId': this.selectedAccountDetails.AccountId,
-                        'ServingSchoolId': siteSchool,
-                        'BuyerSchoolId': this.patronDetails.SchoolId,
-                        'SessionId': this.sessionId,
-                        'BuyerId': this.selectedAccountDetails.PersonId,
-                        'IsDeposit': true,
-                        'IsCheck': this.orderData.IsCheck,
-                        'TransactionType': 4,
-                        'PriceTypeId': this.patronDetails.PriceTypeId,
-                        'BuyerGradeId': this.selectedAccountDetails.GradeId,
-                        'MealTypeId': 0,
-                        'MenuItems': [{}],
-                        'CheckNumber': this.cashCheckNum ? this.cashCheckNum : '',
-                        'TransactionDate': currentTime,
-                        'TransactionNumber': this.transactionNumber,
-                        'PrincipalId': this.principalId,
-                        'PrincipalAccountId': this.principalAccountId,
-                        'TerminalId': this.terminalId,
-                        'MealType': 'Payment',
-                        'FirstName': this.selectedAccountDetails.FirstName,
-                        'LastName': this.selectedAccountDetails.LastName,
-                        'PersonName': this.selectedAccountDetails.PersonName,
-                        'IsSynced': false,
-                        'DeviceTransactionId': this.generateUUID(),
-                        'IsMarked': false,
-                        'IsSent': false,
-                        'IsfromSameDay': false,
-                        'IsProcessed': false,
-                        'TerminalName': this.terminalName,
-                        'IsCard': false,
-                        'CardNumber': '',
-                        'OldBalance': parseFloat(this.selectedAccountDetails.Balance),
-                        'DepositAmount': this.cashtendAmount,
-                        'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString()),
-                        'BonusAmount': this.bonusAmount,
-                        'AmountTendered': 0,
-                        'Identifier': this.patronDetails.Identifier,
-                        'Site': this.patronDetails.SiteCode,
-                        'Grade': this.patronDetails.GradeDescription,
-                        'Teacher': this.patronDetails.HomeRoom,
-                        'ChangeReturned': 0,
-                        'TotalAmount': 0,
-                        'ServingSiteId': this.siteName,
-                        'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
-                        'UserId': this.userId,
-                        'PersonIdentifier': this.patronDetails.PersonIdentifier,
-                        '_id': this.selectedAccountDetails._id
-                    };
+            // For visitor Sale using Student balance : Payment Amount should be Total Amount
+            if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+                paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
+            }
 
-                    paymentDoc = {
-                        '_id': 'Transaction--' + paymentData.DeviceTransactionId,
-                        'saleData': paymentData
-                    };
-                    personSaledetails.push({
-                        '_id': paymentData['_id'],
-                        'Balance': paymentData['NewBalance'],
-                        'PreviousSales': [{}]
-                    });
-                    this.transactionNumber = this.transactionNumber + 1;
-                    AppStateService.set('TransactionNumber', this.transactionNumber);
-                }
+            const updatedPatronDetails = Object.assign({}, this.patronDetails);
+            const balance = this.patronDetails.Balance;
 
-                this.saleData = {
-                    'PaymentAmount': Math.round(paymentAmnt * 100) / 100, // parseFloat(paymentAmnt.toFixed(2))
-                    'Balance': this.patronDetails.Balance,
-                    'AccountId': this.patronDetails.AccountId,
-                    'ServingSchoolId': this.schoolId,
+            const payment = Math.round(paymentAmnt * 100) / 100;
+            const saleTotal = this.orderData.totalAmount;
+            if (transactionType === 1) {
+                updatedPatronDetails.Balance = balance - (saleTotal - payment);
+            } else if (transactionType === 2) {
+                updatedPatronDetails.Balance = balance - saleTotal;
+            }
+
+            const sortedItems = this.sortMenuItems(items);
+
+            let paymentData, paymentDoc;
+            if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
+                && this.orderData.IsDeposit) {
+                paymentData = {
+                    'PaymentAmount': Math.round(parseFloat(this.cashtendAmount) * 100) / 100,
+                    'Balance': parseFloat(this.selectedAccountDetails.Balance),
+                    'AccountId': this.selectedAccountDetails.AccountId,
+                    'ServingSchoolId': siteSchool,
                     'BuyerSchoolId': this.patronDetails.SchoolId,
                     'SessionId': this.sessionId,
-                    'BuyerId': this.patronDetails.PersonId,
-                    'IsDeposit': this.orderData.IsDeposit,
+                    'BuyerId': this.selectedAccountDetails.PersonId,
+                    'IsDeposit': true,
                     'IsCheck': this.orderData.IsCheck,
-                    'TransactionType': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType,
+                    'TransactionType': 4,
                     'PriceTypeId': this.patronDetails.PriceTypeId,
-                    'BuyerGradeId': this.patronDetails.GradeId,
-                    'MealTypeId': this.selectedMealType,
-                    'MenuItems': sortedItems,
-                    'CheckNumber': this.orderData.CheckNumber,
+                    'BuyerGradeId': this.selectedAccountDetails.GradeId,
+                    'MealTypeId': 0,
+                    'MenuItems': [{}],
+                    'CheckNumber': this.cashCheckNum ? this.cashCheckNum : '',
                     'TransactionDate': currentTime,
                     'TransactionNumber': this.transactionNumber,
-                    'PrincipalId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.PersonId : this.principalId,
-                    'PrincipalAccountId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.AccountId : this.principalAccountId,
-                    'TerminalId': parseInt(this.terminalId),
-                    'MealType': this.selectedMealTypeName,
-                    'FirstName': this.patronDetails.FirstName,
-                    'LastName': this.patronDetails.LastName,
-                    'PersonName': this.patronDetails.PersonName,
+                    'PrincipalId': this.principalId,
+                    'PrincipalAccountId': this.principalAccountId,
+                    'TerminalId': this.terminalId,
+                    'MealType': 'Payment',
+                    'FirstName': this.selectedAccountDetails.FirstName,
+                    'LastName': this.selectedAccountDetails.LastName,
+                    'PersonName': this.selectedAccountDetails.PersonName,
                     'IsSynced': false,
-                    'DeviceTransactionId': this.deviceTransactionId,
-                    'IsMarked': this.isMarked,
+                    'DeviceTransactionId': this.generateUUID(),
+                    'IsMarked': false,
                     'IsSent': false,
                     'IsfromSameDay': false,
                     'IsProcessed': false,
-                    'SalesTax': Math.round(this.orderData.tax * 100) / 100,
-                    'IsCard': this.orderData.IsCard,
-                    'CardNumber': this.orderData.CardNumber,
-                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : 0,
-                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : Number(this.amountTowardsBalance).toFixed(2),
-                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : 0,
-                    'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                    'AmountTendered': Number(this.cashtendAmount).toFixed(2),
-                    'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard || this.orderData.IsDeposit ? 0 : (Number(this.cashtendAmount) - Number(this.amountTowardsBalance)).toFixed(2),
-                    'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
-                    'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
-                    'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
-                    'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                    'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
+                    'TerminalName': this.terminalName,
+                    'IsCard': false,
+                    'CardNumber': '',
+                    'OldBalance': parseFloat(this.selectedAccountDetails.Balance),
+                    'DepositAmount': this.cashtendAmount,
+                    'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString()),
+                    'BonusAmount': this.bonusAmount,
+                    'AmountTendered': 0,
+                    'Identifier': this.patronDetails.Identifier,
+                    'Site': this.patronDetails.SiteCode,
+                    'Grade': this.patronDetails.GradeDescription,
+                    'Teacher': this.patronDetails.HomeRoom,
+                    'ChangeReturned': 0,
+                    'TotalAmount': 0,
                     'ServingSiteId': this.siteName,
-                    'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
+                    'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                     'UserId': this.userId,
                     'PersonIdentifier': this.patronDetails.PersonIdentifier,
-                    '_id': this.patronDetails._id
+                    '_id': this.selectedAccountDetails._id
                 };
 
-                // console.log('-----this.saleData------');
-                // console.log(this.saleData);
-                // console.log(JSON.stringify(this.patronDetails));
-
-
-                const transactionDoc = {
-                    '_id': 'Transaction--' + this.deviceTransactionId,
-                    'saleData': this.saleData
-                };
-                // if (this.saleData['TransactionNumber'] === 1) {
-                const terminalStatusDoc: TerminalSaleStatusDoc = {
-                    '_id': 'TerminalStatus--' + this.sessionId + '--' + this.selectedMealType,
-                    'SessionId': this.sessionId,
-                    'MealTypeId': this.selectedMealType,
-                    'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-                    'TerminalId': this.terminalId,
-                    'IsSynced': false,
-                    'SaleDate': currentTime
+                paymentDoc = {
+                    '_id': 'Transaction--' + paymentData.DeviceTransactionId,
+                    'saleData': paymentData
                 };
                 personSaledetails.push({
-                    '_id': this.saleData['_id'],
-                    'Balance': this.saleData['NewBalance'],
-                    'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
+                    '_id': paymentData['_id'],
+                    'Balance': paymentData['NewBalance'],
+                    'PreviousSales': [{}]
                 });
+                this.transactionNumber = this.transactionNumber + 1;
+                AppStateService.set('TransactionNumber', this.transactionNumber);
+            }
 
-                this.transactionService.SaveTerminalSaleStatus(terminalStatusDoc).then(() => {
+            this.saleData = {
+                'PaymentAmount': Math.round(paymentAmnt * 100) / 100, // parseFloat(paymentAmnt.toFixed(2))
+                'Balance': this.patronDetails.Balance,
+                'AccountId': this.patronDetails.AccountId,
+                'ServingSchoolId': this.schoolId,
+                'BuyerSchoolId': this.patronDetails.SchoolId,
+                'SessionId': this.sessionId,
+                'BuyerId': this.patronDetails.PersonId,
+                'IsDeposit': this.orderData.IsDeposit,
+                'IsCheck': this.orderData.IsCheck,
+                'TransactionType': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType,
+                'PriceTypeId': this.patronDetails.PriceTypeId,
+                'BuyerGradeId': this.patronDetails.GradeId,
+                'MealTypeId': this.selectedMealType,
+                'MenuItems': sortedItems,
+                'CheckNumber': this.orderData.CheckNumber,
+                'TransactionDate': currentTime,
+                'TransactionNumber': this.transactionNumber,
+                'PrincipalId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.PersonId : this.principalId,
+                'PrincipalAccountId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.AccountId : this.principalAccountId,
+                'TerminalId': parseInt(this.terminalId),
+                'MealType': this.selectedMealTypeName,
+                'FirstName': this.patronDetails.FirstName,
+                'LastName': this.patronDetails.LastName,
+                'PersonName': this.patronDetails.PersonName,
+                'IsSynced': false,
+                'DeviceTransactionId': this.deviceTransactionId,
+                'IsMarked': this.isMarked,
+                'IsSent': false,
+                'IsfromSameDay': false,
+                'IsProcessed': false,
+                'SalesTax': Math.round(this.orderData.tax * 100) / 100,
+                'IsCard': this.orderData.IsCard,
+                'CardNumber': this.orderData.CardNumber,
+                'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : 0,
+                'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : Number(this.amountTowardsBalance).toFixed(2),
+                'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : 0,
+                'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                'AmountTendered': Number(this.cashtendAmount).toFixed(2),
+                'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard || this.orderData.IsDeposit ? 0 : (Number(this.cashtendAmount) - Number(this.amountTowardsBalance)).toFixed(2),
+                'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
+                'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
+                'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
+                'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
+                'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
+                'ServingSiteId': this.siteName,
+                'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
+                'UserId': this.userId,
+                'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                '_id': this.patronDetails._id
+            };
 
-                });
-                // }
+            // console.log('-----this.saleData------');
+            // console.log(this.saleData);
+            // console.log(JSON.stringify(this.patronDetails));
 
 
-                if (transactionType !== 0) {
-                    if (updatedPatronDetails.PreviousSales) {
-                        updatedPatronDetails.PreviousSales.map(s => {
-                            if (s.MealTypeId === this.saleData['MealTypeId']) {
+            const transactionDoc = {
+                '_id': 'Transaction--' + this.deviceTransactionId,
+                'saleData': this.saleData
+            };
+            // if (this.saleData['TransactionNumber'] === 1) {
+            const terminalStatusDoc: TerminalSaleStatusDoc = {
+                '_id': 'TerminalStatus--' + this.sessionId + '--' + this.selectedMealType,
+                'SessionId': this.sessionId,
+                'MealTypeId': this.selectedMealType,
+                'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                'TerminalId': this.terminalId,
+                'IsSynced': false,
+                'SaleDate': currentTime
+            };
+            personSaledetails.push({
+                '_id': this.saleData['_id'],
+                'Balance': this.saleData['NewBalance'],
+                'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
+            });
 
-                                console.log(this.orderData.items);
-                                for (let i = 0; i < this.orderData.items.length; i++) {
-                                    for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
-                                        s.SalesByMealType.push({
-                                            'Price': this.orderData.items[i]['CurrentPrice'],
-                                            'MenuItemId': this.orderData.items[i]['RefId'],
-                                            'CategoryId': this.orderData.items[i]['CategoryId'],
-                                            'priceTypeId': this.orderData.items[i]['price_type_id'],
-                                            'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
-                                            'MenuItemDescription': this.orderData.items[i]['Name'],
-                                            'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
-                                            'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
-                                            'IsPartOfMeal': false, // this.orderData.items[i]['IsPartOfMeal']
+            this.transactionService.SaveTerminalSaleStatus(terminalStatusDoc).then(() => {
 
-                                            'TerminalName': this.terminalName
-                                            // this.orderData.items[i]['IsPartOfMeal']
-                                            // tslint:disable-next-line:max-line-length
-                                            // 'isReimbursable' : this.orderData.items[i]['isSecondMeal'] ? false : this.orderData.items[i]['isReimbursable']
-                                        });
-                                    }
+            });
+            // }
+
+
+            if (transactionType !== 0) {
+                if (updatedPatronDetails.PreviousSales) {
+                    updatedPatronDetails.PreviousSales.map(s => {
+                        if (s.MealTypeId === this.saleData['MealTypeId']) {
+
+                            console.log(this.orderData.items);
+                            for (let i = 0; i < this.orderData.items.length; i++) {
+                                for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
+                                    s.SalesByMealType.push({
+                                        'Price': this.orderData.items[i]['CurrentPrice'],
+                                        'MenuItemId': this.orderData.items[i]['RefId'],
+                                        'CategoryId': this.orderData.items[i]['CategoryId'],
+                                        'priceTypeId': this.orderData.items[i]['price_type_id'],
+                                        'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
+                                        'MenuItemDescription': this.orderData.items[i]['Name'],
+                                        'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
+                                        'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
+                                        'IsPartOfMeal': false, // this.orderData.items[i]['IsPartOfMeal']
+
+                                        'TerminalName': this.terminalName
+                                        // this.orderData.items[i]['IsPartOfMeal']
+                                        // tslint:disable-next-line:max-line-length
+                                        // 'isReimbursable' : this.orderData.items[i]['isSecondMeal'] ? false : this.orderData.items[i]['isReimbursable']
+                                    });
                                 }
-                                // s.SalesByMealType.push(this.orderData.items)
-                            } else {
-                                updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
                             }
-                        });
-                    } else {
-                        updatedPatronDetails.PreviousSales = [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }];
-                    }
-                    if (!this.bonusAmount) {
-                        this.bonusAmount = 0;
-                    }
-                    if (this.utilService.isElectronApp()
-                        && (this.printAllSetting === 1
-                            || (this.printAuto === 1
-                                && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
-                        const transactionReceiptData: TransactionDetailPrintFormat = {
-                            'PersonName': this.patronDetails.PersonName,
-                            'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
-                            'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
-                            'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
-                            'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                            'TerminalName': this.terminalName,
-                            'Cashier': UtilService.userNameLoggedIn,
-                            'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
-                                this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
-                            'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                            'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
-                            'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
-                            'IsCheck': this.orderData.IsCheck,
-                            'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
-                                { hour: 'numeric', minute: 'numeric', hour12: true }),
-                            'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                            'AmountTendered': Number(this.cashtendAmount).toFixed(2),
-                            'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                            'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                            'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
-                            'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
-                            'ServingSiteId': this.siteName,
-                            'TransactionNumber': this.transactionNumber,
-                            'CheckNumber': this.orderData.CheckNumber,
-                            'CardNumber': this.orderData.CardNumber,
+                            // s.SalesByMealType.push(this.orderData.items)
+                        } else {
+                            updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
+                        }
+                    });
+                } else {
+                    updatedPatronDetails.PreviousSales = [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }];
+                }
+                if (!this.bonusAmount) {
+                    this.bonusAmount = 0;
+                }
+                if (this.utilService.isElectronApp()
+                    && (this.printAllSetting === 1
+                        || (this.printAuto === 1
+                            && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
+                    const transactionReceiptData: TransactionDetailPrintFormat = {
+                        'PersonName': this.patronDetails.PersonName,
+                        'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
+                        'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
+                        'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
+                        'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
+                        'TerminalName': this.terminalName,
+                        'Cashier': UtilService.userNameLoggedIn,
+                        'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
+                            this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
+                        'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
+                        'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
+                        'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
+                        'IsCheck': this.orderData.IsCheck,
+                        'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
+                            { hour: 'numeric', minute: 'numeric', hour12: true }),
+                        'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                        'AmountTendered': Number(this.cashtendAmount).toFixed(2),
+                        'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
+                        'Balance': Number(this.saleData['NewBalance']).toFixed(2),
+                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
+                        'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
+                        'ServingSiteId': this.siteName,
+                        'TransactionNumber': this.transactionNumber,
+                        'CheckNumber': this.orderData.CheckNumber,
+                        'CardNumber': this.orderData.CardNumber,
 
+                    };
+
+                    const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
+
+                    this.utilService.publishIpcEvent('print', {
+                        data: [{ html: receiptFormat }],
+                        preview: false, copies: this.esrr === 1 ? 2 : 1
+                    });
+                }
+            }
+
+            if (this.deviceTransactionId) {
+
+                PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
+                    if (!(result && result.id)) {
+                        this.ShowTransactionConflictPopover();
+                    }
+                    if (paymentData && paymentDoc) {
+                        if (paymentData.DeviceTransactionId) {
+                            PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then((result) => {
+                                if (!(result && result.id)) {
+                                    this.ShowTransactionConflictPopover();
+                                }
+                            });
+                        }
+                    }
+
+
+                    this.signalRService.sendDataToServer(personSaledetails, this.schoolId
+                    );
+                    // this.utilService.setLoader(false);
+                    if (this.reviewReasonDoc) {
+                        PouchDBService.UpsertSingleDoc(this.reviewReasonDoc, EXP_TRANSACTIONS).then(() => { this.reviewType = 0; });
+                    }
+                    if (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) {
+
+                        const accBal = this.selectedAccountDetails.Balance;
+
+                        if (Number(this.cashtendAmount) !== 0 && (Number(this.cashtendAmount) > Number(saleTotal))) {
+                            this.selectedAccountDetails.Balance = accBal + Number(this.amountTowardsBalance);
+
+                        } else {
+
+                            this.selectedAccountDetails.Balance = accBal - saleTotal;
+
+                        }
+
+                        PouchDBService.UpsertSingleDoc(this.selectedAccountDetails, EXP_PERSON);
+                    }
+                    this.isMarked = false;
+                    this.initCashVariables();
+
+                    this.deviceTransactionId = null;
+
+                    if (transactionType === 1 || transactionType === 3) {
+                        this.event.publish('menu-order-popup:close', {});
+                    }
+                    if (this.orderData.IsCheck) {
+
+                        const sessionCheckDoc: SessionCheckDoc = {
+                            '_id': 'SessionCheck--' + UTC,
+                            'SessionId': this.sessionId,
+                            'CheckNumber': this.orderData.CheckNumber,
+                            'Amount': paymentAmnt,
+                            'IsDeleted': false,
+                            'SessionCheckId': this.utilService.generateUUID(),
+                            'IsSynced': false,
+                            'CreatedDate': UTC
                         };
 
-                        const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
 
-                        this.utilService.publishIpcEvent('print', {
-                            data: [{ html: receiptFormat }],
-                            preview: false, copies: this.esrr === 1 ? 2 : 1
-                        });
+                        this.transactionService.SaveSessionCheck(sessionCheckDoc).then(() => { });
                     }
-                }
 
-                if (this.deviceTransactionId) {
+                    if (this.orderData.IsCard) {
 
-                    PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
-                        if (!(result && result.id)) {
-                            this.ShowTransactionConflictPopover();
-                        }
-                        if (paymentData && paymentDoc) {
-                            if (paymentData.DeviceTransactionId) {
-                                PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then((result) => {
-                                    if (!(result && result.id)) {
-                                        this.ShowTransactionConflictPopover();
-                                    }
-                                });
+                        const sessionCardDoc: SessionCardDoc = {
+                            '_id': 'SessionCard--' + UTC,
+                            'SessionId': this.sessionId,
+                            'CardNumber': this.orderData.CardNumber,
+                            'Amount': paymentAmnt,
+                            'IsDeleted': false,
+                            'SessionCardId': this.utilService.generateUUID(),
+                            'IsSynced': false,
+                            'CreatedDate': UTC
+                        };
+                        this.transactionService.SaveSessionCard(sessionCardDoc).then(() => { });
+                    }
+
+                    if ((updatedPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId) ||
+                        !updatedPatronDetails.IsFromServer) {
+                        PouchDBService.UpsertSingleDoc(updatedPatronDetails, EXP_PERSON);
+                    } else {
+                        this.oldBalance = updatedPatronDetails.Balance;
+                        this.oldPatronId = this.patronDetails.PersonId;
+                        this.isMakeCharge = true;
+                    }
+                    // this.voidOrder();
+                })
+                    .then(() => {
+
+                        // const paymentReceiptDoc = {
+
+                        //     'Name': this.pat
+                        // };
+                        if (this.menuGrid['Buttons'].length) {
+                            for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                                this.menuGrid['Buttons'][k]['restrictedItem'] = false;
                             }
                         }
+                        this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
+                        const spId = AppStateService.get('SpecialRosterId');
+                        // let hmId = AppStateService.get('HomeroomId');
+                        const hmId = this.patronDetails.HomeRoomId;
 
+                        // let gId = AppStateService.get('SelectedHomeroomGrade')
+                        const gId = this.patronDetails.GradeId;
+                        // tslint:disable-next-line:max-line-length
+                        this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
 
-                        this.signalRService.sendDataToServer(personSaledetails, this.schoolId
-                        );
-                        // this.utilService.setLoader(false);
-                        if (this.reviewReasonDoc) {
-                            PouchDBService.UpsertSingleDoc(this.reviewReasonDoc, EXP_TRANSACTIONS).then(() => { this.reviewType = 0; });
-                        }
-                        if (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) {
+                        this.restrictedAlacarteCount = 0;
+                        this.alacarteTotal = 0.00;
+                        this.patronDetails = {};
+                        this.patronDetails.PersonId = null;
+                        this.patronDetails = {};
+                        this.patronImage = null;
+                        this.mealCount = 0;
+                        this.orderData = {
+                            accountBalance: 0.00,
+                            subTotal: 0.00,
+                            tax: 0.00,
+                            totalAmount: 0.00,
+                            items: [],
+                            IsDeposit: false,
+                            IsCheck: false,
+                            CheckNumber: '',
+                            IsCard: false,
+                            CardNumber: ''
+                        };
+                        this.bonusAmount = 0;
+                        AppStateService.remove('patron_details');
+                        this.transactionInProgress = false;
+                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
 
-                            const accBal = this.selectedAccountDetails.Balance;
-
-                            if (Number(this.cashtendAmount) !== 0 && (Number(this.cashtendAmount) > Number(saleTotal))) {
-                                this.selectedAccountDetails.Balance = accBal + Number(this.amountTowardsBalance);
-
-                            } else {
-
-                                this.selectedAccountDetails.Balance = accBal - saleTotal;
-
-                            }
-
-                            PouchDBService.UpsertSingleDoc(this.selectedAccountDetails, EXP_PERSON);
-                        }
-                        this.isMarked = false;
-                        this.initCashVariables();
-
-                        this.deviceTransactionId = null;
-
-                        if (transactionType === 1 || transactionType === 3) {
-                            this.event.publish('menu-order-popup:close', {});
-                        }
-                        if (this.orderData.IsCheck) {
-
-                            const sessionCheckDoc: SessionCheckDoc = {
-                                '_id': 'SessionCheck--' + UTC,
-                                'SessionId': this.sessionId,
-                                'CheckNumber': this.orderData.CheckNumber,
-                                'Amount': paymentAmnt,
-                                'IsDeleted': false,
-                                'SessionCheckId': this.utilService.generateUUID(),
-                                'IsSynced': false,
-                                'CreatedDate': UTC
-                            };
-
-
-                            this.transactionService.SaveSessionCheck(sessionCheckDoc).then(() => { });
-                        }
-
-                        if (this.orderData.IsCard) {
-
-                            const sessionCardDoc: SessionCardDoc = {
-                                '_id': 'SessionCard--' + UTC,
-                                'SessionId': this.sessionId,
-                                'CardNumber': this.orderData.CardNumber,
-                                'Amount': paymentAmnt,
-                                'IsDeleted': false,
-                                'SessionCardId': this.utilService.generateUUID(),
-                                'IsSynced': false,
-                                'CreatedDate': UTC
-                            };
-                            this.transactionService.SaveSessionCard(sessionCardDoc).then(() => { });
-                        }
-
-                        if ((updatedPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId) ||
-                            !updatedPatronDetails.IsFromServer) {
-                            PouchDBService.UpsertSingleDoc(updatedPatronDetails, EXP_PERSON);
+                        if (this.lookUpService.getQ().length !== 0) {
+                            console.log('GetQ   ' + this.lookUpService.getQ()[0]);
+                            this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                         } else {
-                            this.oldBalance = updatedPatronDetails.Balance;
-                            this.oldPatronId = this.patronDetails.PersonId;
-                            this.isMakeCharge = true;
-                        }
-                        // this.voidOrder();
-                    })
-                        .then(() => {
+                            if (this.returnToWhatPage === 'SpecialRoster') {
+                                this.event.publish('patronLookup:ready', {
+                                    'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
+                                    'returnToWhatPage': this.returnToWhatPage,
+                                    'patronRoomSelected': spId
+                                });
+                            } else if (this.returnToWhatPage === 'HomeRoom') {
 
-                            // const paymentReceiptDoc = {
+                                this.event.publish('patronLookup:ready', {
+                                    'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
+                                    'returnToWhatPage': this.returnToWhatPage,
+                                    'patronRoomSelected': hmId,
+                                    'patronGradeSelected': gId
 
-                            //     'Name': this.pat
-                            // };
-                            if (this.menuGrid['Buttons'].length) {
-                                for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
-                                    this.menuGrid['Buttons'][k]['restrictedItem'] = false;
-                                }
-                            }
-                            this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
-                            const spId = AppStateService.get('SpecialRosterId');
-                            // let hmId = AppStateService.get('HomeroomId');
-                            const hmId = this.patronDetails.HomeRoomId;
-
-                            // let gId = AppStateService.get('SelectedHomeroomGrade')
-                            const gId = this.patronDetails.GradeId;
-                            // tslint:disable-next-line:max-line-length
-                            this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
-
-                            this.restrictedAlacarteCount = 0;
-                            this.alacarteTotal = 0.00;
-                            this.patronDetails = {};
-                            this.patronDetails.PersonId = null;
-                            this.patronDetails = {};
-                            this.patronImage = null;
-                            this.mealCount = 0;
-                            this.orderData = {
-                                accountBalance: 0.00,
-                                subTotal: 0.00,
-                                tax: 0.00,
-                                totalAmount: 0.00,
-                                items: [],
-                                IsDeposit: false,
-                                IsCheck: false,
-                                CheckNumber: '',
-                                IsCard: false,
-                                CardNumber: ''
-                            };
-                            this.bonusAmount = 0;
-                            AppStateService.remove('patron_details');
-                            this.transactionInProgress = false;
-                            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-
-                            if (this.lookUpService.getQ().length !== 0) {
-                                console.log('GetQ   ' + this.lookUpService.getQ()[0]);
-                                this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+                                });
                             } else {
-                                if (this.returnToWhatPage === 'SpecialRoster') {
-                                    this.event.publish('patronLookup:ready', {
-                                        'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
-                                        'returnToWhatPage': this.returnToWhatPage,
-                                        'patronRoomSelected': spId
-                                    });
-                                } else if (this.returnToWhatPage === 'HomeRoom') {
-
-                                    this.event.publish('patronLookup:ready', {
-                                        'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
-                                        'returnToWhatPage': this.returnToWhatPage,
-                                        'patronRoomSelected': hmId,
-                                        'patronGradeSelected': gId
-
-                                    });
-                                } else {
-                                    this.event.publish('patronLookup:ready', this.menuGridCount);
-                                    // this.event.publish('patron-released', { 'patronDetails': null });
-                                    // this.utilService.setLoader(false);
-                                }
-
+                                this.event.publish('patronLookup:ready', this.menuGridCount);
                                 // this.event.publish('patron-released', { 'patronDetails': null });
+                                // this.utilService.setLoader(false);
                             }
-                            this.event.publish('patron-released', { 'patronDetails': null });
-                            this.displayDetails = false;
-                            this.utilService.selectAccountClick = false;
-                            this.lookUpService.menuPayselectAccountClick = false;
-                            this.selectedAccountDetails = {};
-                        }, error => {
-                            console.log(error);
-                            this.transactionInProgress = false;
-                            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                        });
-                } else {
-                    this.transactionInProgress = false;
-                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                }
-            });
+
+                            // this.event.publish('patron-released', { 'patronDetails': null });
+                        }
+                        this.event.publish('patron-released', { 'patronDetails': null });
+                        this.displayDetails = false;
+                        this.utilService.selectAccountClick = false;
+                        this.lookUpService.menuPayselectAccountClick = false;
+                        this.selectedAccountDetails = {};
+                    }, error => {
+                        console.log(error);
+                        this.transactionInProgress = false;
+                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                    });
+            } else {
+                this.transactionInProgress = false;
+                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+            }
         });
     }
 
@@ -3583,24 +3580,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.itemCount = this.orderData.items.map(li => li.Quantity).reduce((sum, val) => sum + val, 0);
     }
 
-    public calculateOrderTotals(items) {
-        return new Promise((resolve) => {
-            this.orderData.tax = this.menuGridService.calculateTax(items, this.patronDetails.IsSaleTaxable);
 
-            this.orderData.subTotal = items.map(li => li.Price).reduce((sum, val) => sum + val, 0);
-
-            this.orderData.totalAmount = +(this.orderData.tax + this.orderData.subTotal).toFixed(2);
-            this.orderData.accountBalance = this.setAmount();
-            /////////////////////
-            let accbal: any = parseFloat(this.orderData.accountBalance);
-            accbal = (Math.round(accbal * 100) / 100).toFixed(2);
-            this.cashtendered = '$' + accbal;
-            this.cashtendAmount = this.orderData.accountBalance;
-            this.itemCount = items.map(li => li.Quantity).reduce((sum, val) => sum + val, 0);
-            resolve(null)
-        })
-
-    }
     public showPatronPin() {
         this.showPin = !this.showPin;
     }

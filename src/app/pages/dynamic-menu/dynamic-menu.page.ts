@@ -50,7 +50,8 @@ enum Contributors {
     Veg = 2,
     Grain = 8,
     Meat = 11,
-    Milk = 12
+    Milk = 12,
+    FruitJ = 13
 }
 
 
@@ -88,6 +89,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public BREAKFAST_ITEMS_NEEDED = 3;
 
     public BREAKFAST_CASE_1 = false;
+    public BREAKFAST_CASE_2 = false
 
     public LUNCH_CASE_1 = false;
     public LUNCH_CASE_2 = false;
@@ -1837,6 +1839,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public addMenuToCart(menuItem) {
 
 
+        menuItem['Fruit'] = 0
+        menuItem['Grain'] = 0
+        menuItem['Meat'] = 0
+        menuItem['Veg'] = 0
+        menuItem['Milk'] = 0
+
 
         let hasContributions;
         let defaultServingSize;
@@ -1871,7 +1879,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     switch (contribution.ContributorId) {
 
                                         case Contributors.Fruit:
-                                            menuItem['Fruit'] = contribution.Factor;
+                                            menuItem['Fruit'] += contribution.Factor;
                                             // this.Tray_Fruit += contribution.Factor;
                                             break;
 
@@ -1892,6 +1900,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                                         case Contributors.Veg:
                                             menuItem['Veg'] = contribution.Factor;
+                                            // this.Tray_Veg += contribution.Factor;
+                                            break;
+                                        case Contributors.FruitJ:
+                                            menuItem['Fruit'] += contribution.Factor;
                                             // this.Tray_Veg += contribution.Factor;
                                             break;
 
@@ -1994,7 +2006,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                                         menuItem['Veg'] = contribution.Factor;
                                                         this.trayVeg += contribution.Factor;
                                                         break;
-
+                                                    case Contributors.FruitJ:
+                                                        menuItem['Fruit'] += contribution.Factor;
+                                                        this.trayFruit += contribution.Factor;
+                                                        break;
                                                     default:
                                                         menuItem['IsPartOfMeal'] = false;
                                                         break;
@@ -2071,7 +2086,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         switch (contribution.ContributorId) {
 
                                             case Contributors.Fruit:
-                                                menuItem['Fruit'] = contribution.Factor;
+                                                menuItem['Fruit'] += contribution.Factor;
                                                 this.trayFruit += contribution.Factor;
                                                 break;
 
@@ -2093,6 +2108,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                             case Contributors.Veg:
                                                 menuItem['Veg'] = contribution.Factor;
                                                 this.trayVeg += contribution.Factor;
+                                                break;
+                                            case Contributors.FruitJ:
+                                                menuItem['Fruit'] += contribution.Factor;
+                                                this.trayFruit += contribution.Factor;
                                                 break;
 
                                             default:
@@ -2298,6 +2317,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
     }
 
+
     public changeMealFormedStatus() {
 
 
@@ -2331,74 +2351,79 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 && this.menuGridService.GetMenuItemWithContributionLength(this.orderData.items) >= 3
                 && this.menuGridService.GetPartOfMealItemLength(this.orderData.items) >= 3)
 
+
+            // Breakfast : Meat and Grain are in the same Silo, veg and Fruit are checked in the above rule
+
+            this.BREAKFAST_CASE_2 = ((this.trayGrain + this.trayMeat) >= ((this.requiredGrain + this.requiredMeat) / 2))
+
         }
         // **************LUNCH RULES****************//
 
+        // This change is made for GarlandISD : other than the above rule, breakfast and lunch rules are the same. 
+
+        // if (this.selectedMealTypeName === 'Lunch') {
+        /**
+         * Lunch needs 3 different contributions fulfilled.
+         * We will have to check Change the RequiredFruit and RequiredVeg based on the 
+         */
+
+        let vegItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.vegCategoryId);
+        let fruitItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.fruitCategoryId);
 
 
-        if (this.selectedMealTypeName === 'Lunch') {
-            /**
-             * Lunch needs 3 different contributions fulfilled.
-             * We will have to check Change the RequiredFruit and RequiredVeg based on the 
-             */
-
-            let vegItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.vegCategoryId);
-            let fruitItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.fruitCategoryId);
-
-
-            if (this.trayFruit >= this.requiredFruit) {
-                fulfilledComponentCount++;
-            }
-            if (this.trayVeg >= this.requiredVeg) {
-                fulfilledComponentCount++;
-            }
-            if (this.trayMeat >= this.requiredMeat) {
-                fulfilledComponentCount++;
-                otherFullfilledCount++;
-            }
-            if (this.trayGrain >= this.requiredGrain) {
-                fulfilledComponentCount++;
-                otherFullfilledCount++;
-            }
-            if (this.trayMilk >= this.requiredMilk) {
-                fulfilledComponentCount++;
-                otherFullfilledCount++;
-
-            }
-
-
-
-            this.LUNCH_CASE_1 = (this.trayFruit > 0 || this.trayVeg > 0) &&
-                ((this.trayMeat > 0 && this.trayVeg > 0) ||
-                    (this.trayMeat > 0 && this.trayGrain > 0) ||
-                    (this.trayMeat > 0 && this.trayMilk > 0) ||
-                    (this.trayVeg > 0 && this.trayGrain > 0) ||
-                    (this.trayVeg > 0 && this.trayMilk > 0) ||
-                    (this.trayGrain > 0 && this.trayMilk > 0));
-
-            // Group Fruit and Veg: Atleast 1 from the group
-            this.LUNCH_CASE_2 = (this.trayFruit >= this.requiredFruit || this.trayVeg >= this.requiredVeg);
-
-            // Group Grain, Milk, Meat: Atleast 1 from the group
-            this.LUNCH_CASE_3 = (this.trayMeat >= this.requiredMeat || this.trayGrain >= this.requiredGrain || this.trayMilk >= this.requiredMilk);
-
-
-            // Took this out for https://primeroedge.freshdesk.com/a/tickets/154992
-            // if (this.mealFormed) {
-            //     this.LUNCH_CASE_4 = true;
-            // } else {
-            this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
-            ));
-            // }
-
-            totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
-
+        if (this.trayFruit >= this.requiredFruit) {
+            fulfilledComponentCount++;
+        }
+        if (this.trayVeg >= this.requiredVeg) {
+            fulfilledComponentCount++;
+        }
+        if (this.trayMeat >= this.requiredMeat) {
+            fulfilledComponentCount++;
+            otherFullfilledCount++;
+        }
+        if (this.trayGrain >= this.requiredGrain) {
+            fulfilledComponentCount++;
+            otherFullfilledCount++;
+        }
+        if (this.trayMilk >= this.requiredMilk) {
+            fulfilledComponentCount++;
+            otherFullfilledCount++;
 
         }
 
+
+
+        this.LUNCH_CASE_1 = (this.trayFruit > 0 || this.trayVeg > 0) &&
+            ((this.trayMeat > 0 && this.trayVeg > 0) ||
+                (this.trayMeat > 0 && this.trayGrain > 0) ||
+                (this.trayMeat > 0 && this.trayMilk > 0) ||
+                (this.trayVeg > 0 && this.trayGrain > 0) ||
+                (this.trayVeg > 0 && this.trayMilk > 0) ||
+                (this.trayGrain > 0 && this.trayMilk > 0));
+
+        // Group Fruit and Veg: Atleast 1 from the group
+        this.LUNCH_CASE_2 = (this.trayFruit >= this.requiredFruit || this.trayVeg >= this.requiredVeg);
+
+        // Group Grain, Milk, Meat: Atleast 1 from the group
+        this.LUNCH_CASE_3 = (this.trayMeat >= this.requiredMeat || this.trayGrain >= this.requiredGrain || this.trayMilk >= this.requiredMilk);
+
+
+        // Took this out for https://primeroedge.freshdesk.com/a/tickets/154992
+        // if (this.mealFormed) {
+        //     this.LUNCH_CASE_4 = true;
+        // } else {
+        this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1) : ((this.trayFruit + this.trayVeg) >= 0.5)
+        ));
+        // }
+
+        totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
+
+
+        // }
+
         if (this.selectedMealTypeName === 'Lunch') {
             if (this.LUNCH_CASE_2 && this.LUNCH_CASE_3 && fulfilledComponentCount >= 3
-                && totalContribution >= 2.5 && this.LUNCH_CASE_4) {
+                && totalContribution >= 2 && this.LUNCH_CASE_4) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
@@ -2406,7 +2431,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.mealFormed = false;
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
-            if (this.BREAKFAST_CASE_1) {
+            if ((this.BREAKFAST_CASE_1) || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3
+                && totalContribution >= 2 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2)) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
