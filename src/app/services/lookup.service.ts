@@ -201,7 +201,7 @@ export class LookupService {
                 resolve(null);
             },(error)=> {
                 if(queueInput!==null) {
-                    this.logDBService.logData({
+                    this.logDBService.logError({
                         event : EventType.LOOKUP,
                         patronId : queueInput.PIN,
                         type: LogType.ERROR,

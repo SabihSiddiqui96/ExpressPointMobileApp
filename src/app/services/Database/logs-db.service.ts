@@ -38,6 +38,7 @@ export class LogsDBService {
   }*/
   logData(logData:any){
     let inputLogData;
+    console.log('Log Data : '+logData.data)
     if(this.terminalId!== null && logData.data !==null){
       inputLogData = {
         TerminalId : this.terminalId,
@@ -53,6 +54,7 @@ export class LogsDBService {
 
   logError(logData:any){
     let errorLogData;
+    console.log('Log Error : '+logData.patronId);
     if(this.terminalId !== null && logData.patronId !==null){
       errorLogData = {
         TerminalId: this.terminalId,
