@@ -38,7 +38,8 @@ export class LogsDBService {
   }*/
   logData(logData:any){
     let inputLogData;
-    if(this.terminalId!== null){
+    console.log('Log Data : '+logData.data)
+    if(this.terminalId!== null && logData.data !==null && logData.data !== undefined){
       inputLogData = {
         TerminalId : this.terminalId,
         EventName : logData.event,
@@ -47,13 +48,14 @@ export class LogsDBService {
         QueueCount: logData.queueCount,
         ErrorLogTime: new Date().toISOString(),
       }
+      this.http.saveErrorLogs(inputLogData).subscribe((res) => console.log(res));
     }
-    this.http.saveErrorLogs(inputLogData).subscribe((res) => console.log(res));
   }
 
   logError(logData:any){
     let errorLogData;
-    if(this.terminalId !== null){
+    console.log('Log Error : '+logData.patronId);
+    if(this.terminalId !== null && logData.patronId !==null){
       errorLogData = {
         TerminalId: this.terminalId,
         EventName: 0,
@@ -62,8 +64,8 @@ export class LogsDBService {
         QueueCount: 0,
         ErrorLogTime: this.currentDateTime
       }
+      this.http.saveErrorLogs(JSON.stringify(errorLogData)).subscribe((res) => console.log(res));
     }
-    this.http.saveErrorLogs(JSON.stringify(errorLogData)).subscribe((res) => console.log(res));;
   }
 
 }

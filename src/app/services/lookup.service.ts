@@ -189,22 +189,26 @@ export class LookupService {
                     });
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
-                this.logDBService.logData({
-                    event : EventType.LOOKUP,
-                    patronId : queueInput.PIN,
-                    type: LogType.INFO,
-                    data: results[0],
-                    queueCount: this.personsQ.length
-                  });
+                if(results[0] !== null) {
+                    this.logDBService.logData({
+                        event : EventType.LOOKUP,
+                        patronId : queueInput.PIN,
+                        type: LogType.INFO,
+                        data: results[0],
+                        queueCount: this.personsQ.length
+                      });
+                }
                 resolve(null);
             },(error)=> {
-                this.logDBService.logData({
-                    event : EventType.LOOKUP,
-                    patronId : queueInput.PIN,
-                    type: LogType.ERROR,
-                    data: queueInput,
-                    queueCount: this.personsQ.length
-                  });
+                if(queueInput!==null) {
+                    this.logDBService.logError({
+                        event : EventType.LOOKUP,
+                        patronId : queueInput.PIN,
+                        type: LogType.ERROR,
+                        data: queueInput,
+                        queueCount: this.personsQ.length
+                      });
+                }
             });
         });
     }
