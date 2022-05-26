@@ -38,7 +38,7 @@ export class LogsDBService {
   }*/
   logData(logData:any){
     let inputLogData;
-    if(this.terminalId!== null){
+    if(this.terminalId!== null && logData.data !==null){
       inputLogData = {
         TerminalId : this.terminalId,
         EventName : logData.event,
@@ -53,7 +53,7 @@ export class LogsDBService {
 
   logError(logData:any){
     let errorLogData;
-    if(this.terminalId !== null){
+    if(this.terminalId !== null && logData.patronId !==null){
       errorLogData = {
         TerminalId: this.terminalId,
         EventName: 0,
