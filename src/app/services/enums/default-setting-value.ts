@@ -42,5 +42,6 @@ export enum DefaultSettingValue {
     PRACCDAYCT = 5,
     TAXPERCENT = 5,
     MULTIREAD = '1',
-    WRNTMDFSAM = 15
+    WRNTMDFSAM = 15,
+    ENABLELOG ='0'
 }
