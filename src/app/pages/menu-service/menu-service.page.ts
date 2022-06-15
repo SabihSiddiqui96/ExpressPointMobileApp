@@ -3335,8 +3335,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if(this.patronDetails! == null) {
-                const enableLog = parseInt(SettingService.getSiteSettingValue('ENABLELOG'));
+            if(this.patronDetails.PersonId !== null) {
+                const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
                 if(enableLog === 1){
                     this.logDBService.logData({
                         event : EventType.QUEUE,

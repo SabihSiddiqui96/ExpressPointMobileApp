@@ -190,7 +190,7 @@ export class LookupService {
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
                 if(results[0] !== null) {
-                    const enableLog = parseInt(SettingService.getSiteSettingValue('ENABLELOG'));
+                    const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
                     if(enableLog === 1){
                         this.logDBService.logData({
                             event : EventType.LOOKUP,
@@ -204,7 +204,7 @@ export class LookupService {
                 resolve(null);
             },(error)=> {
                 if(queueInput!==null) {
-                    const enableLog = parseInt(SettingService.getSiteSettingValue('ENABLELOG'));
+                    const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
                     if(enableLog === 1){
                         this.logDBService.logError({
                             event : EventType.LOOKUP,
