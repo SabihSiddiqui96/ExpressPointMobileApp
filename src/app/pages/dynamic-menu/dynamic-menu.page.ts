@@ -3620,7 +3620,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             CardNumber: ''
                         };
                         this.bonusAmount = 0;
-                        AppStateService.remove('patron_details');
                         if (this.lookUpService.getQ().length !== 0) {
                             this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                         } else {
