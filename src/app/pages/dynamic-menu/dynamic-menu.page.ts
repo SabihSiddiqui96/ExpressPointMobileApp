@@ -3620,6 +3620,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             CardNumber: ''
                         };
                         this.bonusAmount = 0;
+                        AppStateService.remove('patron_details');
                         if (this.lookUpService.getQ().length !== 0) {
                             this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                         } else {
@@ -4295,14 +4296,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if(this.patronDetails!==null){
-                this.logDBService.logData({
-                    event : EventType.QUEUE,
-                    patronId : this.patronDetails.PersonId,
-                    type: LogType.INFO,
-                    data: this.patronDetails,
-                    queueCount: this.lookUpService.personsQ.length
-                  });
+            if(this.patronDetails !==null){
+                const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
+                if(enableLog === 1){
+                    this.logDBService.logData({
+                        event : EventType.QUEUE,
+                        patronId : this.patronDetails.PersonId,
+                        type: LogType.INFO,
+                        data: this.patronDetails,
+                        queueCount: this.lookUpService.personsQ.length
+                    });
+                }
             }
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;

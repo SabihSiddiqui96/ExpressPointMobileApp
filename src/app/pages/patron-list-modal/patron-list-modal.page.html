@@ -13,6 +13,7 @@
     <p padding *ngIf="filteredPatronList.length == 0">
         No patron(s) found for this search criteria.
     </p>
+    <ion-list>
         <ion-grid>
             <ion-row lines="none" bold class="bg-transparent ion-no-padding">
                 <ion-col text-wrap size="5" style="padding-left: 16px;" *ngIf="!isFromServer && !navIsFromQueue && navAllowVisitingPatron"
@@ -51,7 +52,9 @@
         </ion-grid>
 
 
-        
+        <ion-row *ngFor="let patron of filteredPatronList;let i=index;" class="ion-justify-content-center minHeight bg-border"
+            align-items-center>
+            <ion-col size="6">
 
         <ion-grid>
             <ion-row>
@@ -158,6 +161,7 @@
         </ion-grid>
 
 
+    </ion-list>
 </ion-content>
 <ion-footer>
     <ion-toolbar position="bottom">

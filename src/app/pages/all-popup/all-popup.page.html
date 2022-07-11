@@ -107,7 +107,7 @@
             </ion-list>
           </ion-col>
         </ion-row>
-        <ion-card *ngFor=" let list of lists; let i=index;" class="minHeight bg-border"
+        <ion-row *ngFor=" let list of lists; let i=index;" class="minHeight bg-border"
           [attr.ion-justify-content-center]="isPatronType" [attr.ion-align-items-center]="isPatronType"
           style="min-height: 100%;border-bottom: 1px solid #dedede;" (click)="select(list)">
           <!--as scss file not working -->
@@ -156,7 +156,7 @@
           </ion-col>
 
 
-        </ion-card>
+        </ion-row>
       </div>
 
 
