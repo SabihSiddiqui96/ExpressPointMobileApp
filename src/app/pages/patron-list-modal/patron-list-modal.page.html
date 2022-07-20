@@ -56,64 +56,109 @@
             align-items-center>
             <ion-col size="6">
 
-                <ion-item (click)="selectPatron(patron,i)" lines="none">
+        <ion-grid>
+            <ion-row>
+              <ion-col style="max-height: 18rem;" sizeLg="4" sizeMd="4" sizeXs="6" *ngFor="let patron of filteredPatronList;let i=index;">
+                <!--<ion-card class="ion-justify-content-center card-size bg-border"
+                align-items-center>
+                    <ion-row>
+                        <ion-item (click)="selectPatron(patron,i)" lines="none">
 
-                    <ion-icon slot="start" name="rewind" color="slate" *ngIf="patron.InputDirection == 1"></ion-icon>
-                    <ion-icon slot="start" name="fastforward" color="slate" *ngIf="patron.InputDirection == 2"></ion-icon>
+                            <ion-icon slot="start" name="rewind" color="slate" *ngIf="patron.InputDirection == 1"></ion-icon>
+                            <ion-icon slot="start" name="fastforward" color="slate" *ngIf="patron.InputDirection == 2"></ion-icon>
 
-                    <ion-avatar slot="start" class="avatar-small">
-                        <!-- <ion-icon name="contact" *ngIf="!patron.Image"></ion-icon> -->
-                        <img src="{{patron.Image}}" *ngIf="patron.Image">
-                        <img src="assets/img/default_male.png" *ngIf="!patron.Image && patron.Gender === 'M'">
-                        <img src="assets/img/default_female.png" *ngIf="!patron.Image && patron.Gender === 'F'">
-                        <img style="border-radius: 0%;" src="assets/img/no_image.png"
-                            *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
-                    </ion-avatar>
+                            <ion-avatar slot="start" class="avatar-small">
+                                <img src="{{patron.Image}}" *ngIf="patron.Image">
+                                <img src="assets/img/default_male.png" *ngIf="!patron.Image && patron.Gender === 'M'">
+                                <img src="assets/img/default_female.png" *ngIf="!patron.Image && patron.Gender === 'F'">
+                                <img style="border-radius: 0%;" src="assets/img/no_image.png"
+                                    *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
+                            </ion-avatar>
 
-                    <ion-label text-large *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
-                        {{patron.FirstName}}
-                        {{patron.LastName}}
-                        <p class="center_text_content">Site: {{patron.SiteCode}}</p>
-                    </ion-label>
+                            <ion-label *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
+                                {{patron.FirstName}}
+                                {{patron.LastName}}
+                                <p class="center_text_content">Site: {{patron.SiteCode}}</p>
+                            </ion-label>
 
-                    <ion-label text-large *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
-                        {{patron.LastName}},
-                        {{patron.FirstName}}
-                        <p class="center_text_content">Site: {{patron.SiteCode}}</p>
-
-                    </ion-label>
-                </ion-item>
-
-            </ion-col>
-            <ion-col size="2">
-                <ion-item (click)="selectPatron(patron,i)" lines="none">
-                    <ion-label item-content text-large font-bold>
-                        {{patron.GradeDescription}}
-                        <p class="center_text_content" font-bold>{{patron.HomeRoom}}</p>
-                    </ion-label>
-                </ion-item>
-            </ion-col>
-            <ion-col size="1">
-                <ion-item (click)="selectPatron(patron,i)" lines="none">
-
-                    <ion-label text-large font-bold style="text-align:center" *ngIf="patron.IsStudent!=null">
-                        {{patron.IsStudent?'S':'A'}}
-                    </ion-label>
-
-                </ion-item>
-            </ion-col>
-            <ion-col size="3">
-                <ion-item (click)="selectPatron(patron,i)" lines="none">
-
-                    <ion-label item-content text-large style="text-align:center" *ngIf="patron.Identifier!=null">
-                        {{patron.Identifier}}</ion-label>
-                    <ion-label item-content text-large style="text-align:center" *ngIf="patron.Identifier==null">
-                        {{patron.PersonName}}</ion-label>
-
-                </ion-item>
-            </ion-col>
-
-        </ion-row>
+                            <ion-label *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
+                                {{patron.LastName}},
+                                {{patron.FirstName}}
+                                <p class="center_text_content">Site: {{patron.SiteCode}}</p>
+                            </ion-label>
+                            <ion-label>
+                                Grade : {{patron.GradeDescription}}
+                            </ion-label>
+                        <div>
+                                Grade : {{patron.GradeDescription}}
+                                <p class="center_text_content" font-bold>{{patron.HomeRoom}}</p>
+                            </div>
+                            <div style="text-align:center" *ngIf="patron.IsStudent!=null">
+                                {{patron.IsStudent?'S':'A'}}
+                            </div>
+                            <div style="text-align:center" *ngIf="patron.Identifier!=null">
+                                {{patron.Identifier}}</div>
+                            <div style="text-align:center" *ngIf="patron.Identifier==null">
+                                {{patron.PersonName}}</div>
+                        </ion-item>
+                    
+                        <ion-item>
+                            <ion-label item-content font-bold>
+                                Grade : {{patron.GradeDescription}}
+                                <p class="center_text_content" font-bold>{{patron.HomeRoom}}</p>
+                            </ion-label>
+                            <ion-label font-bold style="text-align:center" *ngIf="patron.IsStudent!=null">
+                                {{patron.IsStudent?'S':'A'}}
+                            </ion-label>
+                        </ion-item>
+                        <ion-item>
+                            <ion-label item-content style="text-align:center" *ngIf="patron.Identifier!=null">
+                                {{patron.Identifier}}</ion-label>
+                            <ion-label item-content style="text-align:center" *ngIf="patron.Identifier==null">
+                                {{patron.PersonName}}</ion-label>
+                        </ion-item>
+                    </ion-row>
+                </ion-card>-->
+                <ion-card class="ion-justify-content-center card-size bg-border" style="height: 16rem;" align-items-center>
+                    <ion-grid>
+                     <ion-row>
+                      <ion-col>
+                        <ion-avatar item-start> 
+                            <img src="{{patron.Image}}" *ngIf="patron.Image">
+                            <img src="assets/img/default_male.png" *ngIf="!patron.Image && patron.Gender === 'M'">
+                            <img src="assets/img/default_female.png" *ngIf="!patron.Image && patron.Gender === 'F'">
+                            <img style="border-radius: 0%;" src="assets/img/no_image.png" *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
+                        </ion-avatar>
+                     </ion-col>
+                    <ion-col>
+                    <ion-row style="width: 12rem;">
+                        <ion-label *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
+                            {{patron.FirstName}}
+                            {{patron.LastName}}
+                            <p class="center_text_content">Site: {{patron.SiteCode}}</p>
+                        </ion-label>
+                        <ion-label *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
+                            {{patron.LastName}},
+                            {{patron.FirstName}}
+                            <p class="center_text_content">Site: {{patron.SiteCode}}</p>
+                        </ion-label>
+                        <ion-label>Grade : {{patron.GradeDescription}}</ion-label><br>
+                        <ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
+                            {{patron.IsStudent?'Student':'A'}}
+                        </ion-label>
+                        <ion-label style="text-align:center" *ngIf="patron.Identifier!=null">
+                            {{patron.Identifier}}</ion-label>
+                        <ion-label style="text-align:center" *ngIf="patron.Identifier==null">
+                            {{patron.PersonName}}</ion-label>
+                    </ion-row> 
+                    </ion-col>
+                     </ion-row>
+                    </ion-grid>
+                  
+                  </ion-card>
+              </ion-col>
+            </ion-row>
+        </ion-grid>
 
 
     </ion-list>
