@@ -1432,6 +1432,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 }
                 incomingID = '';
                 this.inputBuffer = [];
+                //this.patronSearch.keyword = '';
             }
         } else if (event['keyCode'] === 9) {
             // setTimeout(() => {
