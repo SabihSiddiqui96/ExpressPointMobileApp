@@ -267,7 +267,7 @@ export class SummarySalePage implements OnInit {
               summarySaleDoc.PriceType = pricetype;
               summarySaleDoc.IsStudent = 1
               summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
-              summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
+              summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
               summarySaleDoc.Index = index
 
               index++
@@ -280,7 +280,7 @@ export class SummarySalePage implements OnInit {
                     summarySaleDoc.RdaGroupId = doc.RDAGroupId;
                     summarySaleDoc.IsStudent = 1
                     summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
-                    summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
+                    summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
                     summarySaleDoc.Index = index
 
                     index++
@@ -289,7 +289,7 @@ export class SummarySalePage implements OnInit {
                   summarySaleDoc.PriceType = pricetype;
                   summarySaleDoc.IsStudent = 1
                   summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
-                  summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
+                  summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
                   summarySaleDoc.Index = index
                   index++
 
@@ -311,7 +311,7 @@ export class SummarySalePage implements OnInit {
             // summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;
 
             summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
-            summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
+            summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
             summarySaleDoc.Index = index
             index++
           }
