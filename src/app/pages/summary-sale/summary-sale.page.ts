@@ -67,7 +67,7 @@ export class SummarySalePage implements OnInit {
   public transactionInProgress: boolean = false
   public allMenuItemsPrices: any = [];
   private priceMode: number = 0;
-  isMealCount:boolean = false;
+  isMealCount: boolean = false;
   public keyboardSettings: IonDigitKeyboardOptions = {
     align: 'center',
     width: '2%',
@@ -216,9 +216,10 @@ export class SummarySalePage implements OnInit {
     );
 
     if (priceDoc) {
-      return true;
+      return priceDoc.doc.Price;
     }
-    return false
+    // Return -1 if there dont show the pricetype
+    return -1;
 
   }
 
@@ -242,7 +243,8 @@ export class SummarySalePage implements OnInit {
             'Show': 1,
             'Index': 0,
             'RdaGroupId': 0,
-            'IsStudent': 0
+            'IsStudent': 0,
+            'MenuItemPrice': 0
           };
 
           if (data.PriceTypeDescription === 'Reduced') {
@@ -264,7 +266,8 @@ export class SummarySalePage implements OnInit {
             if (this.priceMode === 0) {
               summarySaleDoc.PriceType = pricetype;
               summarySaleDoc.IsStudent = 1
-              summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+              summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
+              summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
               summarySaleDoc.Index = index
 
               index++
@@ -276,7 +279,8 @@ export class SummarySalePage implements OnInit {
                     summarySaleDoc.PriceType = pricetype + ' (' + doc.Description + ')';
                     summarySaleDoc.RdaGroupId = doc.RDAGroupId;
                     summarySaleDoc.IsStudent = 1
-                    summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+                    summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
+                    summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
                     summarySaleDoc.Index = index
 
                     index++
@@ -284,7 +288,8 @@ export class SummarySalePage implements OnInit {
                 } else {
                   summarySaleDoc.PriceType = pricetype;
                   summarySaleDoc.IsStudent = 1
-                  summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;;
+                  summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
+                  summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
                   summarySaleDoc.Index = index
                   index++
 
@@ -303,7 +308,10 @@ export class SummarySalePage implements OnInit {
              * PriceMode is not considered here as RDA Pricing in Summary sales will be taken up in 2.0 Project
              */
 
-            summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;
+            // summarySaleDoc.Show = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent) ? 1 : 2;
+
+            summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
+            summarySaleDoc.Show = summarySaleDoc.MenuItemPrice > 0 ? 1 : 2;
             summarySaleDoc.Index = index
             index++
           }
@@ -462,10 +470,10 @@ export class SummarySalePage implements OnInit {
   }
 
   public numberClick(key: any) {
-    if(this.isMealCount){
+    if (this.isMealCount) {
       this.customKeys = '';
       this.isMealCount = false;
-    }else{
+    } else {
       this.isMealCount = false;
     }
     const summaryIndex = _.findIndex(
