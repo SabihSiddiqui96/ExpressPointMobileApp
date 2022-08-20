@@ -1,3 +1,4 @@
 jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore Expresspointapp.keystore app-release-unsigned.apk Expresspointapp
-zipalign -v 4 app-release-unsigned.apk ExpressPoint.apk
+zipalign -v2 4 app-release-unsigned.apk ExpressPoint.apk
+apksigner sign --ks Expresspointapp.keystore ExpressPoint.apk
 apksigner verify ExpressPoint.apk
