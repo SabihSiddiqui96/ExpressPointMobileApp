@@ -207,14 +207,14 @@ export class PouchDBService {
             PouchDB.plugin(require('pouchdb-adapter-cordova-sqlite'));
             const adapter = 'cordova-sqlite';
             EXP_PERSON_IN_MEMORY = this.dbName.collection('FORDB_PERSON', { primaryKey: '_id' }); // Introduced ForerunnerDB for Person table to increase performance
-            EXP_COMMON = new PouchDB('EXP_COMMON', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true } as any);
-            EXP_PERSON = new PouchDB('EXP_PERSON', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any );
-            EXP_STANDARD_MENUS = new PouchDB('EXP_STANDARD_MENUS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true } as any);
-            EXP_DYNAMIC_MENUS = new PouchDB('EXP_DYNAMIC_MENUS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true } as any );
-            EXP_TRANSACTIONS = new PouchDB('EXP_TRANSACTIONS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any );
-            EXP_SYSTEM = new PouchDB('EXP_SYSTEM', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true } as any );
-            EXP_USERS = new PouchDB('EXP_USERS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
-            EXP_LOGS = new PouchDB('EXP_LOGS', { location: 'default', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
+            EXP_COMMON = new PouchDB('EXP_COMMON', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true } as any);
+            EXP_PERSON = new PouchDB('EXP_PERSON', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true }as any );
+            EXP_STANDARD_MENUS = new PouchDB('EXP_STANDARD_MENUS', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true } as any);
+            EXP_DYNAMIC_MENUS = new PouchDB('EXP_DYNAMIC_MENUS', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true } as any );
+            EXP_TRANSACTIONS = new PouchDB('EXP_TRANSACTIONS', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true }as any );
+            EXP_SYSTEM = new PouchDB('EXP_SYSTEM', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true } as any );
+            EXP_USERS = new PouchDB('EXP_USERS', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
+            EXP_LOGS = new PouchDB('EXP_LOGS', { location: 'default',androidDatabaseProvider: 'system', adapter: adapter, revs_limit: 1, auto_compaction: true }as any);
 
 
             // this.vacuumSQLite();
