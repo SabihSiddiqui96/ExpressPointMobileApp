@@ -58,9 +58,7 @@
         </ion-grid>
 
 
-        <ion-row *ngFor="let patron of filteredPatronList;let i=index;"
-            class="ion-justify-content-center minHeight bg-border" align-items-center>
-            <ion-col size="6">
+       
 
                 <ion-grid>
                     <ion-row>
@@ -126,11 +124,11 @@
                         </ion-item>
                     </ion-row>
                 </ion-card>-->
-                            <ion-card class="ion-justify-content-center card-size bg-border" style="height: 16rem;"
+                            <ion-card class="ion-justify-content-center card-size bg-border" style="height: 16rem;width:20rem;"
                                 align-items-center>
                                 <ion-grid>
                                     <ion-row>
-                                        <ion-col>
+                                        <ion-col style="width: 7rem;">
                                             <ion-avatar item-start>
                                                 <img src="{{patron.Image}}" *ngIf="patron.Image">
                                                 <img src="assets/img/default_male.png"
@@ -141,7 +139,7 @@
                                                     *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
                                             </ion-avatar>
                                         </ion-col>
-                                        <ion-col>
+                                        <ion-col style="width:12rem;">
                                             <ion-row style="width: 12rem;">
                                                 <ion-label *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
                                                     {{patron.FirstName}}
@@ -153,7 +151,7 @@
                                                     {{patron.FirstName}}
                                                     <p class="center_text_content">Site: {{patron.SiteCode}}</p>
                                                 </ion-label>
-                                                <ion-label>Grade : {{patron.GradeDescription}}</ion-label><br>
+                                                <ion-label>Grade : {{patron.GradeDescription}}</ion-label><br/>
                                                 <ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
                                                     {{patron.IsStudent?'Student':'A'}}
                                                 </ion-label>
@@ -170,8 +168,7 @@
                         </ion-col>
                     </ion-row>
                 </ion-grid>
-            </ion-col>
-        </ion-row>
+            
 
 
     </ion-list>
