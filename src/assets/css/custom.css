@@ -1159,6 +1159,15 @@ ion-header ion-toolbar {
   min-width: 820px;
 }
 
+.patron-modal-popup div.modal-wrapper {
+  left: calc(50% - (900px/2));
+  top: calc(50% - (550px/2));
+  position: absolute;
+  max-width: 900px;
+  max-height: 600px;
+  min-width: 880px !important;
+}
+
 @media only screen and (min-width: 700px) {
   .modal-wrapper {
     left: calc(50% - (700px / 2));

@@ -247,7 +247,8 @@ export class LookupService {
                     'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
                 },
                 showBackdrop: true,
-                backdropDismiss: false
+                backdropDismiss: false,
+                cssClass: 'patron-modal-popup'
             }).then(async (res) => {
                 await res.present().then(() => {
                     resolve('Success');
