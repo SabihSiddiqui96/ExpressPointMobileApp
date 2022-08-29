@@ -94,7 +94,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     });*/
     this.changeActiveInput('amount');
 
-    if(document.querySelector('button')!==null){
+    if (document.querySelector('button') !== null) {
       document.querySelector('button').addEventListener('keydown', function (e) {
         var key = e.keyCode || e.charCode;
         if (key == 13) {
@@ -103,7 +103,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
         }
       });
     }
-   
+
 
     console.log('Hello MenuPaymentPopup Page');
     if (this.utilService.isElectronApp()) {
@@ -259,7 +259,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
           return;
         }
       }
-      super.checkPayment();
+      super.checkPayment(true);
 
       this.event.subscribe('menu-payment-popup:close', (userEventData) => {
         // Made Payment From Add Funds and Going Back to the MenuService Screen
