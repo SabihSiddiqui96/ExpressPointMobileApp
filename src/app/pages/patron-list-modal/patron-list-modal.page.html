@@ -62,7 +62,7 @@
 
                 <ion-grid>
                     <ion-row>
-                        <ion-col style="max-height: 13rem;" sizeLg="3" sizeMd="3" sizeXs="6"
+                        <ion-col style="max-height: 12rem;" sizeLg="3" sizeMd="3" sizeXs="6"
                             *ngFor="let patron of filteredPatronList;let i=index;">
                             <!--<ion-card class="ion-justify-content-center card-size bg-border"
                 align-items-center>
@@ -139,7 +139,7 @@
                                                     *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
                                             </ion-avatar>
                                         </ion-col>
-                                        <ion-col style="width:12rem;">
+                                        <ion-col style="width:12rem;height: 100%;">
                                             <ion-row style="width: 12rem;">
                                                 <ion-label *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
                                                     {{patron.FirstName}}
@@ -150,13 +150,13 @@
                                                     {{patron.LastName}},
                                                     {{patron.FirstName}}
                                                     <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
-                                                </ion-label>
-                                                <ion-label>Grade : {{patron.GradeDescription}}</ion-label><br/>
-                                                <ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
-                                                    {{patron.IsStudent?'Student':'A'}}
-                                                </ion-label>
+                                                </ion-label>       
+                                                <ion-label *ngIf="patron.GradeDescription">Grade : {{patron.GradeDescription}}</ion-label><br />
+                                                <!--<ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
+                                                    {{patron.IsStudent?'Student': 'A'}}
+                                                </ion-label><br />-->
                                                 <ion-label style="text-align:center" *ngIf="patron.Identifier!=null">
-                                                    {{patron.Identifier}}</ion-label>
+                                                    PIN - {{patron.Identifier}}</ion-label>
                                                 <ion-label style="text-align:center" *ngIf="patron.Identifier==null">
                                                     {{patron.PersonName}}</ion-label>
                                             </ion-row>
