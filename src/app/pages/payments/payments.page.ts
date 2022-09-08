@@ -469,7 +469,7 @@ export class DoPayment {
         this.newBalance = this.navPatronDetails['Balance'];
     }
 
-    public checkPayment() {
+    public checkPayment(IsFromAddFunds = false) {
         this.makePaymentProcessing = true;
         const maxpymtamt = parseFloat(SettingService.getSettingValue('MAXPYMTAMT'));
         const warnamount = parseFloat(SettingService.getSettingValue('WARNAMOUNT'));
@@ -527,13 +527,13 @@ export class DoPayment {
                 if (amnt >= warnamount) {
                     this.popupMessageService.showMessage(PopupMessageCode.E17456, ['$' + amnt + '']).then((bool) => {
                         if (bool) {
-                            this.startPayment();
+                            this.startPayment(IsFromAddFunds);
                         }
                     });
                     // this.showConfrim('You have entered a payment amount of $'
                     //     + amnt + '. This amount is higher than a typical payment. Are you sure this is the correct amount?');
                 } else {
-                    this.startPayment();
+                    this.startPayment(IsFromAddFunds);
                 }
             } else {
                 this.makePaymentProcessing = false;
@@ -580,7 +580,7 @@ export class DoPayment {
         });
     }
 
-    public startPayment() {
+    public startPayment(IsFromAddFunds = false) {
         this.transactionService.CheckSessionInAppState().then(() => {
 
             this.makePaymentProcessing = true;
@@ -800,8 +800,8 @@ export class DoPayment {
 
                 this.navPatronDetails = {};
                 this.patronId = null;
-
-                AppStateService.remove('patron_details');
+                if (!IsFromAddFunds)
+                    AppStateService.remove('patron_details');
 
                 // if (this.lookUpService.getQ().length != 0)
                 //     this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
