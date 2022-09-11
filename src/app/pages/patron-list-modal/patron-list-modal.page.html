@@ -128,7 +128,12 @@
                                 align-items-center>
                                 <ion-grid>
                                     <ion-row>
+                                            <div style="position: absolute;">
+                                                <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="rewind" color="slate" ></ion-icon>
+                                                <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="fastforward" color="slate" ></ion-icon>
+                                            </div>
                                         <ion-col style="width: 7rem;">
+                                            
                                             <ion-avatar item-start>
                                                 <img src="{{patron.Image}}" *ngIf="patron.Image">
                                                 <img src="assets/img/default_male.png"
