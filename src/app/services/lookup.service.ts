@@ -720,6 +720,7 @@ export class LookupService {
     }
 
     public CheckPreviousSalesOnInMemoryDBByDate(patron) {
+        let inputDirectionVal = patron.InputDirection;
         return new Promise((resolve) => {
             PouchQueriesService.GetStudentInfo(patron.PersonId).then((result) => {
                 if (result.docs.length === 1) {
@@ -733,9 +734,10 @@ export class LookupService {
                             resolve(patron)
                         } else if (result.docs[0].SyncedFromServerAt) {
                             // this.utilService.showToast(result.docs[0].SyncedFromServerAt + ' Inmemory')
-
+                            result.docs[0].InputDirection = inputDirectionVal;
                             resolve(result.docs[0])
                         } else {
+                            result.docs[0].InputDirection = inputDirectionVal;
                             resolve(result.docs[0])
                         }
                     }
