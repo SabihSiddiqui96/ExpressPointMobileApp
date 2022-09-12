@@ -726,6 +726,7 @@ export class LookupService {
                 if (result.docs.length === 1) {
                     if (patron.SyncedFromServerAt && result.docs[0].SyncedFromServerAt) {
                         let data = patron.SyncedFromServerAt > result.docs[0].SyncedFromServerAt ? patron : result.docs[0];
+                        data.InputDirection = inputDirectionVal;
                         // this.utilService.showToast(patron.SyncedFromServerAt + ' ' + result.docs[0].SyncedFromServerAt)
                         resolve(data);
                     } else {
