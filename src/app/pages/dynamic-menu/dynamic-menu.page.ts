@@ -3168,7 +3168,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             for (let i = 0; i < this.orderData.items.length; i++) {
                 items.push({
-                    'Price': this.orderData.items[i]['IsPartOfMeal'] ? 0 : this.orderData.items[i]['Price'],
+                    'Price': this.orderData.items[i]['IsPartOfMeal'] && this.mealFormed ? 0 : this.orderData.items[i]['Price'],
                     'MenuItemId': this.orderData.items[i]['RefId'],
                     'priceTypeId': this.orderData.items[i]['price_type_id'],
                     'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
