@@ -3182,7 +3182,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 });
             }
 
-
             // meal combo item
             if (this.mealFormed) {
                 const isMeal = true;
