@@ -14,6 +14,7 @@ import { PouchDBService, EXP_TRANSACTIONS, EXP_COMMON } from '../../services/pou
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 
+
 @Component({
   selector: 'app-comments-popup',
   templateUrl: './comments-popup.page.html',
