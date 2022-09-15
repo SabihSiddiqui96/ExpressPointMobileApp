@@ -230,11 +230,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     public ngOnDestroy() {
-        this.event.destroy('all_categories:show');
-        this.event.destroy('menu_subcategory:select');
-        this.event.destroy('menu-service-popup');
-        this.event.destroy('category_all:select');
-        this.event.destroy('menu_subcategory:select');
+        // this.event.destroy('all_categories:show');
+        // this.event.destroy('menu_subcategory:select');
+        // this.event.destroy('menu-service-popup');
+        // this.event.destroy('category_all:select');
+        // this.event.destroy('menu_subcategory:select');
     }
     public resetHomeroom() {
         this.filter.selected_grade = -1;
@@ -597,7 +597,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'PersonIdentifier': doc.PersonIdentifier
                         };
                     });
-                    students = _.sortBy(students, 'LastName');
+                    students = _.sortBy(students, ['LastName','FirstName']);
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -680,7 +680,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                     });
 
-                    students = _.sortBy(students, 'LastName');
+                    students = _.sortBy(students,['LastName','FirstName']);
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -787,7 +787,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             students = students.filter(r => r.isActive === true);
                         }
 
-                        students = _.sortBy(students, 'LastName');
+                        students = _.sortBy(students, ['LastName','FirstName']);
                         console.log(students);
 
 
@@ -1162,7 +1162,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     console.log(items);
                     console.log(this.classroomSales);
 
-                    this.persons = _.sortBy(this.persons, 'LastName');
+                    this.persons = _.sortBy(this.persons, ['LastName','FirstName']);
                     this.persons.map(person => {
                         person.Image = null;
                         if (person.PersonId === student.PersonId) {
@@ -2378,7 +2378,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         let pDetails: any;
         pDetails = patronDetails;
         const previousSales = pDetails.PreviousSales;
-        // const date = new Date();
+
+        const today = new Date();
         // const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
         // const today = new Date().setHours(0, 0, 0, 0);
         const previousALCCount = 0;
@@ -2398,14 +2399,24 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             if (prevSalesByMealType) {
                 const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
                 const mealTypeItems = [].concat.apply([], items);
-                soldItemsByMealType = mealTypeItems;
+                soldItemsByMealType = _.filter(mealTypeItems, (s) => {
+                    let date = new Date(_.toInteger(s.Date));
+                    return (date.getDate() === today.getDate()
+                        && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+
+                });
             }
             /**
                 * Calculating all A La carte meals served in previous sales
                 */
-            const alaCarteItems = _.filter(allItems, (o) => o.IsReimbursable === false ||
-                (o.IsReimbursable === true && o.IsSecondMeal === true));
-
+            const alaCarteItems = _.filter(allItems, (o) => {
+                let date = new Date(_.toInteger(o.Date));
+                return o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                    && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+            });
 
             if (alaCarteItems.length > 0) {
                 const alaItems = _.filter(alaCarteItems, item => {

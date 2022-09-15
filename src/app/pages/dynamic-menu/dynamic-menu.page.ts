@@ -26,7 +26,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
 import { MenugridService } from '../../services/menugrid.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
@@ -41,13 +41,17 @@ import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
+import { LogsDBService } from '../../services/Database/logs-db.service';
+import { LogType } from '../../services/enums/log-type';
+import { EventType } from '../../services/enums/event-type';
 
 enum Contributors {
     Fruit = 1,
     Veg = 2,
     Grain = 8,
     Meat = 11,
-    Milk = 12
+    Milk = 12,
+    FruitJ = 13
 }
 
 
@@ -85,6 +89,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public BREAKFAST_ITEMS_NEEDED = 3;
 
     public BREAKFAST_CASE_1 = false;
+    public BREAKFAST_CASE_2 = false
 
     public LUNCH_CASE_1 = false;
     public LUNCH_CASE_2 = false;
@@ -227,7 +232,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public terminalId: any;
     public terminalName: any;
     public systemMenuItem;
-
+    public disablePay: boolean = false;
+    public disableCharge: boolean = false;
 
     public isDepositByEXNEGBAL: any;
     public amountTowardsBalance: any;
@@ -301,7 +307,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public displayDetails: boolean = false;
     public sepChargeLimit: boolean = false;
     public loadingID;
-
+    public printAllSetting: number = 0;
+    private ALACASREST: boolean = false;
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
@@ -312,7 +319,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
-        public pouchDBService: PouchDBService, public settingService: SettingService,
+        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService:LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
@@ -391,6 +398,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
+        this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
+        this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
 
         /**
        * Use the site Terminal if the Device Terminal is not set.
@@ -1132,6 +1141,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public setPreviousSalesCount() {
         const previousSales = this.patronDetails.PreviousSales;
         let previousALCAmt = 0;
+        const today = new Date();
         if (previousSales) {
             // var SoldItemsByMealType = _.find(previousSales, (o) => { return o.MealTypeId === this.DefaultMealTypeId });
             const prevSalesByMealType = _.find(previousSales,
@@ -1146,14 +1156,25 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             let soldItemsByMealType = [];
             if (prevSalesByMealType) {
-                const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
+                //  items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
+                const items = prevSalesByMealType.SalesByMealType
                 const mealTypeItems = [].concat.apply([], items);
-                soldItemsByMealType = mealTypeItems;
-                soldItemsByMealType = prevSalesByMealType.SalesByMealType;
+                soldItemsByMealType = _.filter(mealTypeItems, (s) => {
+                    let date = new Date(_.toInteger(s.Date));
+                    return (date.getDate() === today.getDate()
+                        && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+
+                });
             }
 
-            const alaCarteItems = _.filter(allItems, (o) => o.IsReimbursable === false ||
-                (o.IsReimbursable === true && o.IsSecondMeal === true));
+            const alaCarteItems = _.filter(allItems, (o) => {
+                let date = new Date(_.toInteger(o.Date));
+                return o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                    && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+            });
 
             /**
              * Commented out below snippet as its duplicate will undo if needed
@@ -1334,42 +1355,42 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public showLargeImage(timeoutVal) {
-        this.hideLargeImage();
-        this.showLargeImageTimeout = setTimeout(() => {
-            try {
+        // this.hideLargeImage();
+        // this.showLargeImageTimeout = setTimeout(() => {
+        //     try {
 
-                const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
-                    .getBoundingClientRect().top + window.scrollY);
+        //         const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
+        //             .getBoundingClientRect().top + window.scrollY);
 
-                let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
-                    .getBoundingClientRect().left + window.scrollX);
+        //         let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
+        //             .getBoundingClientRect().left + window.scrollX);
 
-                const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().top + window.scrollY);
-                const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
-                //Calculate the exact picture width and height and show only if image available
-                if (pictureTop && pictureStartX && topPosFooter) {
-                    let pictureWidth = rightXFooter - pictureStartX;
-                    let pictureHeight = topPosFooter - pictureTop - 10;
-                    let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
-                    let diffDisp = (pictureWidth - newWidthHeight);
-                    pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
-                    pictureWidth = newWidthHeight;
-                    pictureHeight = newWidthHeight;
-                    document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
-                    document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
-                    document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
-                    document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
-                        + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
-                }
-                this.largeImageIsShowing = true;
-            } catch (e) {
-                console.log('Caught in error while enlarging picture...');
-            }
+        //         const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().top + window.scrollY);
+        //         const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
+        //         //Calculate the exact picture width and height and show only if image available
+        //         if (pictureTop && pictureStartX && topPosFooter) {
+        //             let pictureWidth = rightXFooter - pictureStartX;
+        //             let pictureHeight = topPosFooter - pictureTop - 10;
+        //             let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
+        //             let diffDisp = (pictureWidth - newWidthHeight);
+        //             pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
+        //             pictureWidth = newWidthHeight;
+        //             pictureHeight = newWidthHeight;
+        //             document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
+        //             document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
+        //             document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
+        //             document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
+        //                 + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
+        //         }
+        //         this.largeImageIsShowing = true;
+        //     } catch (e) {
+        //         console.log('Caught in error while enlarging picture...');
+        //     }
 
-            this.hideLargeImageTimeout = setTimeout(() => {
-                this.hideLargeImage();
-            }, 5000);
-        }, timeoutVal);
+        //     this.hideLargeImageTimeout = setTimeout(() => {
+        //         this.hideLargeImage();
+        //     }, 5000);
+        // }, timeoutVal);
     }
 
     // public setRegionSettingsForPayments() {
@@ -1625,12 +1646,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             items.push({
                 'Price': this.orderData.items[index]['Price'],
                 'MenuItemId': this.orderData.items[index]['RefId'],
+                'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
             });
 
-
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
+            let suspiciousId = this.utilService.generateUUID();
+            const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+                '_id': 'SuspiciousTransaction--' + suspiciousId,
                 'SessionId': this.sessionId,
+                'SuspiciousTransactionId': suspiciousId,
                 'TransactionNumber': this.transactionNumber,
                 'PersonId': this.patronDetails.PersonId,
                 'MenuItems': items,
@@ -1648,7 +1671,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable)
             this.changeMealFormedStatus();
             this.calculateTotals();
-
+            setTimeout(() => {
+                this.transactionInProgress = false;
+                this.disableCharge = this.enableCharge()
+                this.disablePay = this.enablePay()
+            }, 50)
         }
     }
 
@@ -1713,6 +1740,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 items.push({
                     'Price': this.orderData.items[i]['Price'],
                     'MenuItemId': this.orderData.items[i]['RefId'],
+                    'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
                 });
 
                 if (this.orderData.items[i]['IsReimbursable']) {
@@ -1724,50 +1752,47 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             this.orderData.items = cartItems;
 
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
         } else {
 
 
             items.push({
                 'Price': this.orderData.items[index]['Price'],
                 'MenuItemId': this.orderData.items[index]['RefId'],
+                'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
             });
 
-
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
             itemPrice = this.orderData.items[index]['Price'];
             this.orderData.items.splice(index, 1);
         }
 
+
+        let suspiciousId = this.utilService.generateUUID();
+        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+            '_id': 'SuspiciousTransaction--' + suspiciousId,
+            'SessionId': this.sessionId,
+            'SuspiciousTransactionId': suspiciousId,
+            'TransactionNumber': this.transactionNumber,
+            'PersonId': this.patronDetails.PersonId,
+            'MenuItems': items,
+            'TransactionType': '',
+            'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
+            'Comment': 'Clear items on the POS transaction screen.'
+        };
+
+        this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
+
+
         // let item =this.orderData.items[index]
         // this.adjustTrayQuantities(item);
-
+        this.changeMealFormedStatus();
 
         this.calculateTotals();
+        setTimeout(() => {
+            this.transactionInProgress = false;
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
+        }, 50)
 
     }
 
@@ -1814,6 +1839,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public addMenuToCart(menuItem) {
 
 
+        menuItem['Fruit'] = 0
+        menuItem['Grain'] = 0
+        menuItem['Meat'] = 0
+        menuItem['Veg'] = 0
+        menuItem['Milk'] = 0
+
 
         let hasContributions;
         let defaultServingSize;
@@ -1848,7 +1879,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     switch (contribution.ContributorId) {
 
                                         case Contributors.Fruit:
-                                            menuItem['Fruit'] = contribution.Factor;
+                                            menuItem['Fruit'] += contribution.Factor;
                                             // this.Tray_Fruit += contribution.Factor;
                                             break;
 
@@ -1869,6 +1900,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                                         case Contributors.Veg:
                                             menuItem['Veg'] = contribution.Factor;
+                                            // this.Tray_Veg += contribution.Factor;
+                                            break;
+                                        case Contributors.FruitJ:
+                                            menuItem['Fruit'] += contribution.Factor;
                                             // this.Tray_Veg += contribution.Factor;
                                             break;
 
@@ -1971,7 +2006,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                                         menuItem['Veg'] = contribution.Factor;
                                                         this.trayVeg += contribution.Factor;
                                                         break;
-
+                                                    case Contributors.FruitJ:
+                                                        menuItem['Fruit'] += contribution.Factor;
+                                                        this.trayFruit += contribution.Factor;
+                                                        break;
                                                     default:
                                                         menuItem['IsPartOfMeal'] = false;
                                                         break;
@@ -2048,7 +2086,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         switch (contribution.ContributorId) {
 
                                             case Contributors.Fruit:
-                                                menuItem['Fruit'] = contribution.Factor;
+                                                menuItem['Fruit'] += contribution.Factor;
                                                 this.trayFruit += contribution.Factor;
                                                 break;
 
@@ -2070,6 +2108,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                             case Contributors.Veg:
                                                 menuItem['Veg'] = contribution.Factor;
                                                 this.trayVeg += contribution.Factor;
+                                                break;
+                                            case Contributors.FruitJ:
+                                                menuItem['Fruit'] += contribution.Factor;
+                                                this.trayFruit += contribution.Factor;
                                                 break;
 
                                             default:
@@ -2170,8 +2212,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             return i.IsPartOfMeal;
         });
         const aLCItems = items.filter(i => {
-            return !i.IsPartOfMeal;
+            return !i.IsPartOfMeal
         });
+
+        if (this.mealCount >= 1) {
+            this.alacarteCount = aLCItems.length
+        } else {
+            this.alacarteCount = items.length
+        }
         const value = this.checkALCInItems(aLCItems);
         if (value !== '') {
             this.adjustTrayQuantities(value);
@@ -2269,6 +2317,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
     }
 
+
     public changeMealFormedStatus() {
 
 
@@ -2302,82 +2351,93 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 && this.menuGridService.GetMenuItemWithContributionLength(this.orderData.items) >= 3
                 && this.menuGridService.GetPartOfMealItemLength(this.orderData.items) >= 3)
 
+
+            // Breakfast : Meat and Grain are in the same Silo, veg and Fruit are checked in the above rule
+
+            this.BREAKFAST_CASE_2 = ((this.trayGrain + this.trayMeat) >= ((this.requiredGrain + this.requiredMeat) / 2))
+
         }
         // **************LUNCH RULES****************//
 
+        // This change is made for GarlandISD : other than the above rule, breakfast and lunch rules are the same. 
+
+        // if (this.selectedMealTypeName === 'Lunch') {
+        /**
+         * Lunch needs 3 different contributions fulfilled.
+         * We will have to check Change the RequiredFruit and RequiredVeg based on the 
+         */
+
+        let vegItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.vegCategoryId);
+        let fruitItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.fruitCategoryId);
 
 
-        if (this.selectedMealTypeName === 'Lunch') {
-            /**
-             * Lunch needs 3 different contributions fulfilled.
-             * We will have to check Change the RequiredFruit and RequiredVeg based on the 
-             */
-
-            let vegItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.vegCategoryId);
-            let fruitItems = this.menuGridService.numberofItemsInCategory(this.orderData.items, this.fruitCategoryId);
-
-
-            if (this.trayFruit >= this.requiredFruit) {
-                fulfilledComponentCount++;
-            }
-            if (this.trayVeg >= this.requiredVeg) {
-                fulfilledComponentCount++;
-            }
-            if (this.trayMeat >= this.requiredMeat) {
-                fulfilledComponentCount++;
-                otherFullfilledCount++;
-            }
-            if (this.trayGrain >= this.requiredGrain) {
-                fulfilledComponentCount++;
-                otherFullfilledCount++;
-            }
-            if (this.trayMilk >= this.requiredMilk) {
-                fulfilledComponentCount++;
-                otherFullfilledCount++;
-
-            }
-
-
-
-            this.LUNCH_CASE_1 = (this.trayFruit > 0 || this.trayVeg > 0) &&
-                ((this.trayMeat > 0 && this.trayVeg > 0) ||
-                    (this.trayMeat > 0 && this.trayGrain > 0) ||
-                    (this.trayMeat > 0 && this.trayMilk > 0) ||
-                    (this.trayVeg > 0 && this.trayGrain > 0) ||
-                    (this.trayVeg > 0 && this.trayMilk > 0) ||
-                    (this.trayGrain > 0 && this.trayMilk > 0));
-
-            // Group Fruit and Veg: Atleast 1 from the group
-            this.LUNCH_CASE_2 = (this.trayFruit >= this.requiredFruit || this.trayVeg >= this.requiredVeg);
-
-            // Group Grain, Milk, Meat: Atleast 1 from the group
-            this.LUNCH_CASE_3 = (this.trayMeat >= this.requiredMeat || this.trayGrain >= this.requiredGrain || this.trayMilk >= this.requiredMilk);
-
-            if (this.mealFormed) {
-                this.LUNCH_CASE_4 = true;
-            } else {
-                this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1.5) : ((this.trayFruit + this.trayVeg) >= 0.5)
-                ));
-            }
-
-            totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
-
+        if (this.trayFruit >= this.requiredFruit) {
+            fulfilledComponentCount++;
+        }
+        if (this.trayVeg >= this.requiredVeg) {
+            fulfilledComponentCount++;
+        }
+        if (this.trayMeat >= this.requiredMeat) {
+            fulfilledComponentCount++;
+            otherFullfilledCount++;
+        }
+        if (this.trayGrain >= this.requiredGrain) {
+            fulfilledComponentCount++;
+            otherFullfilledCount++;
+        }
+        if (this.trayMilk >= this.requiredMilk) {
+            fulfilledComponentCount++;
+            otherFullfilledCount++;
 
         }
 
+
+
+        this.LUNCH_CASE_1 = (this.trayFruit > 0 || this.trayVeg > 0) &&
+            ((this.trayMeat > 0 && this.trayVeg > 0) ||
+                (this.trayMeat > 0 && this.trayGrain > 0) ||
+                (this.trayMeat > 0 && this.trayMilk > 0) ||
+                (this.trayVeg > 0 && this.trayGrain > 0) ||
+                (this.trayVeg > 0 && this.trayMilk > 0) ||
+                (this.trayGrain > 0 && this.trayMilk > 0));
+
+        // Group Fruit and Veg: Atleast 1 from the group
+        this.LUNCH_CASE_2 = (this.trayFruit >= this.requiredFruit || this.trayVeg >= this.requiredVeg);
+
+        // Group Grain, Milk, Meat: Atleast 1 from the group
+        this.LUNCH_CASE_3 = (this.trayMeat >= this.requiredMeat || this.trayGrain >= this.requiredGrain || this.trayMilk >= this.requiredMilk);
+
+
+        // Took this out for https://primeroedge.freshdesk.com/a/tickets/154992
+        // if (this.mealFormed) {
+        //     this.LUNCH_CASE_4 = true;
+        // } else {
+        this.LUNCH_CASE_4 = ((((vegItems + fruitItems) >= 2 && otherFullfilledCount < 2) ? ((this.trayFruit + this.trayVeg) >= 1) : ((this.trayFruit + this.trayVeg) >= 0.5)
+        ));
+        // }
+
+        totalContribution = this.trayFruit + this.trayGrain + this.trayVeg + this.trayMeat + this.trayMilk;
+
+
+        // }
+
         if (this.selectedMealTypeName === 'Lunch') {
             if (this.LUNCH_CASE_2 && this.LUNCH_CASE_3 && fulfilledComponentCount >= 3
-                && totalContribution >= 2.5 && this.LUNCH_CASE_4) {
+                && totalContribution >= 2 && this.LUNCH_CASE_4) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
+                this.mealCount = 0;
                 this.mealFormed = false;
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
-            if (this.BREAKFAST_CASE_1) {
+            if ((this.BREAKFAST_CASE_1) || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3
+                && totalContribution >= 2 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2)) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
+
+                this.mealCount = 0;
                 this.mealFormed = false;
             }
         }
@@ -2522,7 +2582,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
 
         });
-
+        setTimeout(() => {
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
+        }, 50)
     }
 
 
@@ -2653,6 +2716,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         } else if (returnTyp === 'charge-order') {
                             this.verifyChargeLimits(data.transactionType);
                         } else if (returnTyp === 'postSaleTransaction') {
+                            console.log('11')
+
                             this.postSaleTransaction(data.transactionType);
                             this.event.publish('patron-released', { 'patronDetails': null });
                         } else if (returnTyp === 'default_terminal_menu') {
@@ -2804,49 +2869,209 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.orderData.IsCard = false;
             this.orderData.CardNumber = '';
 
+            // if (transactionType === 2) {
+            //     if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+            //         console.log('12')
+
+            //         this.postSaleTransaction(transactionType);
+            //     } else {
+            //         this.chargeOrder(transactionType);
+            //     }
+            // } else if (transactionType === 0) {
+            //     const message = 'Do you want to void this sale?';
+            //     this.popupMessageService.showMessage(PopupMessageCode.E06401).then((bool) => {
+            //         if (bool) {
+            //             console.log('13')
+
+            //             this.postSaleTransaction(transactionType);
+            //             this.event.publish('patron-released', { 'patronDetails': null });
+            //         }
+            //     });
+            //     this.transactionInProgress = false;
+            //     // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+            // } else {
+            //     this.transactionInProgress = false;
+            // }
+
+
             if (transactionType === 2) {
+                const ordDetails = {};
+                ordDetails['orderData'] = this.orderData;
+                ordDetails['alaCount'] = this.alacarteCount;
+                ordDetails['mealCount'] = this.mealCount;
+                ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
+                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['patronDetails'] = this.patronDetails;
+                ordDetails['transactionType'] = transactionType;
+                ordDetails['cashTendAmt'] = this.cashTendAmount;
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
-                    this.chargeOrder(transactionType);
+                    this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
+                    if (this.transactionInProgress) {
+                        this.postSaleTransaction(transactionType);
+                    } else {
+                        const showPrompt = this.restrictService.showConfirm();
+                        const partPayPrompt = this.restrictService.showPartPayPopup();
+                        if (showPrompt) {
+                            // const message = 'Account Balance is below charge limit. Do you still want to continue?';
+                            // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+                            this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
+                                if (bool) {
+                                    this.postSaleTransaction(transactionType);
+                                    this.event.publish('patron-released', { 'patronDetails': null });
+                                }
+                            });
+                        } if (this.restrictService.showNoChargePrompt) {
+                            this.popupMessageService.showMessage(PopupMessageCode.E05514)
+                                .then(bool => {
+                                    this.restrictService.showNoChargePrompt = false;
+                                    if (bool) {
+                                        this.postSaleTransaction(transactionType);
+                                    }
+                                });
+                        }
+                        if (partPayPrompt) {
+                            this.alertCtrl.create({
+                                header: 'Alert',
+                                message: 'Please enter a partial payment',
+                                cssClass: 'customAlertCss',
+                                buttons: [
+                                    {
+                                        text: 'Pay',
+                                        handler: () => {
+                                            this.showChargePopup();
+                                        }
+                                    },
+                                    {
+                                        text: 'Cancel',
+                                        handler: () => {
+                                            console.log('Cancel clicked');
+                                        }
+                                    }
+                                ]
+                            }).then(async (res) => {
+                                await res.present();
+                            });
+                        }
+                    }
+                    // this.chargeOrder(transactionType);
                 }
             } else if (transactionType === 0) {
-                const message = 'Do you want to void this sale?';
-                this.popupMessageService.showMessage(PopupMessageCode.E06401).then((bool) => {
+                this.transactionInProgress = false;
+                // const message = 'Do you want to void this sale?';
+                // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+                this.popupMessageService.showMessage(PopupMessageCode.E05304).then((bool) => {
                     if (bool) {
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
                 });
-                this.transactionInProgress = false;
-                // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
+
             } else {
                 this.transactionInProgress = false;
             }
         }
     }
 
+    // public makeSalePay() {
+    //     if (this.orderData.TransactionType !== 3) {
+    //         this.orderData.TransactionType = 1;
+    //     }
+    //     if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+    //         console.log('1')
+    //         this.postSaleTransaction(this.orderData.TransactionType);
+    //     }
+    //     else {
+    //         this.utilService.selectAccountClick = false;
+    //         this.lookUpService.menuPayselectAccountClick = false;
+
+    //         if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
+    //             //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+    //             this.popupMessageService.showMessage(PopupMessageCode.E06438);
+    //             // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
+    //             return;
+    //         } else {
+    //             this.verifyChargeLimits(this.orderData.TransactionType);
+    //         }
+    //     }
+    // }
     public makeSalePay() {
         if (this.orderData.TransactionType !== 3) {
             this.orderData.TransactionType = 1;
         }
-        if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
 
+        if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
             this.postSaleTransaction(this.orderData.TransactionType);
-        }
-        else {
+        } else {
             this.utilService.selectAccountClick = false;
             this.lookUpService.menuPayselectAccountClick = false;
-
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
+                this.transactionInProgress = false;
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                this.popupMessageService.showMessage(PopupMessageCode.E06438);
+                this.popupMessageService.showMessage(PopupMessageCode.E05368);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                 return;
             } else {
-                this.verifyChargeLimits(this.orderData.TransactionType);
+                const ordDetails = {};
+                ordDetails['orderData'] = this.orderData;
+                ordDetails['alaCount'] = this.alacarteCount;
+                ordDetails['mealCount'] = this.mealCount;
+                ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
+                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['patronDetails'] = this.patronDetails;
+                ordDetails['transactionType'] = this.orderData.TransactionType;
+                ordDetails['cashTendAmt'] = this.cashTendAmount;
+                this.transactionInProgress = this.restrictService.verifyChargeLimits(ordDetails); // this.chargeOrder(ordDetails);
+                if (!this.transactionInProgress) {
+                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                }
+                if (this.transactionInProgress) {
+                    this.postSaleTransaction(this.orderData.TransactionType);
+                } else {
+                    const showPrompt = this.restrictService.showConfirm();
+                    const partPayPrompt = this.restrictService.showPartPayPopup();
+                    if (showPrompt) {
+                        // const message = 'Account Balance is below charge limit. Do you still want to continue?';
+                        // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': this.orderData.TransactionType });
+                        this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
+                            if (bool) {
+                                this.postSaleTransaction(this.orderData.TransactionType);
+                                this.event.publish('patron-released', { 'patronDetails': null });
+                            }
+                            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                        });
+
+                    }
+                    if (partPayPrompt) {
+                        this.alertCtrl.create({
+                            header: 'Alert',
+                            message: 'Please enter a partial payment',
+                            cssClass: 'customAlertCss',
+                            buttons: [
+                                {
+                                    text: 'Pay',
+                                    handler: () => {
+                                        this.showChargePopup();
+                                    }
+                                },
+                                {
+                                    text: 'Cancel',
+                                    handler: () => {
+                                        console.log('Cancel clicked');
+                                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                                    }
+                                }
+                            ]
+                        }).then(async (res) => {
+                            await res.present();
+                        });
+                    }
+                }
+                // this.verifyChargeLimits(this.orderData.TransactionType);
             }
         }
+
     }
 
 
@@ -2943,7 +3168,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             for (let i = 0; i < this.orderData.items.length; i++) {
                 items.push({
-                    'Price': this.orderData.items[i]['IsPartOfMeal'] ? 0 : this.orderData.items[i]['Price'],
+                    'Price': this.orderData.items[i]['IsPartOfMeal'] && this.mealFormed ? 0 : this.orderData.items[i]['Price'],
                     'MenuItemId': this.orderData.items[i]['RefId'],
                     'priceTypeId': this.orderData.items[i]['price_type_id'],
                     'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
@@ -3042,13 +3267,19 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
-
+            
+            if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
+                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            }
+            if (paymentAmnt > this.orderData.totalAmount) {
+                this.orderData.IsDeposit = true
+            }
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
 
-            const updatedPatronDetails = this.patronDetails;
+            const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;
             const payment = parseFloat(paymentAmnt.toFixed(2));
             const saleToatal = this.orderData.totalAmount;
@@ -3256,7 +3487,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 if (!this.bonusAmount) {
                     this.bonusAmount = 0;
                 }
-                if (this.utilService.isElectronApp() && this.printAuto === 1) {
+                if (this.utilService.isElectronApp()
+                    && (this.printAllSetting === 1
+                        || (this.printAuto === 1
+                            && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
                     const now = new Date();
                     const transactionReceiptData: TransactionDetailPrintFormat = {
                         'PersonName': this.patronDetails.PersonName,
@@ -3386,6 +3620,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             CardNumber: ''
                         };
                         this.bonusAmount = 0;
+                        AppStateService.remove('patron_details');
                         if (this.lookUpService.getQ().length !== 0) {
                             this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                         } else {
@@ -3569,11 +3804,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E06462, [this.patronDetails.FullName]);
                     this.transactionInProgress = false;
                 } else {
+                    console.log('2')
+
                     this.postSaleTransaction(transactionType);
                 }
             } else {
-                this.verifyChargeLimits(transactionType);
-                // this.utilService.showAlert('You cannot charge this payment because of insufficent balance.');
+                this.verifyChargeLimits(transactionType)
+
+                //  this.utilService.showAlert('You cannot charge this payment because of insufficent balance.');
             }
             return;
         } else {
@@ -3596,11 +3834,15 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         if (transactionType === 3) { // No charge limits are applied if transaction type is to Principal Account
+            console.log('4')
+
             this.postSaleTransaction(transactionType);
             return true;
         }
 
         if (saleTotal === paymentAmount) {
+            console.log('5')
+
             this.postSaleTransaction(transactionType);
             return true;
         }
@@ -3616,6 +3858,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (projectedBalance >= 0 || paymentAmount >= saleTotal) {
             // allow sale
+            console.log('6')
+
             this.postSaleTransaction(transactionType);
             return true;
         }
@@ -3629,6 +3873,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (!this.sepChargeLimit && projectedBalance < creditLimit) {
             if (this.setting.Setting_ActionWhenBelowChargeLimit === 2 && paymentAmount > 0) {
                 // allow sale
+                console.log('7')
+
                 this.postSaleTransaction(transactionType);
                 return true;
             } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 1) {
@@ -3715,17 +3961,26 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.transactionInProgress = false;
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                     return false;
-                } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
+                } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3 && this.setting.Setting_ChargeReimbursableMealsOnly) {
+                    // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
+                    this.popupMessageService.showMessage(PopupMessageCode.E12441);
+                    return false;
+                }
+                else if (this.setting.Setting_ActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
-                        this.restrictService.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12510);
+                        return false
+                        // this.restrictService.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
                     } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal) && reimProjBal < creditLimit) {
-                        this.restrictService.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12511);
+                        return false
+                        // this.restrictService.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
                     }
                     // this.popupMessageService.showMessage(PopupMessageCode.E12441);
                     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
-                    this.transactionInProgress = false;
+                    // this.transactionInProgress = false;
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                    return false;
+                    return true;
                 }
 
 
@@ -3769,6 +4024,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
                 this.popupMessageService.showMessage(PopupMessageCode.E06484).then((bool) => {
                     if (bool) {
+                        console.log('8')
+
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
@@ -3776,6 +4033,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 return;
             } else {
                 // allow sale
+                console.log('9')
+
                 this.postSaleTransaction(transactionType);
                 return true;
             }
@@ -3796,6 +4055,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
             this.popupMessageService.showMessage(PopupMessageCode.E06484).then((bool) => {
                 if (bool) {
+                    console.log('10')
+
                     this.postSaleTransaction(transactionType);
                     this.event.publish('patron-released', { 'patronDetails': null });
                 }
@@ -3817,6 +4078,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public voidOrder() {
         this.isMarked = false;
         this.reviewType = 0;
+        this.menuItemsArr = [];
         if (this.isStaticMenuSelected) {
             if (this.menuGrid['Buttons'].length) {
                 for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
@@ -3837,6 +4099,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
 
+        this.transactionInProgress = false;
 
         console.log('HomeroomId ' + this.patronDetails.HomeRoomId);
         const spId = AppStateService.get('SpecialRosterId');
@@ -3897,7 +4160,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.selectedAccountDetails = {};
         // this.utilService.setLoader(false);
         this.event.publish('patron-released', { 'patronDetails': null });
-        this.transactionInProgress = false;
     }
 
     public showPopup(type) {
@@ -4034,7 +4296,18 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-
+            if(this.patronDetails !==null){
+                const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
+                if(enableLog === 1){
+                    this.logDBService.logData({
+                        event : EventType.QUEUE,
+                        patronId : this.patronDetails.PersonId,
+                        type: LogType.INFO,
+                        data: this.patronDetails,
+                        queueCount: this.lookUpService.personsQ.length
+                    });
+                }
+            }
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};
@@ -4068,7 +4341,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         console.log(this.patronDetails);
 
         if (this.orderData.items.length === 0) {
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            //this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             this.lookUpService.populatePersonsFromQ();
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E06428);
@@ -4970,7 +5243,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         console.log(this.patronDetails['AvailableAmountForAlaCartePurchases']);
 
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
-                            this.patronDetails['AvailableAmountForAlaCartePurchases'] != null) {
+                            this.patronDetails['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
                             this.popupMessageService.showMessage(PopupMessageCode.E06430);
                             // this.utilService.showToast('A la carte dollar amount restriction has been reached for this patron.');
@@ -5113,6 +5386,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
 
         });
+        setTimeout(() => {
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
+        }, 50)
     }
 
     public addMenuToCartForStaticMenus(menuItem) {
@@ -6161,9 +6438,18 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     private calcAlaTotal(items) {
+
+
         this.alacarteTotal = 0.00;
-        const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
-            (o.IsReimbursable === true && o.isSecondMeal === true));
+        let alaItems = []
+
+        if (this.mealCount >= 1) {
+            alaItems = _.filter(items, (o) => (o.IsReimbursable === false && o.IsPartOfMeal == false) ||
+                (o.IsReimbursable === true && o.isSecondMeal === true));
+        } else {
+            alaItems = items
+        }
+
         if (alaItems.length > 0) {
             alaItems.map(item => {
                 this.alacarteTotal += item.Price;

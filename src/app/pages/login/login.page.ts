@@ -53,6 +53,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   public hasNotSentTransactions: boolean;
   public isAndroid: boolean = false;
   public transactions: any = [];
+  public summaryTransactions:any = [];
 
   public windowsUsername;
   public windowsDomainName;
@@ -414,6 +415,21 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
         this.hasNotSentTransactions = false;
       }
     });
+
+    this.transactionService.getAllPendingSummarySale().then((summary) => {
+      let notSentSummaryTransaction: any = [];
+      this.summaryTransactions = summary;
+      if(this.summaryTransactions.length > 0){
+        notSentSummaryTransaction = summary.filter((doc) => doc.IsSynced === false);
+        if (notSentSummaryTransaction.length > 0) {
+          this.hasNotSentTransactions = true;
+        } else {
+          this.hasNotSentTransactions = false;
+        }
+      }else{
+        this.hasNotSentTransactions = false;
+      }
+    })
   }
 
   /** iOS Methods */

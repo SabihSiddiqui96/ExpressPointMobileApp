@@ -467,6 +467,14 @@ export class PouchQueriesService {
     // });
   }
 
+  public static GetDataForOfflineUsefromSystemDB():any{
+    return EXP_SYSTEM.allDocs({
+      startkey:'dataforofflineUse',
+      endkey:'dataforofflineUse',
+      include_docs:true
+    })
+  }
+
   public static AuthenticateUserName(userName): any {
 
     const args = {
@@ -571,6 +579,15 @@ export class PouchQueriesService {
     return EXP_COMMON.allDocs({
       startkey: 'Grade',
       endkey: 'Grade\uffff',
+      include_docs: true
+    });
+  }
+
+  public static GetRdaGradeGroups() {
+
+    return EXP_COMMON.allDocs({
+      startkey: 'RDAGrade',
+      endkey: 'RDAGrade\uffff',
       include_docs: true
     });
   }
@@ -1203,7 +1220,7 @@ export class PouchQueriesService {
         sessionDocs.map(doc => {
           if (doc.isSentToServer === false) {
             this.http.postOpenSession(doc.SessionId, doc.SessionDenominations, doc.OpeningBalance,
-              doc.OpenDateWithTime, doc.TerminalId).
+              doc.OpenDateWithTime, doc.TerminalId, doc.SchoolId, doc.LoginWithoutSetup).
               subscribe(
                 data => {
                   newSessionDoc = doc;

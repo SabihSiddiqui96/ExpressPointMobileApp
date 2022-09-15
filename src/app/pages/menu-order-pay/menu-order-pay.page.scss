@@ -67,7 +67,7 @@ app-menu-order-pay .placeholder-input-label{
     top: calc(50% - (700px / 2));
     position: absolute;
     max-width: 900px;
-    min-height: 700px;
+    min-height: 600px !important;
     min-width: 800px;
 }
 
@@ -75,5 +75,6 @@ app-menu-order-pay .placeholder-input-label{
     .modal-wrapper.menu-order-pay {
         left: calc(50% - (700px / 2));
         min-width: 700px;
+        min-height: 600px !important;
     }
 }

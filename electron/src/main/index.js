@@ -190,7 +190,7 @@ electron_updater_1.autoUpdater.on('checking-for-update', i => {
 //#region  IPC Events
 function print58m(printData) {
     return new Promise((resolve, reject) => {
-        mainWindow = new electron_1.BrowserWindow({ width: 500, height: 500, show: false, webPreferences: { nodeIntegration: true } });
+        mainWindow = new electron_1.BrowserWindow({ width: 500, height: 500, show: true, webPreferences: { nodeIntegration: true } });
         mainWindow.loadURL(path.join(__dirname, 'PrintPreview.html'));
         // mainWindow.hide();
         mainWindow.webContents.on('did-finish-load', () => {
@@ -204,7 +204,7 @@ function print58m(printData) {
 electron_1.ipcMain.on('print', (evnt, arg) => {
     print58m(arg).then((result) => {
         if (result) {
-            mainWindow.webContents.print({ silent: true }, (success) => {
+            mainWindow.webContents.print({ margins: { marginType: 'printableArea' }, silent: true }, (success) => {
                 console.log('---mainWindow---');
                 console.log(success);
                 mainWindow.hide();
@@ -276,7 +276,7 @@ electron_1.ipcMain.on('ssologin', (event, loginSSOUrl) => {
     });
 });
 electron_1.ipcMain.on('app-ready', () => {
-    SystemUUID = UUID_os + ' ' + UUID_FileSystem + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName;
+    SystemUUID = UUID_os + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName;
     win.webContents.send('device', {
         deviceId: deviceId,
         deviceName: deviceName,

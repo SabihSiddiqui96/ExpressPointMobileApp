@@ -449,6 +449,7 @@ export class AppComponent {
         // console.clear()
         // UtilService.getHashForText("password");
 
+
         if (this.platform.is("cordova")) {
           UtilService.isCordovaApp = true;
         } else {
@@ -688,10 +689,115 @@ export class AppComponent {
               PouchQueriesService.deleteAllEncryptedTransactions().then(
                 () => { }
               );
+
+            }
+
+            // Check if there is data in system db and no data in the local storage data
+            // This was part of changes that we introduced to fix loss of local storage due to varied reasons
+            if (!AppStateService.get('selectedDistrict')) {
+
+              PouchQueriesService.GetDataForOfflineUsefromSystemDB().then((result) => {
+
+                if (result.rows.length === 1) {
+
+                  if (!AppStateService.get('selectedDistrict') && result.rows[0].doc.selectedDistrict)
+                    AppStateService.set('selectedDistrict', result.rows[0].doc.selectedDistrict);
+
+                  if (!AppStateService.get('access_token') && result.rows[0].doc.access_token)
+                    AppStateService.set('access_token', result.rows[0].doc.access_token);
+
+                  // if (!AppStateService.get('LastSyncDate_Account') && result.rows[0].doc.LastSyncDate_Account)
+                  //   AppStateService.set('LastSyncDate_Account', result.rows[0].doc.LastSyncDate_Account);
+
+                  // if (!AppStateService.get('LastSyncDate_Person') && result.rows[0].doc.LastSyncDate_Person)
+                  //   AppStateService.set('LastSyncDate_Person', result.rows[0].doc.LastSyncDate_Person);
+
+                  if (!AppStateService.get('setupComplete'))
+                    AppStateService.set('SetupComplete', false);
+
+                  if (!AppStateService.get('TransactionNumber') && result.rows[0].doc.TransactionNumber)
+                    AppStateService.set('TransactionNumber', result.rows[0].doc.TransactionNumber);
+
+                  if (!AppStateService.get('districtId') && result.rows[0].doc.districtId)
+                    AppStateService.set('districtId', result.rows[0].doc.districtId);
+
+                  if (!AppStateService.get('LOGIN_URL') && result.rows[0].doc.LOGIN_URL)
+                    AppStateService.set('LOGIN_URL', result.rows[0].doc.LOGIN_URL);
+
+                  if (!AppStateService.get('API_URL') && result.rows[0].doc.API_URL)
+                    AppStateService.set('API_URL', result.rows[0].doc.API_URL);
+
+                  if (!AppStateService.get('LastOnlineDate') && result.rows[0].doc.LastOnlineDate)
+                    AppStateService.set('LastOnlineDate', result.rows[0].doc.LastOnlineDate);
+
+                  if (!AppStateService.get('site_details') && result.rows[0].doc.site_details)
+                    AppStateService.set('site_details', result.rows[0].doc.site_details);
+
+                  if (!AppStateService.get('DeviceInfo') && result.rows[0].doc.DeviceInfo)
+                    AppStateService.set('DeviceInfo', result.rows[0].doc.DeviceInfo);
+
+                  if (!AppStateService.get('Settings') && result.rows[0].doc.Settings)
+                    AppStateService.set('Settings', result.rows[0].doc.Settings);
+
+                  if (!AppStateService.get('Permissions') && result.rows[0].doc.Permissions)
+                    AppStateService.set('Permissions', result.rows[0].doc.Permissions);
+
+                  if (!AppStateService.get('DeploymentServerURL') && result.rows[0].doc.DeploymentServerURL)
+                    AppStateService.set('DeploymentServerURL', result.rows[0].doc.DeploymentServerURL);
+
+                  if (!AppStateService.get('hosted_url') && result.rows[0].doc.hosted_url)
+                    AppStateService.set('hosted_url', result.rows[0].doc.hosted_url);
+
+                  if (!AppStateService.get('NewSessionDate') && result.rows[0].doc.NewSessionDate)
+                    AppStateService.set('NewSessionDate', result.rows[0].doc.NewSessionDate);
+
+                  if (!AppStateService.get('DeviceConnectionUrl') && result.rows[0].doc.DeviceConnectionUrl) {
+                    AppStateService.set('DeviceConnectionUrl', result.rows[0].doc.DeviceConnectionUrl);
+                  }
+                  if (!AppStateService.get('cleanedDb') && result.rows[0].doc.cleanedDb) {
+                    AppStateService.set('cleanedDb', result.rows[0].doc.cleanedDb);
+                  }
+                  if (!AppStateService.get('pnpPeripherals') && result.rows[0].doc.pnpPeripherals) {
+                    AppStateService.set('pnpPeripherals', result.rows[0].doc.pnpPeripherals);
+                  }
+                  if (!AppStateService.get('OpenOSK') && result.rows[0].doc.OpenOSK) {
+                    AppStateService.set('OpenOSK', result.rows[0].doc.OpenOSK);
+                  }
+                  if (!AppStateService.get('TranDbDestroyedDate') && result.rows[0].doc.TranDbDestroyedDate) {
+                    AppStateService.set('TranDbDestroyedDate', result.rows[0].doc.TranDbDestroyedDate);
+                  }
+                  if (!AppStateService.get('TokenGoodBefore') && result.rows[0].doc.TokenGoodBefore) {
+                    AppStateService.set('TokenGoodBefore', result.rows[0].doc.TokenGoodBefore);
+                  }
+                  if (!AppStateService.get('SelectedSite') && result.rows[0].doc.SelectedSite) {
+                    AppStateService.set('SelectedSite', result.rows[0].doc.SelectedSite);
+                  }
+
+                  if (!AppStateService.get('WindowsCredentials') && result.rows[0].doc.WindowsCredentials) {
+                    AppStateService.set('WindowsCredentials', result.rows[0].doc.WindowsCredentials);
+                  }
+
+                  if (!AppStateService.get('SSOAuthDetails') && result.rows[0].doc.SSOAuthDetails) {
+                    AppStateService.set('SSOAuthDetails', result.rows[0].doc.SSOAuthDetails);
+                  }
+
+                  if (!AppStateService.get('LastLoggedInUser') && result.rows[0].doc.LastLoggedInUser) {
+                    AppStateService.set('LastLoggedInUser', result.rows[0].doc.LastLoggedInUser);
+                  }
+
+                  if (!AppStateService.get('DeviceIpAddress') && result.rows[0].doc.DeviceIpAddress) {
+                    AppStateService.set('DeviceIpAddress', result.rows[0].doc.DeviceIpAddress);
+                  }
+                }
+              })
             }
 
             this.event.publish("pouchDBIntialized", null);
             this.utilService.isPouchDBInitialized = true;
+          }).then(() => {
+            this.setupDbService.initializeData().then(() => {
+
+            });
           })
           .catch((error) => {
             console.log(error);
@@ -1216,7 +1322,8 @@ export class AppComponent {
   public transactionStatusFromServer() {
     this.utilService.isNetworkOnline().then((isNetworkOnline) => {
       if (isNetworkOnline) {
-        this.transactionService.getAllTransactionswithStatus().then(() => { });
+        this.transactionService.getAllTransactionswithStatus().then((data) => {
+        });
       }
     });
   }
@@ -1235,6 +1342,7 @@ export class AppComponent {
       );
       return;
     }
+
     this.isAlaCarteItemAdded = false;
     if (this.selectedPatron !== "") {
       this.popupMessageService.showMessage(PopupMessageCode.E01311);
@@ -1344,8 +1452,7 @@ export class AppComponent {
 
     this.utilService.setLoader(true);
 
-
-    if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+    if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
       this.useDynamicMenus = true;
     } else {
       this.useDynamicMenus = false;
@@ -1755,25 +1862,7 @@ export class AppComponent {
 
     // this.loader.present();
     this.setupDbService.setupData().then(() => {
-      if (this.deviceInfo) {
-        this.http.SaveDeviceInfo().subscribe((data) => {
-          if (data.IsValid === true) {
-            this.deviceInfo.TerminalId = data.DeviceTerminalId;
-            this.deviceInfo.TerminalName =
-              deviceInfo.DeviceName + "-" + siteCode[0];
-            AppStateService.set("DeviceInfo", JSON.stringify(this.deviceInfo));
-          }
 
-          if (AppStateService.get("SetupComplete")) {
-            // this.navCtrl.navigateRoot("service-selection");
-            // this.event.publish('site-changed', { 'changedSite': this.displayDetails.site_name });
-          } else {
-            this.utilService.showToast(
-              "Something went wrong while configuring the device. Please try again."
-            );
-          }
-        });
-      }
     });
   }
 

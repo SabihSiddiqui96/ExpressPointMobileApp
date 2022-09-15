@@ -58,7 +58,7 @@ export class AllPopupPage implements OnInit {
             this.showFullList = true;
         }
         this.toShowSortOrder = false;
-        if (this.isSortOrderCase()) {
+        if (this.isSortOrderCase(this.navType)) {
             this.toShowSortOrder = true;
             const sortOrder = AppStateService.get("AdvLookupSortOrder");
             if (sortOrder === "FnLn") {
@@ -361,7 +361,7 @@ export class AllPopupPage implements OnInit {
         public popoverCtrl: PopoverController,
         public appStateService: AppStateService,
         public pouchDBService: PouchDBService
-    ) { 
+    ) {
         this.isElectronApp = this.utilService.isElectronApp();
     }
 
@@ -470,7 +470,7 @@ export class AllPopupPage implements OnInit {
     public getInFormatWithKeys(data, label, value, key1?, key2?, key3?) {
         const newArray = [];
         for (const item of data) {
-            if (this.isSortOrderCase()) {
+            if (this.isSortOrderCase(this.navType)) {
                 if (item["GradeDescription"]) {// Fix for data seen for grade with trailing spaces making it not visible
                     item["GradeDescription"] = item["GradeDescription"].trim();
                 }
@@ -518,13 +518,15 @@ export class AllPopupPage implements OnInit {
         return newArray;
     }
 
-    public select(data) {
+    public select(data, fromPeripheral?) {
         console.log(data);
         // tslint:disable-next-line:no-empty
         // if (this.navType === 'ReviewTypes' && this.selectedValue !== (undefined)) {
 
         // } else
-        if (this.navType === "keyboard") {
+
+        let navType = fromPeripheral == undefined ? this.navType : ''
+        if (navType === "keyboard") {
             let filteredData = [];
             if (this.title === "Patron") {
                 filteredData = _.filter(this.patronOrders, function (o) {
@@ -539,39 +541,40 @@ export class AllPopupPage implements OnInit {
             this.close();
             this.event.publish("menu-service-popup", {
                 selectedData: filteredData,
-                type: this.navType,
+                type: navType,
             });
         } else {
             this.navSelectedValue = data.value;
 
 
-            if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
-                if (this.navType !== "servingLine") {
+            if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
+                if (navType !== "servingLine") {
                     this.close();
                 }
             } else {
-                if (this.navType !== "menuType") {
+                if (navType !== "menuType") {
                     this.close();
                 }
             }
 
-            if (this.isSortOrderCase()) {
+
+            if (this.isSortOrderCase(navType)) {
                 this.toShowSortOrder = true;
             } else {
                 this.toShowSortOrder = false;
             }
             this.event.publish("menu-service-popup", {
                 selectedData: data,
-                type: this.navType,
+                type: navType,
             });
         }
     }
 
-    public isSortOrderCase() {
+    public isSortOrderCase(navType) {
         return (
-            this.navType === "patronSpecialRosterPersonList" ||
-            this.navType === "patronlist" ||
-            this.navType === "patronPatron"
+            navType === "patronSpecialRosterPersonList" ||
+            navType === "patronlist" ||
+            navType === "patronPatron"
         );
     }
 
@@ -755,7 +758,7 @@ export class AllPopupPage implements OnInit {
                     if (/^Shifto/.test(incomingID)) {
                         incomingID = incomingID.replace("Shifto", "O");
                     }
-                    this.select(incomingID);
+                    this.select(incomingID, false);
                 }
                 incomingID = "";
                 this.inputBuffer = [];
@@ -837,7 +840,7 @@ export class AllPopupPage implements OnInit {
     public openOnScreenKeyboard() {
         //Check if toggle is enabled in admin settings
         if (this.utilService.isElectronApp()) {
-          this.utilService.openOnScreenKeyboard();
+            this.utilService.openOnScreenKeyboard();
         }
     }
 }

@@ -33,7 +33,7 @@
               <ion-segment [(ngModel)]="patronAccount">
                 <ion-segment-button value="patron_pin" (click)="patronPinClick()">
                   <ion-label class="color-white">
-                    PIN
+                    {{PinIdLabel}}
                   </ion-label>
                 </ion-segment-button>
                 <ion-segment-button value="advanced" (click)="advancePatronClick()">
@@ -152,14 +152,19 @@
                     </ion-col>
                   </ion-row>
 
+                  <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
+                    <ion-row>
+                      <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                    </ion-row>
+                  </ng-container>
+
                   <!-- Non iOS -->
                   <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
-
                     <ion-input type="text" [(ngModel)]="patronSearch.firstname" placeholder="First Name"
                       (click)="setActiveField('firstName')" [ngClass]="firstNameClass"
-                      (keyup)="checkAlphaNumeric($event); handleKeyDown($event)">
+                      (keyup)="checkAlphaNumericFN($event); handleKeyDown($event)">
                       <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -186,7 +191,7 @@
 
                     <ion-input type="text" [(ngModel)]="patronSearch.lastname" placeholder="Last Name"
                       (click)="setActiveField('lastName')" [ngClass]="lastNameClass"
-                      (keyup)="checkAlphaNumeric($event); handleKeyDown($event)">
+                      (keyup)="checkAlphaNumericLN($event); handleKeyDown($event)">
                       <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -210,8 +215,9 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
-                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="{{AdvancedPinLookupLabel}}"
-                      (click)="setActiveField('externalId')" [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
+                      placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
+                      [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event);handleKeyDown($event)">
                       <!-- (keyup)=""> -->
                     </ion-input>
@@ -352,8 +358,9 @@
                   </ion-item>
                 </ion-col>
                 <ion-col size="3" size-md="3" size-sm="3" *ngIf="!hidePrevPatron">
-                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn" *ngIf= "canLoadPrevPatron"
-                    [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" [disabled]="!canLoadPrevPatron">
+                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                    *ngIf="canLoadPrevPatron" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
+                    [disabled]="!canLoadPrevPatron">
                     &lt;&lt; &nbsp;Previous
                   </ion-button>
                 </ion-col>
@@ -416,7 +423,7 @@
                 <ion-item lines="none">
 
                   <ion-label slot="start" position="fixed">Site</ion-label>
-                  <ion-select [(ngModel)]="selectedSite">
+                  <ion-select [(ngModel)]="selectedSite" >
                     <ion-select-option value="{{site.SchoolId}}" *ngFor="let site of siteList;let i = index;">
                       {{site.SiteNameWithCode}}
                     </ion-select-option>
@@ -426,13 +433,17 @@
 
 
                 <!-- Non iOS -->
-
+                <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
+                  <ion-row>
+                    <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                  </ion-row>
+                </ng-container>
                 <!-- <ion-item lines="none" *ngIf="!isIOS"> -->
                 <ion-item lines="none">
                   <ion-label slot="start" position="fixed">First Name</ion-label>
 
                   <ion-input type="text" [(ngModel)]="patronSearch.firstname" (keypress)="onKeyPressFN($event)"
-                    (keyup)="checkAlphaNumeric($event);handleKeyDown($event)">
+                    (keyup)="checkAlphaNumericFN($event);handleKeyDown($event)">
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -457,7 +468,7 @@
                   <ion-label slot="start" position="fixed">Last Name</ion-label>
 
                   <ion-input type="text" [(ngModel)]="patronSearch.lastname" (keypress)="onKeyPressLN($event)"
-                    (keyup)="checkAlphaNumeric($event);handleKeyDown($event)">
+                    (keyup)="checkAlphaNumericLN($event);handleKeyDown($event)">
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -661,12 +672,18 @@
                   </ion-row>
                   <!-- Non iOS -->
                   <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
+                    <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
+                      <ion-row>
+                        <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                      </ion-row>
+                    </ng-container>
+                    
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
 
                     <ion-input type="text" [(ngModel)]="patronSearch.firstname" placeholder="First Name"
                       (click)="setActiveField('firstName')" [ngClass]="firstNameClass"
-                      (keyup)="checkAlphaNumeric($event); handleKeyDown($event)">
+                      (keyup)="checkAlphaNumericFN($event); handleKeyDown($event)">
                       <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -679,7 +696,7 @@
 
                     <ion-input type="text" [(ngModel)]="patronSearch.lastname" placeholder="Last Name"
                       (click)="setActiveField('lastName')" [ngClass]="lastNameClass"
-                      (keyup)="checkAlphaNumeric($event); handleKeyDown($event)">
+                      (keyup)="checkAlphaNumericLN($event); handleKeyDown($event)">
                       <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -690,8 +707,9 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
-                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" placeholder="{{AdvancedPinLookupLabel}}"
-                      (click)="setActiveField('externalId')" [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
+                      placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
+                      [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event);handleKeyDown($event)">
                       <!-- (keyup)=""> -->
                     </ion-input>
@@ -732,12 +750,14 @@
                   </ion-select>
 
                 </ion-item>
+                <ion-label>Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+
                 <!-- Non iOS -->
                 <ion-item *ngIf="!isIOS">
                   <ion-label item-start fixed>First Name</ion-label>
 
                   <ion-input type="text" [(ngModel)]="patronSearch.firstname" (keypress)="onKeyPressFN($event)"
-                    (keyup)="checkAlphaNumeric($event);handleKeyDown($event)">
+                    (keyup)="checkAlphaNumericFN($event);handleKeyDown($event)">
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -758,7 +778,7 @@
                   <ion-label item-start fixed>Last Name</ion-label>
 
                   <ion-input type="text" [(ngModel)]="patronSearch.lastname" (keypress)="onKeyPressLN($event)"
-                    (keyup)="checkAlphaNumeric($event);handleKeyDown($event)">
+                    (keyup)="checkAlphaNumericLN($event);handleKeyDown($event)">
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"

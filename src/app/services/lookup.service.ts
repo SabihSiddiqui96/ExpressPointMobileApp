@@ -14,6 +14,9 @@ import { PopupMessageCode } from '../services/enums/popup-message-codes';
 import { Events } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { BehaviorSubject } from 'rxjs';
+import { LogsDBService } from './Database/logs-db.service';
+import { LogType } from './enums/log-type';
+import { EventType } from './enums/event-type';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -37,6 +40,7 @@ export class LookupService {
     public menuPayselectAccountClick: boolean = false;
 
     constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
+        private logDBService:LogsDBService,
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
         private electronService: ElectronService) {
@@ -84,10 +88,10 @@ export class LookupService {
 
     public setQ(queueInput) {
         this.getSettingValuesRequired(); // Added this to get the setting values in lookup using peripherals
-
+        
 
         this.lookupAndPushPersonToQ(queueInput).then(() => {
-            if (this.personsQ.length === 1 && AppStateService.get('patron_details') === undefined &&
+            if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
                 AppStateService.get('currentTab') !== 'advanced') {
                 this.selectPatron(this.personsQ[0]);
             }
@@ -185,7 +189,32 @@ export class LookupService {
                     });
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
+                if(results[0] !== null) {
+                    const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
+                    if(enableLog === 1){
+                        this.logDBService.logData({
+                            event : EventType.LOOKUP,
+                            patronId : queueInput.PIN,
+                            type: LogType.INFO,
+                            data: results[0],
+                            queueCount: this.personsQ.length
+                        });
+                    }
+                }
                 resolve(null);
+            },(error)=> {
+                if(queueInput!==null) {
+                    const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
+                    if(enableLog === 1){
+                        this.logDBService.logError({
+                            event : EventType.LOOKUP,
+                            patronId : queueInput.PIN,
+                            type: LogType.ERROR,
+                            data: queueInput,
+                            queueCount: this.personsQ.length
+                        });
+                    }
+                }
             });
         });
     }
@@ -214,9 +243,12 @@ export class LookupService {
             this.modalCtrl.create({
                 component: PatronListModalPage,
                 componentProps: {
-                    'patron_list': patronList, 'isFromQueue': isFromQueue,
-                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed
-                }
+                    'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
+                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
+                },
+                showBackdrop: true,
+                backdropDismiss: false,
+                cssClass: 'patron-modal-popup'
             }).then(async (res) => {
                 await res.present().then(() => {
                     resolve('Success');
@@ -252,7 +284,13 @@ export class LookupService {
                     }
                 });
             } else {
-                this.publishEvents(patron);
+                //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
+                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result:any) => {
+                    this.publishEvents(result);
+                    if(this.lookupResults.find(f => f.PersonId === result.PersonId)){
+                        this.popPersonFromQ(result.PersonIdentifier);
+                    }
+                })
             }
         } else { // lookup from peripheral yielded non-unique results / no results
             this.lookupFromNonUniquePIN(patron).then(() => {
@@ -320,11 +358,16 @@ export class LookupService {
                     // resolve(this.lookupResults);
                 } else {
                     let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-                    if ((this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) || this.CanServeVisitingAdults) {
+                    if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
                         this.serverLookup(pin, selectedSite).then(() => {
                             this.handlePersonResults(false, inputDirection);
                             // resolve(this.lookupResults);
+                        }, (error) => {
+
                         });
+                    } else {
+                        this.lookupResults = [];
+                        this.handlePersonResults(false, inputDirection);
                     }
                 }
                 resolve(null);
@@ -365,7 +408,7 @@ export class LookupService {
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
 
                 if (isNetworkOnline) {
-                    if ((this.CanServeVisitingAdults || (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0))) && this.utilService.isNetworkOnline()) {
+                    if ((this.CanServeVisitingAdults || this.canServeVisitingPatrons) && this.utilService.isNetworkOnline()) {
                         this.http.PatronLookup(pin, schoolId).
                             subscribe
                             (
@@ -373,15 +416,17 @@ export class LookupService {
                                     this.loader.dismiss();
                                     this.lookupResults = data.patrons;
 
-                                    if (!(this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) && this.CanServeVisitingAdults) {
+                                    if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
                                         this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
                                     }
                                     resolve(this.lookupResults);
                                 }, () => { this.loader.dismiss(); });
                     } else {
+                        this.lookupResults = [];
                         resolve([]);
                     }
                 } else {
+                    this.lookupResults = [];
                     resolve([]);
                 }
             });
@@ -417,7 +462,8 @@ export class LookupService {
                 }
             } else if (this.lookupResults.length > 1) { // && this.lookupResults.length <= 20
                 this.lookupResults.map(PL => {
-                    PL.InputDirection = inputDirection;
+                    if (PL !== undefined)
+                        PL.InputDirection = inputDirection;
                 });
                 this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch).then(() => {
                     resolve('Success');
@@ -524,10 +570,13 @@ export class LookupService {
                     then((res) => {
 
                         const docs = res.docs.map((patron) => {
-                            patron['value'] = patron.PersonId;
-                            patron['label'] = patron.PersonName;
-                            patron['Image'] = patron.Image;
-                            return patron;
+                            if (!patron.isSpecialAccount) {
+                                patron['value'] = patron.PersonId;
+                                patron['label'] = patron.PersonName;
+                                patron['Image'] = patron.Image;
+                                return patron;
+                            }
+
                         });
                         this.lookupResults = docs;
                         if (this.serveInactiveStudents === 0) {
@@ -537,7 +586,13 @@ export class LookupService {
                             this.utilService.setLoader(false);
                         }).catch(() => this.utilService.setLoader(false));
                         resolve(this.lookupResults);
-                    }).catch((err) => console.log(err));
+                    }).catch((err) => {
+                        this.lookupResults = [];
+                        this.handlePersonResults(true).then(() => {
+                            this.utilService.setLoader(false);
+                        }).catch(() => this.utilService.setLoader(false));
+                        resolve([]); console.log(err);
+                    });
             } else {
                 this.utilService.setLoader(false);
                 this.patronFromServer(firstname, lastname, externalId);
@@ -662,6 +717,36 @@ export class LookupService {
 
         });
 
+    }
+
+    public CheckPreviousSalesOnInMemoryDBByDate(patron) {
+        let inputDirectionVal = patron.InputDirection;
+        return new Promise((resolve) => {
+            PouchQueriesService.GetStudentInfo(patron.PersonId).then((result) => {
+                if (result.docs.length === 1) {
+                    if (patron.SyncedFromServerAt && result.docs[0].SyncedFromServerAt) {
+                        let data = patron.SyncedFromServerAt > result.docs[0].SyncedFromServerAt ? patron : result.docs[0];
+                        data.InputDirection = inputDirectionVal;
+                        // this.utilService.showToast(patron.SyncedFromServerAt + ' ' + result.docs[0].SyncedFromServerAt)
+                        resolve(data);
+                    } else {
+                        if (patron.SyncedFromServerAt) {
+                            // this.utilService.showToast(patron.SyncedFromServerAt + ' EXPPerson')
+                            resolve(patron)
+                        } else if (result.docs[0].SyncedFromServerAt) {
+                            // this.utilService.showToast(result.docs[0].SyncedFromServerAt + ' Inmemory')
+                            result.docs[0].InputDirection = inputDirectionVal;
+                            resolve(result.docs[0])
+                        } else {
+                            result.docs[0].InputDirection = inputDirectionVal;
+                            resolve(result.docs[0])
+                        }
+                    }
+                } else {
+                    resolve(patron)
+                }
+            })
+        })
     }
 
 }

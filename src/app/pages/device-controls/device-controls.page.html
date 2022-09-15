@@ -38,6 +38,12 @@
           </ion-toggle>
         </ion-item>
 
+        <ion-item *ngIf='this.utilService.isAppOnline ' lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Login Without Data Download ?</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="LoginWithoutSetup" (ionChange)="OnChangeLoginWithoutSetup($event)">
+          </ion-toggle>
+        </ion-item>
+
         <ion-item *ngIf='isElectronApp && MULTIREAD' lines="none" class="bg-transparent" style="padding-top: 4px;">
           <ion-label class="ion-text-end" position="bottom">Use Plug and Play Peripherals</ion-label>
           <ion-toggle slot="end" color="slate" [(ngModel)]="pnpPeripherals" (ionChange)="configurePeripherals()">

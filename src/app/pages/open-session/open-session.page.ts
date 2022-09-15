@@ -155,7 +155,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     if (AppStateService.get('login_details')) {
       const loginDetails = JSON.parse(AppStateService.get('login_details'));
       this.displayDetails.user_name = loginDetails.Name;
-      if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+      if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
         this.useDynamicMenus = true;
       }
     }
@@ -506,33 +506,33 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     setTimeout(() => {
       for (let i = 0; i < this.denominationDetailsCoins.length; i++) {
         if (this.utilService.isPlatformAndroid()) {
-            const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-            if (input) {
-                input.setAttribute('type', 'tel');
-                input.setAttribute('pattern', '[0-9]');
-            }          
+          const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
+          if (input) {
+            input.setAttribute('type', 'tel');
+            input.setAttribute('pattern', '[0-9]');
+          }
         } else {
-            const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-            if (input) {
-                input.setAttribute('type', 'text');
-                input.setAttribute('pattern', '[0-9]');
-            } 
-          
+          const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
+          if (input) {
+            input.setAttribute('type', 'text');
+            input.setAttribute('pattern', '[0-9]');
+          }
+
         }
       }
       for (let i = 0; i < this.denominationDetailsBills.length; i++) {
         if (this.utilService.isPlatformAndroid()) {
-            const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-            if (input) {
-                input.setAttribute('type', 'tel');
-                input.setAttribute('pattern', '[0-9]');
-            }
-          
+          const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
+          if (input) {
+            input.setAttribute('type', 'tel');
+            input.setAttribute('pattern', '[0-9]');
+          }
+
         } else {
-            const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-            if (input) {
-                input.setAttribute('type', 'text');
-            }
+          const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
+          if (input) {
+            input.setAttribute('type', 'text');
+          }
         }
       }
     }, 3000);
@@ -673,6 +673,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
     const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
     const sessionDate = AppStateService.get('NewSessionDate');
+    const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
 
     if (sessionDate !== undefined) {
       if (currentDate !== sessionDate) {
@@ -696,7 +697,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       OpenDateWithTime: currentTime,
       OpenDate: new Date().setHours(0, 0, 0, 0),
       OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
-      TerminalId: this.terminalId
+      TerminalId: this.terminalId,
+      LoginWithoutSetup: LoginWithoutSetup
     };
 
     PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {

@@ -64,16 +64,26 @@ export class SettingService {
   }
 
   public static getSiteSettingValue(siteSettingCode) {
-    const siteSettings = JSON.parse(AppStateService.get('AllSiteSettings'));
-    // settings = JSON.parse(settings);
-    const setting = siteSettings.filter(s => {
-      return s.SiteSettingCode.trim().toUpperCase() === siteSettingCode.trim().toUpperCase();
-    });
-    if (setting.length > 0) {
-      return setting[0].SiteSettingValue;
+    if (AppStateService.get('AllSiteSettings')) {
+      const siteSettings = JSON.parse(AppStateService.get('AllSiteSettings'));
+      // settings = JSON.parse(settings);
+      const setting = siteSettings.filter(s => {
+        return s.SiteSettingCode.trim().toUpperCase() === siteSettingCode.trim().toUpperCase();
+      });
+      if (setting.length > 0) {
+        return setting[0].SiteSettingValue;
+      } else {
+        if (siteSettingCode === 'DYNSITE') // this setting has a default value of 1 
+          return '1'
+        const defaultValue = "0";
+        return defaultValue;
+      }
     } else {
+      if (siteSettingCode === 'DYNSITE') // this setting has a default value of 1 
+        return '1'
       const defaultValue = "0";
       return defaultValue;
     }
+
   }
 }

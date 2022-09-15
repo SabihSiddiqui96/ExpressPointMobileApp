@@ -9,7 +9,7 @@ import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SettingService } from '../../services/setting.service';
-import { TransactionService, SessionCheckDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
@@ -106,6 +106,7 @@ export class DoPayment {
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
     public content_height;
+    public printAllSetting: number = 0;
 
     constructor(public navCtrl: NavController, public alertCtrl: AlertController, public event: Events,
         public lookUpService: LookupService, public utilService: UtilService,
@@ -154,6 +155,8 @@ export class DoPayment {
         this.printAuto = parseInt(SettingService.getSettingValue('PRINTAUTO'));
         this.hideEligibility = parseInt(SettingService.getSettingValue('HIDELGBLTY'));
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
+        this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
+
         // });
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -169,6 +172,7 @@ export class DoPayment {
     public ngOnDestroy() {
         // this.event.destroy('popover:open');
         this.event.destroy('numberClick');
+        this.event.destroy('peripheral:input');
         if (UtilService.isCordovaApp) {
             this.keyboardShowSubscription.unsubscribe();
             this.keyboardHideSubscription.unsubscribe();
@@ -465,7 +469,7 @@ export class DoPayment {
         this.newBalance = this.navPatronDetails['Balance'];
     }
 
-    public checkPayment() {
+    public checkPayment(IsFromAddFunds = false) {
         this.makePaymentProcessing = true;
         const maxpymtamt = parseFloat(SettingService.getSettingValue('MAXPYMTAMT'));
         const warnamount = parseFloat(SettingService.getSettingValue('WARNAMOUNT'));
@@ -523,13 +527,13 @@ export class DoPayment {
                 if (amnt >= warnamount) {
                     this.popupMessageService.showMessage(PopupMessageCode.E17456, ['$' + amnt + '']).then((bool) => {
                         if (bool) {
-                            this.startPayment();
+                            this.startPayment(IsFromAddFunds);
                         }
                     });
                     // this.showConfrim('You have entered a payment amount of $'
                     //     + amnt + '. This amount is higher than a typical payment. Are you sure this is the correct amount?');
                 } else {
-                    this.startPayment();
+                    this.startPayment(IsFromAddFunds);
                 }
             } else {
                 this.makePaymentProcessing = false;
@@ -576,7 +580,7 @@ export class DoPayment {
         });
     }
 
-    public startPayment() {
+    public startPayment(IsFromAddFunds = false) {
         this.transactionService.CheckSessionInAppState().then(() => {
 
             this.makePaymentProcessing = true;
@@ -714,7 +718,11 @@ export class DoPayment {
                 'CreatedDate': UTC
             };
             // PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then(() => {
-            if (this.utilService.isElectronApp() && this.printAuto === 1) {
+            if (this.utilService.isElectronApp()
+                && (this.printAllSetting === 1
+                    || this.printAuto === 1
+                )) {
+
                 var paymentReceiptData: TransactionDetailPrintFormat = {
                     'PersonName': this.navPatronDetails.PersonName,
                     'Identifier': this.navPatronDetails.Identifier,
@@ -792,8 +800,8 @@ export class DoPayment {
 
                 this.navPatronDetails = {};
                 this.patronId = null;
-
-                AppStateService.remove('patron_details');
+                if (!IsFromAddFunds)
+                    AppStateService.remove('patron_details');
 
                 // if (this.lookUpService.getQ().length != 0)
                 //     this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
@@ -1061,10 +1069,11 @@ export class PaymentsPage extends DoPayment implements OnInit {
         if (AppStateService.get('session_id')) {
             sessionId = AppStateService.get('session_id');
         }
-
-        const suspiciousTransactionDoc = {
-            '_id': 'SuspiciousTransaction--' + new Date().getTime(),
+        let suspiciousId = this.utilService.generateUUID();
+        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+            '_id': 'SuspiciousTransaction--' + suspiciousId,
             'SessionId': sessionId,
+            'SuspiciousTransactionId': suspiciousId,
             'TransactionNumber': this.transactionNumber,
             'PersonId': this.navPatronDetails.PersonId,
             'MenuItems': [],

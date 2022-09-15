@@ -7,7 +7,7 @@ import { LookupService } from '../../services/lookup.service';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
 import { UtilService } from '../../services/util.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService } from '../../services/transaction.service';
+import { SuspiciousTransactionDoc, TransactionService } from '../../services/transaction.service';
 import { SettingService } from '../../services/setting.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
@@ -37,6 +37,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
   @Input() patronSelectedData;
   @Input() calledFrom;
   @Input() itemPrice;
+  isEnterKey: boolean = false;
 
   ngOnInit() {
     this.navPatronDetails = this.patronDetails;
@@ -57,7 +58,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     }
 
     this.event.publish('patronLargeImagehide', null);
-    this.event.subscribe('numberClick', (userEventData) => {
+    /*this.event.subscribe('numberClick', (userEventData) => {
       const event = userEventData.event;
       if (userEventData.number === 8) {
         this.numberClick('X');
@@ -90,10 +91,21 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
         this.numberClick(parseInt(event['key']));
       }
 
-    });
+    });*/
+    this.changeActiveInput('amount');
+
+    if (document.querySelector('button') !== null) {
+      document.querySelector('button').addEventListener('keydown', function (e) {
+        var key = e.keyCode || e.charCode;
+        if (key == 13) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      });
+    }
+
 
     console.log('Hello MenuPaymentPopup Page');
-    this.changeActiveInput('amount');
     if (this.utilService.isElectronApp()) {
       this.utilService.publishIpcEvent('Open-CashDrawer');
     }
@@ -166,26 +178,28 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     this.event.destroy('numberClick');
   }
 
-  public close(data?) {
+  public close(data?, isClosed: boolean = false) {
 
     let sessionId = null;
     if (AppStateService.get('session_id')) {
       sessionId = AppStateService.get('session_id');
     }
+    if (isClosed) {
+      let suspiciousId = this.utilService.generateUUID();
+      const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+        '_id': 'SuspiciousTransaction--' + suspiciousId,
+        'SessionId': sessionId,
+        'SuspiciousTransactionId': suspiciousId,
+        'TransactionNumber': data,
+        'PersonId': this.navPatronDetails.PersonId,
+        'MenuItems': [],
+        'TransactionType': 'Pre Payment',
+        'SuspiciousActivityType': SuspiciousActivityTypes.CANCELPREPAY,
+        'Comment': 'Cancel Pre Payment on the Add Funds window.'
+      };
 
-    const suspiciousTransactionDoc = {
-      '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-      'SessionId': sessionId,
-      'TransactionNumber': data,
-      'PersonId': this.navPatronDetails.PersonId,
-      'MenuItems': [],
-      'TransactionType': 'Pre Payment',
-      'SuspiciousActivityType': SuspiciousActivityTypes.CANCELPREPAY,
-      'Comment': 'Cancel Pre Payment on the Add Funds window.'
-    };
-
-    this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
+      this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
+    }
     this.modal.dismiss(data);
   }
 
@@ -245,7 +259,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
           return;
         }
       }
-      super.checkPayment();
+      super.checkPayment(true);
 
       this.event.subscribe('menu-payment-popup:close', (userEventData) => {
         // Made Payment From Add Funds and Going Back to the MenuService Screen
@@ -324,7 +338,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
   }
 
   public setCashTopupAmount(amount, price) {
-
+    this.customKeys = '';
     this.cashTopupAmount = amount;
     this.cashTopUp = this.cashTopupAmount;
     this.setTotalCashTopup();
@@ -356,6 +370,12 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
         this.cashTopupAmount = null;
         this.bonusAmount = 0;
       }
+    }
+  }
+
+  onKeydown(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
     }
   }
 

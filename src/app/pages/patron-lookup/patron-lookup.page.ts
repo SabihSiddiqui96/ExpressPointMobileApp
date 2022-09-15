@@ -148,13 +148,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public enableVisitor = false;
     public enableProgAdult = false;
     public SearchByText: string;
-    public AdvancedPinLookupLabel : string
+    public AdvancedPinLookupLabel: string
     public selectAccuntClick: boolean = false;
     public menuPayselectAcctClick: boolean = false;
     public isKeyboardOpen: boolean;
     public keyboardShowSubscription;
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
+    public eventType:string;
+    public PinIdLabel: string;
 
     constructor(
         public modalCtrl: ModalController,
@@ -197,6 +199,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.event.subscribe('peripheral:input', (userEventData) => {
             this.patronSearch.keyword = '';
         });
+
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
+        PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
 
 
         this.event.subscribe('patron-hamburger:showhide', (userEventData) => {
@@ -250,7 +255,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public ngOnInit() {
 
         this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-            document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+        document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
 
         document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
@@ -299,12 +304,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined && !this.utilService.isElectronApp()) {
+            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
-                setTimeout(() => {
-                    this.patronSearchId.setFocus();
-                }, 500);
+                if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
+                    setTimeout(() => {
+                        this.patronSearchId.setFocus();
+                    }, 500);
+                }
+
             } else {
                 //  this.resetPatronData()
                 setTimeout(() => {
@@ -341,7 +349,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.getSpecialRostersList();
                             this.GetGradesBySchool();
                             this.AdvancePatronSchoolList();
-                            this.setActiveField('externalId');
+
+                            if (changeFocus === 0 && this.patronAccount === 'advanced') {
+                                this.setActiveField('externalId');
+                                this.patronAccount = 'advanced';
+                                this.advancedPatron = 'by_patron';
+                            } else {
+                                this.patronAccount = 'patron_pin';
+                            }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
                                     this.patronPinId.setFocus();
@@ -400,6 +415,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 }
             }
         );
+    }
+
+    public bindPeriPheralEvent(){
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
     }
 
     public changeWidth() {
@@ -477,7 +496,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     }
 
-    public checkAlphaNumeric(event) {
+    public checkAlphaNumericFN(event) {
         if (event['keyCode'] === 9) {
             // event.stopPropagation();
             // setTimeout(() => {
@@ -513,8 +532,55 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const field = this.activeField
         if (field === 'firstName') {
             this.patronSearch.firstname = (<HTMLInputElement>event.target).value;
-        } else if (field === 'lastName') {
-            this.patronSearch.lastname = (<HTMLInputElement>event.target).value;
+        }
+        if (code >= 48 && code <= 57) {
+            setTimeout(() => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            });
+            // event.stopPropagation();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public checkAlphaNumericLN(event) {
+        if (event['keyCode'] === 9) {
+            // event.stopPropagation();
+            // setTimeout(() => {
+            console.log('Alphanumeric ---- Stop Propagation')
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // });
+            return false;
+        }
+
+        let inputChar = (<HTMLInputElement>event.target).value;
+
+        const pattern = /^[0-9]+$/;
+        let newInputChar = '';
+
+        // divide input char into char array
+        // and then check each char against regex
+        let chars = inputChar.split('');
+        chars.map(char => {
+            if (!char.match(pattern)) {
+                if (newInputChar !== '') {
+                    newInputChar = newInputChar + char;
+                } else {
+                    newInputChar = char;
+                }
+            }
+        });
+        inputChar = newInputChar;
+        (<HTMLInputElement>event.target).value = inputChar;
+        let code = inputChar.charCodeAt((inputChar.length) - 1);
+        code = (isNaN(code)) ? -1 : code;
+
+        const field = this.activeField
+        if (field === 'firstName') {
+            this.patronSearch.firstname = (<HTMLInputElement>event.target).value;
         }
         if (code >= 48 && code <= 57) {
             setTimeout(() => {
@@ -685,6 +751,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
 
     }
+
     public gotoAdvOtherSchoolSearch() {
 
         const siteList = [];
@@ -1211,8 +1278,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.event.destroy("menu-service-popup");
                 if (userEventData.selectedData) {
                     const selectedData = userEventData.selectedData;
-                    const eventType = userEventData.type;
-                    switch (eventType) {
+                    //const eventType = userEventData.type ? '':this.eventType;
+                    if(userEventData.type !== ''){
+                        this.eventType = userEventData.type;
+                    }
+                    switch (this.eventType) {
                         case 'patronSites':
                             this.selectedSite = selectedData.value;
                             this.selectedSiteName = selectedData.label;
@@ -1225,12 +1295,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.onChangeGrade();
                             break;
                         case 'patronHomeroom':
-                            this.selectedHomeroom = selectedData.value;
-                            this.selectedHomeroomName = selectedData.label;
-                            this.returnToWhatPage = 'HomeRoom'; // Saketh for Back to Homeroom Sale
-                            AppStateService.set('HomeroomId', this.selectedHomeroom);
-
-                            this.getPatronList();
+                            if(selectedData.value && selectedData.label){
+                                this.selectedHomeroom = selectedData.value;
+                                this.selectedHomeroomName = selectedData.label;
+                                this.returnToWhatPage = 'HomeRoom'; // Saketh for Back to Homeroom Sale
+                                AppStateService.set('HomeroomId', this.selectedHomeroom);
+    
+                                this.getPatronList();
+                            }
+                           
                             break;
                         case 'patronPatron':
                             this.selectedHomeroomPatronId = selectedData.value;
@@ -1359,6 +1432,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 }
                 incomingID = '';
                 this.inputBuffer = [];
+                //this.patronSearch.keyword = '';
             }
         } else if (event['keyCode'] === 9) {
             // setTimeout(() => {
@@ -1724,8 +1798,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.allSiteSettings = JSON.parse(AppStateService.get('AllSiteSettings'));
         // console.log(JSON.stringify(this.allSiteSettings));
         this.allSiteSettings.map(setting => {
-            console.log('---AllSiteSetting---');
-            console.log(setting.SiteSettingCode.trim());
+
             switch (setting.SiteSettingCode.trim()) {
                 case SiteSettingCodes[SiteSettingCodes.ENNEWSTD]:
                     if (setting.SiteSettingValue === "1") {
@@ -1760,9 +1833,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup
                         this.SearchByText = 'Enter a PIN';
                         this.AdvancedPinLookupLabel = 'Patron Id'
+                        this.PinIdLabel = 'PIN'
                     } else {
                         this.SearchByText = 'Enter an ID';
                         this.AdvancedPinLookupLabel = 'PIN'
+                        this.PinIdLabel = 'Patron Id'
                     }
                     break;
             }

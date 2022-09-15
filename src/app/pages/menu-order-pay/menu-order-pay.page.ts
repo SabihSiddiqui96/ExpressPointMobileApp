@@ -16,6 +16,7 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { LookupService } from '../../services/lookup.service';
 import { HttpService } from '../../services/HTTP/http.service';
+import { threadId } from 'worker_threads';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -36,12 +37,14 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() orderData;
     @Input() isSpecialAccount;
     @Input() isMealFormed;
+    isEnterKey: boolean = false;
 
     ngOnInit() {
         this.navPatronDetails = this.patronDetails;
         this.navOrderData = this.orderData;
         this.navIsSpecialAccount = this.isSpecialAccount;
         this.navIsMealFormed = this.isMealFormed;
+        this.amountDue = this.navOrderData.accountBalance;
 
         this.changeDue = 0.00;
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
@@ -107,7 +110,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.event.subscribe('numberClick', (userEventData) => {
             const event = userEventData.event;
             if (userEventData.number === 8) {
-                this.numberClick('X');
+                this.numberInput('X');
             } else if (userEventData.number === 9 && event.shiftKey) {
                 if (this.cashpaymentOption === 'cash' || this.cashpaymentOption === 'check') {
                     if (this.cashpaymentOption === 'cash' && this.activeInputField === 'deposit' && this.depositChangeDue) {
@@ -161,7 +164,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 }
             }
             else {
-                this.numberClick(parseInt(event['key']));
+                this.numberInput(parseInt(event['key']));
             }
 
         });
@@ -314,11 +317,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public hasAlaCarte: boolean = false;
     public navIsMealFormed: boolean;
     public isElectron: boolean = false;
-    public  isCompleteTransactionProcessing: boolean = false;
+    public isCompleteTransactionProcessing: boolean = false;
     public showSelectAccount: boolean = false;
     public isLoadingPrevPatron = false;
     public depositeStudentAmount = 0.00;
     public selectedStudentBalance = 0.00;
+    amountDue = 0.00;
 
     public keyboardSettings: IonDigitKeyboardOptions = {
         align: 'center',
@@ -404,114 +408,117 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     private inputBuffer = [];
 
     public ngOnDestroy() {
-        this.event.destroy('numberClick');
+        this.event.destroy('numberInput');
     }
-    public numberClick(key: any) {
-
-
-        if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
-            this.popupMessageService.showMessage(PopupMessageCode.E07354);
-            // this.utilService.showToast('Payment via Check is disabled for this patron');
-        } else {
-            if (this.activeInputField === 'check' && this.cashCheckNum && key !== 'X' && key !== 'GO') {
-                if (this.cashCheckNum.length >= 10) {
-                    if (this.cashCheckNum.length == 11) {
-                        this.numberClick('X');
+    public numberInput(key: any, isKeyInput: boolean = false) {
+        //key.preventDefault();
+        if (isKeyInput) {
+            if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
+                this.popupMessageService.showMessage(PopupMessageCode.E07354);
+                // this.utilService.showToast('Payment via Check is disabled for this patron');
+            } else {
+                if (this.activeInputField === 'check' && this.cashCheckNum && key !== 'X' && key !== 'GO') {
+                    if (this.cashCheckNum.length >= 10) {
+                        if (this.cashCheckNum.length == 11) {
+                            this.numberInput('X');
+                        }
+                        this.popupMessageService.showMessage(PopupMessageCode.E07493);
+                        return;
+                        // this.utilService.showToast('Check Number cannot be longer than 10 digits.');
                     }
-                    this.popupMessageService.showMessage(PopupMessageCode.E07493);
-                    return;
-                    // this.utilService.showToast('Check Number cannot be longer than 10 digits.');
                 }
-            }
-            if (key !== 'X' && key !== 'GO') {
-                this.customKeys += key;
-                if (this.activeInputField === 'amount') {
-                    const amt = this.filterCurrency(this.cashtendered);
-                    if (amt === "0.00" && (key === "00" || key === 0)) {
-                        this.customKeys = "";
-                        this.cashtendered = "0";
-                    } else {
+                if (key !== 'X' && key !== 'GO') {
+                    this.customKeys += key;
+                    if (this.activeInputField === 'amount') {
+                        const amt = this.filterCurrency(this.cashtendered);
+                        if (amt === "0.00" && (key === "00" || key === 0)) {
+                            this.customKeys = "";
+                            this.cashtendered = "0";
+                        } else {
+                            this.cashtendered = this.customKeys;
+                        }
+                        if (this.cashtendered.length > 6) {
+                            // this.numberClick('X');
+                            do {
+                                this.numberInput('X');
+                            } while (this.cashtendered.length == 7);
+                        }
+                    }
+                    if (this.activeInputField === 'check') {
+
+                        this.cashCheckNum = this.customKeys;
+                        if (this.cashCheckNum.length == 11) {
+                            this.numberInput('X');
+                        }
+                    }
+                    if (this.activeInputField === 'deposit') {
+                        const amt = this.filterCurrency(this.depositAmount);
+                        if (amt === "0.00" && (key === "00" || key === 0)) {
+                            this.customKeys = "";
+                            this.depositAmount = "0";
+                        } else {
+                            this.depositAmount = this.customKeys;
+                        }
+                        if (this.depositAmount.length > 6) {
+                            do {
+                                this.numberInput('X');
+                            } while (this.depositAmount.length == 7);
+                        }
+                    }
+                    if (this.activeInputField === 'card') {
+
+                        this.cashCardNum = this.customKeys;
+
+                        if (this.cashCardNum.length > 10) {
+
+                            do {
+                                this.numberInput('X');
+                            } while (this.cashCardNum.length == 11);
+
+                            this.utilService.showToast('Card Number cannot be longer than 10 digits.')
+                        }
+                    }
+                } else if (key === 'GO') {
+                    // this.searchPatronNormal();
+                    this.customKeys = '';
+                    if (!this.checkPayDisable()) {
+                        this.makeSale();
+                    }
+                } else if (key === 'X') {
+
+                    this.customKeys = this.customKeys.slice(0, -1);
+                    if (this.activeInputField === 'amount') {
                         this.cashtendered = this.customKeys;
+                        // this.depositAmount = this.customKeys;
                     }
-                    if (this.cashtendered.length > 6) {
-                        // this.numberClick('X');
-                        do {
-                            this.numberClick('X');
-                        } while (this.cashtendered.length == 7);
+                    if (this.activeInputField === 'check') {
+                        this.cashCheckNum = this.customKeys;
                     }
-                }
-                if (this.activeInputField === 'check') {
-
-                    this.cashCheckNum = this.customKeys;
-                    if (this.cashCheckNum.length == 11) {
-                        this.numberClick('X');
-                    }
-                }
-                if (this.activeInputField === 'deposit') {
-                    const amt = this.filterCurrency(this.depositAmount);
-                    if (amt === "0.00" && (key === "00" || key === 0)) {
-                        this.customKeys = "";
-                        this.depositAmount = "0";
-                    } else {
+                    if (this.activeInputField === 'deposit') {
                         this.depositAmount = this.customKeys;
                     }
-                    if (this.depositAmount.length > 6) {
-                        do {
-                            this.numberClick('X');
-                        } while (this.depositAmount.length == 7);
+                    if (this.activeInputField === 'card') {
+                        this.cashCardNum = this.customKeys;
                     }
                 }
-                if (this.activeInputField === 'card') {
-
-                    this.cashCardNum = this.customKeys;
-
-                    if (this.cashCardNum.length > 10) {
-
-                        do {
-                            this.numberClick('X');
-                        } while (this.cashCardNum.length == 11);
-
-                        this.utilService.showToast('Card Number cannot be longer than 10 digits.')
-                    }
-                }
-            } else if (key === 'GO') {
-                // this.searchPatronNormal();
-                this.customKeys = '';
-                if (!this.checkPayDisable()) {
-                    this.makeSale();
-                }
-            } else if (key === 'X') {
-
-                this.customKeys = this.customKeys.slice(0, -1);
                 if (this.activeInputField === 'amount') {
-                    this.cashtendered = this.customKeys;
-                    // this.depositAmount = this.customKeys;
-                }
-                if (this.activeInputField === 'check') {
-                    this.cashCheckNum = this.customKeys;
+                    const classOb = this;
+                    setTimeout(function () {
+                        classOb.buttonPriceActive = 0;
+                        classOb.setCashTendered();
+                    }, 50);
                 }
                 if (this.activeInputField === 'deposit') {
-                    this.depositAmount = this.customKeys;
+                    const classOb = this;
+                    setTimeout(function () {
+                        classOb.buttonPriceActive = 0;
+                        classOb.setDepositAmount();
+                    }, 50);
                 }
-                if (this.activeInputField === 'card') {
-                    this.cashCardNum = this.customKeys;
-                }
-            }
-            if (this.activeInputField === 'amount') {
-                const classOb = this;
-                setTimeout(function () {
-                    classOb.buttonPriceActive = 0;
-                    classOb.setCashTendered();
-                }, 50);
-            }
-            if (this.activeInputField === 'deposit') {
-                const classOb = this;
-                setTimeout(function () {
-                    classOb.buttonPriceActive = 0;
-                    classOb.setDepositAmount();
-                }, 50);
             }
         }
+
+
     }
 
 
@@ -567,23 +574,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     }
 
-    public close() {
+    public close(isClosed: boolean = false) {
 
-        var suspiciousComment;
 
-        var suspiciousActType: number;
-
-        if (this.cashpaymentOption == 'cash') {
-
-            suspiciousComment = 'Cancel Cash Payment on the POS transaction window.'
-            suspiciousActType = SuspiciousActivityTypes.CANCELCASHPAY;
-
-        } else if (this.cashpaymentOption == 'check') {
-
-            suspiciousComment = 'Cancel Check Payment on the POS transaction window.'
-            suspiciousActType = SuspiciousActivityTypes.CANCELCHECKPAY;
-
-        }
 
         const items = [];
 
@@ -605,21 +598,38 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
+        if (isClosed) {
+            let suspiciousComment;
 
-        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
-            '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-            'SessionId': this.sessionId,
-            'TransactionNumber': this.transactionNumber,
-            'PersonId': this.navPatronDetails.PersonId,
-            'MenuItems': items,
-            'TransactionType': 'Payment',
-            'SuspiciousActivityType': suspiciousActType,
-            'Comment': suspiciousComment
-        };
+            let suspiciousActType: number;
+
+            if (this.cashpaymentOption == 'cash') {
+
+                suspiciousComment = 'Cancel Cash Payment on the POS transaction window.'
+                suspiciousActType = SuspiciousActivityTypes.CANCELCASHPAY;
+
+            } else if (this.cashpaymentOption == 'check') {
+
+                suspiciousComment = 'Cancel Check Payment on the POS transaction window.'
+                suspiciousActType = SuspiciousActivityTypes.CANCELCHECKPAY;
+
+            }
+            let suspiciousId = this.utilService.generateUUID();
+            const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+                '_id': 'SuspiciousTransaction--' + suspiciousId,
+                'SessionId': this.sessionId,
+                'SuspiciousTransactionId': suspiciousId,
+                'TransactionNumber': this.transactionNumber,
+                'PersonId': this.navPatronDetails.PersonId,
+                'MenuItems': [],
+                'TransactionType': 'Payment',
+                'SuspiciousActivityType': suspiciousActType,
+                'Comment': suspiciousComment
+            };
 
 
-        this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
+            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
+        }
         this.lookUpService.menuPayselectAccountClick = false;
 
         // this.modal.dismiss();
@@ -696,6 +706,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     public preSetCashTendered(amount, price) {
+        this.customKeys = '';
         if (this.activeInputField === 'amount') {
             this.buttonPriceActive = price;
             this.cashtendered = amount;
@@ -707,24 +718,63 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
     }
 
+    onKeydown(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+        }
+    }
+    /**
+     * Sets cash tendered
+    /**
+     * Sets cash tendered
+     */
     public setCashTendered() {
         this.saveInProgress = false;
         let amnt = this.cashtendered;
-
+        /**
+         *  This is for the backspace click would not update the amount tendered field
+         */
+        if (amnt === '') {
+            amnt = '0'
+        }
         if (amnt) {
+
             amnt = this.filterCurrency(amnt);
+
+            this.amountDue = (+amnt - Math.abs(this.navOrderData.accountBalance)) > 0 ? (+amnt - this.navOrderData.accountBalance) : (this.navOrderData.accountBalance - +amnt) < 0 ? 0.00 : (this.navOrderData.accountBalance - +amnt)
+
+            if (this.navOrderData.totalAmount <= +amnt) {
+                this.amountDue = 0.00
+            } else {
+                /**
+              If the balance is greater than 0 then we need to consider the balance plus the amount tendered to calculate Amount Due
+      *  if the balance is less than 0 then we should not consider the patron balance to calculate amount due
+      */
+                if (this.navPatronDetails.Balance > 0)
+                    this.amountDue = (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) > 0 ? (this.navOrderData.totalAmount - (+amnt + this.navPatronDetails.Balance)) : 0.00
+                else
+                    this.amountDue = this.navOrderData.totalAmount - +amnt
+            }
             if (!isNaN(amnt)) {
                 this.cashtendAmount = amnt;
                 this.cashtendered = '$' + amnt;
-                let chngDue = amnt - this.navOrderData.totalAmount;
-                this.changeDue = chngDue > 0 ? chngDue : 0.00;
+                let chngDue = (+amnt) - (this.navOrderData.totalAmount);
+                if (chngDue > 0) {
+                    this.changeDue = chngDue;
+                } else {
+                    this.changeDue = 0.00;
+                }
                 let amountTowardsBal = 0.00;
 
-                if (this.depositChangeDue) {
-                    this.changeDue = 0.00;
-                    this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00'
-                } else {
+                //if(this.cashtendAmount.toFixed(2) > this.navOrderData.totalAMount)
 
+                if (this.depositChangeDue) {
+
+                    this.changeDue = 0.00;
+                    this.depositAmount = ((+amnt) - (this.navOrderData.totalAmount)).toFixed(2);
+                    this.depositAmount = this.depositAmount > 0.00 ? '$' + this.depositAmount : '$' + '0.00'
+                    //this.depositAmount = (this.cashtendAmount - this.orderData.totalAmount) > 0 ? '$' + (this.cashtendAmount - this.orderData.totalAmount).toFixed(2) : '$' + '0.00';
+                } else {
 
                     if (this.EXNEGBAL) {  // change to true
                         if (this.navPatronDetails['Balance'] < 0) {
@@ -743,7 +793,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             // this.amountTowardsBalance = amountTowardsBal;
                             // this.depositAmount = '$' + amountTowardsBal.toFixed(2);
 
-
                             // this.changeDue = chngDue > 0 ? chngDue : 0.00;
                             // this.isDepositByEXNEGBAL = true; // Check this
 
@@ -752,10 +801,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             /*
                             With EXNEGBAL : the deposit amount would be the
                             minimum of balance to zero or cashTendered- totalAMount
-
+ 
                             if the minimum  of these is less than zero then there wont be a deposit available as
                              amount tendered would be used up by the saletotal entirely
-
+ 
                              Change Due will be calculated based on the deposit amount and totalSaleAmount  and Cashtendered
                             */
                             const tempDepositAmnt = Math.min(amountToZero, this.cashtendAmount - this.orderData.totalAmount)
@@ -763,9 +812,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             this.depositAmount = tempDepositAmnt > 0 ? '$' + tempDepositAmnt.toFixed(2) : '$' + '0.00'
                             // this.depositAmount = tempDepositAmnt > 0 ? '$' + (tempDepositAmnt + Number(this.navOrderData.totalAmount)).toFixed(2) : '$' + '0.00'
 
-                            this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
+                            //this.changeDue = this.cashtendAmount - (tempDepositAmnt + this.navOrderData.totalAmount)
+                            this.changeDue = ((this.cashtendAmount) - (this.navOrderData.totalAmount) - (tempDepositAmnt > 0 ? tempDepositAmnt : 0));
+
                         } else {
-                            const changDue = amnt - this.navOrderData.totalAmount;
+                            let changDue = (+amnt) - (this.navOrderData.totalAmount);
                             this.changeDue = changDue > 0 ? changDue : 0.00;
                             if (this.depositChangeDue) {
                                 this.depositAmount = '$' + this.changeDue.toFixed(2);
@@ -1138,6 +1189,21 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             return false;
         }
 
+        if ((this.navPatronDetails.Balance > this.navOrderData.totalAmount) && this.patronDetails.CannotCharge) {
+            this.saveInProgress = false;
+            return false;
+        }
+
+        if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance < this.navOrderData.totalAmount) && (cashtendered > this.navOrderData.totalAmount)) {
+            this.saveInProgress = false;
+            return false;
+        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance > this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
+            this.saveInProgress = false;
+            return false;
+        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance < this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
+            return true;
+        }
+
         if (!this.navIsSpecialAccount && cashtendered < this.navOrderData.totalAmount && cashtendered === 0) {
             return true;
         } else if (!this.navIsSpecialAccount && cashtendered > this.navOrderData.totalAmount) {
@@ -1152,15 +1218,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
 
-        if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.accountDetails.Balance < this.navOrderData.totalAmount) && (cashtendered > this.navOrderData.totalAmount)) {
-            this.saveInProgress = false;
-            return false;
-        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.accountDetails.Balance > this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
-            this.saveInProgress = false;
-            return false;
-        } else if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.accountDetails.Balance < this.navOrderData.totalAmount) && (cashtendered < this.navOrderData.totalAmount)) {
-            return true;
-        }
+
 
 
     }

@@ -11,6 +11,9 @@ import { LocalTimerService } from "./local-timer.service";
 import { PouchDBService, EXP_COMMON, EXP_DYNAMIC_MENUS, EXP_PERSON, EXP_PERSON_IN_MEMORY, EXP_STANDARD_MENUS, EXP_SYSTEM, EXP_TRANSACTIONS, EXP_USERS } from "./pouch-db.service";
 import { SettingService } from "./setting.service";
 import { StatusPopupPage } from '../pages/status-popup/status-popup.page';
+import { HttpService } from "./HTTP/http.service";
+import { UtilService } from "./util.service";
+import * as _ from "lodash";
 
 
 
@@ -23,7 +26,8 @@ export class SetupDbService {
     constructor(private generalDB: GeneralDBService, private dynamicMenusDB: DynamicMenusDBService,
         private staticMenusDB: StaticMenusDBService, private personDB: PersonDBService,
         private usersDb: UsersDBService,
-        private pouchDBService: PouchDBService, private popoverCtrl: PopoverController) {
+        private pouchDBService: PouchDBService, private popoverCtrl: PopoverController,
+        private http: HttpService, private utilService: UtilService) {
 
     }
     public syncList = { 'SiteSettings': 'InProgress', 'StaticMenus': 'InProgress', 'Students': 'InProgress', 'Users': 'InProgress' };
@@ -45,7 +49,7 @@ export class SetupDbService {
                             Promise.all(setupPromises as any[]).then(() => {
 
                                 console.timeEnd('Setup:ALL');
-                                PouchDBService.CreatePersonDBIndex()
+                                // PouchDBService.CreatePersonDBIndex()
                                 // AppStateService.set('SetupComplete', true);
                                 resolve('Success');
                             },
@@ -54,9 +58,32 @@ export class SetupDbService {
                                     resolve('Fail');
                                 });
                         });
+                    }).then(() => {
+                        let deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"))
+                        let SelectedSite = JSON.parse(AppStateService.get("SelectedSite"))
+                        let sitecode = _.split(SelectedSite.SiteNameWithCode, "-", 2);
+                        if (deviceInfo) {
+                            this.http.SaveDeviceInfo().subscribe((data) => {
+                                if (data.IsValid === true) {
+                                    deviceInfo.TerminalId = data.DeviceTerminalId;
+                                    deviceInfo.TerminalName =
+                                        deviceInfo.DeviceName + "-" + sitecode[0];
+                                    AppStateService.set("DeviceInfo", JSON.stringify(deviceInfo));
+                                }
+
+                                if (AppStateService.get("SetupComplete")) {
+                                    // this.navCtrl.navigateRoot("service-selection");
+                                    // this.event.publish('site-changed', { 'changedSite': this.displayDetails.site_name });
+                                } else {
+                                    this.utilService.showToast(
+                                        "Something went wrong while configuring the device. Please try again."
+                                    );
+                                }
+                            });
+                        }
                     });
                 });
-                resolve('Success');
+                // resolve('Success');
             });
         });
 
@@ -82,7 +109,7 @@ export class SetupDbService {
                  * Fix for bug 126524 : Deleting Person information- > get person Information on each login
                  */
                 this.ResetDB(false).then(() => {
-                    if (DYNMENU === 1) {
+                    if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
                         setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
                         this.dynamicMenusDB.SetupDynamicMenusDB(), this.personDB.SetupPersonDB()], this.usersDb.SetupUsersDB();
                         this.syncList['DynamicMenus'] = 'InProgress';
@@ -99,6 +126,7 @@ export class SetupDbService {
 
         });
     }
+
 
     public ResetDB(includeSystemDb = true) {
         console.time('ResetDB');
@@ -212,5 +240,37 @@ export class SetupDbService {
 
     }
 
-  
+    public initializeData() {
+        // initialize the popup messages required
+        return new Promise((resolve) => {
+
+            let popupupMessages = [];
+            const popupMessageDoc = {
+                '_id': 'PopupMessage--' + 212,
+                'MessageCode': 'E08512',
+                'MessageDescription': 'Current student data, menu updates, and settings will not be downloaded from the server.'
+                    + 'This will result in using local data for all meal service. Account balances and updates may not be the same as what is currently on the server.'
+                    + 'Do you still want to continue without downloading data ?',
+                'Header': 'CONFIRM',
+                'FootNote': '',
+                'MessageType': 1,
+                'ShowOk': 0,
+                'ShowCancel': 0,
+                'ShowYes': 1,
+                'ShowNo': 1,
+                'ShowNoThanks': 0,
+                'DontShowMe': 0,
+                'ChkShowValue': false
+            };
+            popupupMessages.push(popupMessageDoc);
+
+            PouchDBService.UpsertDocs(popupupMessages, EXP_COMMON).then(() => {
+
+                resolve(null);
+            });
+
+        })
+    }
+
+
 }

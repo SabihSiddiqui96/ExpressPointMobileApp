@@ -1,3 +1,4 @@
+import { MenuGridComponent, MenuGridEvent, MenuGridEventType } from './components/menu-grid/menu-grid.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
@@ -31,7 +32,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
@@ -46,6 +47,11 @@ import { LoadingService } from '../../services/loading.service';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { ConfettiService } from '../../services/confetti.service';
+import { ServiceToolbarComponent, ServiceToolbarEvent } from '../../shared-components/service-toolbar/service-toolbar.component';
+import { Subscription } from 'rxjs';
+import { LogsDBService } from '../../services/Database/logs-db.service';
+import { LogType } from '../../services/enums/log-type';
+import { EventType } from '../../services/enums/event-type';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -63,6 +69,8 @@ enum SuspiciousActivityTypes {
     providers: [Network, PatronLookupPage, SwitchHandsService]
 })
 export class MenuServicePage implements OnInit, OnDestroy {
+    public printAllSetting: Number = 0;
+    public localStorageValue: string = 'currentTab';
 
 
     public ngOnInit() {
@@ -98,10 +106,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // this.event.destroy('all_categories:show');
             this.showAllCategories();
         });
+
+        this.subscribeToMenuServicePopupEvents();
     }
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
+
+    @ViewChild(ServiceToolbarComponent, { static: false })
+    public serviceToolbarComponent;
+
+    @ViewChild(MenuGridComponent, { static: false })
+    public menuGridComponent;
 
     public type = 'MenuService';
     // public patronId = null;
@@ -113,14 +129,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     };
     // public setting={}
     public dayOfWeek = '0';
-    public days = [{ 'value': 0, 'label': 'Sunday' },
-    { 'value': 1, 'label': 'Monday' },
-    { 'value': 2, 'label': 'Tuesday' },
-    { 'value': 3, 'label': 'Wednesday' },
-    { 'value': 4, 'label': 'Thursday' },
-    { 'value': 5, 'label': 'Friday' },
-    { 'value': 6, 'label': 'Saturday' },
-    ];
     public paymentValidation;
     public tempMealTypeId = 0;
     public defaultMealTypeId = 0;
@@ -256,9 +264,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public personName: string;
     public loadingID;
     public disablePay: boolean = false;
-    public disableCharge :boolean = false;
-
-
+    public disableCharge: boolean = false;
+    private popupSubscription: Subscription;
+    private ALACASREST: boolean = false;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -269,6 +277,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public pouchQuery: PouchQueriesService,
+        public logDBService: LogsDBService,
         public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         AppStateService.remove('patron_details');
@@ -285,6 +294,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.setting = JSON.parse(AppStateService.get('settings'));
         }
 
+        PatronLookupPage.onKeyUpCallback = this.patronLookup.onPeripheralKey.bind(this);
+
         /**
          * Use the site Terminal if the Device Terminal is not set.
          */
@@ -295,6 +306,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.terminalId = JSON.parse(AppStateService.get('site_details')).TerminalId;
         }
 
+        this.patronLookup.bindPeriPheralEvent();
 
         this.event.subscribe('switch-hands:selected', (userEventData) => {
             if (userEventData.left === true) {
@@ -317,6 +329,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     switchHandsService.updateSwapConfiguration('left');
                 }
             }
+
+
 
             this.event.publish('patron-hamburger:showhide', { 'switchHands': true });
             this.event.publish('change-banner-side', { 'shiftRight': this.swapRight });
@@ -356,7 +370,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.printAuto = parseInt(SettingService.getSettingValue('PRINTAUTO'));
         this.esrr = parseInt(SettingService.getSettingValue('ESRR'));
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
-
+        this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
+        this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
         this.dayOfWeek = wDay[day.getUTCDay()];
@@ -480,7 +495,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }
                     this.alacarteTotal = this.calcAlaTotal(this.orderData['items']);
                     if (this.alacarteTotal > this.patronDetails['AvailableAmountForALCPurchases'] &&
-                        this.patronDetails['AvailableAmountForALCPurchases'] != null) { // check for ala carte dollar restrictions
+                        this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) { // check for ala carte dollar restrictions
                         this.popupMessageService.showMessage(PopupMessageCode.E05429);
                         this.orderData.items[i].Quantity = qty;
                         this.orderData.items[i].Price = price;
@@ -540,13 +555,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
         // this.event.subscribe('windowResized', (userEventData) => {
-           // this.hideLargeImage();
-            // if (this.router.url.endsWith('menu-service')) {
-            //     this.setTransactionListHeight();
-            // }
+        // this.hideLargeImage();
+        // if (this.router.url.endsWith('menu-service')) {
+        //     this.setTransactionListHeight();
+        // }
         // });
         // this.event.subscribe('patronLargeImagehide', (userEventData) => {
-            // this.hideLargeImage();
+        // this.hideLargeImage();
         // });
 
         this.event.subscribe('close-review-popup:close', (userEventData) => {
@@ -825,7 +840,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 .getBoundingClientRect().top + window.scrollY;
             const topPosMenulist = (this.elRef.nativeElement.querySelector('.transaction-item-list'))
                 .getBoundingClientRect().top + window.scrollY;
-            const calHeight = (topPosFooter - topPosMenulist) + 'px !important';
+            const calHeight = (topPosFooter - topPosMenulist) - 21 + 'px !important';
             this.elRef.nativeElement.querySelector('.transaction-item-list').setAttribute('style', 'height: ' + calHeight);
         }, 500);
     }
@@ -918,8 +933,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.isDefaultMenuItemRestricted = false;
                 }
 
-                if (this.isDefaultMenuItemRestricted === false) {
-                    this.addMenuToCart(this.defaultMenuItemDetails);
+                if (this.isDefaultMenuItemRestricted === false && this.patronDetails) {
+                    this.menuGridComponent.addMenuToCart(
+                        this.defaultMenuItemDetails, this.patronDetails, 0);
                 }
             }
         }
@@ -954,44 +970,44 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public showLargeImage(timeoutVal) {
-        this.hideLargeImage();
-        this.showLargeImageTimeout = setTimeout(() => {
-            try {
+        // this.hideLargeImage();
+        // this.showLargeImageTimeout = setTimeout(() => {
+        //     try {
 
-                const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
-                    .getBoundingClientRect().top + window.scrollY);
+        //         const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
+        //             .getBoundingClientRect().top + window.scrollY);
 
-                let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
-                    .getBoundingClientRect().left + window.scrollX);
+        //         let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
+        //             .getBoundingClientRect().left + window.scrollX);
 
-                const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture'))
-                    .getBoundingClientRect().top + window.scrollY);
-                const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
+        //         const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture'))
+        //             .getBoundingClientRect().top + window.scrollY);
+        //         const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
 
-                //Calculate the exact picture width and height and show only if image available
-                if (pictureTop && pictureStartX && topPosFooter) {
-                    let pictureWidth = rightXFooter - pictureStartX;
-                    let pictureHeight = topPosFooter - pictureTop - 10;
-                    let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
-                    let diffDisp = (pictureWidth - newWidthHeight);
-                    pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
-                    pictureWidth = newWidthHeight;
-                    pictureHeight = newWidthHeight;
-                    document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
-                    document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
-                    document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
-                    document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
-                        + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
-                }
-                this.largeImageIsShowing = true;
-            } catch (e) {
-                console.log('Caught in error while enlarging picture...');
-            }
+        //         //Calculate the exact picture width and height and show only if image available
+        //         if (pictureTop && pictureStartX && topPosFooter) {
+        //             let pictureWidth = rightXFooter - pictureStartX;
+        //             let pictureHeight = topPosFooter - pictureTop - 10;
+        //             let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
+        //             let diffDisp = (pictureWidth - newWidthHeight);
+        //             pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
+        //             pictureWidth = newWidthHeight;
+        //             pictureHeight = newWidthHeight;
+        //             document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
+        //             document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
+        //             document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
+        //             document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
+        //                 + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
+        //         }
+        //         this.largeImageIsShowing = true;
+        //     } catch (e) {
+        //         console.log('Caught in error while enlarging picture...');
+        //     }
 
-            this.hideLargeImageTimeout = setTimeout(() => {
-                this.hideLargeImage();
-            }, 5000);
-        }, timeoutVal);
+        //     this.hideLargeImageTimeout = setTimeout(() => {
+        //         this.hideLargeImage();
+        //     }, 5000);
+        // }, timeoutVal);
     }
 
     public setCreditLimit() {
@@ -1010,7 +1026,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         let previousALCCount = 0;
         let previousALCAmt = 0;
-
+        const today = new Date();
         if (previousSales) {
 
             /**
@@ -1033,13 +1049,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (prevSalesByMealType) {
                 const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
                 const mealTypeItems = [].concat.apply([], items);
-                soldItemsByMealType = mealTypeItems;
+                soldItemsByMealType = _.filter(mealTypeItems, (s) => {
+                    let date = new Date(_.toInteger(s.Date));
+                    return (date.getDate() === today.getDate()
+                        && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+
+                });
             }
             /**
                 * Calculating all A La carte meals served in previous sales
                 */
-            const alaCarteItems = _.filter(allItems, (o) => o.IsReimbursable === false ||
-                (o.IsReimbursable === true && o.IsSecondMeal === true));
+            const alaCarteItems = _.filter(allItems, (o) => {
+                let date = new Date(_.toInteger(o.Date));
+                return o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                    && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
+                        && date.getFullYear() === today.getFullYear())
+            });
 
 
 
@@ -1079,7 +1106,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.availableALCCt = null;
                 }
             }
-            // soldItemsByMealType = _.find(soldItems, s => new Date(_.toInteger(s.Date)).setHours(0, 0, 0, 0) === today)
 
             this.patronDetails.soldItems_count = soldItemsByMealType.length;
             if (soldItemsByMealType.length > 0) {
@@ -1561,26 +1587,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
-    public gridClick(grid) {
-
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
-
-        if (grid.emptygrid === true) {
-            return false;
-        }
-
-        if (grid.IsCategory === false) {
-            this.addMenuToCart(grid);
-        } else {
-            this.showItemsInCategory(grid.RefId);
-        }
-       // this.event.publish('patronLargeImagehide', null);
-    }
-
     public deleteMenuFromCart(index) {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
 
         if (this.mealCount >= 1) {
             // tslint:disable-next-line:max-line-length
@@ -1635,6 +1643,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const cartItems = [];
         let itemPrice = 0.00;
         let IsTaxable: boolean;
+
         if (deleteAllMeals) {
             for (let i = 0; i < this.orderData.items.length; i++) {
 
@@ -1643,6 +1652,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     items.push({
                         'Price': this.orderData.items[i]['Price'],
                         'MenuItemId': this.orderData.items[i]['RefId'],
+                        'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
                     });
 
                 }
@@ -1664,19 +1674,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
             this.orderData.items = cartItems;
 
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
-
         } else {
 
             for (let qty = 0; qty < this.orderData.items[index]['Quantity']; qty++) {
@@ -1684,22 +1681,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 items.push({
                     'Price': this.orderData.items[index]['Price'],
                     'MenuItemId': this.orderData.items[index]['RefId'],
+                    'SaleDetailId': this.utilService.generateUUID() // Added to Send Suspicious Transactionid With Menu Items as SaleDetailId
                 });
 
             }
-
-            const suspiciousTransactionDoc = {
-                '_id': 'SuspiciousTransaction--' + new Date().getTime(),
-                'SessionId': this.sessionId,
-                'TransactionNumber': this.transactionNumber,
-                'PersonId': this.patronDetails.PersonId,
-                'MenuItems': items,
-                'TransactionType': '',
-                'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
-                'Comment': 'Clear items on the POS transaction screen.'
-            };
-
-            this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
             // this.itemCount -= this.orderData.items[index].Quantity; // itemCount
             itemPrice = this.orderData.items[index]['Price'];
@@ -1710,100 +1695,27 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         }
 
+        let suspiciousId = this.utilService.generateUUID();
+        const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
+            '_id': 'SuspiciousTransaction--' + suspiciousId,
+            'SessionId': this.sessionId,
+            'SuspiciousTransactionId': suspiciousId,
+            'TransactionNumber': this.transactionNumber,
+            'PersonId': this.patronDetails.PersonId,
+            'MenuItems': items,
+            'TransactionType': '',
+            'SuspiciousActivityType': SuspiciousActivityTypes.CLEARLAST,
+            'Comment': 'Clear items on the POS transaction screen.'
+        };
 
-        // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable, this.taxMeal, this.taxPercent);
-        // this.orderData.subTotal = this.orderData.subTotal - itemPrice;
+        this.transactionService.SaveSuspiciousTransaction(suspiciousTransactionDoc).then(() => { });
 
-        // // const amt = this.orderData.tax + this.orderData.subTotal;
-        // this.orderData.totalAmount = this.setAmount();
-
-        // // edited on Jan-16-2017
-        // this.orderData.accountBalance = this.orderData.totalAmount;
-        // // this.orderData.accountBalance = this.setAmount();
-        // /////////////////
-        // let accbal: any = parseFloat(this.orderData.accountBalance);
-        // accbal = (Math.round(accbal * 100) / 100).toFixed(2);
-        // this.cashtendered = '$' + accbal;
-        // this.cashtendAmount = this.orderData.accountBalance;
         this.calculateTotals(itemPrice, false);
         this.isSecondMeal = false;
-    }
+        this.transactionInProgress = false;
+        this.disableCharge = this.enableCharge()
+        this.disablePay = this.enablePay()
 
-    public addMenuToCart(menuItem) {
-
-        console.log('***************');
-
-        console.log(menuItem);
-        if (this.checkOrderItems(menuItem.ButtonDescription)) {
-            for (let i = 0; i < this.orderData.items.length; i++) {
-                this.clearAllItemsinCart()
-            }
-        } else {
-            for (let i = 0; i < this.orderData.items.length; i++) {
-                const itemData = this.orderData.items[i];
-                const description = itemData.Name;
-                if (this.checkOrderItems(description)) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E05508);
-                    // this.utilService.showToast('No other items may be selected. Please remove the last menu item and re-enter selected items');
-                    return;
-                }
-            }
-        }
-
-        if (this.patronDetails.PersonId) {
-            if (menuItem.restrictedItem === true) {
-                this.popupMessageService.showMessage(PopupMessageCode.E05366);
-                // this.utilService.showToast('Student restrictions do not allow the sale of this item.');
-                return;
-            }
-            let priceTypeId = this.patronDetails['PriceTypeId'];
-
-            if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
-                this.mealCount = 1;
-                this.isSecondMeal = true;
-            }
-
-            if (menuItem.IsReimbursable === true) { // && !this.patronDetails.IsSecondMeal
-
-                if (this.mealCount >= 1) {
-                    //   if (this.patronDetails['GradeId'] ||
-                    //     (this.patronDetails.isSpecialAccount == true &&
-                    //         JSON.parse(AppStateService.get('patron_details')).FullName == 'Student') // IsStudent Check
-                    if (this.patronDetails.IsStudent === true ||
-                        (this.patronDetails.isSpecialAccount === true &&
-                            JSON.parse(AppStateService.get('patron_details')).FullName === 'Student')
-                    ) {
-
-                        priceTypeId = this.secondMealPriceType;
-                        // const txt = 'This is a SECOND MEAL. Do you want to continue?';
-                        // this.showConfrim(txt, 'second_meal', { 'menu_item': menuItem, 'price_type_id': priceTypeId });
-                        this.popupMessageService.showMessage(PopupMessageCode.E05491).then((bool) => {
-                            if (bool) {
-                                this.confirmSecondMeal({ 'menu_item': menuItem, 'price_type_id': priceTypeId });
-                            }
-                        })
-                    } else { // adult
-
-                        priceTypeId = this.patronDetails['PriceTypeId'];
-                        this.mealCount = this.mealCount + 1;
-                        this.Confirmed_CartMenuItem(menuItem, priceTypeId);
-                    }
-
-                } else {
-
-                    this.mealCount = this.mealCount + 1;
-                    this.Confirmed_CartMenuItem(menuItem, priceTypeId);
-                }
-            } else {
-                this.checkALCRestrictions(menuItem, priceTypeId);
-
-            }
-
-        } else {
-            this.popupMessageService.showMessage(PopupMessageCode.E05410);
-            // this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');
-            return;
-        }
     }
 
     public checkALCRestrictions(menuItem, priceTypeId) {
@@ -1969,7 +1881,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.patronDetails.IsStudent === true) { // IsStudent Check
 
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
-                            this.patronDetails['AvailableAmountForALCPurchases'] != null) {
+                            this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
                             this.popupMessageService.showMessage(PopupMessageCode.E05429);
                             // this.utilService.showToast('A La Carte dollar amount restriction has been reached for this patron.');
@@ -2126,37 +2038,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.menuItemsArr.length === 0) {
                 this.transactionInProgress = false;
             }
+            this.disableCharge = this.enableCharge()
+            this.disablePay = this.enablePay()
         });
 
 
-        this.disableCharge = this.enableCharge()
-        this.disablePay = this.enablePay()
 
 
-    }
 
-    public checkOrderItems(menuItemDescription) {
-        //  const description = menuItem.ButtonDescription;
-        const checkStart = menuItemDescription.startsWith('**');
-        const checkEnd = menuItemDescription.endsWith('**');
-        if (checkStart && checkEnd) {
-            // check further if description contains more ** into it
-            const testString = menuItemDescription.substring(2, menuItemDescription.length - 2);
-            // this.orderData.items = [];
-            if (this.checkOrderItems(testString)) {
-                return false;
-            } else {
-                // check if menu item starts with only *
-                const checkStart2 = testString.startsWith('*');
-                const checkEnd2 = testString.endsWith('*');
-                if (checkStart2 || checkEnd2) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public setMealCount(mealCount) {
@@ -2284,7 +2173,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.event.subscribe('category_all:select', (userEventData) => {
                             // tslint:disable-next-line:max-line-length
                             // let category = _.find(this.menuItemCategories, { "CategoryId": userEventData.category.MenuItemCategoryId })
-                            this.showItemsInCategory(userEventData.category);
+                            this.menuGridComponent.showItemsInCategory(userEventData.category);
                         });
                     } else {
                         this.popupMessageService.showMessage(PopupMessageCode.E05406);
@@ -2328,83 +2217,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
-    public showItemsInCategory(categoryId) {
-        if (this.patronDetails.PersonId) {
-            PouchQueriesService.GetItemsInCategory(categoryId).then(res => {
-                if (res.rows[0].doc) {
-                    const categoryName = res.rows[0].doc.Description;
-                    let buttons = res.rows[0].doc.Buttons;
-
-                    if (buttons === null) {
-                        this.popupMessageService.showMessage(PopupMessageCode.E05408);
-                        // this.utilService.showToast('There are no items within this category.');
-                        return;
-                    }
-                    buttons = buttons.filter(mi => {
-                        return mi.IsMealCombo !== true; // && mi.IsReimbursable == false
-                    });
-
-                    /**
-                      * Added CategoryId for all items from category
-                      */
-                    if (buttons.length > 0) {
-                        buttons = buttons.map(b => {
-                            b.BackColor = res.rows[0].doc.BackColor;
-                            b.ForeColor = res.rows[0].doc.ForeColor;
-                            b.CategoryId = categoryId;
-                            return b;
-                        });
-
-                        if (this.patronDetails.RestrictedMenuItems != null) {
-                            for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
-                                for (let k = 0; k < buttons.length; k++) {
-                                    if (this.patronDetails.RestrictedMenuItems[i] === buttons[k].RefId) {
-                                        buttons[k]['restrictedItem'] = true;
-                                    }
-                                }
-                            }
-                        }
-
-
-                        const modal = this.modalCtrl.create({
-                            component: MenuCategoryModelPage,
-                            componentProps: {
-                                'submenuGrid': buttons,
-                                'subMenuGridName': categoryName,
-                                'DefaultMenuItemId': 0,
-                                'PatronId': this.patronDetails.PersonId
-
-                            }
-                        }).then(async (res) => {
-                            await res.present();
-                        });
-
-                        this.event.subscribe('menu_subcategory:select', (userEventData) => {
-                            this.event.destroy('menu_subcategory:select');
-                            if (userEventData.subgrid) {
-                                this.addMenuToCart(userEventData.subgrid);
-                            }
-                        });
-                    } else {
-                        this.popupMessageService.showMessage(PopupMessageCode.E05408);
-                        // this.utilService.showToast('There are no items within this category.');
-                        return;
-                    }
-                } else {
-                    this.popupMessageService.showMessage(PopupMessageCode.E05408);
-                    // this.utilService.showToast('There are no items within this category.');
-                    return;
-                }
-            });
-        } else {
-            this.popupMessageService.showMessage(PopupMessageCode.E05410);
-            // this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');
-            return;
-        }
-    }
-
     public ShowMenuItemQuantityPopover(itemData) {
-
 
         this.popoverCtrl.create({
             component: MenuItemQuantityPopupPage,
@@ -2480,15 +2293,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public ShowsolditemsPopover(myEvent) {
-        if (this.patronDetails.soldItems_count > 0) {
-            this.modalCtrl.create({
-                component: MenuSoldPopupPage,
-                // event: myEvent,
-                componentProps: { 'patronDetails': this.patronDetails },
-                cssClass: this.utilService.popupCenter.cssClass
-            }).then(async (res) => {
-                await res.present();
-            });
+        if (!this.utilService.isMenuSoldPopupOpen) {
+            if (this.patronDetails.soldItems_count > 0) {
+                this.modalCtrl.create({
+                    component: MenuSoldPopupPage,
+                    // event: myEvent,
+                    componentProps: { 'patronDetails': this.patronDetails },
+                    cssClass: this.utilService.popupCenter.cssClass
+                }).then(async (res) => {
+                    await res.present();
+                    this.utilService.isMenuSoldPopupOpen = true;
+                });
+            }
         }
 
     }
@@ -2531,7 +2347,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
     public makeSale(transactionType) {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
 
@@ -2589,6 +2405,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 }
                             });
                         }
+                        if (this.restrictService.showNoChargePrompt) {
+                            this.popupMessageService.showMessage(PopupMessageCode.E05514)
+                                .then(bool => {
+                                    this.restrictService.showNoChargePrompt = false;
+                                    if (bool) {
+                                        this.postSaleTransaction(transactionType);
+                                    }
+                                });
+                        }
                         if (partPayPrompt) {
                             this.alertCtrl.create({
                                 header: 'Alert',
@@ -2612,6 +2437,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 await res.present();
                             });
                         }
+                    }
+                    if (this.patronDetails.CannotCharge && this.patronDetails.accountBalance > this.orderData.totalAmount) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E12513).then(bool => {
+                            if (bool) {
+                                this.postSaleTransaction(transactionType);
+                            }
+                        });
                     }
                     // this.chargeOrder(transactionType);
                 }
@@ -2715,7 +2547,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public showChargePopup() {
         // this.deviceTransactionId = this.generateUUID();
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         if (this.orderData.items.length > 0) {
 
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
@@ -2803,29 +2635,45 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
 
-                    items.push({
-                        'Price': this.orderData.items[i]['CurrentPrice'],
-                        'CategoryId': this.orderData.items[i]['CategoryId'],
-                        'MenuItemId': this.orderData.items[i]['RefId'],
-                        'priceTypeId': this.orderData.items[i]['price_type_id'],
-                        'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
-                        'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
-                        'MenuItemDescription': this.orderData.items[i]['Name'],
-                        'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
-                        'TransactionNo': this.transactionNumber,
-                        // Saketh for meal Combo
-                        'IsPartOfMeal': false,
-                        'TerminalName': this.terminalName,
-                        'MenuId': null
-                        // this.orderData.items[i]['IsPartOfMeal']
-                        // tslint:disable-next-line:max-line-length
-                        // "isReimbursable" : this.orderData.items[i]['isSecondMeal'] ? false : this.orderData.items[i]['isReimbursable'] // ADD Is Combo and IsPartOfMeal to the Order Data
-                    });
 
+                    // Check if there are any cases where there are more than one first meal items and remove them promptly
+                    let firstMeals = _.filter(items, ((o) =>
+                        o.priceTypeId === this.patronDetails.PriceTypeId &&
+                        o.IsReimbursable === true
+                    ))
+
+
+
+                    if (this.orderData.items[i]['price_type_id'] === this.patronDetails.PriceTypeId &&
+                        this.orderData.items[i]['IsReimbursable'] === true && this.patronDetails.IsStudent
+                        && firstMeals.length > 0
+                    ) {
+                        // this.deleteMenuFromCart(i);
+                        continue;
+
+                    } else {
+                        items.push({
+                            'Price': this.orderData.items[i]['CurrentPrice'],
+                            'CategoryId': this.orderData.items[i]['CategoryId'],
+                            'MenuItemId': this.orderData.items[i]['RefId'],
+                            'priceTypeId': this.orderData.items[i]['price_type_id'],
+                            'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
+                            'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
+                            'MenuItemDescription': this.orderData.items[i]['Name'],
+                            'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
+                            'TransactionNo': this.transactionNumber,
+                            // Saketh for meal Combo
+                            'IsPartOfMeal': false,
+                            'TerminalName': this.terminalName,
+                            'MenuId': null
+                            // this.orderData.items[i]['IsPartOfMeal']
+                            // tslint:disable-next-line:max-line-length
+                            // "isReimbursable" : this.orderData.items[i]['isSecondMeal'] ? false : this.orderData.items[i]['isReimbursable'] // ADD Is Combo and IsPartOfMeal to the Order Data
+                        });
+                    }
                 }
 
             }
-
 
             let paymentAmnt = this.orderData.totalAmount;
             if (transactionType === 1) {
@@ -2894,7 +2742,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
 
-            const updatedPatronDetails = this.patronDetails;
+            const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;
 
             const payment = Math.round(paymentAmnt * 100) / 100;
@@ -3095,7 +2943,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (!this.bonusAmount) {
                     this.bonusAmount = 0;
                 }
-                if (this.utilService.isElectronApp() && this.printAuto === 1) {
+                if (this.utilService.isElectronApp()
+                    && (this.printAllSetting === 1
+                        || (this.printAuto === 1
+                            && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
                     const transactionReceiptData: TransactionDetailPrintFormat = {
                         'PersonName': this.patronDetails.PersonName,
                         'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
@@ -3354,6 +3205,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public clearAllItemsinCart() {
 
         this.restrictedAlacarteCount = 0;
+        this.menuItemsArr = []
         this.alacarteTotal = 0.00;
         this.mealCount = 0;
         this.orderData = {
@@ -3372,7 +3224,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public voidOrder() {
         this.isMarked = false;
         this.reviewType = 0;
-
+        this.menuItemsArr = [];
         if (this.menuGrid['Buttons'].length) {
             for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
                 this.menuGrid['Buttons'][k]['restrictedItem'] = false;
@@ -3412,26 +3264,27 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
         } else {
             if (this.returnToWhatPage === 'SpecialRoster') {
-                this.event.publish('patron-released', {
-                    'menuGrid_Count': this.menuGridCount, 'returnToWhatPage': this.returnToWhatPage
-                    , 'patronRoomSelected': spId
-
+                this.event.publish('patronLookup:ready', {
+                    'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
+                    'returnToWhatPage': this.returnToWhatPage,
+                    'patronRoomSelected': spId
                 });
             } else if (this.returnToWhatPage === 'HomeRoom') {
 
-                this.event.publish('patron-released', {
-                    'menuGrid_Count': this.menuGridCount
-                    , 'returnToWhatPage': this.returnToWhatPage
-                    , 'patronRoomSelected': hmId
-                    , 'patronGradeSelected': gId
-                });
+                this.event.publish('patronLookup:ready', {
+                    'patronIdSelected': JSON.stringify(this.patronDetails.PersonId), // Ron ASked
+                    'returnToWhatPage': this.returnToWhatPage,
+                    'patronRoomSelected': hmId,
+                    'patronGradeSelected': gId
 
+                });
             } else {
                 if (this.utilService.selectAccountClick === false) {
                     this.event.publish('patronLookup:ready', this.menuGridCount);
                 }
-                // this.utilService.setLoader(false);
             }
+
+            // this.event.publish('patron-released', { 'patronDetails': null });
         }
         this.displayDetails = false;
         this.utilService.selectAccountClick = false;
@@ -3441,85 +3294,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.event.publish('patron-released', { 'patronDetails': null });
     }
 
-    public showPopup(type) {
-
-        // if (this.patronDetails.PersonId == null) {
-        if (this.patronDetails.PersonId != null && (type === 'mealType' || type === 'dayOfWeek' || type === 'menuType')) {
-            this.popupMessageService.showMessage(PopupMessageCode.E05341);
-            // this.utilService.showToast('Please complete the current transaction before switching menus.');
-        } else {
-            let postData = {};
-
-            switch (type) {
-                case 'dayOfWeek': postData = { 'type': type, 'data': this.days, 'selectedValue': this.dayOfWeek }; break;
-                case 'mealType': postData = { 'type': type, 'data': this.mealTypes, 'selectedValue': this.selectedMealType }; break;
-                case 'menuType': postData = { 'type': type, 'data': this.menuTypes, 'selectedValue': this.selectedMenuType }; break;
-                case 'ReviewTypes': postData = { 'type': type, 'data': this.reviewReasons, 'selectedValue': this.reviewType }; break;
-            }
-
-            if (postData['data'].length > 0) {
-
-                if (type == 'ReviewTypes') {
-                    this.popoverCtrl.create({
-                        component: AllPopupPage,
-                        componentProps: postData,
-                        backdropDismiss: false,
-                        cssClass: 'user_ppup center_ppup'
-                    }).then(async (res) => {
-                        await res.present();
-                    });
-
-                }
-                else {
-                    this.popoverCtrl.create({
-                        component: AllPopupPage,
-                        componentProps: postData
-                        , cssClass: this.utilService.popupCenter.cssClass
-                    }).then(async (res) => {
-                        await res.present();
-                    });
-
-                }
-
-
-
-                this.event.subscribe('menu-service-popup', (userEventData) => {
-                    if (userEventData.selectedData) {
-                        const selectedData = userEventData.selectedData;
-                        console.log(selectedData);
-                        const typeOption = userEventData.type;
-
-                        switch (typeOption) {
-                            case 'dayOfWeek': this.dayOfWeek = selectedData.value;
-                                this.dayChange(); break;
-
-                            case 'mealType': this.tempMealTypeId = selectedData.value;
-                                this.tempMealTypeName = selectedData.label;
-                                AppStateService.set('mealType', this.tempMealTypeId);
-                                this.changeMealType(this.tempMealTypeId, this.tempMealTypeName);
-                                break;
-
-                            case 'menuType': this.selectedMenuType = selectedData.value!== undefined ? selectedData.value : this.selectedMenuType;
-                                this.selectedMenuTypeName = selectedData.label!== undefined ? selectedData.label :this.selectedMenuTypeName;
-                                this.changeMenuType();
-                                break;
-                            case 'ReviewTypes': this.reviewType = selectedData.value;
-                                const reviewTypeDescription = selectedData.label;
-                                const reviewTypeCd = selectedData.key;
-                                this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
-                                break;
-                        }
-                    }
-                });
-            }
-
-            //     }
-            // else {
-            //         this.utilService.showToast('Please complete this transaction before changing the menu.');
-            //     }
-        }
-        // }
-    }
     public generateUUID() {
         let d = new Date().getTime();
         if (window.performance && typeof window.performance.now === 'function') {
@@ -3553,7 +3327,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public goToLookUp() {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         /**************************keep this?****************************** */
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
@@ -3561,6 +3335,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            if(this.patronDetails.PersonId !== null) {
+                const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
+                if(enableLog === 1){
+                    this.logDBService.logData({
+                        event : EventType.QUEUE,
+                        patronId : this.patronDetails.PersonId,
+                        type: LogType.INFO,
+                        data: this.patronDetails,
+                        queueCount: this.lookUpService.personsQ.length
+                      });
+                }
+            }
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};
@@ -3585,12 +3371,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.popupMessageService.showMessage(PopupMessageCode.E05427);
             // this.utilService.showToast('Please Complete the current transaction.');
         }
-
     }
 
     public showQ() {
         if (this.orderData.items.length === 0) {
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            //this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             this.lookUpService.populatePersonsFromQ();
 
         } else {
@@ -3618,10 +3403,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
     public showBalance() {
         this.hideBalSetting = 0;
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
     }
     public getReviews() {
-       // this.event.publish('patronLargeImagehide', null);
+        // this.event.publish('patronLargeImagehide', null);
         this.isMarkForReviewClicked = true;
         console.log('Mark for review cliked ---' + this.isMarkForReviewClicked);
         this.transactionService.getAllReviewReasons().then((reviews) => {
@@ -3632,7 +3417,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.isMarkForReviewClicked = false;
                 // this.utilService.showToast('No Review type available.');
             } else {
-                this.showPopup('ReviewTypes');
+                this.serviceToolbarComponent.showReviewTypePopup(this.reviewReasons, this.reviewType);
             }
         });
     }
@@ -3800,6 +3585,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.itemCount = this.orderData.items.map(li => li.Quantity).reduce((sum, val) => sum + val, 0);
     }
 
+
     public showPatronPin() {
         this.showPin = !this.showPin;
     }
@@ -3906,17 +3692,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public enablePay() {
-      
-        const itemLen = this.orderData.items.length;
-        const totAmount = this.orderData.totalAmount;
+
         if (this.transactionInProgress) {
             return true;
-        } else if (this.patronDetails.isSpecialAccount == true && itemLen === 0) {
-            return true;
-        } else if (this.patronDetails.isSpecialAccount == true && itemLen > 0 && totAmount === 0.00) {
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -3926,7 +3704,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const totAmount = this.orderData.totalAmount;
         const isSpecialAccount = this.patronDetails.isSpecialAccount;
 
-   if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
+        if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
             const projBal = this.selectedAccountDetails.Balance - this.orderData.totalAmount;
             if (itemLen > 0 && totAmount >= 0.00 && projBal >= 0) { // To enable Charge button when account is linked to adult
                 return false;
@@ -3944,10 +3722,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public ionViewDidLeave() {
         // document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
-    }
-
-    public emptySpaceClick() {
-        //// this.event.publish('patronLargeImagehide', null);
     }
 
     public getMealCategories() {
@@ -4129,6 +3903,56 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
+    public onToolbarEvent(event: ServiceToolbarEvent) {
+        switch (event) {
+            case ServiceToolbarEvent.OpenTransactionViewer:
+                this.openTransactionViewer();
+                break;
+
+            case ServiceToolbarEvent.ShowAllCategories:
+                this.showAllCategories();
+                break
+
+            default:
+                console.error("unknown toolbar event");
+                break
+        }
+    }
+
+    public onMenuGridEvent(event: MenuGridEvent) {
+        console.log('rcvd event - menu-grid', event);
+        switch (event.type) {
+            case MenuGridEventType.SetMealCount:
+                this.mealCount = event.payload;
+                break;
+
+            case MenuGridEventType.ConfirmedCartMenuItem:
+                this.Confirmed_CartMenuItem(
+                    event.payload.menuItem,
+                    event.payload.priceTypeId
+                );
+                break;
+
+            case MenuGridEventType.ConfirmSecondMeal:
+                this.confirmSecondMeal(event.payload);
+                break;
+
+            case MenuGridEventType.ClearItemsInCart:
+                this.clearAllItemsinCart();
+                break;
+
+            case MenuGridEventType.CheckALCRestrictions:
+                this.checkALCRestrictions(
+                    event.payload.menuItem,
+                    event.payload.priceTypeId
+                );
+                break;
+
+            default:
+                break;
+        }
+    }
+
     private calcAlaTotal(items) { // To calculate sum of only categorical restricted ala carte items
         this.alacarteTotal = 0.00;
         const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
@@ -4150,4 +3974,43 @@ export class MenuServicePage implements OnInit, OnDestroy {
             return this.alacarteTotal;
         }
     }
+
+    private subscribeToMenuServicePopupEvents() {
+        this.popupSubscription = this.event.subscribe('menu-service-popup', (userEventData) => {
+            if (userEventData.selectedData) {
+                const selectedData = userEventData.selectedData;
+                console.log(selectedData);
+                const typeOption = userEventData.type;
+
+                switch (typeOption) {
+                    case 'dayOfWeek': this.dayOfWeek = selectedData.value;
+                        this.dayChange(); break;
+
+                    case 'mealType': this.tempMealTypeId = selectedData.value;
+                        this.tempMealTypeName = selectedData.label;
+                        AppStateService.set('mealType', this.tempMealTypeId);
+                        this.changeMealType(this.tempMealTypeId, this.tempMealTypeName);
+                        break;
+
+                    case 'menuType': this.selectedMenuType = selectedData.value !== undefined ? selectedData.value : this.selectedMenuType;
+                        this.selectedMenuTypeName = selectedData.label !== undefined ? selectedData.label : this.selectedMenuTypeName;
+                        this.changeMenuType();
+                        break;
+
+                    case 'ReviewTypes': this.reviewType = selectedData.value;
+                        const reviewTypeDescription = selectedData.label;
+                        const reviewTypeCd = selectedData.key;
+                        this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
+                        break;
+                }
+            }
+        });
+    }
+
+    private unsubscribeToMenuServicePopupEvents() {
+        if (this.popupSubscription) {
+            this.popupSubscription.unsubscribe();
+        }
+    }
+
 }

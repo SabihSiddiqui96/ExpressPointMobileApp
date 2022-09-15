@@ -1,6 +1,6 @@
 import { NavController, AlertController, ModalController } from '@ionic/angular';
 // import { Keyboard, Network } from 'ionic-native';
-import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
+// import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
 import * as _ from 'lodash';
 import { LoadingController } from '@ionic/angular';
 // import { OnInit } from '@angular/core';
@@ -23,7 +23,6 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
 
-
 export class GoLogin implements OnDestroy {
 
 
@@ -42,6 +41,7 @@ export class GoLogin implements OnDestroy {
 
     public passwordType: string = 'password';
     public passwordIcon: string = 'eye-off';
+    public LoginWithoutSetup: boolean = false;
 
 
     constructor(public _nav: NavController, public loading: LoadingController, public alertCtrl: AlertController,
@@ -53,6 +53,7 @@ export class GoLogin implements OnDestroy {
         public appStateService: AppStateService,
         public settingService: SettingService, public signalRService: SignalRService
         , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
+
 
         AppStateService.set('AllCatRemainOpen', false);
     }
@@ -182,6 +183,9 @@ export class GoLogin implements OnDestroy {
         if (AppStateService.get('selectedDistrict')) {
             if (JSON.parse(AppStateService.get('selectedDistrict')).loginUrl !== '') {
                 const date = new Date();
+                if (AppStateService.get('LoginWithoutSetup') !== undefined)
+                    this.LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
+
                 // this.utilService.setLoader(true);
                 this.http.getLoginToken(this.login).
                     subscribe
@@ -224,7 +228,7 @@ export class GoLogin implements OnDestroy {
                                 return;
                             }
                             if (this.utilService.isElectronApp()) {
-                                if (this.isWindowsAuth) {
+                                if (this.isWindowsAuth && this.login.WindowsAuth) {
                                     this.showWinAuthAlert('Windows Authentication', 'You cannot be validated through Windows' +
                                         ' Please enter your user credentials.', false);
                                 } else {
@@ -337,37 +341,40 @@ export class GoLogin implements OnDestroy {
                                                 this._nav.navigateRoot('reset-password');
                                             } else {
 
-                                                const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
-                                                const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
-                                                const value = SettingService.getSettingValue('DTTIMEZONE');
-                                                const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
-                                                // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
-                                                // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
-                                                if (diffTime >= diffThreshold) {
+                                                // const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
+                                                // const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
+                                                // const value = SettingService.getSettingValue('DTTIMEZONE');
+                                                // const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
+                                                // // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
+                                                // // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
+                                                // if (diffTime >= diffThreshold) {
 
-                                                    const alert = this.alertCtrl.create({
-                                                        header: 'Warning',
-                                                        message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings.',
-                                                        backdropDismiss: false,
-                                                        buttons: [
-                                                            {
-                                                                text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
-                                                                handler: () => {
-                                                                    console.log('Clicked');
-                                                                    const openSettings = new OpenNativeSettings();
-                                                                    openSettings.open('date');
-                                                                    this.canProceed = false;
-                                                                    this.disableLogin = false;
-                                                                    this.loginProcessing = false;
-                                                                }
-                                                            }
-                                                        ]
-                                                    }).then(async (res) => {
-                                                        await res.present();
-                                                    });
-                                                } else {
-                                                    this.CheckLogin();
-                                                }
+                                                //     const alert = this.alertCtrl.create({
+                                                //         header: 'Warning',
+                                                //         message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings.',
+                                                //         backdropDismiss: false,
+                                                //         buttons: [
+                                                //             {
+                                                //                 text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+                                                //                 handler: () => {
+                                                //                     console.log('Clicked');
+                                                //                     const openSettings = new OpenNativeSettings();
+                                                //                     openSettings.open('date');
+                                                //                     this.canProceed = false;
+                                                //                     this.disableLogin = false;
+                                                //                     this.loginProcessing = false;
+                                                //                 }
+                                                //             }
+                                                //         ]
+                                                //     }).then(async (res) => {
+                                                //         await res.present();
+                                                //     });
+                                                // } else {
+                                                this.CheckLogin();
+                                                // this.canProceed = false;
+                                                // this.disableLogin = false;
+                                                // this.loginProcessing = false;
+                                                // }
                                             }
 
                                         } else {
@@ -592,7 +599,12 @@ export class GoLogin implements OnDestroy {
 
                 if (this.user.AuthorizedSites.length === 1) {
                     if (AppStateService.get('SelectedSite') && JSON.parse(AppStateService.get('SelectedSite')).SchoolId === this.user.AuthorizedSites[0].SchoolId) {
-                        this.setupDbService.setupData().then(() => { });
+                        if (!this.LoginWithoutSetup) {
+                            this.setupDbService.setupData().then(() => { });
+                        } else {
+                            AppStateService.set('SetupComplete', true);
+                            this._nav.navigateRoot("service-selection");
+                        }
                     } else {
                         let selectedSite = {};
                         // to make sure that the user downloads all students for the particular school when a different user logs in
@@ -600,8 +612,13 @@ export class GoLogin implements OnDestroy {
                         selectedSite = JSON.stringify(this.user.AuthorizedSites[0]);
                         AppStateService.set('SelectedSite', selectedSite);
                         this.deviceService.checkDeviceName().then(() => {
-                            this.setupDbService.setupData().then(() => {
-                            });
+                            if (!this.LoginWithoutSetup) {
+                                this.setupDbService.setupData().then(() => {
+                                });
+                            } else {
+                                this._nav.navigateRoot("service-selection");
+                            }
+
                         });
                     }
 
@@ -615,16 +632,26 @@ export class GoLogin implements OnDestroy {
 
                     if (this.CheckIfselectedSiteIsAuthourised()) {
                         this.deviceService.checkDeviceName().then(() => {
-                            this.setupDbService.setupData().then(() => {
-                            });
+                            if (!this.LoginWithoutSetup) {
+                                this.setupDbService.setupData().then(() => {
+                                });
+                            } else {
+                                this._nav.navigateRoot("service-selection");
+                            }
                         });
                     } else {
+                        if (!this.LoginWithoutSetup) {
+                            this.deviceControlsService.syncEXPSettings().then(() => {
+                                AppStateService.remove('SelectedSite');
+                                // this.utilService.setLoader(false);
+                                this._nav.navigateRoot('school-selection');
+                            });
+                        } else {
+                            this.utilService.showToast('The user does not have access to the school that has data downloaded,'
+                                + 'Please login after unchecking the Login Without data download toggle ')
+                            return
+                        }
 
-                        this.deviceControlsService.syncEXPSettings().then(() => {
-                            AppStateService.remove('SelectedSite');
-                            // this.utilService.setLoader(false);
-                            this._nav.navigateRoot('school-selection');
-                        });
 
                     }
                 }
@@ -658,12 +685,5 @@ export class GoLogin implements OnDestroy {
 
     }
 
-
-    // public getUserDetailsOffline() {
-    //   PouchQueriesService.GetUser().then((res) => {
-    //     console.clear()
-    //     console.log(res)
-    //   })
-    // }
 
 }

@@ -232,7 +232,7 @@ autoUpdater.on('checking-for-update', i => {
 
 function print58m(printData: any) {
   return new Promise((resolve, reject) => {
-    mainWindow = new BrowserWindow({ width: 500, height: 500, show: false, webPreferences: { nodeIntegration: true } });
+    mainWindow = new BrowserWindow({ width: 500, height: 500, show: true, webPreferences: { nodeIntegration: true } });
     mainWindow.loadURL(path.join(__dirname, 'PrintPreview.html'));
     // mainWindow.hide();
 
@@ -248,7 +248,8 @@ function print58m(printData: any) {
 ipcMain.on('print', (evnt: any, arg: any) => {
   print58m(arg).then((result) => {
     if (result) {
-      mainWindow.webContents.print({ silent: true }, (success) => {
+      mainWindow.webContents.print({ margins: { marginType: 'printableArea' }, silent: true }, (success) => {
+
         console.log('---mainWindow---');
         console.log(success);
 
@@ -330,7 +331,7 @@ ipcMain.on('ssologin', (event: any, loginSSOUrl: any) => {
 
 
 ipcMain.on('app-ready', () => {
-  SystemUUID = UUID_os + ' ' + UUID_FileSystem + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName
+  SystemUUID = UUID_os + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName
   win.webContents.send('device', {
     deviceId: deviceId,
     deviceName: deviceName,

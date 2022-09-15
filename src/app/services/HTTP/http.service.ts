@@ -222,6 +222,9 @@ export class HttpService {
     }
 
 
+    public SyncRdaGroupsBySchool(): any {
+        return this.http.get(API_URL + 'SyncRdaGroupsBySchool/' + JSON.parse(AppStateService.get('SelectedSite')).SchoolId).pipe(map(res => res));
+    }
     public SyncGradesList(): any {
         return this.http.get(API_URL + 'SyncGradeList/' + JSON.parse(AppStateService.get('SelectedSite')).SchoolId).pipe(map(res => res));
     }
@@ -444,16 +447,17 @@ export class HttpService {
     //#endregion: GETs
 
     //#region:POSTs
-    public postOpenSession(sessionId, data, total, openDate, terminalId): any {
+    public postOpenSession(sessionId, data, total, openDate, terminalId, schoolId, loginWithoutSetup): any {
         if (AppStateService.get('SelectedSite')) {
             return this.http.post(API_URL + 'SyncOpenSession',
                 JSON.stringify({
                     'SessionId': sessionId,
                     'OpeningBalance': total,
-                    'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                    'SchoolId': schoolId,
                     'SessionDenominations': data,
                     'OpenSessionDate': openDate,
-                    'TerminalId': terminalId
+                    'TerminalId': terminalId,
+                    'LoginWithoutSetup': loginWithoutSetup
                 })).pipe(map(res => res));
         }
     }
@@ -501,6 +505,10 @@ export class HttpService {
         return this.http.post(API_URL + 'Recordtransaction', orderData, { responseType: 'text' }).pipe(map(res => res));
     }
 
+    public saveErrorLogs(errorLog) {
+        return this.http.post(API_URL + 'SaveErrorLog', errorLog, { responseType: 'text' }).pipe(map(res => res));
+    }
+
     public SaveReviewRecord(orderData): any {
         return this.http.post(API_URL + 'SyncReviews', orderData, { responseType: 'text' }).pipe(map(res => res));
     }
@@ -524,14 +532,14 @@ export class HttpService {
         return this.http.post(API_URL + 'RecordtransactionList', orderData).pipe(map(res => res));
     }
 
-    public postHeartBeat(terminalId, pending, sent, heartBeatTime,appVersion): any {
+    public postHeartBeat(terminalId, pending, sent, heartBeatTime, appVersion): any {
         return this.http.post(API_URL + 'SaveDeviceHeartbeat',
             {
                 'TerminalId': terminalId,
                 'Pending': pending,
                 'Sent': sent,
                 'HeartBeatTime': heartBeatTime,
-                'AppVersion':appVersion
+                'AppVersion': appVersion
             }, { responseType: 'text' }).pipe(map(res => res));
     }
 

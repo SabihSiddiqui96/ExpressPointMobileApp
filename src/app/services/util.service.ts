@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { LoadingController, AlertController, Platform } from '@ionic/angular';
+import { LoadingController, AlertController, Platform, ToastController } from '@ionic/angular';
 import { SC_URL } from '../services/urls.service';
 import { UrlsId } from './enums/environment-url-id';
 import { AppStateService } from './app-state.service';
@@ -40,8 +40,10 @@ export class UtilService {
   public navOption = { 'animate': false };
   public popupCenter = { cssClass: 'user_ppup center_ppup' };
   public popOption = { cssClass: 'user_ppup' };
+  public isMenuSoldPopupOpen:boolean = false;
 
   constructor(private loadingCtrl: LoadingController, private alertCtrl: AlertController,
+    public toastCtrl: ToastController,
     private electron: ElectronService, private platform: Platform) {
     // const url = _.find(this.URLS, (obj) => obj.url === SC_URL);
     // AppStateService.set('SelectedURL', JSON.stringify(url));
@@ -89,7 +91,17 @@ export class UtilService {
   }
 
   public showToast(message, duration = 5000) {
+    const toast = this.toastCtrl.create({
+      message: message,
+      duration: duration,
+      position: 'top',
+      showCloseButton: true,
+      // dismissOnPageChange: true // - not supported
+    }).then(async (res) => {
+      await res.present();
+    });
   }
+
 
   async setLoader(type) {
     if (type === true) {

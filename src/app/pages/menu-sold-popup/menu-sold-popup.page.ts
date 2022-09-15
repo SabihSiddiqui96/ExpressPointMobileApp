@@ -6,6 +6,7 @@ import { AppStateService } from '../../services/app-state.service';
 import { Router } from '@angular/router';
 import { LoadingService } from '../../services/loading.service';
 import { SettingService } from '../../services/setting.service';
+import { UtilService } from '../../services/util.service';
 
 @Component({
   selector: 'app-menu-sold-popup',
@@ -23,7 +24,7 @@ export class MenuSoldPopupPage implements OnInit {
   public loadingID;
 
   constructor(public navCtrl: NavController,
-    public router: Router, public appStateService: AppStateService, private modalCtrl: ModalController,
+    public router: Router, public appStateService: AppStateService,private utilService: UtilService, private modalCtrl: ModalController,
     public loadingService: LoadingService) {
   }
 
@@ -40,9 +41,8 @@ export class MenuSoldPopupPage implements OnInit {
         console.log(this.navPatronDetails.SoldItems);
 
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
-        if (DYNMENU === 1) {
+        if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
           this.useDynamicMenus = true;
-
           const x = _.uniqBy(this.navPatronDetails.SoldItems, 'TransactionNo');
           const transactions = x.map(d => d.TransactionNo);
 
@@ -79,5 +79,6 @@ export class MenuSoldPopupPage implements OnInit {
 
   public close() {
     this.modalCtrl.dismiss();
+    this.utilService.isMenuSoldPopupOpen = false;
   }
 }

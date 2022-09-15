@@ -14,5 +14,6 @@ export enum SiteSettingCodes { // Refer PR_Site_Settings table for codes
     ENORDR,
     CANUSEPRN,
     CHGVISTSTD,
-    SRCHBYPIN
+    SRCHBYPIN,
+    PRTALLTRA
 }

@@ -4,21 +4,8 @@
     <ion-header>
       <ion-toolbar color="slate">
         <ion-row style="align-items: center">
-          <!--<ion-col col-1>
-                    <ion-button default expand="block" fill="clear" transparent (click)="popoverClick($event)">
-                      <ion-icon name="menu"></ion-icon>
-                    </ion-button>
-                  </ion-col>-->
-          <!-- <ion-col col-1>
-                      <ion-button default expand="block" fill="clear" transparent (click)="goToServicePage()">
-                          <ion-icon name="arrow-round-back"></ion-icon>
-                      </ion-button>
-                  </ion-col> -->
           <ion-col size="1">
             <ion-buttons [ngClass]="{'ion-hide':swapRight}" push-md-4>
-              <!-- <ion-button default expand="block" (click)="showOptions($event)">
-                              <ion-icon name="menu"></ion-icon>
-                          </ion-button> -->
               <ion-menu-toggle>
                 <ion-button class="btn-full-size-icon" fill="clear" style="display: block !important;" start>
                   <ion-icon slot="icon-only" name="menu"></ion-icon>
@@ -56,8 +43,9 @@
         <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
           <ion-col *ngFor="let grid of grid_row; let j=index" style="width:20%">
             <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0">
-              <ion-button [tabindex]="i+j" expand="block" [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor"
-                [style.display]="" [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
+              <ion-button [tabindex]="i+j" expand="block"
+                [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor" [style.display]=""
+                [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
                 [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
                 [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
                 (click)="gridClick(grid)">
@@ -80,12 +68,12 @@
             <ion-button [tabindex]="i" expand="block" (click)="showcategoryPopup(category)">
 
               {{category.DisplayCategoryName}}
-              <!--<ion-icon name="more"></ion-icon>-->
             </ion-button>
           </div>
           <div *ngFor="let menuItem of itemsByCategory[i]; let j=index" class="menu-item-dynamic"
             [style.background]="category.BackColor">
-            <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor" (click)="gridClick(menuItem)">
+            <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor"
+              (click)="gridClick(menuItem)">
               {{menuItem.MenuItemDescription}}
               <ion-icon name="alert" *ngIf="menuItem.restrictedItem"></ion-icon>
             </ion-button>
@@ -171,9 +159,9 @@
                   </ion-button>
                 </ion-col>
                 <ion-col size="3" size-md="3" size-sm="3">
-                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn" *ngIf = "canLoadPrevPatron"
-                    [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" style="height:3.6rem;font-size: 65%;"
-                    [disabled]="!canLoadPrevPatron">
+                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                    *ngIf="canLoadPrevPatron" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
+                    style="height:3.6rem;font-size: 65%;" [disabled]="!canLoadPrevPatron">
                     &lt; &lt; &nbsp;Previous
                   </ion-button>
                 </ion-col>
@@ -220,8 +208,8 @@
                             </span> &nbsp; <span [ngClass]="{'color-green': ((patronDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -
                                         orderData.totalAmount) ) < 0, 'color-black': ((patronDetails.Balance -
                                         orderData.totalAmount) ) == 0 }">{{patronDetails.Balance -
-                                        orderData.totalAmount |
-                                        currency:'USD':true:'1.2-2'}}</span></p>
+                              orderData.totalAmount |
+                              currency:'USD':true:'1.2-2'}}</span></p>
                           <p>Transaction :
                             <b>{{transactionNumber}}</b>
                           </p>
@@ -390,8 +378,8 @@
                               </span></span> &nbsp; <span [ngClass]="{'color-green': ((selectedAccountDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -
                                 orderData.totalAmount) ) < 0, 'color-black': ((selectedAccountDetails.Balance -
                                 orderData.totalAmount) ) == 0 }">{{selectedAccountDetails.Balance -
-                                    orderData.totalAmount |
-                                    currency:'USD':true:'1.2-2'}}</span></label>
+                              orderData.totalAmount |
+                              currency:'USD':true:'1.2-2'}}</span></label>
                           <p>Transaction :
                             <b>{{transactionNumber}}</b>
                           </p>
@@ -601,13 +589,13 @@
           <ion-row>
             <ion-col size="4">
               <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
-                [disabled]="enablePay()">
+                [disabled]="disablePay">
                 <!-- [disabled]="(patronDetails.isSpecialAccount==true && orderData.items.length === 0) || isValidMenuItemArray"> -->
                 Pay
               </ion-button>
             </ion-col>
             <ion-col size="8">
-              <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)" [disabled]="enableCharge()">
+              <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)" [disabled]="disableCharge">
                 <!-- [disabled]="(patronDetails.isSpecialAccount==true && orderData.totalAmount>=0.00) || isValidMenuItemArray"> -->
                 Charge
                 <!-- <span
@@ -666,7 +654,7 @@
     </div>
   </ion-col>
   <ion-col size-md="4" [attr.pull-md]="swapRight==true ? 8: 0" [attr.pull-sm]="swapRight==true ? 8: 0"
-    [ngClass]="{'ion-hide' : patronId!=null || (lookUpService.getQ().length != 0 && getLocalStorageValue('currentTab') == 'advanced')}">
+    [ngClass]="{'ion-hide' : patronDetails.PersonId!=null}">
     <page-patron-lookup [page]="type"></page-patron-lookup>
   </ion-col>
 </ion-row>

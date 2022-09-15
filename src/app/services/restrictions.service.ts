@@ -42,11 +42,13 @@ export class RestrictionsService {
     public patronDetails: any;
     public transactionInProgress: boolean;
     public showPrompt: boolean = false;
+    public showNoChargePrompt: boolean = false;
     public partPayPopup: boolean = false;
     public orderData: any;
     public cashtendAmount: any = 0.00;
     public sepChargeLimit: boolean = false;
-
+    public ALACASREST: boolean = false;
+    public useDynamicMenus: boolean = false;
     constructor(
         private popupMessageService: PopupMessageService) {
 
@@ -63,6 +65,11 @@ export class RestrictionsService {
         } else if (SettingService.getSettingValue('SCHPREPAY') === '0') {
             this.hideAddFunds = true;
         }
+        if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1) {
+            this.useDynamicMenus = true;
+        } else {
+            this.useDynamicMenus = false;
+        }
 
         /**
         * Use the site Terminal if the Device Terminal is not set.
@@ -77,6 +84,8 @@ export class RestrictionsService {
         this.settingChargeReimbursableMealsOnly = Boolean(parseInt(SettingService.getSettingValue('RMUTCHARLT')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
+        this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
+
         this.setRestrictableItems();
         this.setRestrictableCategories();
         this.setSiteSettings();
@@ -133,7 +142,7 @@ export class RestrictionsService {
             return restriction;
         }
         if ((this.alacarteTotal + this.menuItemPrice) > student['AvailableAmountForAlaCartePurchases'] &&
-            student['AvailableAmountForAlaCartePurchases'] != null) {
+            student['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
             restriction.ChargeRestriction = true;
             // restriction.Description = 'A La Carte dollar amount restriction has been reached for this patron.';
             restriction.Description = PopupMessageCode.E12431;
@@ -368,7 +377,6 @@ export class RestrictionsService {
         PouchQueriesService.GetRestrictableItems().
             then((data) => {
                 this.restrictableAlaCarteItems = data.rows[0].doc.RestrictableAlaCarteItems;
-                console.log('Restrictable Ala Carte Items' + this.restrictableAlaCarteItems);
             });
     }
 
@@ -397,7 +405,7 @@ export class RestrictionsService {
         let transactionType: any;
         this.orderData = ordDetails.orderData;
         this.alacarteCount = ordDetails.alaCount;
-        this.mealCount = this.calculateMealCount(this.orderData['items']); // ordDetails.mealCount;
+        this.mealCount = this.useDynamicMenus ? ordDetails.mealCount : this.calculateMealCount(this.orderData['items']); // ordDetails.mealCount;
         this.restrictedAlacarteCount = ordDetails.restAlCcount;
         this.patronDetails = ordDetails.patronDetails;
         this.cashtendAmount = ordDetails.cashTendAmt;
@@ -419,10 +427,11 @@ export class RestrictionsService {
         if (!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge) { // && this.patronDetails.Balance <= 0
             if (Math.round(this.orderData.totalAmount * 100) / 100 === 0) {
                 return true; // If total item cost is 0.00 debit of 0.00 is allowed even CannotCharge is true.
-            } else {
+            } else if(this.patronDetails.Balance > this.orderData.totalAmount){
+                this.showNoChargePrompt = true;
+                return false;
+            }else {
                 this.popupMessageService.showMessage(PopupMessageCode.E12480);
-                // const message = 'No charges are allowed for this patron. Please ask for cash or void the transaction.';
-                // this.utilService.showWarning(message); // , 'charge-order', { 'transactionType': transactionType }
                 return false;
             }
 
@@ -459,7 +468,7 @@ export class RestrictionsService {
         this.showPrompt = false;
         this.alacarteCount = ordDetails.alaCount;
         // this.mealCount = ordDetails.mealCount;
-        this.mealCount = this.calculateMealCount(this.orderData['items']);
+        this.mealCount = this.useDynamicMenus ? ordDetails.mealCount : this.calculateMealCount(this.orderData['items']);
         this.alacarteTotal = ordDetails.alaTotal;
         this.restrictedAlacarteCount = ordDetails.restAlCcount;
         this.patronDetails = ordDetails.patronDetails;
@@ -532,7 +541,7 @@ export class RestrictionsService {
                 return false;
             }
         } else if (this.sepChargeLimit) { // Work in Progress for US 156550
-            this.alacarteTotal = this.calcAlaTotal(this.orderData["items"]);
+            this.alacarteTotal = this.useDynamicMenus ? ordDetails.alaTotal : this.calcAlaTotal(this.orderData["items"]);
             const alaProjBal = accountBalance - this.alacarteTotal;
             const reimProjBal = accountBalance - (saleTotal - this.alacarteTotal);
 
@@ -610,18 +619,16 @@ export class RestrictionsService {
                     return false;
                 } else if (this.settingActionWhenBelowChargeLimit === 3) {
                     if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
-                        this.showDialog('WARNING', 'A-la-Carte credit limit reached. Please make a payment for the amount due or remove A-la-Carte items');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12510);
                         return false;
                     } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal) && reimProjBal < creditLimit) {
-                        this.showDialog('WARNING', 'Reimbursable Meals credit limit reached. Please make a payment for the amount due or remove reimbursable meals');
+                        this.popupMessageService.showMessage(PopupMessageCode.E12511);
                         return false;
                     }
                     // this.popupMessageService.showMessage(PopupMessageCode.E12441);
                     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
                     return true;
                 }
-
-
             }
         }
 
@@ -722,6 +729,7 @@ export class RestrictionsService {
 
     private calcAlaTotal(items) { // To calculate sum of all Ala-Carte items in an order
         let alacarteTotal = 0.00;
+
         const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
             (o.IsReimbursable === true && o.isSecondMeal === true));
         if (alaItems.length > 0) {
@@ -732,5 +740,6 @@ export class RestrictionsService {
         } else {
             return alacarteTotal;
         }
+
     }
 }

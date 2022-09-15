@@ -16,8 +16,9 @@ import { Router } from '@angular/router';
 import { timeout } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { LogsDBService } from '../Database/logs-db.service';
 
-const TIMEOUT = 20 * 1000;
+const TIMEOUT = 300 * 1000;
 const TIMEOUT_HEARTBEAT = 5 * 1000;
 
 
@@ -26,7 +27,7 @@ const TIMEOUT_HEARTBEAT = 5 * 1000;
 })
 export class HttpInterceptorService {
 
-  constructor(private utilService: UtilService, public network: NetworkService,
+  constructor(private utilService: UtilService, public network: NetworkService, public logDBService:LogsDBService,
     public event: Events, public navCtrl: NavController, public router: Router, public appStateService: AppStateService) { }
 
   public intercept(request: HttpRequest<any>, httpHandler: HttpHandler): Observable<HttpProgressEvent | HttpEvent<any>> {
@@ -84,6 +85,9 @@ export class HttpInterceptorService {
     if (request.url.indexOf('SaveDeviceHeartbeat') !== -1) {
       finalTimeout = TIMEOUT_HEARTBEAT;
     }
+    if (request.url.indexOf('SyncAllUsers') !== -1) {
+      finalTimeout = 300 * 1000; // Set 300 seconds as timeout for SyncAllUsers Api
+    }
     return httpHandler.handle(request).pipe(timeout(finalTimeout),
       tap((event: HttpEvent<any>) => { }, (err: any) => {
         if (err instanceof HttpErrorResponse) {
@@ -115,6 +119,7 @@ export class HttpInterceptorService {
 
   public handleHTTPError(err, request) {
     const errStatus = err.status;
+    //this.logDBService.logError({request : request,error : err,code: err.status});
     switch (errStatus) {
       case 400: // being handled in login component
         break;

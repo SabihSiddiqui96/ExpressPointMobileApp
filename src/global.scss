@@ -141,7 +141,7 @@ button:focus {outline:0;}
     top: calc(50% - (700px/2));
     position: absolute;
     max-width: 800px;
-    max-height: 600px;
+    min-height: 600px !important;
     min-width: 700px;
   }
 }
