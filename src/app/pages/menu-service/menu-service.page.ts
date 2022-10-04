@@ -2693,17 +2693,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             /**
                              * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
                              */
-                            if (this.cashtendAmount < this.orderData.totalAmount) {
-                                paymentAmnt = parseFloat(this.cashtendAmount);
+                            if (this.cashtendAmount <= this.orderData.totalAmount) {
+                                paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
 
                             } else {
+                                // console.clear()
+                                console.log(this.orderData.totalAmount)
                                 paymentAmnt = parseFloat(this.orderData.totalAmount);
                             }
                             //   this.orderData.IsDeposit = true
                         }
                     }
                 } else {
-                    paymentAmnt = parseFloat(this.cashtendAmount);
+                    paymentAmnt = parseFloat(this.cashtendAmount) -   this.cashDue;
                     if (this.cashtendAmount > this.orderData.totalAmount) {
                         if (this.orderData.IsDeposit === false) {
                             paymentAmnt = this.orderData.totalAmount;
@@ -2740,6 +2742,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
+
 
             const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;

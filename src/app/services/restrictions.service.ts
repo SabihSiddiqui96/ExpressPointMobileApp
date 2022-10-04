@@ -427,10 +427,10 @@ export class RestrictionsService {
         if (!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge) { // && this.patronDetails.Balance <= 0
             if (Math.round(this.orderData.totalAmount * 100) / 100 === 0) {
                 return true; // If total item cost is 0.00 debit of 0.00 is allowed even CannotCharge is true.
-            } else if(this.patronDetails.Balance > this.orderData.totalAmount){
+            } else if (this.patronDetails.Balance > this.orderData.totalAmount) {
                 this.showNoChargePrompt = true;
                 return false;
-            }else {
+            } else {
                 this.popupMessageService.showMessage(PopupMessageCode.E12480);
                 return false;
             }
@@ -563,7 +563,7 @@ export class RestrictionsService {
                     return true;
                 } else if (this.settingActionWhenBelowChargeLimit === 1) {
 
-                    if (saleHasOnlyOneReimbursableMeal ||
+                    if ((saleHasOnlyOneReimbursableMeal && this.settingChargeReimbursableMealsOnly && reimProjBal < creditLimit) ||
                         saleTotalOfJustALaCarteItems <= (accountBalance + paymentAmount) ||
                         !this.settingChargeReimbursableMealsOnly) {
                         this.showPrompt = true;
@@ -592,7 +592,7 @@ export class RestrictionsService {
                         // this.utilService.showToast('Only reimbursable meals can be charged.');
                         this.popupMessageService.showMessage(PopupMessageCode.E12371);
                         return false;
-                    } else if (saleHasOnlyAlaCarteItems && !this.settingChargeReimbursableMealsOnly) {
+                    } else if (saleHasOnlyAlaCarteItems && !this.settingChargeReimbursableMealsOnly && alaProjBal < creditLimitAlaCarte) {
                         // if (alaProjBal < creditLimitAlaCarte) {
                         //     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
                         //     this.popupMessageService.showMessage(PopupMessageCode.E12441);
@@ -601,17 +601,24 @@ export class RestrictionsService {
                         // }
                         this.showPrompt = true;
                         return false;
-                    } else if (this.settingActionWhenBelowChargeLimit === 2 && !this.settingChargeReimbursableMealsOnly) {
-                        // this.utilService.showToast('Please enter a partial payment');
-                        return true;
-                    } else if (this.settingActionWhenBelowChargeLimit === 1 && this.settingChargeReimbursableMealsOnly) {
+                    }
+                    //  else if (this.settingActionWhenBelowChargeLimit === 2 && !this.settingChargeReimbursableMealsOnly) {
+                    //     // this.utilService.showToast('Please enter a partial payment');
+                    //     return true;
+                    // }
+                    else if (this.settingActionWhenBelowChargeLimit === 1 && this.settingChargeReimbursableMealsOnly && reimProjBal < creditLimit) {
                         this.showPrompt = true;
                         return false;
-                    } else if (this.settingActionWhenBelowChargeLimit === 3 && this.settingChargeReimbursableMealsOnly) {
-                        // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
-                        this.popupMessageService.showMessage(PopupMessageCode.E12441);
-                        return false;
                     }
+                    else {
+                        this.showPrompt = false;
+                        return true;
+                    }
+                    // else if (this.settingActionWhenBelowChargeLimit === 3 && this.settingChargeReimbursableMealsOnly) {
+                    //     // this.utilService.showToast('Please enter a cash amount greater than or equal to the sale amount.');
+                    //     this.popupMessageService.showMessage(PopupMessageCode.E12441);
+                    //     return false;
+                    // }
 
                 } else if (this.settingActionWhenBelowChargeLimit === 2) {
                     this.partPayPopup = true;
