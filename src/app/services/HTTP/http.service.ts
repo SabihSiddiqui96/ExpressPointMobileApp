@@ -18,7 +18,7 @@ export class HttpService {
     public schoolCafeURL: string;
 
 
-    constructor(public http: HttpClient, public httpNative: HTTP, public appStateService: AppStateService) { }
+    constructor(public http: HttpClient, public httpNative: HTTP, public appStateService: AppStateService, public utilService: UtilService) { }
 
     public getCookieDetails(userdata): any {
         return this.http.get(API_URL + 'Cookies');
@@ -487,6 +487,7 @@ export class HttpService {
         const deviceinfo = JSON.parse(AppStateService.get('DeviceInfo'));
         const selectedsite = JSON.parse(AppStateService.get('SelectedSite'));
         deviceinfo.SchoolId = selectedsite.SchoolId;
+        deviceinfo.Appversion = this.utilService.versionNumber;
         AppStateService.set('DeviceInfo', JSON.stringify(deviceinfo));
 
 
