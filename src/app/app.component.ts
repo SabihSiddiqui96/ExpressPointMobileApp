@@ -280,16 +280,6 @@ export class AppComponent {
       this.sites = loginDetails.AuthorizedSites;
     }
 
-    // if (this.sites != null && this.sites.length > 1) {
-    //   this.isMultipleSchools = true;
-    // } else {
-    //   this.isMultipleSchools = false;
-    // }
-
-    // if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') !== null) {
-    //   this.deviceInfo = JSON.parse(AppStateService.get('DeviceInfo'));
-    // }
-
     if (AppStateService.get("SelectedSite")) {
       this.selectedSite = JSON.parse(
         AppStateService.get("SelectedSite")
