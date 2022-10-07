@@ -7,7 +7,7 @@
                     [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
                     [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
                     [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
-                    (click)="gridClick(grid);">
+                    (click)="gridClick($event, grid);">
                     {{grid.ButtonDescription}}&ensp;
                     <ion-icon name="alert" [style.display]="grid.restrictedItem==false? 'none' : ''">
                     </ion-icon>
