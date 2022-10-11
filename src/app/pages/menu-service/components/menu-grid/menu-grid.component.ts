@@ -41,22 +41,24 @@ export class MenuGridComponent {
         private modalCtrl: ModalController
     ) { }
 
-    public gridClick(grid) {
+    public gridClick(event, grid) {
+        if (event.clientX > 0 || event.clientY > 0 || event.layerX > 0 || event.layerY > 0 || event.offsetX > 0 || event.offsetY > 0) {
 
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
+            setTimeout(() => {
+                (document.activeElement as HTMLElement).blur();
+            }, 0);
 
-        if (grid.emptygrid === true) {
-            return false;
+            if (grid.emptygrid === true) {
+                return false;
+            }
+
+            if (grid.IsCategory === false) {
+                this.addMenuToCart(grid, this.patronDetails, this.mealCount);
+            } else {
+                this.showItemsInCategory(grid.RefId);
+            }
+            // this.event.publish('patronLargeImagehide', null);
         }
-
-        if (grid.IsCategory === false) {
-            this.addMenuToCart(grid, this.patronDetails, this.mealCount);
-        } else {
-            this.showItemsInCategory(grid.RefId);
-        }
-        // this.event.publish('patronLargeImagehide', null);
     }
 
     public addMenuToCart(menuItem, patronDetails, mealCount) {

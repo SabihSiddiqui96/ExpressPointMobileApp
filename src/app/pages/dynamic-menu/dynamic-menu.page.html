@@ -48,7 +48,7 @@
                 [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
                 [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
                 [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
-                (click)="gridClick(grid)">
+                (click)="gridClick($event, grid)">
                 {{grid.ButtonDescription}}&ensp;
                 <ion-icon class="button-icon" name="alert" [style.display]="grid.restrictedItem==false? 'none' : ''">
                 </ion-icon>
@@ -73,7 +73,7 @@
           <div *ngFor="let menuItem of itemsByCategory[i]; let j=index" class="menu-item-dynamic"
             [style.background]="category.BackColor">
             <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor"
-              (click)="gridClick(menuItem)">
+              (click)="gridClick($event, menuItem)">
               {{menuItem.MenuItemDescription}}
               <ion-icon name="alert" *ngIf="menuItem.restrictedItem"></ion-icon>
             </ion-button>

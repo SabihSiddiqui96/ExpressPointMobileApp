@@ -1575,25 +1575,26 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.defaultmealTypeName = mealType.MealTypeDescription;
     }
 
-    public gridClick(menuItem) {
+    public gridClick(event, menuItem) {
+        if (event.clientX > 0 || event.clientY > 0 || event.layerX > 0 || event.layerY > 0 || event.offsetX > 0 || event.offsetY > 0) {
 
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
+            setTimeout(() => {
+                (document.activeElement as HTMLElement).blur();
+            }, 0);
 
-        if (this.isStaticMenuSelected === true) {
-            if (menuItem.emptygrid === true) {
-                return false;
-            }
+            if (this.isStaticMenuSelected === true) {
+                if (menuItem.emptygrid === true) {
+                    return false;
+                }
 
-            if (menuItem.IsCategory === false) {
-                this.addMenuToCartForStaticMenus(menuItem);
+                if (menuItem.IsCategory === false) {
+                    this.addMenuToCartForStaticMenus(menuItem);
+                } else {
+                    // this.event.publish('category_all:select', { 'category': menuItem.RefId });
+
+                    this.showSubcategories(menuItem);
+                }
             } else {
-                // this.event.publish('category_all:select', { 'category': menuItem.RefId });
-
-                this.showSubcategories(menuItem);
-            }
-        } else {
             // const aLCItems = this.orderData.items.filter(i => {
             //   return !i.IsPartOfMeal;
             // });
@@ -1632,6 +1633,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
         this.event.publish('patronLargeImagehide', null);
     }
+}
 
     public deleteItem(item) {
         this.event.publish('patronLargeImagehide', null);
