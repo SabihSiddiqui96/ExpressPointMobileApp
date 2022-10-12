@@ -1160,14 +1160,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
             const canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
 
-            if (!canServeVisitingPatrons && this.setting.CanServeVisitingAdults === true) {
+            /*if (!canServeVisitingPatrons && this.setting.CanServeVisitingAdults === true) {
                 var patronsSpecialRosterPersonList = this.specialRosterPersonList.filter(s => s.SchoolId === this.schoolId);
                 var adultSpecialRosterPersonList = this.specialRosterPersonList.filter(s => s.SchoolId !== this.schoolId && s.IsStudent === false);
                 this.specialRosterPersonList = adultSpecialRosterPersonList.concat(patronsSpecialRosterPersonList);
             }
             else if (!canServeVisitingPatrons) {
                 this.specialRosterPersonList = this.specialRosterPersonList.filter(s => s.SchoolId === this.schoolId);
-            }
+            }*/
 
             this.specialRosterPersonList = _.sortBy(this.specialRosterPersonList, ['LastName', 'FirstName']);
 
