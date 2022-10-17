@@ -2388,7 +2388,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
-                    this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
+                    //check for order total 0 to allow schools to distribute free meals.
+                    if(this.orderData.totalAmount === 0) {
+                        this.transactionInProgress =true;
+                    } else {
+                        this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
+                    }
                     if (this.transactionInProgress) {
                         this.postSaleTransaction(transactionType);
                     } else {
