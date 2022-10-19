@@ -918,7 +918,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         };
         this.deviceTransactionId = this.utilService.generateUUID();
         this.largeImageToShow = false;
-        console.log(this.itemsByCategory);
         this.ResetData();
         const date = new Date();
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
@@ -1416,7 +1415,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             PouchQueriesService.GetRestrictableItems().
                 then((data) => {
                     this.restrictableAlaCarteItems = data.rows[0].doc.RestrictableAlaCarteItems;
-                    console.log('Restrictable Ala Items' + JSON.stringify(this.restrictableAlaCarteItems));
                     resolve(null);
                 }).catch((err) => { console.log(err); resolve(null); });
 
@@ -1807,7 +1805,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public adjustTrayQuantities(item) {
-        console.log('Item ' + item);
         if (item.Grain > 0) {
             this.trayGrain -= item.Grain;
         }
@@ -1868,8 +1865,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, defaultServingSize).
                     then((res) => {
-
-                        console.log(res);
 
                         if (res.docs.length > 0) {
                             const contributions = res.docs[0].Contributions;
@@ -2163,10 +2158,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
 
     public MakeItemALC(menuItem) {
-        console.log(menuItem);
-        console.log(this.orderData.items);
         const mi = _.find(this.orderData.items, { RefId: menuItem.RefId, 'ItemIndex': menuItem.ItemIndex });
-        console.log(mi);
         if (mi.IsPartOfMeal) {
             mi.IsPartOfMeal = false;
             mi.Price = mi.OriginalPrice;
@@ -2188,7 +2180,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         const index = _.findIndex(this.orderData.items, { 'RefId': menuItem.RefId, 'ItemIndex': menuItem.ItemIndex });
         this.orderData.items.splice(index, 1, mi);
 
-        console.log(this.orderData.items);
         this.sortOrderData();
     }
 
@@ -2297,7 +2288,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (items.length > 0) {
             items.forEach(item => {
-                console.log('Item ' + item);
                 if (item.Grain > 0) {
                     this.trayGrain += item.Grain;
                 }
@@ -2480,7 +2470,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         this.menuItemsArr.push(menuItemNo);
 
-        console.log('MealCount ' + this.mealCount);
         PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
             // this.utilService.setLoader(true);
             let currPrice = 0;
@@ -3412,7 +3401,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'PersonIdentifier': this.patronDetails.PersonIdentifier,
                 '_id': this.patronDetails._id
             };
-            console.log(this.saleData);
 
             const transactionDoc = {
                 '_id': 'Transaction--' + this.deviceTransactionId,
@@ -3634,7 +3622,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             this.utilService.selectAccountClick = false;
                             this.lookUpService.menuPayselectAccountClick = false;
                             this.selectedAccountDetails = {};
-                            console.log(spId);
                             if (this.returnToWhatPage === 'SpecialRoster') {
                                 this.event.publish('patronLookup:ready', {
                                     'patronIdSelected': JSON.stringify(this.patronId),
@@ -3809,7 +3796,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E06462, [this.patronDetails.FullName]);
                     this.transactionInProgress = false;
                 } else {
-                    console.log('2')
 
                     this.postSaleTransaction(transactionType);
                 }
@@ -3839,15 +3825,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         if (transactionType === 3) { // No charge limits are applied if transaction type is to Principal Account
-            console.log('4')
-
             this.postSaleTransaction(transactionType);
             return true;
         }
 
         if (saleTotal === paymentAmount) {
-            console.log('5')
-
             this.postSaleTransaction(transactionType);
             return true;
         }
@@ -3863,8 +3845,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (projectedBalance >= 0 || paymentAmount >= saleTotal) {
             // allow sale
-            console.log('6')
-
             this.postSaleTransaction(transactionType);
             return true;
         }
@@ -3878,8 +3858,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (!this.sepChargeLimit && projectedBalance < creditLimit) {
             if (this.setting.Setting_ActionWhenBelowChargeLimit === 2 && paymentAmount > 0) {
                 // allow sale
-                console.log('7')
-
                 this.postSaleTransaction(transactionType);
                 return true;
             } else if (this.setting.Setting_ActionWhenBelowChargeLimit === 1) {
@@ -4029,8 +4007,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
                 this.popupMessageService.showMessage(PopupMessageCode.E06484).then((bool) => {
                     if (bool) {
-                        console.log('8')
-
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
@@ -4038,8 +4014,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 return;
             } else {
                 // allow sale
-                console.log('9')
-
                 this.postSaleTransaction(transactionType);
                 return true;
             }
@@ -4060,8 +4034,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': transactionType });
             this.popupMessageService.showMessage(PopupMessageCode.E06484).then((bool) => {
                 if (bool) {
-                    console.log('10')
-
                     this.postSaleTransaction(transactionType);
                     this.event.publish('patron-released', { 'patronDetails': null });
                 }
@@ -4106,7 +4078,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         this.transactionInProgress = false;
 
-        console.log('HomeroomId ' + this.patronDetails.HomeRoomId);
         const spId = AppStateService.get('SpecialRosterId');
         const hmId = this.patronDetails.HomeRoomId;
         const gId = this.patronDetails.GradeId;
@@ -4213,7 +4184,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if (userEventData.selectedData) {
                         const selectedData = userEventData.selectedData;
 
-                        console.log(selectedData);
                         const data = userEventData.type;
 
                         switch (data) {
@@ -4302,16 +4272,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             if(this.patronDetails !==null){
-                const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
-                if(enableLog === 1){
-                    this.logDBService.logData({
-                        event : EventType.QUEUE,
-                        patronId : this.patronDetails.PersonId,
-                        type: LogType.INFO,
-                        data: this.patronDetails,
-                        queueCount: this.lookUpService.personsQ.length
-                    });
-                }
+                this.logDBService.logData({
+                    event: EventType.QUEUE,
+                    patronId: this.patronDetails.PersonId,
+                    type: LogType.INFO,
+                    data: this.patronDetails,
+                    queueCount: this.lookUpService.personsQ.length
+                });
             }
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
@@ -4678,7 +4645,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                     } else {
                         this.event.publish('patronLookup:ready', this.menuGridCount);
-                        console.log('^^^^^');
                     }
                 } else {
                     this.popupMessageService.showMessage(PopupMessageCode.E06343);
@@ -4877,9 +4843,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         PouchQueriesService.GetAllMenuItemCategories().
             then((res) => {
                 if (res.rows.length > 0) {
-                    console.log('*MenuItemCategories- POS ');
                     const mIC = res.rows.map(row => row.doc);
-                    console.log(mIC);
 
                     const categoryButtons = mIC.map(m => {
                         const mic = {
@@ -5039,9 +5003,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
 
                                             for (let k = 0; k < buttons.length; k++) {
-                                                console.log(this.patronDetails.RestrictedMenuItems[i] + ' ' + buttons[k].RefId);
 
-                                                console.log(this.patronDetails.RestrictedMenuItems[i] === buttons[k].RefId);
                                                 if (this.patronDetails.RestrictedMenuItems[i] === buttons[k].RefId) {
                                                     buttons[k]['restrictedItem'] = true;
                                                 }
@@ -5245,7 +5207,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     // if (is_restricted_item != -1 && this.isSpecialAccount == false && this.patronDetails['GradeId']) { //IsStudent Check
                     if (isRestrictedItem !== -1 && this.isSpecialAccount === false && this.patronDetails.IsStudent === true) { // IsStudent Check
                         /////////////////////////////////////////////////////////////////
-                        console.log(this.patronDetails['AvailableAmountForAlaCartePurchases']);
 
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
                             this.patronDetails['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
@@ -5327,8 +5288,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             // this.utilService.showToast('No other items may be selected. Please remove the last menu item and re-enter selected items');
                             break;
                         }
-
-                        console.log(JSON.stringify(itemData));
                     }
                 }
                 if (processOrderItem) {
@@ -5532,7 +5491,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         this.popupMessageService.showMessage(PopupMessageCode.E06409);
                         // this.utilService.showToast('There are no items within this category.');
                     }
-                    console.log('buttons' + buttons);
                     if (buttons !== undefined || buttons != null) {
                         if (buttons.length > 0) {
                             // console.clear();

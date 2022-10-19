@@ -89,6 +89,12 @@ export class LookupService {
     public setQ(queueInput) {
         this.getSettingValuesRequired(); // Added this to get the setting values in lookup using peripherals
         
+        this.logDBService.logData({
+            event: EventType.QUEUE,
+            patronId: queueInput.PIN,
+            type: LogType.INFO,
+            data: queueInput
+        });
 
         this.lookupAndPushPersonToQ(queueInput).then(() => {
             if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
@@ -161,6 +167,12 @@ export class LookupService {
     }
 
     public pushPersonToQ(person, atIndex) {
+        this.logDBService.logData({
+            event: EventType.QUEUE,
+            personId: person.PersonId,
+            type: LogType.INFO,
+            data: person
+        });
         person.InputDirection = person.InputDirection ? person.InputDirection : Direction.None;
         const personInQ = _.findIndex(this.personsQ, p => p.Identifier === person.Identifier);
         const specialPersonsinQ = _.findIndex(this.personsQ, q => q.PersonName === person.PersonName);
@@ -190,30 +202,24 @@ export class LookupService {
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
                 if(results[0] !== null) {
-                    const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
-                    if(enableLog === 1){
-                        this.logDBService.logData({
-                            event : EventType.LOOKUP,
-                            patronId : queueInput.PIN,
-                            type: LogType.INFO,
-                            data: results[0],
-                            queueCount: this.personsQ.length
-                        });
-                    }
+                    this.logDBService.logData({
+                        event: EventType.LOOKUP,
+                        patronId: queueInput.PIN,
+                        type: LogType.INFO,
+                        data: results[0],
+                        queueCount: this.personsQ.length
+                    });
                 }
                 resolve(null);
             },(error)=> {
-                if(queueInput!==null) {
-                    const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
-                    if(enableLog === 1){
-                        this.logDBService.logError({
-                            event : EventType.LOOKUP,
-                            patronId : queueInput.PIN,
-                            type: LogType.ERROR,
-                            data: queueInput,
-                            queueCount: this.personsQ.length
-                        });
-                    }
+                if (queueInput !== null) {
+                    this.logDBService.logError({
+                        event: EventType.LOOKUP,
+                        patronId: queueInput.PIN,
+                        type: LogType.ERROR,
+                        data: queueInput,
+                        queueCount: this.personsQ.length
+                    });
                 }
             });
         });
@@ -720,6 +726,12 @@ export class LookupService {
     }
 
     public CheckPreviousSalesOnInMemoryDBByDate(patron) {
+        this.logDBService.logData({
+            event: EventType.LOOKUP,
+            patronId: patron.Identifier,
+            type: LogType.INFO,
+            data: patron
+        });
         let inputDirectionVal = patron.InputDirection;
         return new Promise((resolve) => {
             PouchQueriesService.GetStudentInfo(patron.PersonId).then((result) => {

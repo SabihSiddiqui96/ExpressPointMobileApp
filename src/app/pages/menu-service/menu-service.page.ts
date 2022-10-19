@@ -377,7 +377,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.dayOfWeek = wDay[day.getUTCDay()];
 
         this.loadingID = LoadingService.generateLoadingID();
-        console.log("@@ Starting loader with id: " + this.loadingID);
         this.loadingService.present(this.loadingID, null, false).then(() => {
             Promise.all([this.setRegionSettingsForPayments(), this.getMealTypes(), this.getMealCategories()])
                 .then(result => {
@@ -1038,7 +1037,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             const prevItems = _.map(previousSales, (o) => o.SalesByMealType);
             const allItems = [].concat.apply([], prevItems);
-            console.log('New Array' + JSON.stringify(allItems));
 
             /**
              * Removing the Date filter in the assumption that the previous sales are reset
@@ -2124,10 +2122,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         PouchQueriesService.GetAllMenuItemCategories().
             then((res) => {
                 if (res.rows.length > 0) {
-                    console.log('*MenuItemCategories- POS ');
                     const MIC = res.rows.map(row => row.doc);
-                    console.log(MIC);
-
                     const categoryButtons = MIC.map(m => {
                         const mic = {
                             'MenuItemCategoryId': m.MenuItemCategoryId,
@@ -2703,7 +2698,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                             } else {
                                 // console.clear()
-                                console.log(this.orderData.totalAmount)
                                 paymentAmnt = parseFloat(this.orderData.totalAmount);
                             }
                             //   this.orderData.IsDeposit = true
@@ -2882,11 +2876,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 '_id': this.patronDetails._id
             };
 
-            // console.log('-----this.saleData------');
-            // console.log(this.saleData);
-            // console.log(JSON.stringify(this.patronDetails));
-
-
             const transactionDoc = {
                 '_id': 'Transaction--' + this.deviceTransactionId,
                 'saleData': this.saleData
@@ -2918,7 +2907,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     updatedPatronDetails.PreviousSales.map(s => {
                         if (s.MealTypeId === this.saleData['MealTypeId']) {
 
-                            console.log(this.orderData.items);
                             for (let i = 0; i < this.orderData.items.length; i++) {
                                 for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
                                     s.SalesByMealType.push({
@@ -3126,7 +3114,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         //MenuOrderPayPage.isCompleteTransactionProcessing = false;
 
                         if (this.lookUpService.getQ().length !== 0) {
-                            console.log('GetQ   ' + this.lookUpService.getQ()[0]);
                             this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                         } else {
                             if (this.returnToWhatPage === 'SpecialRoster') {
@@ -3343,16 +3330,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             if(this.patronDetails.PersonId !== null) {
-                const enableLog = parseInt(SettingService.getSettingValue('ENABLELOG'));
-                if(enableLog === 1){
-                    this.logDBService.logData({
-                        event : EventType.QUEUE,
-                        patronId : this.patronDetails.PersonId,
-                        type: LogType.INFO,
-                        data: this.patronDetails,
-                        queueCount: this.lookUpService.personsQ.length
-                      });
-                }
+                this.logDBService.logData({
+                    event: EventType.QUEUE,
+                    patronId: this.patronDetails.PersonId,
+                    type: LogType.INFO,
+                    data: this.patronDetails,
+                    queueCount: this.lookUpService.personsQ.length
+                });
             }
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
@@ -3415,9 +3399,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public getReviews() {
         // this.event.publish('patronLargeImagehide', null);
         this.isMarkForReviewClicked = true;
-        console.log('Mark for review cliked ---' + this.isMarkForReviewClicked);
         this.transactionService.getAllReviewReasons().then((reviews) => {
-            console.log('Mark for review cliked after getting reviews ---' + this.isMarkForReviewClicked);
             this.reviewReasons = reviews[0];
             if (this.reviewReasons.length === 0) {
                 this.popupMessageService.showMessage(PopupMessageCode.E23393);
@@ -3927,7 +3909,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public onMenuGridEvent(event: MenuGridEvent) {
-        console.log('rcvd event - menu-grid', event);
         switch (event.type) {
             case MenuGridEventType.SetMealCount:
                 this.mealCount = event.payload;

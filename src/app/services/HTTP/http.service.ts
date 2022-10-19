@@ -570,9 +570,6 @@ export class HttpService {
     }
 
     public SaveSummarySale(manualSaleData) {
-        console.log('------Inside http service----');
-        console.log(manualSaleData);
-        console.log(JSON.stringify(manualSaleData));
         return this.http.post(API_URL + 'SaveSummarySale', manualSaleData
             // JSON.stringify(manualSaleData)
         ).pipe(map(res => res));
@@ -586,13 +583,11 @@ export class HttpService {
 
     public SaveDefaultMenusForTerminal(terminalMenuData) {
 
-        console.log(JSON.stringify(terminalMenuData));
         return this.http.post(API_URL + 'SyncPostDefaultMenusForTerminal', terminalMenuData).pipe(map(res => res));
     }
 
     public SyncPostDefaultServingLineMenusForTerminal(terminalMenuData) {
 
-        console.log(JSON.stringify(terminalMenuData));
         return this.http.post(API_URL + 'SyncPostDefaultServingLineMenusForTerminal', terminalMenuData).pipe(map(res => res));
 
     }

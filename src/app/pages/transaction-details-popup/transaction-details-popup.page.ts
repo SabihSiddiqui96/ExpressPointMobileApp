@@ -256,7 +256,6 @@ export class TransactionDetailsPopupPage implements OnInit {
                 priceTypes.map(doc => {
                     this.priceTypeIDs.push(_.pick(doc, ['PriceTypeId', 'PriceTypeDescription']));
                 });
-                console.log('PRice Types from DB' + JSON.stringify(this.priceTypeIDs));
                 this.priceTypeSM = _.find(this.priceTypeIDs, function (o) { return o.PriceTypeDescription === 'Second Meal'; });
             });
 
@@ -272,12 +271,10 @@ export class TransactionDetailsPopupPage implements OnInit {
                     for (let i = 0; i < this.mealTypes.length; i++) {
                         tempArray.push(_.pick(this.mealTypes[i], ['MealTypeId', 'MealTypeDescription']));
                     }
-                    // onsole.log("After filtering"+JSON.stringify(tempArray));
 
                     // Filtering and adding into PriceTypeId array after comparing with current Sales
                     this.priceTypeIDs.forEach((item) => {
                         const dataList = this.saleDataList;
-                        // console.log("Sale List" + JSON.stringify(this.saleDataList));
                         const obJ = _.map(_.filter(dataList, function (sale) {
                             return sale.PriceTypeId === item.PriceTypeId;
                         }), function (object) {
@@ -294,7 +291,6 @@ export class TransactionDetailsPopupPage implements OnInit {
                             // item['countSeconMeal'] = 0;
                         }
                     });
-                    // console.log('NEW PRICE TYPE ' + JSON.stringify(this.priceTypeIDs));
                     const adults = ['ProgAdult', 'Visitor', 'Staff']; // Created adults array to avoid second meal count for adults
                     tempArray.forEach((item) => {
                         this.priceTypeIDs.forEach((priceItem) => {
@@ -380,7 +376,6 @@ export class TransactionDetailsPopupPage implements OnInit {
                 // console.clear();
                 if (userEventData.selectedData) {
                     const selectedData = userEventData.selectedData;
-                    console.log(selectedData);
                     const typeHandler = userEventData.type;
 
                     switch (typeHandler) {

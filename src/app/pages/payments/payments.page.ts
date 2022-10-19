@@ -374,7 +374,6 @@ export class DoPayment {
         const classOb = this;
 
         setTimeout(function () {
-            console.log(event.keyCode);
             const val = (<HTMLInputElement>event.target).value;
             if (val.length <= 9) {
 
@@ -1022,7 +1021,6 @@ export class PaymentsPage extends DoPayment implements OnInit {
         if (this.patronSelectedData.PersonId) {
             this.http.GetPersonImage(this.patronSelectedData.PersonId).subscribe(data => {
                 if (data != null) {
-                    console.log(data);
                     this.patronSelectedData['Image'] = data;
 
                 }

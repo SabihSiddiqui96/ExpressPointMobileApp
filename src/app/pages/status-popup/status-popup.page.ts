@@ -41,7 +41,6 @@ export class StatusPopupPage implements OnInit {
         }
 
         this.events.subscribe("data:sync", (data) => {
-            console.log(data);
 
             Object.assign(this.syncList, data);
 

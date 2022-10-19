@@ -36,7 +36,6 @@ export class SessionInfoPage implements OnInit {
     // this.sessionList = this.sessionService.checkSession();
     this.GetSessionInfo().then((docs) => {
       this.sessionList = docs;
-      console.log(JSON.stringify(this.sessionList));
     });
 
     if (AppStateService.get('SelectedSite')) {

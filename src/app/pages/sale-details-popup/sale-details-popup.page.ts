@@ -27,9 +27,7 @@ export class SaleDetailsPopupPage implements OnInit {
       this.navSaleData = this.SaleData;
       this.menuItems = this.navSaleData.MenuItems;
 
-      /////////////////////////////////////////
       console.log('Hello MenuSoldPopup Page');
-      // console.log(this.patronDetails.SoldItems)
 
       if ((parseInt(SettingService.getSettingValue('DYNMENU')) === 1) && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
         this.useDynamicMenus = true;
@@ -61,7 +59,6 @@ export class SaleDetailsPopupPage implements OnInit {
           this.useDynamicMenus = false;
         }
 
-        console.log(this.previousSalesItemized);
 
       }
       // Set the transaction type - DEBIT / PAYMENT

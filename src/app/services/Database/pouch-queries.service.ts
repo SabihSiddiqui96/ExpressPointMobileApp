@@ -1575,14 +1575,11 @@ export class PouchQueriesService {
     return new Promise((resolve, reject) => {
       PouchQueriesService.GetAllPendingSummarySale().then((res) => {
         const summarySales = res.rows.map(row => row.doc);
-        console.log(JSON.stringify(summarySales));
         if (summarySales.length > 0) {
           summarySales.map((doc) => {
             if (doc.IsSynced === false) {
-              console.log(JSON.stringify(doc));
               this.http.SaveSummarySale(doc).subscribe(
                 data => {
-                  console.log('Posted Summary Sale' + JSON.stringify(data));
                   doc.IsSynced = true;
                   PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                 },
@@ -1634,14 +1631,11 @@ export class PouchQueriesService {
     return new Promise((resolve, reject) => {
       PouchQueriesService.GetAllPendingTerminalDefaultMenu().then((res) => {
         const terminalMenus = res.rows.map(row => row.doc);
-        console.log(JSON.stringify(terminalMenus));
         if (terminalMenus.length > 0) {
           terminalMenus.map((doc) => {
             if (doc.IsSynced === false) {
-              console.log(JSON.stringify(doc));
               this.http.SaveDefaultMenusForTerminal(doc).subscribe(
                 data => {
-                  console.log('Posted default menu for terminal' + JSON.stringify(data));
                   doc.IsSynced = true;
                   PouchDBService.UpsertSingleDoc(doc, EXP_STANDARD_MENUS).then(() => { resolve(null); });
                 },
@@ -1670,15 +1664,12 @@ export class PouchQueriesService {
     return new Promise((resolve, reject) => {
       PouchQueriesService.GetAllPendingTerminalServingLineDefaultMenu().then((res) => {
         const terminalMenus = res.rows.map(row => row.doc);
-        console.log(JSON.stringify(terminalMenus));
         if (terminalMenus.length > 0) {
 
           terminalMenus.map((doc) => {
             if (doc.IsSynced === false) {
-              console.log(JSON.stringify(doc));
               this.http.SyncPostDefaultServingLineMenusForTerminal(doc).subscribe(
                 data => {
-                  console.log('Post Terminal Serving Line Dynamic menu for dynamic case' + JSON.stringify(data));
                   doc.IsSynced = true;
                   PouchDBService.UpsertSingleDoc(doc, EXP_DYNAMIC_MENUS).then(() => { resolve(null); });
                 },
@@ -1888,7 +1879,6 @@ export class PouchQueriesService {
       EXP_COMMON.allDocs({
         include_docs: true
       }).then(res => {
-        console.log(res.rows);
         res.rows.map(doc => {
           if (doc.nonce !== undefined) {
             EXP_COMMON.remove(doc);
@@ -1899,7 +1889,6 @@ export class PouchQueriesService {
         EXP_PERSON.allDocs({
           include_docs: true
         }).then(res => {
-          console.log(res.rows);
           if (res.rows.length >= 0) {
             res.rows.map(doc => {
               if (doc.nonce !== undefined) {
@@ -1913,7 +1902,6 @@ export class PouchQueriesService {
         EXP_STANDARD_MENUS.allDocs({
           include_docs: true
         }).then(res => {
-          console.log(res.rows);
           if (res.rows.length >= 0) {
             res.rows.map(doc => {
               if (doc.nonce !== undefined) {
@@ -1926,7 +1914,6 @@ export class PouchQueriesService {
         EXP_DYNAMIC_MENUS.allDocs({
           include_docs: true
         }).then(res => {
-          console.log(res.rows);
           if (res.rows.length >= 0) {
             res.rows.map(doc => {
               if (doc.nonce !== undefined) {
@@ -1939,7 +1926,6 @@ export class PouchQueriesService {
         EXP_TRANSACTIONS.allDocs({
           include_docs: true
         }).then(res => {
-          console.log(res.rows);
           if (res.rows.length >= 0) {
             res.rows.map(doc => {
               if (doc.nonce !== undefined) {

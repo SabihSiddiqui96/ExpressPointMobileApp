@@ -401,7 +401,6 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
     // @HostListener('keydown', ['$event'])
     public onKeyDown(e) {
-        console.log('Key Down' + JSON.stringify(e));
         const coinIndex = this.findIndex(this.denominationDetailsCoins);
         const billIndex = this.findIndex(this.denominationDetailsBills);
         if (e.shiftKey && e.keyCode === 9) { // Shift and Tab both keys are pressed
@@ -774,7 +773,6 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         this.events.subscribe('total:updated', (userEventData) => {
             this.checkList = userEventData.check_list;
             console.log('----this.checkList on close session----');
-            console.log(JSON.stringify(this.checkList));
             this.ChangeTotal();
         });
     }
@@ -856,7 +854,6 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public numberClick(key: any) {
-        console.log(key);
         if (this.customKeys === '0') {
             this.customKeys = '';
         }

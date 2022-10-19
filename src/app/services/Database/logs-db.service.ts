@@ -3,6 +3,7 @@ import { Events } from "@ionic/angular";
 import { AppStateService } from "../app-state.service";
 import { HttpService } from "../HTTP/http.service";
 import { EXP_LOGS, PouchDBService } from "../pouch-db.service";
+import { SettingService } from "../setting.service";
 import { UtilService } from "../util.service";
 
 
@@ -12,6 +13,7 @@ import { UtilService } from "../util.service";
 })
 export class LogsDBService {
 
+  public enableLog: number  = 0;
   syncStatus: string;
   terminalId: string;
    currentDateTime =
@@ -25,6 +27,7 @@ export class LogsDBService {
   constructor(private http: HttpService, public utilService: UtilService, public events: Events, public appStateService: AppStateService) { 
     let deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"));
     this.terminalId = deviceInfo.TerminalId;
+    this.enableLog = parseInt(SettingService.getSiteSettingValue('ENABLELOG'));
   }
 
 
@@ -38,15 +41,14 @@ export class LogsDBService {
   }*/
   logData(logData:any){
     let inputLogData;
-    console.log('Log Data : '+logData.data)
-    if(this.terminalId!== null && logData.data !==null && logData.data !== undefined){
+    if(this.enableLog === 1 && this.terminalId!== null && logData.data !==null && logData.data !== undefined){
       inputLogData = {
         TerminalId : this.terminalId,
         EventName : logData.event,
         EventType: logData.type,
         Data: JSON.stringify(logData.data),
         QueueCount: logData.queueCount,
-        ErrorLogTime: new Date().toISOString(),
+        ErrorLogTime: new Date().toISOString()
       }
       this.http.saveErrorLogs(inputLogData).subscribe((res) => console.log(res));
     }
@@ -54,8 +56,7 @@ export class LogsDBService {
 
   logError(logData:any){
     let errorLogData;
-    console.log('Log Error : '+logData.patronId);
-    if(this.terminalId !== null && logData.patronId !==null){
+    if(this.enableLog === 1 && this.terminalId !== null && logData.patronId !==null){
       errorLogData = {
         TerminalId: this.terminalId,
         EventName: 0,

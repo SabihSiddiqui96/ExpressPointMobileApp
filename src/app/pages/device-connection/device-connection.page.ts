@@ -200,7 +200,6 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
 
         this.samlProcessing = true;
         console.log('Login data received from SAML app...');
-        console.log(data);
 
         if (data.Error.length > 0) {
           this.showLoginFailedMessage('Login Timeout', 'User login timeout reached... Please try login again !!!')
@@ -338,7 +337,6 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
 
             });
           }
-          console.log(this.schoolDistrictList);
         },
         error => {
           this.showLoader = false;
