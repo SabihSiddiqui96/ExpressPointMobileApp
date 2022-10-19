@@ -425,7 +425,6 @@ export class ServiceSelectionPage implements OnInit {
           break;
       }
 
-      console.log("OPenSession checkOPenSession " + this.openSession);
     } else {
       if (type === "Transactions") {
         this._nav.navigateRoot("transaction-details-popup", {});

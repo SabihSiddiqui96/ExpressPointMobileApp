@@ -48,7 +48,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.event.subscribe('category_all:select', (userEventData) => {
             // this.event.destroy('category_all:select');
             this.modal.dismiss();
-            console.log('Category data' + JSON.stringify(userEventData));
             this.showItemsInCategory(userEventData.category.MenuItemCategoryId); 0
         });
 
@@ -831,8 +830,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     }
                 });
             });
-            console.log('getStudentsImage')
-            console.log(students)
             resolve(students);
 
         })
@@ -1131,7 +1128,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         '_id': student._id
                     };
 
-                    // console.log(orderdata)
                     const classRoomSaleDoc = {
                         '_id': 'Transaction--' + deviceTransactionId,
                         'saleData': orderdata
@@ -1157,10 +1153,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     // }
                     this.classroomSales.push(classRoomSaleDoc);
                     // console.clear()
-                    console.log(items);
                     items = [];
-                    console.log(items);
-                    console.log(this.classroomSales);
 
                     this.persons = _.sortBy(this.persons, ['LastName','FirstName']);
                     this.persons.map(person => {
@@ -1256,7 +1249,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 this.signalRService.sendDataToServer(personSaledetails, this.schoolId
                 );
                 AppStateService.set('TransactionNumber', this.transactionNumber);
-                console.log(this.classroomSales);
                 this.popupMessageService.showMessage(PopupMessageCode.E04318);
                 // this.utilService.showToast('Bulk sale was successful.');
                 this.clearStudents();
@@ -1567,7 +1559,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 if (res.rows.length > 0) {
                     console.log('*MenuItemCategories- AlaCarte classroom sale ');
                     const MIC = res.rows.map(row => row.doc);
-                    console.log(MIC);
 
                     const categoryButtons = MIC.map(m => {
                         const mic = {
@@ -1604,7 +1595,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     this.patronSelectedData = null;
                 }
                 resolve(null);
-                console.log(this.patronSelectedData);
             });
         });
 
@@ -1656,7 +1646,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         this.callModalCtrl(buttons, categoryName, false);
                         this.event.subscribe('menu_subcategory:select', (userEventData) => {
                             this.event.destroy('menu_subcategory:select');
-                            console.log('Sub Category data' + JSON.stringify(userEventData));
                             this.modal.dismiss();
                             if (userEventData.subgrid) {
                                 this.addMenuToCart(userEventData.subgrid);
@@ -1699,13 +1688,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
         // this.getAvailableAlcarteItemsForDay(day);
 
-        /////////////////////////////
-
-        console.log('**************************');
-        console.log(this.patronDetails);
-        console.log('**************************');
-
-        ////////////////////////
         if (this.patronDetails.GradeId === 0) {
             this.patronDetails.GradeId = null;
         }
@@ -1796,10 +1778,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public addMenuToCart(menuItem) {
         if (this.patronId) {
-            console.log('Inside addMenuToCart');
-            console.log(menuItem);
-            // debugger;
-            console.log(this.restrictableAlaCarteItems);
 
             let priceTypeId = this.patronDetails['PriceTypeId'];
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
@@ -1999,7 +1977,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             });
 
         console.log('---------Student ALa Carte-23223-------------');
-        console.log(this.studentWiseAlaCarte);
         const studentwiseAlaCarteCopy = this.studentWiseAlaCarte;
         //  this.checkIfALaCarteItemsExists(studentwiseAlaCarteCopy);
     }
@@ -2198,7 +2175,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             this.patronId = person.PersonId;
             this.setPatrondata().then(() => {
                 const transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
-                console.log('Current Transaction No' + transactionNumber);
                 const modal = this.modalCtrl.create({
                     component: MenuPaymentPopupPage,
                     componentProps: {
@@ -2392,8 +2368,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
             const prevItems = _.map(previousSales, (o) => o.SalesByMealType);
             const allItems = [].concat.apply([], prevItems);
-            console.log('New Array' + JSON.stringify(allItems));
-
 
             let soldItemsByMealType = [];
             if (prevSalesByMealType) {

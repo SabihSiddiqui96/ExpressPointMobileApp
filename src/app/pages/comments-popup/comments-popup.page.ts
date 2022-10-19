@@ -109,7 +109,6 @@ export class CommentsPopupPage implements OnInit {
         this.close();
         this._nav.navigateRoot('transaction-details-popup');
       } else {
-        console.log(1);
         const modal = this.modalCtrl.create({
           component: TransactionDetailsPopupPage,
           componentProps: {

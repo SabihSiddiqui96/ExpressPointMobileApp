@@ -228,7 +228,6 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
     }
 
     this.specialCharacters = SettingService.getSettingValue('SPECHAPASS');
-    console.log(this.passwordSystemSettingsList);
   }
 
   public ionViewDidEnter() {

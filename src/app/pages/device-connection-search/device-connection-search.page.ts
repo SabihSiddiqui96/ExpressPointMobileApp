@@ -87,7 +87,6 @@ export class DeviceConnectionSearchPage implements OnInit {
               loginUrl: data[i][1]
             });
           }
-          console.log(this.schoolDistrictList);
         },
         error => {
           this.showLoader = false;

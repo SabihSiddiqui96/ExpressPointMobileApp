@@ -63,9 +63,6 @@ export class MenuGridComponent {
 
     public addMenuToCart(menuItem, patronDetails, mealCount) {
 
-        console.log('***************');
-        console.log(menuItem, patronDetails, mealCount);
-
         if (this.checkOrderItems(menuItem.ButtonDescription)) {
             for (let i = 0; i < this.orderData.items.length; i++) {
                 this.changes.emit({

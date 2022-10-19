@@ -431,7 +431,6 @@ export class GoLogin implements OnDestroy {
                         this.utilService.showToast('No user found');
                     }
                 }).then(() => {
-                    console.log(this.loginDetails);
                     PouchDBService.UpsertSingleDoc(this.loginDetails, EXP_SYSTEM).then(() => {
                     });
                 });;
@@ -456,7 +455,6 @@ export class GoLogin implements OnDestroy {
                 }
 
             }).then(() => {
-                console.log(this.loginDetails);
                 PouchDBService.UpsertSingleDoc(this.loginDetails, EXP_SYSTEM).then(() => {
                 });
             });

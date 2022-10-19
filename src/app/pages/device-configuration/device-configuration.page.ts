@@ -79,7 +79,6 @@ export class DeviceConfigurationPage implements OnInit {
         const data = this.router.getCurrentNavigation().extras.state.showBack;
         DeviceConfigurationPage.showBackValue = this.router.getCurrentNavigation().extras.state.showBack;
         this.showBack = DeviceConfigurationPage.showBackValue;
-        console.log('Data received' + data);
         if (data === false) {
           const sessionInfo = new SessionInfoPage(this.navCtrl, this.modalCtrl, this.events, this.utilService, this.router,
             this.appStateService, this.pouchQuery);

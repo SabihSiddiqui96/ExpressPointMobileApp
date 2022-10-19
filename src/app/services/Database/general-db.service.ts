@@ -93,7 +93,6 @@ export class GeneralDBService {
         subscribe
         (
           data => {
-            // console.log('Sync orders data' + JSON.stringify(data));
             if (data != null) {
               // var orders = data;
               const orders = data.PatronOrderModel;
@@ -127,7 +126,6 @@ export class GeneralDBService {
             }
             if (preOrders.length > 0) {
               this.syncStatus = 'Success';
-              console.log('Orders before push' + JSON.stringify(preOrders));
               PouchDBService.UpsertOrderDocs(preOrders, EXP_COMMON).then(() => {
                 this.events.publish('data:syncDetails', { SiteSettings: { SyncOrders: "D" } });
                 resolve(null);

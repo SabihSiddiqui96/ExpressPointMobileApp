@@ -50,7 +50,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
         // const settings = JSON.parse(AppStateService.get('Settings'));;
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
-        console.log('Negative Balance ' + this.EXNEGBAL);
         this.setDefaultAmount();
         // if (AppStateService.get('login_details')) {
         //     this.EXNEGBAL = JSON.parse(AppStateService.get('Settings'));.EXNEGBAL;

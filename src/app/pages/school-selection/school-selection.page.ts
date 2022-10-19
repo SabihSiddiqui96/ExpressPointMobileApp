@@ -91,8 +91,6 @@ export class SchoolSelectionPage implements OnInit {
     this.siteList = JSON.parse(AppStateService.get('login_details')).AuthorizedSites;
     // copy required for search
     this.siteListCopy = JSON.parse(AppStateService.get('login_details')).AuthorizedSites;
-    // console.log(this.siteList)
-    // console.log(this.siteList[0])
     if (this.siteList.length === 1) {
       this.selectedSite = JSON.stringify(this.siteList[0]);
       this.setupSchoolData();
