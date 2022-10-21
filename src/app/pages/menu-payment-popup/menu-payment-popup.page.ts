@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { Components } from '@ionic/core';
-import { NavController, AlertController, ModalController } from '@ionic/angular';
+import { NavController, AlertController, ModalController, Platform } from '@ionic/angular';
 
 import { DoPayment } from '../../pages/payments/payments.page';
 import { LookupService } from '../../services/lookup.service';
@@ -165,10 +165,10 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     public popupMessageService: PopupMessageService, public router: Router,
     public appStateService: AppStateService, public pouchDBService: PouchDBService,
     public settingService: SettingService, public pouchQuery: PouchQueriesService, public printService: PrintService,
-    public signalRService: SignalRService) {
+    public signalRService: SignalRService, public platform: Platform) {
 
     super(navCtrl, alertCtrl, event, lookUpService, utilService, transactionService, popupMessageService, modalCtrl,
-      router, appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService);
+      router, appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService, platform);
 
 
 
