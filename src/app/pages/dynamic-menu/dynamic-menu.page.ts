@@ -319,7 +319,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
-        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService:LogsDBService,
+        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService: LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
@@ -1593,45 +1593,45 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.showSubcategories(menuItem);
                 }
             } else {
-            // const aLCItems = this.orderData.items.filter(i => {
-            //   return !i.IsPartOfMeal;
-            // });
-            // if (this.mealFormed) {
-            //   const value = this.checkALCInItems(aLCItems);
-            //   if (value) {
-            //     return false;
-            //   } else {
-            //     this.addMenuToCart(menuItem);
-            //   }
-            // } else {
-            //   if (aLCItems) {
-            //     const value = this.checkALCInItems(aLCItems);
-            //     if (value) {
-            //       return false;
-            //     } else {
-            //       this.addMenuToCart(menuItem);
-            //     }
-            //   } else {
-            //     this.addMenuToCart(menuItem);
-            //   }
-            // }
-            if (!menuItem.MenuItemId) {
-                menuItem.MenuItemId = menuItem.RefId;
-            }
-            PouchQueriesService.GetPrice(menuItem.MenuItemId, this.patronDetails['PriceTypeId'], this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
-                if (price.rows.length > 0) {
-                    let currPrice = 0;
-                    this.addMenuToCart(menuItem);
-                } else {
-                    this.popupMessageService.showMessage(PopupMessageCode.E06461, [menuItem.MenuItemDescription, this.patronDetails.PersonName]);
+                // const aLCItems = this.orderData.items.filter(i => {
+                //   return !i.IsPartOfMeal;
+                // });
+                // if (this.mealFormed) {
+                //   const value = this.checkALCInItems(aLCItems);
+                //   if (value) {
+                //     return false;
+                //   } else {
+                //     this.addMenuToCart(menuItem);
+                //   }
+                // } else {
+                //   if (aLCItems) {
+                //     const value = this.checkALCInItems(aLCItems);
+                //     if (value) {
+                //       return false;
+                //     } else {
+                //       this.addMenuToCart(menuItem);
+                //     }
+                //   } else {
+                //     this.addMenuToCart(menuItem);
+                //   }
+                // }
+                if (!menuItem.MenuItemId) {
+                    menuItem.MenuItemId = menuItem.RefId;
                 }
-            });
-            // this.utilService.setLoader(true);
+                PouchQueriesService.GetPrice(menuItem.MenuItemId, this.patronDetails['PriceTypeId'], this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+                    if (price.rows.length > 0) {
+                        let currPrice = 0;
+                        this.addMenuToCart(menuItem);
+                    } else {
+                        this.popupMessageService.showMessage(PopupMessageCode.E06461, [menuItem.MenuItemDescription, this.patronDetails.PersonName]);
+                    }
+                });
+                // this.utilService.setLoader(true);
 
+            }
+            this.event.publish('patronLargeImagehide', null);
         }
-        this.event.publish('patronLargeImagehide', null);
     }
-}
 
     public deleteItem(item) {
         this.event.publish('patronLargeImagehide', null);
@@ -1866,8 +1866,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, defaultServingSize).
                     then((res) => {
 
-                        if (res.docs.length > 0) {
-                            const contributions = res.docs[0].Contributions;
+                        if (res.rows.length > 0) {
+
+                            const contributions = res.rows[0].doc.Contributions;
                             if (contributions.length > 0) {
 
                                 contributions.forEach(contribution => {
@@ -1970,8 +1971,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, servingSize).
                                 then((res) => {
 
-                                    if (res.docs.length > 0) {
-                                        const contributions = res.docs[0].Contributions;
+                                    if (res.rows.length > 0) {
+
+                                        const contributions = res.rows[0].doc.Contributions;
                                         if (contributions.length > 0) {
 
                                             contributions.forEach(contribution => {
@@ -2073,8 +2075,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                     PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, servingSize).
                         then((res) => {
-                            if (res.docs.length > 0) {
-                                const contributions = res.docs[0].Contributions;
+                            if (res.rows.length > 0) {
+                                const contributions = res.rows[0].doc.Contributions;
                                 if (contributions.length > 0) {
 
                                     contributions.forEach(contribution => {
@@ -2893,13 +2895,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
-                
+
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
                     //check for order total 0 to allow schools to distribute free meals.
-                    if(this.orderData.totalAmount === 0) {
-                        this.transactionInProgress =true;
+                    if (this.orderData.totalAmount === 0) {
+                        this.transactionInProgress = true;
                     } else {
                         this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
                     }
@@ -3261,7 +3263,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
-            
+
             if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
                 paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
             }
@@ -4271,7 +4273,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if(this.patronDetails !==null){
+            if (this.patronDetails !== null) {
                 this.logDBService.logData({
                     event: EventType.QUEUE,
                     patronId: this.patronDetails.PersonId,
