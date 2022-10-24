@@ -41,7 +41,8 @@ export class LogsDBService {
   }*/
   logData(logData:any){
     let inputLogData;
-    if(this.enableLog === 1 && this.terminalId!== null && logData.data !==null && logData.data !== undefined){
+    const enableLog = parseInt(SettingService.getSiteSettingValue('ENABLELOG'));
+    if(enableLog === 1 && this.terminalId!== null && logData.data !==null && logData.data !== undefined){
       inputLogData = {
         TerminalId : this.terminalId,
         EventName : logData.event,
@@ -56,7 +57,8 @@ export class LogsDBService {
 
   logError(logData:any){
     let errorLogData;
-    if(this.enableLog === 1 && this.terminalId !== null && logData.patronId !==null){
+    const enableLog = parseInt(SettingService.getSiteSettingValue('ENABLELOG'));
+    if(enableLog === 1 && this.terminalId !== null && logData.patronId !==null){
       errorLogData = {
         TerminalId: this.terminalId,
         EventName: 0,
