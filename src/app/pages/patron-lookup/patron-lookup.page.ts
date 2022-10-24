@@ -23,6 +23,9 @@ import { CommandCodes } from '../../services/enums/command-codes';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { LoadingService } from "../../services/loading.service";
+import { EventType } from '../../services/enums/event-type';
+import { LogType } from '../../services/enums/log-type';
+import { LogsDBService } from '../../services/Database/logs-db.service';
 
 @Component({
     selector: 'page-patron-lookup',
@@ -167,6 +170,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         public switchHandsService: SwitchHandsService,
         public navCtrl: NavController,
         private utilService: UtilService,
+        private logDBService:LogsDBService,
         public loadingService: LoadingService,
         private http: HttpService,
         public popupMessageService: PopupMessageService,
@@ -325,7 +329,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.patronAccount = 'patron_pin';
                             this.patronAccount = 'advanced';
                             this.advancedPatron = 'by_specialroster';
-                            console.log(userEventData.patronRoomSelected);
                             this.onChangeSpecialRoster(userEventData.patronRoomSelected);
                             this.getSpecialRostersList();
                             this.GetGradesBySchool();
@@ -796,7 +799,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             });
 
             this.specialRosterList = _.uniq(specialrosters);
-            console.log(this.specialRosterList);
             //  PouchQueriesService.GetSpecialRosters().then(res => {
             //
             //      console.log(res);
@@ -863,7 +865,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public lookupByPIN() {
-
+        this.logDBService.logData({
+            event: EventType.LOOKUP,
+            patronId: this.patronSearch.keyword,
+            type: LogType.INFO,
+            queueCount: this.lookUpService.personsQ.length
+        });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
             this.lookUpService.lookupByPIN(this.patronSearch.keyword, Direction.None).then((patrons) => {
                 this.patronSearch.keyword = '';
@@ -991,7 +998,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public onChangeGrade() {
         // console.clear()
-        console.log(this.selectedGrade);
         if (typeof (this.selectedGrade) !== undefined && this.selectedGrade !== -1) {
             this.homeRoomList = [];
             this.selectedHomeroom = -1;
@@ -1021,7 +1027,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.popupMessageService.showMessage(PopupMessageCode.E18373);
             // this.utilService.showToast('Some fields are missing');
         }
-        console.log(this.homeRoomList);
     }
 
     public getPatronList() {
@@ -1134,7 +1139,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
     public onChangeSpecialRoster(selectedSpecialRosterId) {
         // console.clear()
-        console.log(selectedSpecialRosterId);
         PouchQueriesService.GetPatronsBySpecialRoster(selectedSpecialRosterId).then(res => {
 
             this.specialRosterPersonList = res.docs.map(doc => {
@@ -1324,8 +1328,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.selectSpecialRosterPatron();
                             break;
                         case 'patronlist':
-                            console.log('this.personlist');
-                            console.log(this.personlist);
                             this.selectedHomeroomPatronId = selectedData.value;
                             this.selectedHomeroomPatronName = selectedData.label;
                             this.getPatronDetailsByPatronId();
@@ -1401,9 +1403,13 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
     public onPeripheralKey(event) {
-
+        this.logDBService.logData({
+            event: EventType.LOOKUP,
+            type: LogType.INFO,
+            data: event,
+            queueCount: this.personsQ.length
+        });
         var charCode = event.which || event.charCode || event.keyCode || 0;
-        console.log('Code: ' + charCode);
         if (this.isEnterKeyHandled === true) {
             this.isEnterKeyHandled = false;
             return;

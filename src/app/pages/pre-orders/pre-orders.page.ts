@@ -481,7 +481,6 @@ export class PreOrdersPage implements OnInit {
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT
                 };
-                // console.log(orderdata)
                 const onlineOrderTransactionDoc = {
                     '_id': 'Transaction--' + deviceTransactionId,
                     'saleData': transcationDoc
@@ -492,9 +491,6 @@ export class PreOrdersPage implements OnInit {
                 // };
                 // this.onlineOrderSales.push(onlineOrderDoc);
                 this.onlineOrderTransactions.push(onlineOrderTransactionDoc);
-
-                // console.log("Transaction Doc"+JSON.stringify(this.OnlineOrderTransactions));
-                // console.log("Order Sales Doc"+JSON.stringify(this.OnlineOrderSales));
 
                 const person = _.filter(this.allPersonDetails, function (item) {
                     return item.PersonId === student.PersonId;
@@ -563,7 +559,6 @@ export class PreOrdersPage implements OnInit {
         // this.select_all_from_view = false;
         if (this.getSelectedStudentCount() !== this.orderServedCount) {
         }
-        console.log(this.studentList);
         // this.select_all = false;
     }
 
@@ -617,9 +612,7 @@ export class PreOrdersPage implements OnInit {
         this.domEvent = fromEvent(document, 'keydown').subscribe((event) => {
             let incomingID = '';
             this.inputBuffer.push(event);
-            console.log('Input Buffer' + JSON.stringify(this.inputBuffer));
             if (event['keyCode'] === 13) {
-                console.log('Input Buffer' + JSON.stringify(this.inputBuffer));
                 this.inputBuffer.map(c => {
                     if (c.keyCode !== 13 && c.keyCode !== 8) {
                         incomingID += c.key;

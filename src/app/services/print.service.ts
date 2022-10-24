@@ -8,7 +8,6 @@ export class PrintService {
     public getTransactionReceiptFormat(transactionReceiptDoc: TransactionDetailPrintFormat, receiptType): string {
         let receiptFormat: string = '';
         console.log('----transactionReceiptDoc-----');
-        console.log(JSON.stringify(transactionReceiptDoc));
 
         let homeRoom: string = '';
         if (transactionReceiptDoc.Teacher != null) {
@@ -145,9 +144,6 @@ export class PrintService {
     public getCloseSessionReportFormat(closeSessionFormat: CloseSessionPrintFormat): string {
         let receiptFormat: string = '';
         console.log('----closeSessionFormat-----');
-        console.log(JSON.stringify(closeSessionFormat));
-
-
 
         receiptFormat = `<table cellpadding="0" cellspacing="7">
            

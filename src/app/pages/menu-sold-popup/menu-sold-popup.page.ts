@@ -38,7 +38,6 @@ export class MenuSoldPopupPage implements OnInit {
         /////////////////////////////////
 
         console.log('Hello MenuSoldPopup Page');
-        console.log(this.navPatronDetails.SoldItems);
 
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
         if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
@@ -62,8 +61,6 @@ export class MenuSoldPopupPage implements OnInit {
               'saleDetail': saleDetail
             });
           });
-
-          console.log(this.previousSalesItemized);
 
         }
         resolve(null);

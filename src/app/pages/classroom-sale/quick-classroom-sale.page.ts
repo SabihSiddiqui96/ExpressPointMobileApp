@@ -212,7 +212,6 @@ export class QuickClassroomSalePage {
 
     }
     public showAllergyPopover(student) {
-        console.log('Student detail' + JSON.stringify(student));
         if (student.Allergies !== null) {
             student['allergy_count'] = student.Allergies.length;
         }
@@ -255,7 +254,6 @@ export class QuickClassroomSalePage {
         PouchQueriesService.GetRestrictableItems().
             then((data) => {
                 this.restrictableAlaCarteItems = data.rows[0].doc.RestrictableAlaCarteItems;
-                console.log('Restrictable Ala Carte Items' + this.restrictableAlaCarteItems);
             });
     }
 
@@ -263,7 +261,6 @@ export class QuickClassroomSalePage {
         PouchQueriesService.GetRestrictableCategories().
             then((data) => {
                 this.restrictableCategories = data.rows[0].doc.RestrictableAlaCarteCategories;
-                console.log('Restrictable Categories' + JSON.stringify(this.restrictableCategories));
             });
     }
 

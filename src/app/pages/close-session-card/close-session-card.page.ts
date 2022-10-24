@@ -42,9 +42,6 @@ export class CloseSessionCardPage implements OnInit {
     //   this.cardList = this.router.getCurrentNavigation().extras.state.navData.card_list;
     // }
 
-    console.log('card list ' + JSON.stringify(this.cardList));
-
-
     if (SettingService.getSettingValue('HIDECHECKS') === '1') {
       this.hideChecks = true;
     } else if (SettingService.getSettingValue('HIDECHECKS') === '0') {

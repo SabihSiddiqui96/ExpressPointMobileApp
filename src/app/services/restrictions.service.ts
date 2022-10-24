@@ -6,6 +6,9 @@ import { AppStateService } from '../services/app-state.service';
 import { SettingService } from '../services/setting.service';
 import { PopupMessageCode } from '../services/enums/popup-message-codes';
 import { PopupMessageService } from '../services/popup-message.service';
+import { EventType } from './enums/event-type';
+import { LogType } from './enums/log-type';
+import { LogsDBService } from './Database/logs-db.service';
 
 
 @Injectable({
@@ -50,8 +53,9 @@ export class RestrictionsService {
     public ALACASREST: boolean = false;
     public useDynamicMenus: boolean = false;
     constructor(
-        private popupMessageService: PopupMessageService) {
-
+        private popupMessageService: PopupMessageService,
+        private logDBService:LogsDBService) {
+        
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
         }
@@ -195,7 +199,13 @@ export class RestrictionsService {
 
         creditLimit = -creditLimit;
 
-
+        this.logDBService.logData({
+            event: EventType.LOOKUP,
+            patronId: student.PatronId,
+            type: LogType.INFO,
+            creditLimit: creditLimit,
+            data: student
+        });
 
         if (projectedBalance >= 0) {
             // allow sale
@@ -319,8 +329,6 @@ export class RestrictionsService {
         this.menuItemPrice = details.menuItemPrice;
         this.mealCount = details.mealCount;
         this.restrictedAlacarteCount = details.restrictedCount;
-        console.log('Total Alacarte Amount' + this.alacarteTotal);
-        console.log('Menu Item PRices' + JSON.stringify(this.allMenuItemsPrices));
         const alaItems = student['Items'];
         const settings = JSON.parse(AppStateService.get('Settings'));
         this.settingChargeReimbursableMealsOnly = settings.Setting_ChargeReimbursableMealsOnly;
@@ -394,7 +402,6 @@ export class RestrictionsService {
             then((data) => {
                 const siteSettings = data.rows[0].doc;
                 this.maxAlaCarteCountBySite = siteSettings.MaxALCbySite;
-                console.log('Max Ala Carte Items' + this.maxAlaCarteCountBySite);
                 this.isSiteCEP = siteSettings.IsCEP;
             });
     }
@@ -438,7 +445,6 @@ export class RestrictionsService {
         }
 
         if (this.patronDetails.isSpecialAccount || (this.patronDetails.Balance - this.orderData.accountBalance) < 0) {
-            console.log('balance-acBalance<0');
 
             if (this.patronDetails.isSpecialAccount) {
 
@@ -501,7 +507,12 @@ export class RestrictionsService {
         creditLimit = -creditLimit;
         creditLimitAlaCarte = -creditLimitAlaCarte;
 
-
+        this.logDBService.logData({
+            event: EventType.LOOKUP,
+            personId: this.patronDetails.PersonId,
+            type: LogType.INFO,
+            data: ordDetails.patronDetails
+        });
 
         if (projectedBalance >= 0 || paymentAmount >= saleTotal) {
             // allow sale

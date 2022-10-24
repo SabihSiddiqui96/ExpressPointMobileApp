@@ -519,7 +519,6 @@ export class AllPopupPage implements OnInit {
     }
 
     public select(data, fromPeripheral?) {
-        console.log(data);
         // tslint:disable-next-line:no-empty
         // if (this.navType === 'ReviewTypes' && this.selectedValue !== (undefined)) {
 
@@ -537,7 +536,6 @@ export class AllPopupPage implements OnInit {
                     return o.OrderNumber.includes(data);
                 });
             }
-            console.log("Filtered Data" + filteredData);
             this.close();
             this.event.publish("menu-service-popup", {
                 selectedData: filteredData,
@@ -594,7 +592,6 @@ export class AllPopupPage implements OnInit {
                                     this.http.GetPersonImage(student.value).subscribe(
                                         (data) => {
                                             if (data != null) {
-                                                console.log(data);
                                                 student.Image = data;
                                                 const objIndex = this.popUpData.findIndex(
                                                     (obj) => obj.PersonId === student.value

@@ -243,7 +243,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
   // @HostListener('keydown', ['$event'])
   public onKeyDown(e) {
-    console.log('Key Down' + JSON.stringify(e));
     const coinIndex = this.findIndex(this.denominationDetailsCoins);
     const billIndex = this.findIndex(this.denominationDetailsBills);
     if (e.shiftKey && e.keyCode === 9) { // Shift and Tab both keys are pressed
@@ -393,9 +392,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       this.utilService.publishIpcEvent('Open-CashDrawer');
       this.utilService.subscribeIpcEvent('ErrorLog').then((data) => {
         // console.clear()
-        console.log(data['error']);
-        console.log(data['process']);
-        console.log(data['paths']);
 
       });
     }
@@ -493,9 +489,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       }
     }
 
-    console.log(this.denominationDetailsCoins);
-    console.log(this.denominationDetailsBills);
-
     this.denominationDetailsCoins = _.sortBy(this.denominationDetailsCoins, [
       d => d.Worth
     ]);
@@ -568,7 +561,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public changeQuantity(index, quantity, type) {
     if (type === 'COINS') {
       if (quantity) {
-        console.log(quantity);
         const qty = parseInt(quantity);
         this.denominationDetailsCoins[index].Total = this.denominationDetailsCoins[index].Worth * qty;
         this.denominationDetailsCoins[index].Quantity = qty;
@@ -816,7 +808,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       if (key !== 'X' && key !== 'GO' && this.customKeys.length < 5) {
         this.customKeys += key;
         this.activeFieldQty = this.customKeys;
-        console.log('Qty' + this.activeFieldQty);
         if (coinIndex >= 0) {
           this.changeQuantity(coinIndex, this.activeFieldQty, 'COINS');
         } else if (billIndex >= 0) {
