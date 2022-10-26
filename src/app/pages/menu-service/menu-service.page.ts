@@ -1,5 +1,5 @@
 import { MenuGridComponent, MenuGridEvent, MenuGridEventType } from './components/menu-grid/menu-grid.component';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
 import { Network } from '@ionic-native/network/ngx';
@@ -118,6 +118,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     @ViewChild(MenuGridComponent, { static: false })
     public menuGridComponent;
+
+    @HostListener('document:keyup', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        switch (event.code) {
+            case 'Space':
+                this.makeSale(2);
+                break;
+        }
+    }
 
     public type = 'MenuService';
     // public patronId = null;
@@ -267,6 +276,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public disableCharge: boolean = false;
     private popupSubscription: Subscription;
     private ALACASREST: boolean = false;
+    public static onKeyUpCallback;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -663,7 +673,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         );
 
     }
-
 
     // To check whether to enable/disable the load previous patron button in menu service
     public subscribeForLoadingPatron() {
