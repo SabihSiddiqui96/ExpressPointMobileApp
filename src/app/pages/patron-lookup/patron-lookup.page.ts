@@ -158,7 +158,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public keyboardShowSubscription;
     public keyboardHideSubscription;
     public isCordovaApp: boolean;
-    public eventType:string;
+    public eventType: string;
     public PinIdLabel: string;
 
     constructor(
@@ -170,7 +170,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         public switchHandsService: SwitchHandsService,
         public navCtrl: NavController,
         private utilService: UtilService,
-        private logDBService:LogsDBService,
+        private logDBService: LogsDBService,
         public loadingService: LoadingService,
         private http: HttpService,
         public popupMessageService: PopupMessageService,
@@ -417,7 +417,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         );
     }
 
-    public bindPeriPheralEvent(){
+    public bindPeriPheralEvent() {
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
     }
 
@@ -866,6 +866,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             event: EventType.LOOKUP,
             patronId: this.patronSearch.keyword,
             type: LogType.INFO,
+            data: this.patronSearch,
             queueCount: this.lookUpService.personsQ.length
         });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
@@ -1280,7 +1281,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 if (userEventData.selectedData) {
                     const selectedData = userEventData.selectedData;
                     //const eventType = userEventData.type ? '':this.eventType;
-                    if(userEventData.type !== ''){
+                    if (userEventData.type !== '') {
                         this.eventType = userEventData.type;
                     }
                     switch (this.eventType) {
@@ -1296,15 +1297,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.onChangeGrade();
                             break;
                         case 'patronHomeroom':
-                            if(selectedData.value && selectedData.label){
+                            if (selectedData.value && selectedData.label) {
                                 this.selectedHomeroom = selectedData.value;
                                 this.selectedHomeroomName = selectedData.label;
                                 this.returnToWhatPage = 'HomeRoom'; // Saketh for Back to Homeroom Sale
                                 AppStateService.set('HomeroomId', this.selectedHomeroom);
-    
+
                                 this.getPatronList();
                             }
-                           
+
                             break;
                         case 'patronPatron':
                             this.selectedHomeroomPatronId = selectedData.value;
