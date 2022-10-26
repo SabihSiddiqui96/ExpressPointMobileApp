@@ -1877,9 +1877,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, defaultServingSize).
                     then((res) => {
 
-                        if (res.rows.length > 0) {
-
-                            const contributions = res.rows[0].doc.Contributions;
+                        if (res.docs.length > 0) {
+                            const contributions = res.docs[0].Contributions;
                             if (contributions.length > 0) {
 
                                 contributions.forEach(contribution => {
@@ -2906,7 +2905,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
-
+                
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
@@ -4284,7 +4283,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if (this.patronDetails !== null) {
+            if(this.patronDetails !==null){
                 this.logDBService.logData({
                     event: EventType.QUEUE,
                     patronId: this.patronDetails.PersonId,

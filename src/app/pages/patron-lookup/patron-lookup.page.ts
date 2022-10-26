@@ -866,7 +866,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             event: EventType.LOOKUP,
             patronId: this.patronSearch.keyword,
             type: LogType.INFO,
-            data: this.patronSearch,
             queueCount: this.lookUpService.personsQ.length
         });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
