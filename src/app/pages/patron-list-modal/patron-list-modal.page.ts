@@ -20,6 +20,7 @@ export class PatronListModalPage implements OnInit {
     @Input() isFromQueue;
     @Input() isFromAdvPatronSearch;
     @Input() allowVisitingPatron;
+    isGridView = false;
 
     ngOnInit() {
         this.navPatronList = this.patron_list;
@@ -117,6 +118,10 @@ export class PatronListModalPage implements OnInit {
         }
 
 
+    }
+
+    toggleView(){
+        this.isGridView = !this.isGridView;
     }
 
     public updateAdvLookupSortOrder() {

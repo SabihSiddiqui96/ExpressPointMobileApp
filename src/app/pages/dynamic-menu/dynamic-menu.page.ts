@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
 import { NavController, AlertController, PopoverController, ModalController, Platform } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
@@ -309,6 +309,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public loadingID;
     public printAllSetting: number = 0;
     private ALACASREST: boolean = false;
+
+    @HostListener('document:keyup', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        switch (event.code) {
+            case 'Space':
+                this.makeSale(2);
+                break;
+        }
+    }
+
+
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
@@ -319,7 +330,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
-        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService:LogsDBService,
+        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService: LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
@@ -1593,45 +1604,45 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.showSubcategories(menuItem);
                 }
             } else {
-            // const aLCItems = this.orderData.items.filter(i => {
-            //   return !i.IsPartOfMeal;
-            // });
-            // if (this.mealFormed) {
-            //   const value = this.checkALCInItems(aLCItems);
-            //   if (value) {
-            //     return false;
-            //   } else {
-            //     this.addMenuToCart(menuItem);
-            //   }
-            // } else {
-            //   if (aLCItems) {
-            //     const value = this.checkALCInItems(aLCItems);
-            //     if (value) {
-            //       return false;
-            //     } else {
-            //       this.addMenuToCart(menuItem);
-            //     }
-            //   } else {
-            //     this.addMenuToCart(menuItem);
-            //   }
-            // }
-            if (!menuItem.MenuItemId) {
-                menuItem.MenuItemId = menuItem.RefId;
-            }
-            PouchQueriesService.GetPrice(menuItem.MenuItemId, this.patronDetails['PriceTypeId'], this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
-                if (price.rows.length > 0) {
-                    let currPrice = 0;
-                    this.addMenuToCart(menuItem);
-                } else {
-                    this.popupMessageService.showMessage(PopupMessageCode.E06461, [menuItem.MenuItemDescription, this.patronDetails.PersonName]);
+                // const aLCItems = this.orderData.items.filter(i => {
+                //   return !i.IsPartOfMeal;
+                // });
+                // if (this.mealFormed) {
+                //   const value = this.checkALCInItems(aLCItems);
+                //   if (value) {
+                //     return false;
+                //   } else {
+                //     this.addMenuToCart(menuItem);
+                //   }
+                // } else {
+                //   if (aLCItems) {
+                //     const value = this.checkALCInItems(aLCItems);
+                //     if (value) {
+                //       return false;
+                //     } else {
+                //       this.addMenuToCart(menuItem);
+                //     }
+                //   } else {
+                //     this.addMenuToCart(menuItem);
+                //   }
+                // }
+                if (!menuItem.MenuItemId) {
+                    menuItem.MenuItemId = menuItem.RefId;
                 }
-            });
-            // this.utilService.setLoader(true);
+                PouchQueriesService.GetPrice(menuItem.MenuItemId, this.patronDetails['PriceTypeId'], this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+                    if (price.rows.length > 0) {
+                        let currPrice = 0;
+                        this.addMenuToCart(menuItem);
+                    } else {
+                        this.popupMessageService.showMessage(PopupMessageCode.E06461, [menuItem.MenuItemDescription, this.patronDetails.PersonName]);
+                    }
+                });
+                // this.utilService.setLoader(true);
 
+            }
+            this.event.publish('patronLargeImagehide', null);
         }
-        this.event.publish('patronLargeImagehide', null);
     }
-}
 
     public deleteItem(item) {
         this.event.publish('patronLargeImagehide', null);
@@ -1970,8 +1981,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, servingSize).
                                 then((res) => {
 
-                                    if (res.docs.length > 0) {
-                                        const contributions = res.docs[0].Contributions;
+                                    if (res.rows.length > 0) {
+
+                                        const contributions = res.rows[0].doc.Contributions;
                                         if (contributions.length > 0) {
 
                                             contributions.forEach(contribution => {
@@ -2073,8 +2085,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                     PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, servingSize).
                         then((res) => {
-                            if (res.docs.length > 0) {
-                                const contributions = res.docs[0].Contributions;
+                            if (res.rows.length > 0) {
+                                const contributions = res.rows[0].doc.Contributions;
                                 if (contributions.length > 0) {
 
                                     contributions.forEach(contribution => {
@@ -2898,8 +2910,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.postSaleTransaction(transactionType);
                 } else {
                     //check for order total 0 to allow schools to distribute free meals.
-                    if(this.orderData.totalAmount === 0) {
-                        this.transactionInProgress =true;
+                    if (this.orderData.totalAmount === 0) {
+                        this.transactionInProgress = true;
                     } else {
                         this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
                     }
@@ -3261,7 +3273,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
-            
+
             if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
                 paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
             }
