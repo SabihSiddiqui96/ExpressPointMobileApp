@@ -40,6 +40,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public isCordovaApp: boolean;
   public content_height;
   public onKeyDownCallback;
+  public isNullSessionId: boolean = false;
 
   ngOnInit() {
     this.router.events.pipe(startWith([]),
@@ -189,6 +190,11 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
     this.getOpenSession();
   }
+
+  // public makeSessionIdNull() {
+  //   if (this.isNullSessionId) this.isNullSessionId = false;
+  //   else this.isNullSessionId = true;
+  // }
 
   public setGridSize(timeout) {
 
@@ -656,7 +662,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       }
     }
 
-    const sessionId = this.generateUUID();
+    const sessionId = this.isNullSessionId ? null : this.generateUUID();
 
     const now = new Date();
     const UTC = now.getTime();
