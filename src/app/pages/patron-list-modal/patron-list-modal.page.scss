@@ -23,3 +23,15 @@ ion-footer{
     display: block;
     width: 100%;
 }
+
+:host(.toggle-checked) .toggle-icon {
+    background: var(--background-checked) !important;
+}
+
+.background-color {
+    ::ng-deep {
+        .toggle-icon {
+            background : green !important;
+        }
+    }
+}
