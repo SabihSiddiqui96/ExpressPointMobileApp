@@ -190,6 +190,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     this.getOpenSession();
   }
 
+
   public setGridSize(timeout) {
 
     setTimeout(() => {

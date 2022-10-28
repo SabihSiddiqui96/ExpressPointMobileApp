@@ -1233,7 +1233,8 @@ export class PouchQueriesService {
         let newSessionDoc;
         const sessionDocs = res.rows.map(row => row.doc);
         sessionDocs.map(doc => {
-          if (doc.isSentToServer === false) {
+
+          if (doc.isSentToServer === false && doc.SessionId !== null && doc.isStillOpen) {
             this.http.postOpenSession(doc.SessionId, doc.SessionDenominations, doc.OpeningBalance,
               doc.OpenDateWithTime, doc.TerminalId, doc.SchoolId, doc.LoginWithoutSetup).
               subscribe(
@@ -1245,11 +1246,23 @@ export class PouchQueriesService {
 
                   newSessionDoc.SessionId = data;
                   newSessionDoc._id = 'OpenSession--' + data;
-                  EXP_TRANSACTIONS.remove(doc);
-                  newSessionDoc.isSentToServer = true; // to not post this do to server again
-                  PouchDBService.UpsertSingleDoc(newSessionDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
-                });
+                  EXP_TRANSACTIONS.remove(doc).then(() => {
+                    newSessionDoc.isSentToServer = true; // to not post this do to server again
+                    PouchDBService.UpsertSingleDoc(newSessionDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
+                  });
+                })
           }
+          if (doc.SessionId === null) {
+            doc.SessionId = this.utilService.generateUUID();
+            PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
+          }
+          if (doc.isSentToServer === true && !doc.isStillOpen) {
+            EXP_TRANSACTIONS.remove(doc).then(() => {
+              resolve(null);
+            })
+          }
+
+
         });
         resolve(null);
       });
