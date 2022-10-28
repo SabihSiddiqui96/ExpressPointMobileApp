@@ -357,6 +357,14 @@ ion-button[fill="clear"] {
   --opacity: 1;
 }
 
+.toggle-icon {
+  background: var(--background-checked);
+}
+
+toggle-icon {
+  --background-checked: green;
+}
+
 .menu-item-static ion-button,
 .menu-item-dynamic ion-button {
   border: none;

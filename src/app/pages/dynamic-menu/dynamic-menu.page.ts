@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
 import { NavController, AlertController, PopoverController, ModalController, Platform } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
@@ -309,6 +309,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public loadingID;
     public printAllSetting: number = 0;
     private ALACASREST: boolean = false;
+
+    @HostListener('document:keyup', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        switch (event.code) {
+            case 'Space':
+                this.makeSale(2);
+                break;
+        }
+    }
+
+
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
