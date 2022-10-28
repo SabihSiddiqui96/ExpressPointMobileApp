@@ -15,6 +15,7 @@
     </ion-menu-toggle>
     <ion-title class="ion-text-center">
       Open Service
+
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -75,7 +76,7 @@
                   (click)="decrDenominationCnt(denomination.DenominationId, denomination.Quantity )"></ion-icon>
               </ion-col>
               <ion-col size="2" class="ion-align-self-center">
-                <input  id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='BILLS'"
+                <input id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='BILLS'"
                   (click)="setActiveField(denomination.DenominationId, denomination.Quantity )"
                   [ngClass]="{'active-input-label-opencloseBalance': denomination.DenominationId == activeField, 'input-label-opencloseBalance': denomination.DenominationId != activeField}"
                   [(ngModel)]="denomination.Quantity">
