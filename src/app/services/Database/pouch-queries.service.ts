@@ -467,11 +467,11 @@ export class PouchQueriesService {
     // });
   }
 
-  public static GetDataForOfflineUsefromSystemDB():any{
+  public static GetDataForOfflineUsefromSystemDB(): any {
     return EXP_SYSTEM.allDocs({
-      startkey:'dataforofflineUse',
-      endkey:'dataforofflineUse',
-      include_docs:true
+      startkey: 'dataforofflineUse',
+      endkey: 'dataforofflineUse',
+      include_docs: true
     })
   }
 
@@ -1080,6 +1080,36 @@ export class PouchQueriesService {
     });
   }
 
+  // public static GetDynamicMenuCategoryDetials(menuItemId, servingSize): any {
+
+  //   const args = {
+  //     menuItemId: menuItemId,
+  //     servingSize: servingSize
+  //   };
+
+  //   return new Promise<FilteredDocs>((resolve) => {
+  //     EXP_DYNAMIC_MENUS.allDocs({
+  //       include_docs: true
+  //     }).then(res => {
+  //       const testRegex = '^categoryDetail--' + menuItemId + '--' + servingSize;
+  //       const searchResult = JSON.parse('{ "docs": [] }');
+  //       _.filter(res.rows, function (o) {
+  //         if (o.doc._id === undefined) {
+  //           return false;
+  //         }
+  //         if (RegExp(testRegex).test(o.doc._id)) {
+  //           searchResult.docs.push(o.doc);
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //       });
+
+  //       resolve(searchResult);
+  //     });
+  //   });
+  // }
+
   public static GetDynamicMenuCategoryDetials(menuItemId, servingSize): any {
 
     const args = {
@@ -1087,27 +1117,12 @@ export class PouchQueriesService {
       servingSize: servingSize
     };
 
-    return new Promise<FilteredDocs>((resolve) => {
-      EXP_DYNAMIC_MENUS.allDocs({
-        include_docs: true
-      }).then(res => {
-        const testRegex = '^categoryDetail--' + menuItemId + '--' + servingSize;
-        const searchResult = JSON.parse('{ "docs": [] }');
-        _.filter(res.rows, function (o) {
-          if (o.doc._id === undefined) {
-            return false;
-          }
-          if (RegExp(testRegex).test(o.doc._id)) {
-            searchResult.docs.push(o.doc);
-            return true;
-          } else {
-            return false;
-          }
-        });
-
-        resolve(searchResult);
-      });
+    return EXP_DYNAMIC_MENUS.allDocs({
+      startkey: 'categoryDetail--' + menuItemId + '--' + servingSize,
+      endkey: 'categoryDetail--' + menuItemId + '--' + servingSize + '\uffff',
+      include_docs: true
     });
+
   }
 
   public static GetDefaultDynamicTerminalMenuGrid(terminalId, mealTypeId): any {
@@ -1218,7 +1233,8 @@ export class PouchQueriesService {
         let newSessionDoc;
         const sessionDocs = res.rows.map(row => row.doc);
         sessionDocs.map(doc => {
-          if (doc.isSentToServer === false) {
+
+          if (doc.isSentToServer === false && doc.SessionId !== null && doc.isStillOpen) {
             this.http.postOpenSession(doc.SessionId, doc.SessionDenominations, doc.OpeningBalance,
               doc.OpenDateWithTime, doc.TerminalId, doc.SchoolId, doc.LoginWithoutSetup).
               subscribe(
@@ -1230,11 +1246,23 @@ export class PouchQueriesService {
 
                   newSessionDoc.SessionId = data;
                   newSessionDoc._id = 'OpenSession--' + data;
-                  EXP_TRANSACTIONS.remove(doc);
-                  newSessionDoc.isSentToServer = true; // to not post this do to server again
-                  PouchDBService.UpsertSingleDoc(newSessionDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
-                });
+                  EXP_TRANSACTIONS.remove(doc).then(() => {
+                    newSessionDoc.isSentToServer = true; // to not post this do to server again
+                    PouchDBService.UpsertSingleDoc(newSessionDoc, EXP_TRANSACTIONS).then(() => { resolve(null); });
+                  });
+                })
           }
+          if (doc.SessionId === null) {
+            doc.SessionId = this.utilService.generateUUID();
+            PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
+          }
+          if (doc.isSentToServer === true && !doc.isStillOpen) {
+            EXP_TRANSACTIONS.remove(doc).then(() => {
+              resolve(null);
+            })
+          }
+
+
         });
         resolve(null);
       });

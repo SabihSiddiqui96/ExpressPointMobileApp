@@ -258,13 +258,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public ngOnInit() {
 
-        this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-        document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
 
-        document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
         PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
-
+        
         if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined) {
             if (AppStateService.get('pnpPeripherals')) {
                 document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
@@ -869,6 +866,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             event: EventType.LOOKUP,
             patronId: this.patronSearch.keyword,
             type: LogType.INFO,
+            data: this.patronSearch,
             queueCount: this.lookUpService.personsQ.length
         });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {

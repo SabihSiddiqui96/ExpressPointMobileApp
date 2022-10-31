@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
-import { NavController, AlertController, PopoverController, ModalController } from '@ionic/angular';
+import { NavController, AlertController, PopoverController,Platform, ModalController } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { LookupService } from '../../services/lookup.service';
 import { PouchDBService, EXP_TRANSACTIONS, EXP_PERSON } from '../../services/pouch-db.service';
@@ -20,6 +20,7 @@ import { Router } from '@angular/router';
 import { PrintService, TransactionDetailPrintFormat } from '../../services/print.service';
 import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
+import { PatronLookupPage } from '../patron-lookup/patron-lookup.page';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -47,6 +48,7 @@ export class DoPayment {
     public terminalId;
     public transactionNumber: number;
     public terminalName: any;
+    public isIOS: boolean = false;
 
     public priceButtons = [{ 'value': 1, 'price': '$1.00' },
     { 'value': 5, 'price': '$5.00' },
@@ -114,9 +116,15 @@ export class DoPayment {
         public popupMessageService: PopupMessageService, public modalCtrl: ModalController,
         public router: Router, public appStateService: AppStateService, public pouchDBService: PouchDBService,
         public settingService: SettingService, public pouchQuery: PouchQueriesService, public printService: PrintService
-        , public signalRService: SignalRService) {
+        , public signalRService: SignalRService, public platform: Platform) {
+
+        this.isIOS = this.platform.is('ios');
+        this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
+            document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+        document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
 
         this.isCordovaApp = UtilService.isCordovaApp;
+
         if (UtilService.isCordovaApp) {
 
             this.keyboardShowSubscription = this.event.subscribe("keyboard:willshow", (data) => {
@@ -912,10 +920,10 @@ export class PaymentsPage extends DoPayment implements OnInit {
         public popupMessageService: PopupMessageService, public modalCtrl: ModalController, public router: Router,
         public appStateService: AppStateService, public pouchDBService: PouchDBService,
         public settingService: SettingService, public pouchQuery: PouchQueriesService, public printService: PrintService,
-        public signalRService: SignalRService) {
+        public signalRService: SignalRService, public platform: Platform) {
 
         super(navCtrl, alertCtrl, event, lookUpService, utilService, transactionService, popupMessageService, modalCtrl, router,
-            appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService);
+            appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService, platform);
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
 
 
