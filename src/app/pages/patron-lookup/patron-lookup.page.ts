@@ -261,10 +261,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
         PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
-        document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
-
+        
         if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined) {
             if (AppStateService.get('pnpPeripherals')) {
+                document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
                 document.addEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
             }
             else {
