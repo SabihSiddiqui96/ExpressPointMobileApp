@@ -1808,9 +1808,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public confirmSecondMeal(data) {
         this.mealCount = this.mealCount + 1;
         if (this.isStaticMenuItemSelected) {
-            this.Confirmed_CartMenuItemForStaticMenus(data.menu_item, data.price_type_id);
+            this.Confirmed_CartMenuItemForStaticMenus(data.menu_item, data.price_type_id, true);
         } else {
-            this.Confirmed_CartMenuItem(data.menu_item, data.price_type_id);
+            this.Confirmed_CartMenuItem(data.menu_item, data.price_type_id, true);
         }
         // this.setMealCount(this.mealCount);
     }
@@ -2452,7 +2452,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
 
-    public Confirmed_CartMenuItem(menuItem, priceTypeId) {
+    public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
+
+        // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
+
         if (menuItem.MenuItemId === undefined) {
             menuItem.MenuItemId = menuItem.RefId;
         }
@@ -5130,10 +5134,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     //     this.showSubcategories(grid);
     // }
 
-    public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId) {
+    public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId, isSecondMeal = false) {
 
-        // this.utilService.setLoader(true);
-        // console.clear()
+        // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
 
         let menuItemNo = 0;
         if (menuItem.RefId) {

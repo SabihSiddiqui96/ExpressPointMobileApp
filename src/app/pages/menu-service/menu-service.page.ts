@@ -1724,7 +1724,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     }
 
-    public checkALCRestrictions(menuItem, priceTypeId) {
+    public checkALCRestrictions(menuItem, priceTypeId, isSecondMeal = false) {
         if ((this.restrictableAlaCarteItems.length > 0 || this.restrictableCategories.length > 0)) { //&& !this.checkOrderItems(menuItem.ButtonDescription)
             let menuItemId = 0;
             if (menuItem.RefId) {
@@ -1760,17 +1760,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         return;
                     } else {
                         this.alacarteCount = this.alacarteCount + 1;
-                        this.Confirmed_CartMenuItem(menuItem, priceTypeId);
+                        this.Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal);
                     }
                 }
             } else {
                 this.alacarteCount = this.alacarteCount + 1;
-                this.Confirmed_CartMenuItem(menuItem, priceTypeId);
+                this.Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal);
             }
 
         } else {
             this.alacarteCount = this.alacarteCount + 1;
-            this.Confirmed_CartMenuItem(menuItem, priceTypeId);
+            this.Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal);
         }
     }
 
@@ -1778,12 +1778,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.mealCount = this.mealCount + 1;
         this.isSecondMeal = true;
         // this.Confirmed_CartMenuItem(data.menu_item, data.price_type_id);
-        this.checkALCRestrictions(data.menu_item, data.price_type_id);
+        this.checkALCRestrictions(data.menu_item, data.price_type_id, true);
         // this.setMealCount(this.mealCount);
     }
 
-    public Confirmed_CartMenuItem(menuItem, priceTypeId) {
+    public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
+        // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
         // this.utilService.setLoader(true);
         let menuItemNo = 0;
 
@@ -2393,8 +2395,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.postSaleTransaction(transactionType);
                 } else {
                     //check for order total 0 to allow schools to distribute free meals.
-                    if(this.orderData.totalAmount === 0) {
-                        this.transactionInProgress =true;
+                    if (this.orderData.totalAmount === 0) {
+                        this.transactionInProgress = true;
                     } else {
                         this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
                     }
@@ -2713,7 +2715,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         }
                     }
                 } else {
-                    paymentAmnt = parseFloat(this.cashtendAmount) -   this.cashDue;
+                    paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
                     if (this.cashtendAmount > this.orderData.totalAmount) {
                         if (this.orderData.IsDeposit === false) {
                             paymentAmnt = this.orderData.totalAmount;
@@ -3338,7 +3340,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if(this.patronDetails.PersonId !== null) {
+            if (this.patronDetails.PersonId !== null) {
                 this.logDBService.logData({
                     event: EventType.QUEUE,
                     patronId: this.patronDetails.PersonId,
