@@ -1083,7 +1083,7 @@ export class AppComponent {
   public doOfflineCase() {
     this.zone.run(() => {
       this.networkDown = true;
-      this.offlineFooter("35px");
+      this.offlineFooter("0px");
       this.connectionSubject.next(this.networkDown);
       this.utilService.isAppOnline = false;
       this.setNetworkOfflineMessage();
@@ -1119,7 +1119,7 @@ export class AppComponent {
     console.log("network disconnect");
     this.zone.run(() => {
       this.networkDown = true;
-      this.offlineFooter("35px");
+      this.offlineFooter("0px");
       this.connectionSubject.next(this.networkDown);
       this.setNetworkOfflineMessage();
     });
