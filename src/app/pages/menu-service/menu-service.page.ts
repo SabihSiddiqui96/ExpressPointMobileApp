@@ -278,6 +278,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
     private ALACASREST: boolean = false;
     public static onKeyUpCallback;
 
+    public isIOS: boolean = false;
+    public isAndroid: boolean = false;
+
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
         public lookUpService: LookupService, public patronLookup: PatronLookupPage,
@@ -2316,6 +2319,30 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public ShowTransactionConflictPopover() {
         this.alertCtrl.create({
             header: 'Alert',
+            message: 'There has been an internal error, Please logout and log back in to continue.',
+            backdropDismiss: false,
+            inputs: [
+                {
+                    name: 'Code',
+                    placeholder: 'Developer Code'
+                }
+            ],
+            buttons: [
+                {
+                    text: 'LogOut',
+                    handler: () => {
+                        this.navCtrl.navigateRoot('logout');
+                    }
+                }
+            ]
+        }).then(async (res) => {
+            await res.present();
+        });
+    }
+
+    public ShowTransactionConflictWindowsPopover() {
+        this.alertCtrl.create({
+            header: 'Alert',
             message: `We have encountered a serious issue while saving the last transaction.
              Please re-open ExpressPoint to resume the service.
              If possible, please contact PrimeroEdge Customer Care without closing the app`,
@@ -2349,8 +2376,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             await res.present();
         });
     }
-
-
+    
     public makeSale(transactionType) {
         // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
@@ -2993,15 +3019,28 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             if (this.deviceTransactionId) {
 
+                this.isIOS = this.platform.is('ios');
+                this.isAndroid = this.utilService.isPlatformAndroid();
+
                 PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
                     if (!(result && result.id)) {
-                        this.ShowTransactionConflictPopover();
+                        if (this.isIOS || this.isAndroid) {
+                            this.ShowTransactionConflictPopover();
+                        }
+                        else {
+                            this.ShowTransactionConflictWindowsPopover();
+                        }
                     }
                     if (paymentData && paymentDoc) {
                         if (paymentData.DeviceTransactionId) {
                             PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then((result) => {
                                 if (!(result && result.id)) {
-                                    this.ShowTransactionConflictPopover();
+                                    if (this.isIOS || this.isAndroid) {
+                                        this.ShowTransactionConflictPopover();
+                                    }
+                                    else {
+                                        this.ShowTransactionConflictWindowsPopover();
+                                    }
                                 }
                             });
                         }
