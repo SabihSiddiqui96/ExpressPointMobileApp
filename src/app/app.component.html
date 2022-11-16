@@ -73,7 +73,7 @@
     </ion-menu>
     <img class="PatronLargeImage" (click)="onPatronLargeImageClick()">
     <ion-router-outlet id="mainmenu"></ion-router-outlet>
-    <ion-footer>
+    <ion-footer style="width: 66% !important;">
         <div class="network-disconnect-bar ion-text-center" *ngIf="networkDown">
             <div class="center_text_content" style="height: 100%;">
                 <b style="margin: 0 auto">{{variableOfflineMessage}}</b>
@@ -88,4 +88,5 @@
             [ngClass]="(selectedSide === 'left')?'ribbon-bottom-left':'ribbon-bottom-right'">
             <span>{{hostedUrlMessage}}</span></div>
     </ion-footer>
+    
 </ion-app>
