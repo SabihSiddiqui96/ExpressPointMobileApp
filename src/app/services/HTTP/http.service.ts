@@ -443,6 +443,10 @@ export class HttpService {
             return this.http.get(API_URL + 'SyncAllUsers/' + schoolId);
         }
     }
+    public GetBalanceByAccountId(accountId): any {
+        return this.http.get(API_URL + 'GetBalanceByAccountId/' + accountId);
+    }
+
 
     //#endregion: GETs
 

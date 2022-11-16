@@ -22,5 +22,15 @@ export class PersonService {
         }
     }
 
-
+    public GetBalanceByAccountId(accountId) {
+        return new Promise((resolve) => {
+            if (this.utilService.isNetworkOnline()) {
+                this.http.GetBalanceByAccountId(accountId).subscribe(data => {
+                    resolve(data);
+                }, () => {
+                    resolve(null);
+                });
+            }
+        })
+    }
 }
