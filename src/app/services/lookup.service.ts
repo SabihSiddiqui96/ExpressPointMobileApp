@@ -33,6 +33,8 @@ export class LookupService {
     public serverResultSet = null;
     public personsQ = [];
     public lookupResults = [];
+    public lookupPatronIdResults = [];
+    public lookupPinResults = [];
     public personDetails: any;
     public studentPin;
 
@@ -394,10 +396,25 @@ export class LookupService {
 
     public pouchDBLookup(pin) {
         return new Promise((resolve) => {
+            let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
+            if (SearchByPin === '-1') {
+                PouchQueriesService.PatronSearchByName('', '', pin).
+                    then((res) => {
+                        const docs = res.docs.map((patron) => {
+                            if (!patron.isSpecialAccount) {
+                                patron['value'] = patron.PersonId;
+                                patron['label'] = patron.PersonName;
+                                patron['Image'] = patron.Image;
+                                return patron;
+                            }
+                        });
+                        this.lookupPatronIdResults = docs;
+                    });
+            }
+
             // fetching all partial PIN results and filtering here is 'useExactPIN' is set to true
             PouchQueriesService.PINLookup(pin).then((data) => {
                 this.lookupResults = data.rows.map(row => row.doc);
-                let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN')
                 if (SearchByPin == null || SearchByPin == undefined) {
                     SearchByPin = '1'
                 }
@@ -409,6 +426,11 @@ export class LookupService {
                         this.lookupResults = this.lookupResults.filter(r => r.PersonIdentifier === pin);
                     }
                 }
+
+                if (SearchByPin === '-1' && this.lookupResults.length === 0) {
+                    this.lookupResults = this.lookupResults.concat(this.lookupPatronIdResults);
+                }
+
                 if (this.serveInactiveStudents === 0) {
                     this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                 }
@@ -574,6 +596,12 @@ export class LookupService {
      */
     public AdvancedPatronlookup(selectedsite, firstname,
         lastname, externalId) {
+        let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
+        if (SearchByPin === '-1') {
+            PouchQueriesService.PINLookup(externalId).then((data) => {
+                this.lookupPinResults = data.rows.map(row => row.doc);
+            });
+        }
 
         return new Promise((resolve) => {
 
@@ -594,7 +622,10 @@ export class LookupService {
                             }
 
                         });
-                        this.lookupResults = docs;
+                        this.lookupResults = docs;    
+                        if (SearchByPin === '-1' && this.lookupResults.length === 0) {
+                            this.lookupResults = this.lookupResults.concat(this.lookupPinResults);
+                        }            
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
