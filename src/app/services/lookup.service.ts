@@ -17,6 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LogsDBService } from './Database/logs-db.service';
 import { LogType } from './enums/log-type';
 import { EventType } from './enums/event-type';
+import { PersonService } from './person.service';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -40,10 +41,10 @@ export class LookupService {
     public menuPayselectAccountClick: boolean = false;
 
     constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
-        private logDBService:LogsDBService,
+        private logDBService: LogsDBService,
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
-        private electronService: ElectronService) {
+        private electronService: ElectronService, private personService: PersonService) {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
             if (userEventData.selected_patron) {
@@ -88,7 +89,7 @@ export class LookupService {
 
     public setQ(queueInput) {
         this.getSettingValuesRequired(); // Added this to get the setting values in lookup using peripherals
-        
+
         this.logDBService.logData({
             event: EventType.QUEUE,
             patronId: queueInput.PIN,
@@ -201,7 +202,7 @@ export class LookupService {
                     });
                     this.personsQSubject.next(this.personsQ);
                 } // to display PIN in the modal
-                if(results[0] !== null) {
+                if (results[0] !== null) {
                     this.logDBService.logData({
                         event: EventType.LOOKUP,
                         patronId: queueInput.PIN,
@@ -211,7 +212,7 @@ export class LookupService {
                     });
                 }
                 resolve(null);
-            },(error)=> {
+            }, (error) => {
                 if (queueInput !== null) {
                     this.logDBService.logError({
                         event: EventType.LOOKUP,
@@ -267,8 +268,17 @@ export class LookupService {
     public selectPatron(patron) {
         if (patron.PersonId !== undefined) { // Unique result: Person name displayed
             let checkForServer: boolean = false;
+            let getbalanceFromServer: boolean = Boolean(parseInt(SettingService.getSettingValue("BALCHK")));
+            let Balance = null
             if (AppStateService.get('SiteSettings')) {
                 checkForServer = JSON.parse(AppStateService.get('SiteSettings'))[0].CheckOtherSiteSecMeal;
+            }
+            if (getbalanceFromServer && !patron.IsFromServer && this.utilService.isAppOnline) {
+                this.personService.GetBalanceByAccountId(patron.AccountId).then(res => {
+                    if (res != null) {
+                        patron.Balance = res;
+                    }
+                })
             }
             if (checkForServer && !patron.IsFromServer && this.utilService.isAppOnline) {
 
@@ -291,9 +301,9 @@ export class LookupService {
                 });
             } else {
                 //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
-                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result:any) => {
+                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result: any) => {
                     this.publishEvents(result);
-                    if(this.lookupResults.find(f => f.PersonId === result.PersonId)){
+                    if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
                         this.popPersonFromQ(result.PersonIdentifier);
                     }
                 })

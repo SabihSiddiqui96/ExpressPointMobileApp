@@ -43,5 +43,6 @@ export enum DefaultSettingValue {
     TAXPERCENT = 5,
     MULTIREAD = '1',
     WRNTMDFSAM = 15,
-    ENABLELOG ='0'
+    ENABLELOG = '0',
+    BALCHK = '0'
 }
