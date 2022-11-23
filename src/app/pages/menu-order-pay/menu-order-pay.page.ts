@@ -759,6 +759,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 // Partial Pay changes 
                 if (this.navPatronDetails.Balance > 0) {
                     chngDue = (+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount);
+                    // Change Due cant be more than amount tendered
+                    if (chngDue > +amnt) {
+                        chngDue = +amnt - this.navOrderData.totalAmount;
+                    }
                 }
                 if (chngDue > 0) {
                     this.changeDue = chngDue;
