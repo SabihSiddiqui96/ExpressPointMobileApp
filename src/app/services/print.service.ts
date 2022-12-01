@@ -285,12 +285,12 @@ export class TransactionDetailPrintFormat {
     public IsCheck: boolean;
     public TransactionDate: string;
     public MenuItemTemplate: string;
-    public DepositAmount: string;
+    public DepositAmount: Number;
     public NewBalance: string;
     public OldBalance: string;
     public BonusAmount: string;
-    public AmountTendered: string;
-    public ChangeReturned: string;
+    public AmountTendered: Number;
+    public ChangeReturned: Number;
     public TransactionNumber: Number;
     public CheckNumber: string;
     public CardNumber: string;
