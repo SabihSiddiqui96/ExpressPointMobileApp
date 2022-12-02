@@ -82,6 +82,7 @@ export class DeviceConnectionSearchPage implements OnInit {
             return;
           }
           for (const i of Object.keys(data)) {
+            this.showError = false;
             this.schoolDistrictList.push({
               districtName: data[i][0],
               loginUrl: data[i][1]
