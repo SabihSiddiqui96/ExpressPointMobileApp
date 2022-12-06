@@ -244,25 +244,23 @@ export class LookupService {
         });
     }
 
-
-
     public showPatronModel(patronList, isFromQueue, isFromAdvPatronSearch: boolean) {
         return new Promise((resolve) => {
             const isVisitingPatronAllowed = (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) ? true : false;
-            this.modalCtrl.create({
-                component: PatronListModalPage,
-                componentProps: {
-                    'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
-                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
-                },
-                showBackdrop: true,
-                backdropDismiss: false,
-                cssClass: 'patron-modal-popup'
-            }).then(async (res) => {
-                await res.present().then(() => {
-                    resolve('Success');
+                this.modalCtrl.create({
+                    component: PatronListModalPage,
+                    componentProps: {
+                        'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
+                        'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
+                    },
+                    showBackdrop: true,
+                    backdropDismiss: false,
+                    cssClass: 'patron-modal-popup'
+                }).then(async (res) => {
+                    await res.present().then(() => {
+                        resolve('Success');
+                    });
                 });
-            });
         });
 
     }

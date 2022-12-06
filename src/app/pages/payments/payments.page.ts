@@ -119,9 +119,7 @@ export class DoPayment {
         , public signalRService: SignalRService, public platform: Platform) {
 
         this.isIOS = this.platform.is('ios');
-        this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-            document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
-        document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
+
 
         this.isCordovaApp = UtilService.isCordovaApp;
 
@@ -886,7 +884,7 @@ export class DoPayment {
 @Component({
     selector: 'app-payments',
     templateUrl: './payments.page.html',
-    styleUrls: ['./payments.page.scss'],
+    styleUrls: ['./payments.page.scss']
 })
 export class PaymentsPage extends DoPayment implements OnInit {
 
@@ -920,12 +918,11 @@ export class PaymentsPage extends DoPayment implements OnInit {
         public popupMessageService: PopupMessageService, public modalCtrl: ModalController, public router: Router,
         public appStateService: AppStateService, public pouchDBService: PouchDBService,
         public settingService: SettingService, public pouchQuery: PouchQueriesService, public printService: PrintService,
-        public signalRService: SignalRService, public platform: Platform) {
+        public signalRService: SignalRService, public platform: Platform ) {
 
         super(navCtrl, alertCtrl, event, lookUpService, utilService, transactionService, popupMessageService, modalCtrl, router,
             appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService, platform);
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
 
 
         this.event.subscribe('popover:open', (userEventData) => {

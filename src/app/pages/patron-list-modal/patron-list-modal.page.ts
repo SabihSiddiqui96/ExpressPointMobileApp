@@ -7,6 +7,7 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { Events } from '../../services/events.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
+import { LookupService } from '../../services/lookup.service';
 
 @Component({
     selector: 'app-patron-list-modal',
