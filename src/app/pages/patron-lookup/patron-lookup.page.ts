@@ -1401,64 +1401,67 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
     public onPeripheralKey(event) {
-        this.logDBService.logData({
-            event: EventType.LOOKUP,
-            type: LogType.INFO,
-            data: event,
-            queueCount: this.personsQ.length
-        });
-        var charCode = event.which || event.charCode || event.keyCode || 0;
-        if (this.isEnterKeyHandled === true) {
-            this.isEnterKeyHandled = false;
-            return;
-        }
-
-        let incomingID = '';
-        if (event.keyCode === 8 || event.keyCode === 13 ||
-            (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) {
-            // event.keyCode == 46 (backspace)
-            this.inputBuffer.push(event);
-            if (event.keyCode === 13) {
-                console.log('Enter pressed');
-                this.inputBuffer.map(c => {
-                    if (c.keyCode !== 13 && c.keyCode !== 8) {
-                        incomingID += c.key;
-                    } else if (c.keyCode === 8) {
-                        incomingID = incomingID.slice(0, -1);
-                    }
-                });
-                if (incomingID !== '') {
-                    let queueInput = {
-                        'PIN': incomingID,
-                        'InputDirection': 0
-                    }
-                    this.lookUpService.setQ(queueInput);
-                }
-                incomingID = '';
-                this.inputBuffer = [];
-                //this.patronSearch.keyword = '';
+        if(!this.router.url.includes('payments')) {
+            this.logDBService.logData({
+                event: EventType.LOOKUP,
+                type: LogType.INFO,
+                data: event,
+                queueCount: this.personsQ.length
+            });
+            var charCode = event.which || event.charCode || event.keyCode || 0;
+            if (this.isEnterKeyHandled === true) {
+                this.isEnterKeyHandled = false;
+                return;
             }
-        } else if (event['keyCode'] === 9) {
-            // setTimeout(() => {
-            console.log('Peripheral Key ---- Stop Propagation')
-            event.preventDefault();
-            var oldEPD = Event.prototype.preventDefault;
-            Event.prototype.preventDefault = function () {
-                // debugger;
-                oldEPD.call(this);
-            };
-            // event.stopImmediatePropagation();
-            if (event.preventDefault) { event.preventDefault() }
-            //else{event.stop()};
-
-            event.returnValue = false;
-            event.stopPropagation();
-            // });
-            // event.stopPropagation();
-        } else {
-            this.inputBuffer = [];
-            incomingID = '';
+    
+            let incomingID = '';
+            if (event.keyCode === 8 || event.keyCode === 13 ||
+                (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) {
+                // event.keyCode == 46 (backspace)
+                this.inputBuffer.push(event);
+                if (event.keyCode === 13) {
+                    console.log('Enter pressed');
+                    this.inputBuffer.map(c => {
+                        if (c.keyCode !== 13 && c.keyCode !== 8) {
+                            incomingID += c.key;
+                        } else if (c.keyCode === 8) {
+                            incomingID = incomingID.slice(0, -1);
+                        }
+                    });
+                    if (incomingID !== '') {
+                        let queueInput = {
+                            'PIN': incomingID,
+                            'InputDirection': 0
+                        }
+                        this.lookUpService.setQ(queueInput);
+                    }
+                    incomingID = '';
+                    this.inputBuffer = [];
+                    //this.patronSearch.keyword = '';
+                }
+            } else if (event['keyCode'] === 9) {
+                // setTimeout(() => {
+                console.log('Peripheral Key ---- Stop Propagation')
+                event.preventDefault();
+                var oldEPD = Event.prototype.preventDefault;
+                Event.prototype.preventDefault = function () {
+                    // debugger;
+                    oldEPD.call(this);
+                };
+                // event.stopImmediatePropagation();
+                if (event.preventDefault) { event.preventDefault() }
+                //else{event.stop()};
+    
+                event.returnValue = false;
+                event.stopPropagation();
+                // });
+                // event.stopPropagation();
+            } else {
+                this.inputBuffer = [];
+                incomingID = '';
+            }
         }
+       
     }
 
     public onKeyDown(event: KeyboardEvent) {
