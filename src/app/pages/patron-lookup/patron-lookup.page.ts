@@ -160,6 +160,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public isCordovaApp: boolean;
     public eventType: string;
     public PinIdLabel: string;
+    showModalPopup: boolean = true;
 
     constructor(
         public modalCtrl: ModalController,
@@ -1401,7 +1402,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
     public onPeripheralKey(event) {
-        if(!this.router.url.includes('payments')) {
+        if(!this.router.url.includes('payments') && !this.showModalPopup) {
             this.logDBService.logData({
                 event: EventType.LOOKUP,
                 type: LogType.INFO,
@@ -1434,6 +1435,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             'InputDirection': 0
                         }
                         this.lookUpService.setQ(queueInput);
+                        this.showModalPopup = false;
                     }
                     incomingID = '';
                     this.inputBuffer = [];
@@ -1856,5 +1858,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.modalCtrl.dismiss({
             'flag': flag
         });
+        this.showModalPopup = true;
     }
 }
