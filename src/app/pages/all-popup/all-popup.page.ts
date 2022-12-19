@@ -34,6 +34,7 @@ export class AllPopupPage implements OnInit {
     @Input() data;
     @Input() page;
     @Input() selectedValue;
+    isGridView = true;
 
     ngOnInit() {
         this.isElectron = this.utilService.isElectronApp();
