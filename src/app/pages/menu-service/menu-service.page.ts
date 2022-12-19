@@ -2148,7 +2148,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         };
                         return mic;
                     });
-                    categoryButtons.sort((a, b) => a.DisplayOrder - b.DisplayOrder);
 
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');
