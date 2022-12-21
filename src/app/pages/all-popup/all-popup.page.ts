@@ -372,6 +372,10 @@ export class AllPopupPage implements OnInit {
         // });
     }
 
+    toggleView() {
+        this.isGridView = !this.isGridView;
+    }
+
     public ionViewDidLeave() {
         if (this.isPatronType) {
             EXP_PERSON.allDocs({ include_docs: true }).then((res) =>

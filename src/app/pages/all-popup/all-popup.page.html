@@ -51,14 +51,19 @@
             </ion-grid>
           </ion-col>
           <ion-col bold lines="none" class="bg-transparent" style="display: flex;">
-            <ion-item lines="none" style="text-align:right; width: -webkit-fill-available;"
+            <ion-item *ngIf="navType === 'patronlist'">
+              <ion-label style="padding: 12px;">List</ion-label>
+              <ion-toggle color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
+              <ion-label style="padding: 12px;">Picture</ion-label>
+            </ion-item>
+            <ion-item lines="none" style="text-align:right;"
               *ngIf=" ((this.navType=='patronPatron' ||
                         this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' ) && this.navPage!='Payments')">
               <ion-label style="margin: auto;text-align:right">Show All </ion-label>
               <ion-toggle slot="end" color="secondary" [(ngModel)]="showFullList" (ionChange)="showAll(showFullList)"
               class="toggle_small"></ion-toggle>
             </ion-item>
-
+            
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -166,7 +171,7 @@
 
 
         <ion-row *ngIf="isPatronType && isGridView && this.navType === 'patronlist'">
-          <ion-row>
+          <ion-row style="width: 100%;">
               <ion-col style="max-height: 12rem;" sizeLg="3" sizeMd="3" sizeXs="6"
                   *ngFor="let patron of lists;let i=index;">
               <ion-card (click)="select(patron,i)" class="ion-justify-content-center card-size bg-border" style="height: 11rem;width:24rem;"
@@ -206,9 +211,9 @@
                   </ion-grid>
 
               </ion-card>
-          </ion-col>
-      </ion-row>
-      </ion-row>
+              </ion-col>
+          </ion-row>
+        </ion-row>
 
       <div *ngIf="navType == 'patronlist' && !isGridView">
         <ion-row *ngFor=" let list of lists; let i=index;" class="minHeight bg-border"
