@@ -1560,7 +1560,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     console.log('*MenuItemCategories- AlaCarte classroom sale ');
                     const MIC = res.rows.map(row => row.doc);
 
-                    const categoryButtons = MIC.map(m => {
+                    let categoryButtons = MIC.map(m => {
                         const mic = {
                             'MenuItemCategoryId': m.MenuItemCategoryId,
                             'ButtonDescription': m.Description,
@@ -1571,7 +1571,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         };
                         return mic;
                     });
-                    _.sortBy(categoryButtons, m => m.DisplayOrder);
+                    categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         this.callModalCtrl(categoryButtons, 'All Categories', true);

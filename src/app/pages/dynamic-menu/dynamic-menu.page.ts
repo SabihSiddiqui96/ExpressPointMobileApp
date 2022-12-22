@@ -4902,7 +4902,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 if (res.rows.length > 0) {
                     const mIC = res.rows.map(row => row.doc);
 
-                    const categoryButtons = mIC.map(m => {
+                    let categoryButtons = mIC.map(m => {
                         const mic = {
                             'MenuItemCategoryId': m.MenuItemCategoryId,
                             'ButtonDescription': m.Description,
@@ -4913,7 +4913,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         };
                         return mic;
                     });
-                    _.sortBy(categoryButtons, m => m.DisplayOrder);
+                    categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');
