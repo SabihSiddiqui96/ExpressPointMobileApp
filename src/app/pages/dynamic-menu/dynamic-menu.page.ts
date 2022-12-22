@@ -3432,7 +3432,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
                 'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 :  Number(this.cashTendAmount),
-                'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance  === undefined || this.amountTowardsBalance  === null ) ? 0 : Number(this.cashTendAmount) - Number(this.amountTowardsBalance),
+                'ChangeReturned':   Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -3548,7 +3548,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                         'Balance': Number(this.patronDetails.Balance).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 :  Number(this.cashTendAmount) - Number(this.amountTowardsBalance),
+                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 :  this.cashDue,
                         'MenuItemTemplate': this.GetMenuItemsPriceList(items),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
