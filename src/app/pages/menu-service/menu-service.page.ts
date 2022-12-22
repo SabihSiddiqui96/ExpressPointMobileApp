@@ -2137,7 +2137,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             then((res) => {
                 if (res.rows.length > 0) {
                     const MIC = res.rows.map(row => row.doc);
-                    const categoryButtons = MIC.map(m => {
+                    let categoryButtons = MIC.map(m => {
                         const mic = {
                             'MenuItemCategoryId': m.MenuItemCategoryId,
                             'ButtonDescription': m.Description,
@@ -2148,7 +2148,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         };
                         return mic;
                     });
-                    _.sortBy(categoryButtons, m => m.DisplayOrder);
+                    categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');
