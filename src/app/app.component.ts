@@ -795,8 +795,8 @@ export class AppComponent {
 
         this.syncHeartbeatInterval = setInterval(
           this.checkHeartbeat.bind(this),
-          1000 * 10
-        ); // every 10 seconds
+          1000 * 40
+        ); // every 40 seconds
       })
       .catch(function (e) {
         console.log(e);
@@ -905,7 +905,7 @@ export class AppComponent {
     return new Promise((resolve, reject) => {
       const currentAppConnectionState = this.utilService.isAppOnline;
       this.utilService.isAppOnline = true; // Temporarily setting to true for heartbeat API check
-
+      
       const apiURL = AppStateService.get("API_URL");
       const deviceInfo = AppStateService.get("DeviceInfo");
       if (
