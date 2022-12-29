@@ -404,7 +404,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       let notSentTransactions: any = [];
       this.transactions = transactions;
       if (transactions.length > 0) {
-        notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsSynced === false);
+        notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsProcessed === false);
         if (notSentTransactions.length > 0) {
           this.hasNotSentTransactions = true;
         } else {
