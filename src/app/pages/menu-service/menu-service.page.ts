@@ -762,7 +762,23 @@ export class MenuServicePage implements OnInit, OnDestroy {
             await res.present();
         });
     }
+public ResetForNewStudent(){
+    this.cashDue = 0;
+    this.isDepositByEXNEGBAL = false;
+    this.orderData = {
+        accountBalance: 0.00,
+        subTotal: 0.00,
+        tax: 0.00,
+        totalAmount: 0.00,
+        items: [],
+        IsDeposit: false,
+        IsCheck: false,
+        CheckNumber: '',
+        IsCard: false,
+        CardNumber: ''
+    };
 
+}
     public selectPatron(patronData) {
         if (!this.transactionInProgress) {
             this.transactionInProgress = true;
@@ -773,18 +789,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             // Reset Order Data 
-            this.orderData = {
-                accountBalance: 0.00,
-                subTotal: 0.00,
-                tax: 0.00,
-                totalAmount: 0.00,
-                items: [],
-                IsDeposit: false,
-                IsCheck: false,
-                CheckNumber: '',
-                IsCard: false,
-                CardNumber: ''
-            };
+           this.ResetForNewStudent();
 
             AppStateService.remove('currentTab');
             if (this.menuGridCount === 0) {
@@ -2896,11 +2901,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'IsCard': this.orderData.IsCard,
                 'CardNumber': this.orderData.CardNumber,
                 'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : 0,
-                'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : Number(this.amountTowardsBalance).toFixed(2),
+                'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : 0,
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': Number(this.cashtendAmount).toFixed(2),
-                'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard || this.orderData.IsDeposit ? 0 : (Number(this.cashtendAmount) - Number(this.amountTowardsBalance)).toFixed(2),
+                'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
+                'ChangeReturned':  Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -2990,16 +2995,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
                             this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
                         'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                        'DepositAmount': transactionType === TransactionTypes.CHARGE ? Number(0).toFixed(2) : Number(this.amountTowardsBalance).toFixed(2),
+                        'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
                         'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
                         'IsCheck': this.orderData.IsCheck,
                         'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
                             { hour: 'numeric', minute: 'numeric', hour12: true }),
                         'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                        'AmountTendered': Number(this.cashtendAmount).toFixed(2),
+                        'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                         'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? Number(0).toFixed(2) : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2),
+                        'ChangeReturned':  Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                         'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
