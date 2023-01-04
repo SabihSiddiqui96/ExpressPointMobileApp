@@ -48,13 +48,13 @@
           <ion-col size="6">
             <ion-col size="6" *ngIf="navType === 'patronlist' || navType === 'patronSpecialRosterPersonList'" style="width: 20rem ;">
               <ion-label >List</ion-label>
-              <ion-toggle color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
+              <ion-toggle style="padding-bottom: 5px;" color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
               <ion-label>Picture</ion-label>
             </ion-col>
             <ion-col  size="6" *ngIf="((this.navType=='patronPatron' ||
                         this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' ) && this.navPage!='Payments')">
               <ion-label style="margin: auto;text-align:right">Show All </ion-label>
-              <ion-toggle slot="end" color="secondary" [(ngModel)]="showFullList" (ionChange)="showAll(showFullList)"
+              <ion-toggle style="padding-bottom: 5px;" color="secondary" [(ngModel)]="showFullList" (ionChange)="showAll(showFullList)"
               class="toggle_small"></ion-toggle>
             </ion-col>
             
