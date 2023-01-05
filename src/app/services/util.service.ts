@@ -54,10 +54,12 @@ export class UtilService {
   }
 
   public static reverseString(str) {
-    const array = str.split('');
-    array.reverse();
-    str = array.join('');
-    return str;
+    if(str) {
+      const array = str.split('');
+      array.reverse();
+      str = array.join('');
+      return str;
+    }
   }
 
   public showWarning(message) {
