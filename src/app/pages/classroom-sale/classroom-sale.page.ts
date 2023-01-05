@@ -32,6 +32,7 @@ import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.s
 })
 export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit, OnDestroy {
 
+   
 
     public ngOnInit() {
         if (this.specialRosterList.length === 0) { // Saketh for Special SpecialRosters
