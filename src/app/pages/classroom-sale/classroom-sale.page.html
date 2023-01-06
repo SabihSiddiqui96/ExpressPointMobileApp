@@ -1,343 +1,345 @@
-<ion-header>
-  <!-- <ion-toolbar color="slate">
-    <ion-buttons left>
-      <ion-button default block icon-only fill="clear" color="primary" *ngIf="!isTeacher" (click)="goToServicePage()">
-        <ion-icon name="arrow-round-back"></ion-icon>
-      </ion-button>
-      <ion-button  default block icon-only fill="clear" color="primary" *ngIf="isTeacher" (click)="popoverClick($event)">
-        <ion-icon name="menu"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>
-      Quick Sales
-    </ion-title>
 
-  </ion-toolbar> -->
-  <ion-toolbar hideBackButton="true" color="slate">
-    <ion-menu-toggle slot="start">
-      <ion-button fill="clear">
-        <ion-icon name="menu" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-menu-toggle>
-    <ion-title class="ion-text-center">
-      Bulk Sales
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-<ion-content bg-theme>
-  <ion-row vh-100-dyn class="ion-justify-content-center" *ngIf="!studentLoaded">
-    <ion-col size="12" size-lg="8" class="ion-align-self-center width-auto">
-      <div box-list-white class="ion-margin-horizontal">
-        <ion-icon color="slate" text-xxl text-block slot="end" class="ion-text-center" name="ios-people"></ion-icon>
-        <h1 class="ion-text-center" title>Perform meal sales by homeroom or roster.</h1>
-        <ion-segment mode="md" color="slate" [(ngModel)]="patronAccount" class="ion-padding-horizontal">
-          <ion-segment-button value="by_homeroom" (click)="resetHomeroom()">
-            <ion-label>
-              By Homeroom
-            </ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="by_specialroster" (click)="resetSpecial()">
-            <ion-label>
-              By Roster
-            </ion-label>
-          </ion-segment-button>
-        </ion-segment>
-        <ion-list *ngIf="patronAccount=='by_homeroom'">
-          <ion-item (click)="showPopup('classGrade')">
-            <ion-label *ngIf="filter.selected_grade !=-1 ">Selected Grade:
-              <strong>{{filter.selected_grade_name}}</strong>
-            </ion-label>
-            <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length ==0">Grade: None Available</ion-label>
-            <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length >0">Select a Grade ...</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-          <ion-item (click)="showPopup('classHomeroom')">
-            <ion-label *ngIf="filter.selected_homeroom!=-1 ">Selected Homeroom:
-              <strong>{{filter.selected_homeroom_name}}</strong>
-            </ion-label>
-            <ion-label *ngIf="filter.selected_homeroom == -1 && homeRoomList.length ==0">Homeroom: None Available
-            </ion-label>
-            <ion-label *ngIf="filter.selected_homeroom == -1 && homeRoomList.length >0">Select a Homeroom ...
-            </ion-label>
-            <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-          <ion-item (click)="showPopup('classMealtype')">
-            <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
-              <strong>{{filter.selected_mealtype_name}}</strong>
-            </ion-label>
-            <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length ==0">Meal Type: None Available
-            </ion-label>
-            <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
-            </ion-label>
-            <ion-icon *ngIf="mealTypes.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-          <ion-item (click)="showPopup('classMealitem')">
-            <ion-label *ngIf="filter.selected_menuitem >= 0">Selected Item:
-              <strong>{{filter.selected_menuitem_name}}</strong>
-            </ion-label>
-            <ion-label *ngIf="filter.selected_menuitem == -1 && menuItems.length ==0 && filter.selected_mealtype!=-1">
-              Item: None Available</ion-label>
-            <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0">Select an Item ...</ion-label>
-            <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-        </ion-list>
-        <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
-          (click)="getStudentList()" *ngIf="patronAccount=='by_homeroom'">
-          Load Students
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+
+  <ion-header>
+    <!-- <ion-toolbar color="slate">
+      <ion-buttons left>
+        <ion-button default block icon-only fill="clear" color="primary" *ngIf="!isTeacher" (click)="goToServicePage()">
+          <ion-icon name="arrow-round-back"></ion-icon>
         </ion-button>
-        <ion-list *ngIf="patronAccount=='by_specialroster'" class="ion-padding-horizontal">
-          <ion-item (click)="showPopup('patronSpecialRoster')">
-            <ion-label *ngIf="selectedSpecialRosterId !=-1 ">Selected Roster:
-              <strong>{{selectedSpecialRosterName}}</strong>
-            </ion-label>
-            <ion-label *ngIf="selectedSpecialRosterId ==-1 && specialRosterList.length>0 ">Select a Roster ...
-            </ion-label>
-            <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-          <ion-item (click)="showPopup('classMealtype')">
-            <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
-              <strong>{{filter.selected_mealtype_name}}</strong>
-            </ion-label>
-            <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length ==0">Meal Type: None Available
-            </ion-label>
-            <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
-            </ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-          <ion-item (click)="showPopup('classMealitem')">
-            <ion-label *ngIf="filter.selected_menuitem >= 0 ">Selected Item:
-              <strong>{{filter.selected_menuitem_name}}</strong>
-            </ion-label>
-            <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0 && filter.selected_mealtype !=-1">
-              Item: None Available</ion-label>
-            <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0 && filter.selected_mealtype ==-1">
-              Select an Item ...</ion-label>
-            <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
-          </ion-item>
-        </ion-list>
-        <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
-          (click)="getStudentListForSpecialRoster()" *ngIf="patronAccount=='by_specialroster'">
-          Load Students
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+        <ion-button  default block icon-only fill="clear" color="primary" *ngIf="isTeacher" (click)="popoverClick($event)">
+          <ion-icon name="menu"></ion-icon>
         </ion-button>
-      </div>
-    </ion-col>
-  </ion-row>
-  <ion-row class="ion-justify-content-center" *ngIf="studentLoaded">
-    <ion-col size="12" size-lg="8">
-      <div box-sale-list>
-        <ion-row *ngIf="previousMealsCount == totalStudent">
-          <ion-col class="ion-no-padding">
-            <ion-button expand="block" (click)="clearStudents()">
-              <ion-icon slot="start" name="arrow-round-back"></ion-icon>
-              Back
-            </ion-button>
-          </ion-col>
-        </ion-row>
-        <p *ngIf="totalStudent > previousMealsCount && previousMealsCount == 0" box-info>
-          You are serving a
-          <strong>"{{filter.selected_menuitem_name}}"</strong> at
-          <strong>{{filter.selected_mealtype_name}}</strong> for students in
-          <span *ngIf="patronAccount=='by_homeroom'">the
-            <strong>{{filter.selected_homeroom_name}} ({{filter.selected_grade_name}})</strong> homeroom.</span>
-          <span *ngIf="patronAccount=='by_specialroster'">the
-            <strong>{{selectedSpecialRosterName}}</strong> roster.</span>
-        </p>
-        <p *ngIf="previousMealsCount > 0 && totalStudent > previousMealsCount" box-info>
-          Note: {{previousMealsCount}} student
-          <span *ngIf="previousMealsCount > 1">s are</span>
-          <span *ngIf="previousMealsCount == 1"> is</span> indicated as having a prior meal for
-          {{filter.selected_mealtype_name}}
-          today and will not be able to be selected again.
-        </p>
-        <p *ngIf="previousMealsCount == totalStudent && totalStudent > 0" box-info>
-          Note: All {{previousMealsCount}} student(s) in the
-          <strong>{{filter.selected_homeroom_name}} ({{filter.selected_grade_name}})</strong> homeroom are indicated as
-          having
-          a prior meal for {{filter.selected_mealtype_name}} today.
-        </p>
-        <p *ngIf="hasStudentsWithoutPriceTypes" box-info>            
-                Students cannot be selected if price is not set for students price type. Verify all expected students are selected
-          </p>
-          
+      </ion-buttons>
+      <ion-title>
+        Quick Sales
+      </ion-title>
 
-        <!-- <ion-content> -->
-        <div custom-list *ngIf="studentLoaded" class="list-quick-sale ion-no-padding">
-
-          <ion-item box-header *ngIf="selectAllSetting== 1"
-            [ngClass]="{'ion-hide' : (previousMealsCount == totalStudent || totalStudent==0 )}">
-            <ion-label class="ion-text-right ion-padding">
-              <strong>Select All</strong>
-            </ion-label>
-
-            <ion-checkbox slot="end" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons()" title="Select All">
-            </ion-checkbox>
-
-          </ion-item>
-          <!-- <ion-item *ngFor="let student of studentList; let i=index;"> -->
-          <ion-row size="12" size-md="12" *ngFor="let student of studentList; let i=index;"
-            class="padd0 ion-align-items-center">
-            <!-- [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }"-->
-            <ion-col size="1" size-md="1" size-lg="1">
-              <ion-avatar class="avatar-small">
-                <!-- <ion-icon name="contact" *ngIf="!student.Image"></ion-icon> -->
-                <img src="{{student.Image}}" *ngIf="student.Image">
-                <img src="assets/img/default_male.png" *ngIf="!student.Image && student.Gender === 'M'">
-                <img src="assets/img/default_female.png" *ngIf="!student.Image && student.Gender === 'F'">
-                <img src="assets/img/no_image.png" style="border-radius: 0%;"
-                  *ngIf="!student.Image && (student.Gender !== 'M' && student.Gender !== 'F')">
-              </ion-avatar>
-            </ion-col>
-            <ion-col size="4" size-md="4">
-              <ion-item lines="none">
-                <ion-label>
-                  <strong>{{student.LastName}},&nbsp;{{student.FirstName}}</strong>
-                  <!-- <span *ngIf="student.IsAllergent" (click)="showAllergyPopover(student)">
-                  <ion-icon name="alert"></ion-icon>
-                </span> -->
-                  <br>
-                  <span *ngIf="hideBalSetting==0"
-                    [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
-                  | currency:'USD':true:'1.2-2'}}
-                  </span>
-                  <ion-button class="alertBtn" *ngIf="student.ShowAlert" default expand="block"
-                    (click)="setRestrictions(student)">
-                    Alerts
-
-                    <span>*</span>
-                  </ion-button>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-            <ion-col size="4" size-md="4">
-              <!-- <ion-item> -->
-              <ion-list *ngFor="let item of studentWiseAlaCarte; let i = index">
-                <ion-card *ngIf="studentWiseAlaCarte.length > 0 && item.alaCartItemCount > 0" class="ion-card">
-                  <ion-card-header (click)="toggleSection(i)"
-                    *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0"
-                    [ngClass]="{'section-active': item.open, 'section': !item.open}">
-                    <!-- <ion-item>
-                      <ion-icon name="pin" slot="start"></ion-icon>
-                      <ion-label>ion-item in a card, icon left, button right</ion-label>
-                      <ion-button fill="outline" slot="end">View</ion-button>
-                    </ion-item> -->
-                    <ion-icon name="pin" slot="start"></ion-icon>
-                    <!-- <ion-icon style="--color: #fff;" name="arrow-up-outline" *ngIf="!item.open">
-                    </ion-icon>
-                    <ion-icon style="--color: #fff;" name="arrow-down-outline" *ngIf="item.open">
-                    </ion-icon> -->
-                    A La Carte Items
-                  </ion-card-header>
-                  <ion-row *ngIf="item.personId == student.PersonId && item.open">
-                    <ion-col size="12" size-md="12">
-                      <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
-                        <ion-button fill="clear" color="danger"
-                          (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
-                          <ion-icon slot="icon-only" sytle="font-size:21px;" name="md-close-circle"></ion-icon>
-                        </ion-button>
-                        <ion-label>
-                          <strong>{{items.MenuItemDescription}}</strong>
-                        </ion-label>
-                        <ion-label>
-                          <strong>{{items.Price | currency:'USD':true:'1.2-2'}}</strong>
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row
-                    *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0 && item.open && taxMeal ==1 && taxPercent!= undefined && student.IsSaleTaxable">
-                    <ion-col size="12" size-md="12">
-                      <ion-item lines="none">
-                        <!--<ion-button  icon-only fill="clear" slot="start">
-                          <ion-icon name="at"></ion-icon> 
-
-                        </ion-button>-->
-                        <ion-label>
-                          <span>Tax <ion-icon name="at"></ion-icon> {{taxPercent}}%</span>
-                        </ion-label>
-                        <ion-label>
-                          <span>{{ item.alaCartTotalTax | currency:'USD':true:'1.2-2'}} </span>
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                    <ion-col size="12" size-md="12">
-                      <ion-item>
-                        <ion-button fill="clear">
-                          <ion-icon slot="icon-only" name="logo-usd"></ion-icon>
-                        </ion-button>
-                        <ion-label>
-                          <strong>Total</strong>
-                        </ion-label>
-                        <ion-label>
-                          <strong>{{item.alaCartTotalWithTax  | currency:'USD':true:'1.2-2'}} </strong>
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                  </ion-row>
-                </ion-card>
-              </ion-list>
-              <!-- </ion-item> -->
-            </ion-col>
-            <ion-col size="1" size-md="1" class="ion-align-self-center ion-no-padding ion-no-margin">
-              <ion-item lines="none" class="ion-no-padding ion-no-margin">
-                <ion-button (click)="showAlaCarteItems(student)" class="btnIcon">
-                  <ion-icon slot="icon-only" name="add"></ion-icon>
-                </ion-button>
-              </ion-item>
-            </ion-col>
-            <ion-col size="1" size-md="1" class="ion-align-self-center ion-no-padding ion-no-margin">
-              <ion-item lines="none" class="ion-no-padding ion-no-margin">
-                <ion-button (click)="addPaymentPopover(student)" *ngIf="!hideAddFunds" class="btnIcon">
-                  <ion-icon slot="icon-only" name="logo-usd"></ion-icon>
-                </ion-button>
-              </ion-item>
-            </ion-col>
-            <ion-col size="1" size-md="1" class="padd20ion-align-self-stretch"
-              [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }">
-              <ion-row class="minHt100" class="ion-justify-content-center ion-align-items-center">
-                <ion-checkbox mode="md" id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
-                  [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
-                </ion-checkbox>
-                <ion-icon large name="md-checkmark" color="secondary" *ngIf="student.HadMeal"></ion-icon>
-              </ion-row>
+    </ion-toolbar> -->
+    <ion-toolbar hideBackButton="true" color="slate">
+      <ion-menu-toggle slot="start">
+        <ion-button fill="clear">
+          <ion-icon name="menu" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-menu-toggle>
+      <ion-title class="ion-text-center">
+        Bulk Sales
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content bg-theme>
+    <ion-row vh-100-dyn class="ion-justify-content-center" *ngIf="!studentLoaded">
+      <ion-col size="12" size-lg="8" class="ion-align-self-center width-auto">
+        <div box-list-white class="ion-margin-horizontal">
+          <ion-icon color="slate" text-xxl text-block slot="end" class="ion-text-center" name="ios-people"></ion-icon>
+          <h1 class="ion-text-center" title>Perform meal sales by homeroom or roster.</h1>
+          <ion-segment mode="md" color="slate" [(ngModel)]="patronAccount" class="ion-padding-horizontal">
+            <ion-segment-button value="by_homeroom" (click)="resetHomeroom()">
+              <ion-label>
+                By Homeroom
+              </ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="by_specialroster" (click)="resetSpecial()">
+              <ion-label>
+                By Roster
+              </ion-label>
+            </ion-segment-button>
+          </ion-segment>
+          <ion-list *ngIf="patronAccount=='by_homeroom'">
+            <ion-item (click)="showPopup('classGrade')">
+              <ion-label *ngIf="filter.selected_grade !=-1 ">Selected Grade:
+                <strong>{{filter.selected_grade_name}}</strong>
+              </ion-label>
+              <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length ==0">Grade: None Available</ion-label>
+              <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length >0">Select a Grade ...</ion-label>
+              <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+            <ion-item (click)="showPopup('classHomeroom')">
+              <ion-label *ngIf="filter.selected_homeroom!=-1 ">Selected Homeroom:
+                <strong>{{filter.selected_homeroom_name}}</strong>
+              </ion-label>
+              <ion-label *ngIf="filter.selected_homeroom == -1 && homeRoomList.length ==0">Homeroom: None Available
+              </ion-label>
+              <ion-label *ngIf="filter.selected_homeroom == -1 && homeRoomList.length >0">Select a Homeroom ...
+              </ion-label>
+              <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+            <ion-item (click)="showPopup('classMealtype')">
+              <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
+                <strong>{{filter.selected_mealtype_name}}</strong>
+              </ion-label>
+              <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length ==0">Meal Type: None Available
+              </ion-label>
+              <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
+              </ion-label>
+              <ion-icon *ngIf="mealTypes.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+            <ion-item (click)="showPopup('classMealitem')">
+              <ion-label *ngIf="filter.selected_menuitem >= 0">Selected Item:
+                <strong>{{filter.selected_menuitem_name}}</strong>
+              </ion-label>
+              <ion-label *ngIf="filter.selected_menuitem == -1 && menuItems.length ==0 && filter.selected_mealtype!=-1">
+                Item: None Available</ion-label>
+              <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0">Select an Item ...</ion-label>
+              <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
+              <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+          </ion-list>
+          <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
+            (click)="getStudentList()" *ngIf="patronAccount=='by_homeroom'">
+            Load Students
+            <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          </ion-button>
+          <ion-list *ngIf="patronAccount=='by_specialroster'" class="ion-padding-horizontal">
+            <ion-item (click)="showPopup('patronSpecialRoster')">
+              <ion-label *ngIf="selectedSpecialRosterId !=-1 ">Selected Roster:
+                <strong>{{selectedSpecialRosterName}}</strong>
+              </ion-label>
+              <ion-label *ngIf="selectedSpecialRosterId ==-1 && specialRosterList.length>0 ">Select a Roster ...
+              </ion-label>
+              <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available</ion-label>
+              <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+            <ion-item (click)="showPopup('classMealtype')">
+              <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
+                <strong>{{filter.selected_mealtype_name}}</strong>
+              </ion-label>
+              <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length ==0">Meal Type: None Available
+              </ion-label>
+              <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
+              </ion-label>
+              <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+            <ion-item (click)="showPopup('classMealitem')">
+              <ion-label *ngIf="filter.selected_menuitem >= 0 ">Selected Item:
+                <strong>{{filter.selected_menuitem_name}}</strong>
+              </ion-label>
+              <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0 && filter.selected_mealtype !=-1">
+                Item: None Available</ion-label>
+              <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0 && filter.selected_mealtype ==-1">
+                Select an Item ...</ion-label>
+              <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
+              <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            </ion-item>
+          </ion-list>
+          <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
+            (click)="getStudentListForSpecialRoster()" *ngIf="patronAccount=='by_specialroster'">
+            Load Students
+            <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row class="ion-justify-content-center" *ngIf="studentLoaded">
+      <ion-col size="12" size-lg="8">
+        <div box-sale-list>
+          <ion-row *ngIf="previousMealsCount == totalStudent">
+            <ion-col class="ion-no-padding">
+              <ion-button expand="block" (click)="clearStudents()">
+                <ion-icon slot="start" name="arrow-round-back"></ion-icon>
+                Back
+              </ion-button>
             </ion-col>
           </ion-row>
-          <!-- </ion-item> -->
-          <ion-item *ngIf="studentList.length==0">
-            <ion-label>No students found.</ion-label>
-          </ion-item>
-        </div>
-        <!-- </ion-content> -->
-        <ion-row>
-          <ion-col size="4">
-            <ion-button expand="block" (click)="clearStudents()">
-              <ion-icon name="backspace" slot="start"></ion-icon>
-              Cancel
-            </ion-button>
-          </ion-col>
-          <ion-col size="8">
-            <!-- <ion-label class="ion-text-center" *ngIf="getSelectedStudentCount() == 0">
-              Waiting for your selections ...
-            </ion-label> -->
-            <ion-item lines="none" class="ion-text-center" *ngIf="getSelectedStudentCount() == 0">
-              <ion-label> Waiting for your selections ...</ion-label>
+          <p *ngIf="totalStudent > previousMealsCount && previousMealsCount == 0" box-info>
+            You are serving a
+            <strong>"{{filter.selected_menuitem_name}}"</strong> at
+            <strong>{{filter.selected_mealtype_name}}</strong> for students in
+            <span *ngIf="patronAccount=='by_homeroom'">the
+              <strong>{{filter.selected_homeroom_name}} ({{filter.selected_grade_name}})</strong> homeroom.</span>
+            <span *ngIf="patronAccount=='by_specialroster'">the
+              <strong>{{selectedSpecialRosterName}}</strong> roster.</span>
+          </p>
+          <p *ngIf="previousMealsCount > 0 && totalStudent > previousMealsCount" box-info>
+            Note: {{previousMealsCount}} student
+            <span *ngIf="previousMealsCount > 1">s are</span>
+            <span *ngIf="previousMealsCount == 1"> is</span> indicated as having a prior meal for
+            {{filter.selected_mealtype_name}}
+            today and will not be able to be selected again.
+          </p>
+          <p *ngIf="previousMealsCount == totalStudent && totalStudent > 0" box-info>
+            Note: All {{previousMealsCount}} student(s) in the
+            <strong>{{filter.selected_homeroom_name}} ({{filter.selected_grade_name}})</strong> homeroom are indicated as
+            having
+            a prior meal for {{filter.selected_mealtype_name}} today.
+          </p>
+          <p *ngIf="hasStudentsWithoutPriceTypes" box-info>            
+                  Students cannot be selected if price is not set for students price type. Verify all expected students are selected
+            </p>
+            
+
+          <!-- <ion-content> -->
+          <div custom-list *ngIf="studentLoaded" class="list-quick-sale ion-no-padding">
+
+            <ion-item box-header *ngIf="selectAllSetting== 1"
+              [ngClass]="{'ion-hide' : (previousMealsCount == totalStudent || totalStudent==0 )}">
+              <ion-label class="ion-text-right ion-padding">
+                <strong>Select All</strong>
+              </ion-label>
+
+              <ion-checkbox slot="end" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons()" title="Select All">
+              </ion-checkbox>
+
             </ion-item>
-            <ion-button expand="block" color="slate" [disabled]="transactionInProgress" (click)="saveStudentData()"
-              *ngIf="getSelectedStudentCount() > 0">
-              <div class="spinLogin" *ngIf="transactionInProgress">
-                <ion-spinner name="bubbles"></ion-spinner>
-              </div>
-              Record Sales for {{getSelectedStudentCount()}} Student
-              <span *ngIf="getSelectedStudentCount() > 1">s</span>
-              <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
-            </ion-button>
-          </ion-col>
-        </ion-row>
-      </div>
-    </ion-col>
-  </ion-row>
-</ion-content>
+            <!-- <ion-item *ngFor="let student of studentList; let i=index;"> -->
+            <ion-row size="12" size-md="12" *ngFor="let student of studentList; let i=index;"
+              class="padd0 ion-align-items-center">
+              <!-- [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }"-->
+              <ion-col size="1" size-md="1" size-lg="1">
+                <ion-avatar class="avatar-small">
+                  <!-- <ion-icon name="contact" *ngIf="!student.Image"></ion-icon> -->
+                  <img src="{{student.Image}}" *ngIf="student.Image">
+                  <img src="assets/img/default_male.png" *ngIf="!student.Image && student.Gender === 'M'">
+                  <img src="assets/img/default_female.png" *ngIf="!student.Image && student.Gender === 'F'">
+                  <img src="assets/img/no_image.png" style="border-radius: 0%;"
+                    *ngIf="!student.Image && (student.Gender !== 'M' && student.Gender !== 'F')">
+                </ion-avatar>
+              </ion-col>
+              <ion-col size="4" size-md="4">
+                <ion-item lines="none">
+                  <ion-label>
+                    <strong>{{student.LastName}},&nbsp;{{student.FirstName}}</strong>
+                    <!-- <span *ngIf="student.IsAllergent" (click)="showAllergyPopover(student)">
+                    <ion-icon name="alert"></ion-icon>
+                  </span> -->
+                    <br>
+                    <span *ngIf="hideBalSetting==0"
+                      [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
+                    | currency:'USD':true:'1.2-2'}}
+                    </span>
+                    <ion-button class="alertBtn" *ngIf="student.ShowAlert" default expand="block"
+                      (click)="setRestrictions(student)">
+                      Alerts
+
+                      <span>*</span>
+                    </ion-button>
+                  </ion-label>
+                </ion-item>
+              </ion-col>
+              <ion-col size="4" size-md="4">
+                <!-- <ion-item> -->
+                <ion-list *ngFor="let item of studentWiseAlaCarte; let i = index">
+                  <ion-card *ngIf="studentWiseAlaCarte.length > 0 && item.alaCartItemCount > 0" class="ion-card">
+                    <ion-card-header (click)="toggleSection(i)"
+                      *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0"
+                      [ngClass]="{'section-active': item.open, 'section': !item.open}">
+                      <!-- <ion-item>
+                        <ion-icon name="pin" slot="start"></ion-icon>
+                        <ion-label>ion-item in a card, icon left, button right</ion-label>
+                        <ion-button fill="outline" slot="end">View</ion-button>
+                      </ion-item> -->
+                      <ion-icon name="pin" slot="start"></ion-icon>
+                      <!-- <ion-icon style="--color: #fff;" name="arrow-up-outline" *ngIf="!item.open">
+                      </ion-icon>
+                      <ion-icon style="--color: #fff;" name="arrow-down-outline" *ngIf="item.open">
+                      </ion-icon> -->
+                      A La Carte Items
+                    </ion-card-header>
+                    <ion-row *ngIf="item.personId == student.PersonId && item.open">
+                      <ion-col size="12" size-md="12">
+                        <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
+                          <ion-button fill="clear" color="danger"
+                            (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
+                            <ion-icon slot="icon-only" sytle="font-size:21px;" name="md-close-circle"></ion-icon>
+                          </ion-button>
+                          <ion-label>
+                            <strong>{{items.MenuItemDescription}}</strong>
+                          </ion-label>
+                          <ion-label>
+                            <strong>{{items.Price | currency:'USD':true:'1.2-2'}}</strong>
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                    </ion-row>
+                    <ion-row
+                      *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0 && item.open && taxMeal ==1 && taxPercent!= undefined && student.IsSaleTaxable">
+                      <ion-col size="12" size-md="12">
+                        <ion-item lines="none">
+                          <!--<ion-button  icon-only fill="clear" slot="start">
+                            <ion-icon name="at"></ion-icon> 
+
+                          </ion-button>-->
+                          <ion-label>
+                            <span>Tax <ion-icon name="at"></ion-icon> {{taxPercent}}%</span>
+                          </ion-label>
+                          <ion-label>
+                            <span>{{ item.alaCartTotalTax | currency:'USD':true:'1.2-2'}} </span>
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                      <ion-col size="12" size-md="12">
+                        <ion-item>
+                          <ion-button fill="clear">
+                            <ion-icon slot="icon-only" name="logo-usd"></ion-icon>
+                          </ion-button>
+                          <ion-label>
+                            <strong>Total</strong>
+                          </ion-label>
+                          <ion-label>
+                            <strong>{{item.alaCartTotalWithTax  | currency:'USD':true:'1.2-2'}} </strong>
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                    </ion-row>
+                  </ion-card>
+                </ion-list>
+                <!-- </ion-item> -->
+              </ion-col>
+              <ion-col size="1" size-md="1" class="ion-align-self-center ion-no-padding ion-no-margin">
+                <ion-item lines="none" class="ion-no-padding ion-no-margin">
+                  <ion-button (click)="showAlaCarteItems(student)" class="btnIcon">
+                    <ion-icon slot="icon-only" name="add"></ion-icon>
+                  </ion-button>
+                </ion-item>
+              </ion-col>
+              <ion-col size="1" size-md="1" class="ion-align-self-center ion-no-padding ion-no-margin">
+                <ion-item lines="none" class="ion-no-padding ion-no-margin">
+                  <ion-button (click)="addPaymentPopover(student)" *ngIf="!hideAddFunds" class="btnIcon">
+                    <ion-icon slot="icon-only" name="logo-usd"></ion-icon>
+                  </ion-button>
+                </ion-item>
+              </ion-col>
+              <ion-col size="1" size-md="1" class="padd20ion-align-self-stretch"
+                [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }">
+                <ion-row class="minHt100" class="ion-justify-content-center ion-align-items-center">
+                  <ion-checkbox mode="md" id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
+                    [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
+                  </ion-checkbox>
+                  <ion-icon large name="md-checkmark" color="secondary" *ngIf="student.HadMeal"></ion-icon>
+                </ion-row>
+              </ion-col>
+            </ion-row>
+            <!-- </ion-item> -->
+            <ion-item *ngIf="studentList.length==0">
+              <ion-label>No students found.</ion-label>
+            </ion-item>
+          </div>
+          <!-- </ion-content> -->
+          <ion-row>
+            <ion-col size="4">
+              <ion-button expand="block" (click)="clearStudents()">
+                <ion-icon name="backspace" slot="start"></ion-icon>
+                Cancel
+              </ion-button>
+            </ion-col>
+            <ion-col size="8">
+              <!-- <ion-label class="ion-text-center" *ngIf="getSelectedStudentCount() == 0">
+                Waiting for your selections ...
+              </ion-label> -->
+              <ion-item lines="none" class="ion-text-center" *ngIf="getSelectedStudentCount() == 0">
+                <ion-label> Waiting for your selections ...</ion-label>
+              </ion-item>
+              <ion-button expand="block" color="slate" [disabled]="transactionInProgress" (click)="saveStudentData()"
+                *ngIf="getSelectedStudentCount() > 0">
+                <div class="spinLogin" *ngIf="transactionInProgress">
+                  <ion-spinner name="bubbles"></ion-spinner>
+                </div>
+                Record Sales for {{getSelectedStudentCount()}} Student
+                <span *ngIf="getSelectedStudentCount() > 1">s</span>
+                <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-content>

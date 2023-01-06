@@ -325,6 +325,13 @@ const routes: Routes = [
   },
   {
     path: 'summary-sale',
+    component: OpenSessionPage,
+    data: {
+      preload: true
+    }
+  },
+  {
+    path: 'record-sales',
     component: SummarySalePage,
     data: {
       preload: true

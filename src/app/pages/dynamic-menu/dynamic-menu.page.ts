@@ -2936,7 +2936,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
-                
+
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
@@ -3431,8 +3431,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 :  Number(this.cashTendAmount),
-                'ChangeReturned':   Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -3548,7 +3548,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                         'Balance': Number(this.patronDetails.Balance).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 :  this.cashDue,
+                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 : this.cashDue,
                         'MenuItemTemplate': this.GetMenuItemsPriceList(items),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
@@ -3568,7 +3568,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 this.isIOS = this.platform.is('ios');
                 this.isAndroid = this.utilService.isPlatformAndroid();
-            
+
                 PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
                     if (!(result && result.id)) {
                         if (this.isIOS || this.isAndroid) {
@@ -4328,7 +4328,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if(this.patronDetails !==null){
+            if (this.patronDetails !== null) {
                 this.logDBService.logData({
                     event: EventType.QUEUE,
                     patronId: this.patronDetails.PersonId,
@@ -4909,11 +4909,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'DisplayOrder': m.DisplayOrder,
                             'isCategory': true,
                             'BackColor': m.BackColor,
-                            'ForeColor': m.ForeColor
+                            'ForeColor': m.ForeColor,
+                            'IsDynamicMenu': m.IsDynamicMenu
                         };
                         return mic;
                     });
-                    categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
+                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu', 'DisplayOrder', 'ButtonDescription'], ['desc', 'asc', 'asc']);
 
 
                     if (categoryButtons.length > 0) {

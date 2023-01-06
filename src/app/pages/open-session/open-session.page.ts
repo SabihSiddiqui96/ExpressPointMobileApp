@@ -40,6 +40,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public isCordovaApp: boolean;
   public content_height;
   public onKeyDownCallback;
+  public currentRoute:string;
+  public pageTitle:string;
 
   ngOnInit() {
     this.router.events.pipe(startWith([]),
@@ -49,6 +51,12 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         this.type = this.router.getCurrentNavigation().extras.state.navData.type;
       }
     });
+    if(this.router.url.includes('summary-sale')) {
+      this.currentRoute = 'summarySales';
+      this.pageTitle = 'Summary Sales';
+    } else {
+      this.pageTitle = 'Open Service';
+    }
 
     this.setGridSize(100);// Short timeout to ensure we don't see an animation of increasing height
     this.setGridSize(400);// Delayed timeout to ensure the case when rendering was delayed
@@ -639,6 +647,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   }
 
   public openSession() {
+   
     this.saveInProgress = true;
     const sessionDenominations = [];
 
@@ -713,7 +722,9 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
       this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
 
-
+      if(this.currentRoute === 'summarySales') {
+        this._nav.navigateRoot('record-sales');
+      } else {
       switch (this.type) {
         case 'MenuService': if (this.useDynamicMenus) {
           this._nav.navigateRoot('dynamic-menu');
@@ -725,6 +736,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         case 'Transactions': this._nav.navigateRoot('transaction-details-popup'); break;
         case 'PreOrders': this._nav.navigateRoot('pre-orders'); break;
       }
+    }
     });
   }
 
