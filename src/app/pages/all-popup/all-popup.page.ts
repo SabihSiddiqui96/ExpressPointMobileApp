@@ -34,6 +34,7 @@ export class AllPopupPage implements OnInit {
     @Input() data;
     @Input() page;
     @Input() selectedValue;
+    isGridView = true;
 
     ngOnInit() {
         this.isElectron = this.utilService.isElectronApp();
@@ -369,6 +370,10 @@ export class AllPopupPage implements OnInit {
         // setTimeout(() => {
         //   this.schoolSearch.setFocus();
         // });
+    }
+
+    toggleView() {
+        this.isGridView = !this.isGridView;
     }
 
     public ionViewDidLeave() {
