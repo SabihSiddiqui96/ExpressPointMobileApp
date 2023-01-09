@@ -685,6 +685,20 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         i++;
                     }
                 }
+                accountArray[1].push(accountArray[0].find(f => f.CommandCode === "FSSTAFF"));
+                accountArray[0].push(accountArray[1].find(f => f.CommandCode === "NEWSTUDENT"))
+                accountArray[0] = accountArray[0].filter(f => f.CommandCode !== "FSSTAFF");
+                accountArray[1] = accountArray[1].filter(f => f.CommandCode !== "NEWSTUDENT");
+                let accountArray00 = accountArray[0][1];
+                let accountArray01 = accountArray[0][0];
+                accountArray[0] = [];
+                accountArray[0].push(accountArray00);
+                accountArray[0].push(accountArray01);
+                let accountArray10 = accountArray[1][1];
+                let accountArray11 = accountArray[1][0];
+                accountArray[1] = [];
+                accountArray[1].push(accountArray10);
+                accountArray[1].push(accountArray11);
                 this.specialAccountsArray = accountArray;
                 // this.utilService.setLoader(false);
             });
