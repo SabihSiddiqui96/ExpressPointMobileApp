@@ -259,9 +259,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public ngOnInit() {
         
-        // this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
-        //     sessionStorage.setItem('InputDirection',queueInput.InputDirection);
-        //     });
+       if(this.utilService.isElectronApp()) {
+        this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+            sessionStorage.setItem('InputDirection',queueInput.InputDirection);
+            });
+        }
 
         document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
         document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false);
