@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SettingService } from '../../services/setting.service';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 @Component({
   selector: 'app-open-session',
@@ -668,12 +669,15 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
     const sessionId = this.generateUUID();
 
-    const now = new Date();
-    const UTC = now.getTime();
-    const localOffset = -1 * now.getTimezoneOffset() * 60000;
-    const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+    // const now = new Date();
+    // const UTC = now.getTime();
+    // const localOffset = -1 * now.getTimezoneOffset() * 60000;
+    // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
-    const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+    // const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+    const currentTime = LocalTimerService.getCurrentTime();
+    const currentDate = LocalTimerService.GetLocalDateAsString();
+
     const sessionDate = AppStateService.get('NewSessionDate');
     const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
 
@@ -697,7 +701,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       isStillOpen: true,
       isSentToServer: false,
       OpenDateWithTime: currentTime,
-      OpenDate: new Date().setHours(0, 0, 0, 0),
+      OpenDate: currentDate,
       OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
       TerminalId: this.terminalId,
       LoginWithoutSetup: LoginWithoutSetup
