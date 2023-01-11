@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
-import { NavController, AlertController, PopoverController,Platform, ModalController } from '@ionic/angular';
+import { NavController, AlertController, PopoverController, Platform, ModalController } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { LookupService } from '../../services/lookup.service';
 import { PouchDBService, EXP_TRANSACTIONS, EXP_PERSON } from '../../services/pouch-db.service';
@@ -21,6 +21,7 @@ import { PrintService, TransactionDetailPrintFormat } from '../../services/print
 import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { PatronLookupPage } from '../patron-lookup/patron-lookup.page';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -604,11 +605,14 @@ export class DoPayment {
 
             const amount = this.replaceSign();
 
-            const now = new Date();
-            const UTC = now.getTime();
-            const localOffset = (-1) * now.getTimezoneOffset() * 60000;
-            const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+            // const now = new Date();
+            // const UTC = now.getTime();
+            // const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+            // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
+            const currentTime = LocalTimerService.getCurrentTime();
+            const UTC = LocalTimerService.getUTCTime();
+            const currentDateTimeString = LocalTimerService.GetLocalDateTimeAsString()
             // this.transactionNumber = this.transactionService.getCurrentTransactionNo();
             AppStateService.set('TransactionNumber', this.transactionNumber);
 
@@ -741,8 +745,7 @@ export class DoPayment {
                     'DepositAmount': this.cashAmount === undefined || this.cashAmount === null ? 0 : Number(this.cashAmount),
                     'NewBalance': Number(this.newBalance).toFixed(2),
                     'IsCheck': this.paymentOption === 'check' ? true : false,
-                    'TransactionDate': now.toLocaleDateString() + ' ' + now.toLocaleString('en-US',
-                        { hour: 'numeric', minute: 'numeric', hour12: true }), // now.toLocaleDateString() + ' ' + now.toLocaleTimeString(),
+                    'TransactionDate': currentDateTimeString, // now.toLocaleDateString() + ' ' + now.toLocaleTimeString(),
                     'BonusAmount': Number(this.bonusAmount).toFixed(2),
                     'PaymentAmount': (amount).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                     'Balance': Number(this.navPatronDetails.Balance).toFixed(2),

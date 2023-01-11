@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { AppStateService } from "./app-state.service";
 
 @Injectable({
     providedIn: 'root'
@@ -17,34 +18,28 @@ export class LocalTimerService {
         return value;
     }
 
-    public static getTime(unit) {
-        const now = new Date();
-        const UTC = now.getTime();
-        const localOffset = -1 * now.getTimezoneOffset() * 60000;
-        const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+    public  static getTime = ((unit) => {
+        const currentTime = LocalTimerService.getCurrentTime();
         if (unit === 'time') {
             return currentTime;
         } else if (unit = 'date') {
             const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
             return currentDate;
         }
+    });
 
-    }
 
-    public static getCurrentTime() {
+    public static getCurrentTime = (() => {
         const now = new Date();
         const UTC = now.getTime();
         const localOffset = -1 * now.getTimezoneOffset() * 60000;
         const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
         return currentTime
-    }
-
-
-    public static getCurrentYear() {
-        return new Date().getFullYear();
-    }
-    public static getCurrentDate() {
-        return new Date().setHours(0, 0, 0, 0);
-    }
+    })
+    public static getUTCTime = (() => { return new Date().getTime() })
+    public static GetLocalDateAsString = (() => { return new Date().toLocaleDateString() })
+    public static GetLocalDateTimeAsString = (() => { return new Date().toLocaleDateString() })
+    public static getCurrentYear = (() => { return new Date().getFullYear(); })
+    public static getCurrentDate = () => { return new Date().setHours(0, 0, 0, 0); }
 }

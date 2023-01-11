@@ -14,6 +14,7 @@ import { StatusPopupPage } from '../pages/status-popup/status-popup.page';
 import { HttpService } from "./HTTP/http.service";
 import { UtilService } from "./util.service";
 import * as _ from "lodash";
+import { desktopCapturer } from "electron";
 
 
 
@@ -211,11 +212,19 @@ export class SetupDbService {
             }).then(() => {
                 PouchQueriesService.GetAllOpenSessions().then((res) => {
                     const openSessionDocs = res.rows.map(row => row.doc);
+
+                    // delete open sessions from previous day
+                    openSessionDocs.forEach(doc => {
+                        if (doc.isSentToServer === true
+                            && (doc.OpenDate !== LocalTimerService.GetLocalDateAsString() || doc.openDate <= LocalTimerService.getCurrentDate()))
+                            EXP_TRANSACTIONS.remove(doc);
+                    });
+
                     const hasNotSentOpenSessions: boolean =
                         openSessionDocs.length > 0 ? openSessionDocs.find((doc) => doc.isSentToServer === false) : true;
 
                     const hasOpenToday = openSessionDocs.length > 0 ? openSessionDocs.find((doc) =>
-                        doc.isStillOpen && doc.OpenDate === new Date().setHours(0, 0, 0, 0)) : true;
+                        doc.isStillOpen && doc.OpenDate === LocalTimerService.GetLocalDateAsString()) : true;
 
                     if (hasNotSentOpenSessions || hasOpenToday) {
                         canDeleteOpenSession = false;

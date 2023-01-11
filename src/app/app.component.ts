@@ -47,6 +47,7 @@ import { AuthService } from './services/auth.service';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SignalRService } from './services/SignalR.service';
 import { SetupDbService } from "./services/setup-db.service";
+import { LocalTimerService } from "./services/local-timer.service";
 
 declare var Fullscreen: any;
 @Component({
@@ -1378,7 +1379,7 @@ export class AppComponent {
 
       let sessionDocs = data.rows.map(row => row.doc);
       sessionDocs = sessionDocs.filter(s => {
-        return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
           Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
           && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
       });
