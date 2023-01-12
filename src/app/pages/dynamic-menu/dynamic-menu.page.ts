@@ -4909,11 +4909,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'DisplayOrder': m.DisplayOrder,
                             'isCategory': true,
                             'BackColor': m.BackColor,
-                            'ForeColor': m.ForeColor
+                            'ForeColor': m.ForeColor,
+                            'IsDynamicMenu': m.IsDynamicMenu    
                         };
                         return mic;
                     });
-                    categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
+                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu', 'DisplayOrder', 'ButtonDescription'], ['desc', 'asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');

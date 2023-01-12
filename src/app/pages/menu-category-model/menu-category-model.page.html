@@ -62,7 +62,7 @@
       <div class="menu-item-category menu-button" *ngIf="subgrid.isCategory==true">
         <ion-button expand="block" [style.border]="'1px solid ' + subgrid.BackColor"
           (click)="showCategoryItems(subgrid)">
-          {{subgrid.ButtonDescription}}
+          {{subgrid.ButtonDescription}} <span *ngIf = 'subgrid.IsDynamicMenu==true'> (D)</span>
           <ion-icon slot="end" name="alert" [style.display]="subgrid.restrictedItem==true? '' : 'none'">
           </ion-icon>
         </ion-button>
