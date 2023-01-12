@@ -138,7 +138,8 @@ export class StaticMenusDBService {
                   'DisplayOrder': category.DisplayOrder,
                   'Description': category.Description,
                   'BackColor': category.BackColor,
-                  'ForeColor': category.ForeColor
+                  'ForeColor': category.ForeColor,
+                  'IsDynamicMenu': category.IsDynamicMenu
                 };
                 menuItemCategories.push(menuItemCategoryDoc);
               });
