@@ -1423,7 +1423,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
     public onPeripheralKey(event) {
-        if(!this.router.url.includes('payments') && this.lookUpService.showModalPopup) {
+        if(!this.router.url.includes('payments')) {
             this.logDBService.logData({
                 event: EventType.LOOKUP,
                 type: LogType.INFO,
