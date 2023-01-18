@@ -277,6 +277,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     private popupSubscription: Subscription;
     private ALACASREST: boolean = false;
     public static onKeyUpCallback;
+    public hideStudentId: boolean;
 
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
@@ -298,7 +299,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
         }
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
 
         if (AppStateService.get('session_id')) {
             this.sessionId = AppStateService.get('session_id');
@@ -385,6 +385,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        //this.hideStudentId = true;
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
         this.dayOfWeek = wDay[day.getUTCDay()];
@@ -777,6 +779,7 @@ public ResetForNewStudent(){
         IsCard: false,
         CardNumber: ''
     };
+    this.refreshHideStudentSetting();
 
 }
     public selectPatron(patronData) {
@@ -2389,7 +2392,6 @@ public ResetForNewStudent(){
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
 
-
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             if (transactionType !== 0) {
@@ -3377,6 +3379,11 @@ public ResetForNewStudent(){
         return AppStateService.get(key);
     }
 
+    public refreshHideStudentSetting(){
+        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        //this.hideStudentId = true;
+    }
+
     public goToLookUp() {
         // this.event.publish('patronLargeImagehide', null);
         /**************************keep this?****************************** */
@@ -3395,6 +3402,7 @@ public ResetForNewStudent(){
                     queueCount: this.lookUpService.personsQ.length
                 });
             }
+            this.refreshHideStudentSetting();
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};
@@ -3634,6 +3642,11 @@ public ResetForNewStudent(){
 
     public showPatronPin() {
         this.showPin = !this.showPin;
+        if(!this.hideStudentId) {
+            this.hideStudentId = false;
+        } else if(this.hideStudentId) {
+            this.hideStudentId = !this.hideStudentId;
+        }
     }
 
     // public calcAlaTotal(items) { // To calculate sum of only categorical restricted ala carte items
