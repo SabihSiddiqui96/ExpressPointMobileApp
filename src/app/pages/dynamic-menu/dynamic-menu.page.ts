@@ -310,6 +310,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public printAllSetting: number = 0;
     private ALACASREST: boolean = false;
 
+    public hideStudentId: boolean;
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
 
@@ -414,6 +415,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
 
         /**
        * Use the site Terminal if the Device Terminal is not set.
@@ -910,6 +912,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }, 500);
     }
 
+    public refreshHideStudentSetting(){
+        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        //this.hideStudentId = true;
+    }
+
     public getPatronDetails(patronSelectedData) {
         // console.clear();
         this.patronDetails = JSON.parse(patronSelectedData);
@@ -918,6 +925,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // this.transactionNumber += 1;
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
         // Reset Order Data 
+        this.refreshHideStudentSetting();
         this.orderData = {
             accountBalance: 0.00,
             subTotal: 0.00,
@@ -6131,6 +6139,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public showPatronPin() {
         this.showPin = !this.showPin;
+        if(!this.hideStudentId) {
+            this.hideStudentId = false;
+        } else if(this.hideStudentId) {
+            this.hideStudentId = !this.hideStudentId;
+        }
     }
 
     public checkForBirthday(patronData) {

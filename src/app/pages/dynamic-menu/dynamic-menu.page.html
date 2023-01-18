@@ -175,10 +175,16 @@
               <ion-row class="ion-no-padding ion-no-margin">
                 <ion-col size="8" class="ion-no-padding ion-no-margin">
                   <ion-label>
-                    <p *ngIf="!showPin" (click)="showPatronPin()">ID:
-                      {{patronDetails.PersonIdentifier}}</p>
-                    <p *ngIf="showPin" (click)="showPatronPin()">PIN:
-                      {{patronDetails.Identifier}}</p>
+                    <p *ngIf="!showPin && hideStudentId" (click)="showPatronPin()">ID:
+                      **********
+                 </p>
+                 <p *ngIf="!showPin && !hideStudentId" (click)="showPatronPin()">ID:
+                     {{patronDetails.PersonIdentifier}}
+                 </p>
+                 <p *ngIf="showPin && hideStudentId" (click)="showPatronPin()">PIN:
+                      *********</p>
+                 <p *ngIf="showPin && !hideStudentId" (click)="showPatronPin()">PIN:
+                         {{patronDetails.Identifier}}</p>
                     <span id="startPatronPicture"></span>
                     <p *ngIf="patronDetails.SchoolId!=schoolId">
                       <span class="center_text_content">Site:&nbsp; <span class="color-orange"> Visiting from
