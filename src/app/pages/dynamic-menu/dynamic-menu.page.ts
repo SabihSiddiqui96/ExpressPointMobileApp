@@ -415,7 +415,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
-        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
 
         /**
        * Use the site Terminal if the Device Terminal is not set.
@@ -913,7 +913,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public refreshHideStudentSetting(){
-        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
         //this.hideStudentId = true;
     }
 
@@ -2890,6 +2890,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public makeSale(transactionType) {
         this.event.publish('patronLargeImagehide', null);
         // this.IsStaticMenuSelected = false // static menu change
+        this.refreshHideStudentSetting();
         this.transactionInProgress = true;
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
