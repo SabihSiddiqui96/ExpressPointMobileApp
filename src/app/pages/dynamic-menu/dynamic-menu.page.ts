@@ -6140,11 +6140,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public showPatronPin() {
         this.showPin = !this.showPin;
-        if(!this.hideStudentId) {
-            this.hideStudentId = false;
-        } else if(this.hideStudentId) {
-            this.hideStudentId = !this.hideStudentId;
-        }
     }
 
     public checkForBirthday(patronData) {

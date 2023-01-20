@@ -3642,11 +3642,6 @@ public ResetForNewStudent(){
 
     public showPatronPin() {
         this.showPin = !this.showPin;
-        if(!this.hideStudentId) {
-            this.hideStudentId = false;
-        } else if(this.hideStudentId) {
-            this.hideStudentId = !this.hideStudentId;
-        }
     }
 
     // public calcAlaTotal(items) { // To calculate sum of only categorical restricted ala carte items
