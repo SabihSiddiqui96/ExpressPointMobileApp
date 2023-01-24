@@ -385,7 +385,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
-        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
         //this.hideStudentId = true;
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
@@ -2391,7 +2391,7 @@ public ResetForNewStudent(){
         // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
-
+        //this.refreshHideStudentSetting();
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             if (transactionType !== 0) {
@@ -3380,7 +3380,7 @@ public ResetForNewStudent(){
     }
 
     public refreshHideStudentSetting(){
-        this.hideStudentId = Boolean(parseInt(SettingService.getSettingValue('HIDSTUID')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
         //this.hideStudentId = true;
     }
 
@@ -3642,11 +3642,6 @@ public ResetForNewStudent(){
 
     public showPatronPin() {
         this.showPin = !this.showPin;
-        if(!this.hideStudentId) {
-            this.hideStudentId = false;
-        } else if(this.hideStudentId) {
-            this.hideStudentId = !this.hideStudentId;
-        }
     }
 
     // public calcAlaTotal(items) { // To calculate sum of only categorical restricted ala carte items

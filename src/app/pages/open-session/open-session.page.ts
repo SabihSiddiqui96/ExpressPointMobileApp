@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { ViewChild, ElementRef } from '@angular/core';
 import {
@@ -23,6 +23,7 @@ import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SettingService } from '../../services/setting.service';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { SessionType } from '../../services/enums/session-types';
 
 @Component({
   selector: 'app-open-session',
@@ -690,22 +691,43 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     } else {
       AppStateService.set('NewSessionDate', currentDate);
     }
+    let sessionDoc;
 
-    const sessionDoc = {
-      _id: 'OpenSession--' + sessionId,
-      SessionId: sessionId,
-      SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-      SessionDenominations: sessionDenominations,
-      OpeningBalance: this.replaceTotalSign(),
-      // "Status": "New",
-      isStillOpen: true,
-      isSentToServer: false,
-      OpenDateWithTime: currentTime,
-      OpenDate: currentDate,
-      OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
-      TerminalId: this.terminalId,
-      LoginWithoutSetup: LoginWithoutSetup
-    };
+    if(this.router.url.includes('summary-sale')) {
+      sessionDoc = {
+        _id: 'OpenSession--' + sessionId,
+        SessionId: sessionId,
+        SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+        SessionDenominations: sessionDenominations,
+        OpeningBalance: this.replaceTotalSign(),
+        SessionType: SessionType.MANUALSALE,
+        // "Status": "New",
+        isStillOpen: true,
+        isSentToServer: false,
+        OpenDateWithTime: currentTime,
+        OpenDate: currentDate,
+        OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
+        TerminalId: this.terminalId,
+        LoginWithoutSetup: LoginWithoutSetup
+      };
+    } else {
+       sessionDoc = {
+        _id: 'OpenSession--' + sessionId,
+        SessionId: sessionId,
+        SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+        SessionDenominations: sessionDenominations,
+        OpeningBalance: this.replaceTotalSign(),
+        // "Status": "New",
+        isStillOpen: true,
+        isSentToServer: false,
+        OpenDateWithTime: currentTime,
+        OpenDate: currentDate,
+        OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
+        TerminalId: this.terminalId,
+        LoginWithoutSetup: LoginWithoutSetup
+      };
+    }
+    
 
     PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {
       AppStateService.set('session_id', sessionId);
