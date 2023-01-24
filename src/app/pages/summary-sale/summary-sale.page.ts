@@ -603,7 +603,7 @@ export class SummarySalePage implements OnInit {
         // this.utilService.showToast('Summary sale successful');
         // this.closeSession();
         this.resetSummarySale();
-        this._nav.navigateRoot('close-session');
+        this._nav.navigateRoot('summary-sales-close-session');
 
       }).catch((err) => {
         this.transactionInProgress = false
