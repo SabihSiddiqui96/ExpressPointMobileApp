@@ -19,6 +19,7 @@ import { Router } from '@angular/router';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { CloseSessionPrintFormat, PrintService } from '../../services/print.service';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { SessionType } from '../../services/enums/session-types';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -712,16 +713,34 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         const currentTime = LocalTimerService.getCurrentTime();
         
         this.utilService.setLoader(true);
-        const closeSessionDoc = {
-            '_id': 'CloseSession--' + AppStateService.get('session_id'),
-            'SessionId': AppStateService.get('session_id'),
-            'SessionCheck': sessionCheck,
-            'ClosingBalance': this.total,
-            'CloseDateWithTime': currentTime,
-            'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-            'TerminalId': this.terminalId,
-            'SessionDenominations': sessionDenominations
-        };
+
+        let closeSessionDoc;
+
+        if(this.router.url.includes('summary-sales-close-session')) {
+            closeSessionDoc = {
+                '_id': 'CloseSession--' + AppStateService.get('session_id'),
+                'SessionId': AppStateService.get('session_id'),
+                'SessionCheck': sessionCheck,
+                'ClosingBalance': this.total,
+                'SessionType': SessionType.MANUALSALE,
+                'CloseDateWithTime': currentTime,
+                'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                'TerminalId': this.terminalId,
+                'SessionDenominations': sessionDenominations
+            };
+        } else {
+             closeSessionDoc = {
+                '_id': 'CloseSession--' + AppStateService.get('session_id'),
+                'SessionId': AppStateService.get('session_id'),
+                'SessionCheck': sessionCheck,
+                'ClosingBalance': this.total,
+                'CloseDateWithTime': currentTime,
+                'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                'TerminalId': this.terminalId,
+                'SessionDenominations': sessionDenominations
+            };
+        }
+        
 
 
 
