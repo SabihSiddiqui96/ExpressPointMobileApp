@@ -451,18 +451,10 @@ export class HttpService {
     //#endregion: GETs
 
     //#region:POSTs
-    public postOpenSession(sessionId, data, total, openDate, terminalId, schoolId, loginWithoutSetup): any {
+    public postOpenSession(sessionDoc): any {
         if (AppStateService.get('SelectedSite')) {
             return this.http.post(API_URL + 'SyncOpenSession',
-                JSON.stringify({
-                    'SessionId': sessionId,
-                    'OpeningBalance': total,
-                    'SchoolId': schoolId,
-                    'SessionDenominations': data,
-                    'OpenSessionDate': openDate,
-                    'TerminalId': terminalId,
-                    'LoginWithoutSetup': loginWithoutSetup
-                })).pipe(map(res => res));
+                JSON.stringify(sessionDoc)).pipe(map(res => res));
         }
     }
 
