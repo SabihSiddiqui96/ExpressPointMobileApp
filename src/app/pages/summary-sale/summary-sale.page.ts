@@ -13,7 +13,7 @@ import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.servic
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { TransactionService } from '../../services/transaction.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SettingService } from '../../services/setting.service';
 
@@ -29,6 +29,13 @@ export class SummarySalePage implements OnInit {
   public isCloseService: boolean = false;
 
   ngOnInit() {
+    this.route.queryParams
+      .subscribe(params => {
+        console.log(params); // { orderby: "price" }
+        this.sessionId = params.sessionId;
+        console.log(this.sessionId); // price
+      }
+    );
   }
   public selectedMealType = -1;
   public selectedMealTypeName = 'Meal Type';
@@ -106,6 +113,7 @@ export class SummarySalePage implements OnInit {
     private pouchQuery: PouchQueriesService, public platform: Platform,
     public router: Router, public appStateService: AppStateService,
     public toastCtrl: ToastController,
+    private route: ActivatedRoute,
     public pouchDBService: PouchDBService) {
     this.isIOS = this.platform.is('ios');
     if (AppStateService.get('SelectedSite')) {
@@ -117,6 +125,7 @@ export class SummarySalePage implements OnInit {
     } else {
       this.terminalId = JSON.parse(AppStateService.get('site_details')).TerminalId;
     }
+
 
     this.priceMode = Number(SettingService.getSettingValue('PRICEMODE'))
     // if (AppStateService.get('session_id')) {
@@ -578,7 +587,7 @@ export class SummarySalePage implements OnInit {
         'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
         'MealTypeId': this.filter.selected_mealtype,
         'MenuItemId': this.filter.selected_menuitem,
-        // 'SessionId': this.sessionId,
+        'SessionId': this.sessionId,
         'UserId': JSON.parse(AppStateService.get('login_details')).UserId,
         'TerminalId': this.terminalId,
         'IsDetailEntry': 0,
@@ -603,7 +612,7 @@ export class SummarySalePage implements OnInit {
         // this.utilService.showToast('Summary sale successful');
         // this.closeSession();
         this.resetSummarySale();
-        this._nav.navigateRoot('summary-sales-close-session');
+        this._nav.navigateRoot('summary-sales-close-session',{queryParams: {sessionId : this.sessionId}});
 
       }).catch((err) => {
         this.transactionInProgress = false
