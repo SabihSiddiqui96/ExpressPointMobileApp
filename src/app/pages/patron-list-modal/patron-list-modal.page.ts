@@ -57,7 +57,7 @@ export class PatronListModalPage implements OnInit {
     public loadMoreClicks = 0;
     public disableLoadMore: boolean = false;
 
-    constructor(public navCtrl: NavController,
+    constructor(public navCtrl: NavController, public lookUpService: LookupService,
         public event: Events, public utilService: UtilService,
         public http: HttpService, public router: Router, public appStateService: AppStateService) {
         // , public lookUpService:LookUpServiceProvider
@@ -71,6 +71,7 @@ export class PatronListModalPage implements OnInit {
         this.modalController.dismiss({
           'dismissed': true
         });
+        this.lookUpService.showModalPopup = true;
       }
 
     public getPatronImages(list) {

@@ -9,6 +9,7 @@ import { UtilService } from '../services/util.service';
 import { Events as CustomEvents } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { Observable, Subject } from 'rxjs';
+import { LocalTimerService } from './local-timer.service';
 
 @Injectable({
     providedIn: 'root'
@@ -218,7 +219,7 @@ export class TransactionService {
 
             let notSentTransactions: any = [];
             let hasPendingTransactions: boolean = false;
-            let hasPendingSummaryTransaction :boolean = false;
+            let hasPendingSummaryTransaction: boolean = false;
 
             this.getAllTransactions().then(() => {
                 // this.Transactions = transactions
@@ -231,10 +232,10 @@ export class TransactionService {
                 }
 
                 this.getAllPendingSummarySale().then((summarytransaction) => {
-                    if(summarytransaction){
-                        if(summarytransaction.filter((doc) => doc.IsSynced === false).length > 0){
+                    if (summarytransaction) {
+                        if (summarytransaction.filter((doc) => doc.IsSynced === false).length > 0) {
                             hasPendingSummaryTransaction = true;
-                        }else{
+                        } else {
                             hasPendingSummaryTransaction = false;
                         }
                     }
@@ -298,7 +299,7 @@ export class TransactionService {
 
                     let sessionDocs = data.rows.map(row => row.doc);
                     sessionDocs = sessionDocs.filter(s => {
-                        return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+                        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                             Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                             && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
                     });

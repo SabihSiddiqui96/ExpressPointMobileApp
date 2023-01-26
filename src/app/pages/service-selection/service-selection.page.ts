@@ -24,6 +24,7 @@ import { Events } from "../../services/events.service";
 import * as _ from "lodash";
 import { NavigationExtras, Router } from "@angular/router";
 import { LoadingService } from "../../services/loading.service";
+import { LocalTimerService } from "../../services/local-timer.service";
 
 @Component({
   selector: "app-service-selection",
@@ -341,7 +342,7 @@ export class ServiceSelectionPage implements OnInit {
           sessionDocs = sessionDocs.filter((s) => {
             return (
               s.isStillOpen &&
-              s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+              s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
               Number(s.OpenedBy) ===
               JSON.parse(AppStateService.get("login_details")).UserId &&
               s.SchoolId ===

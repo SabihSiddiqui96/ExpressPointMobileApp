@@ -103,3 +103,13 @@ ion-footer ion-toolbar {
   align-items: center;
   justify-content: left;
 }
+
+
+.hide {
+  display: none;
+}
+    
+.hideStudent:hover + .hide {
+  display: block;
+  color: red;
+}

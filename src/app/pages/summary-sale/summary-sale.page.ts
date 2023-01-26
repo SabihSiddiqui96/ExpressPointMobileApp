@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 
-import { NavController, PopoverController, ModalController, AlertController, Platform } from '@ionic/angular';
+import { NavController, PopoverController, ModalController, AlertController, Platform, ToastController } from '@ionic/angular';
 import * as _ from 'lodash';
 import { Network } from '@ionic-native/network/ngx';
 import { AppStateService } from '../../services/app-state.service';
@@ -24,6 +24,9 @@ import { SettingService } from '../../services/setting.service';
 })
 export class SummarySalePage implements OnInit {
 
+  public isOpenService: boolean = true;
+  public isSummarySales: boolean = false;
+  public isCloseService: boolean = false;
 
   ngOnInit() {
   }
@@ -102,6 +105,7 @@ export class SummarySalePage implements OnInit {
     public transactionService: TransactionService,
     private pouchQuery: PouchQueriesService, public platform: Platform,
     public router: Router, public appStateService: AppStateService,
+    public toastCtrl: ToastController,
     public pouchDBService: PouchDBService) {
     this.isIOS = this.platform.is('ios');
     if (AppStateService.get('SelectedSite')) {
@@ -347,7 +351,11 @@ export class SummarySalePage implements OnInit {
   }
 
   public showPopup(type) {
-
+    if(this.filter.selected_mealtype!== -1 && type === 'classMealtype'){
+      this.popupMessageService.showMessage(PopupMessageCode.E05516);
+    } else if(this.filter.selected_menuitem !== -2 && type === 'classMealitem') {
+      this.popupMessageService.showMessage(PopupMessageCode.E05517);
+    } else {
     let postData = {};
     switch (type) {
       case 'classMealtype': postData = {
@@ -389,6 +397,7 @@ export class SummarySalePage implements OnInit {
         }
       });
     }
+  }
   }
 
   public getMenuItemsByMealType() {
@@ -594,6 +603,7 @@ export class SummarySalePage implements OnInit {
         // this.utilService.showToast('Summary sale successful');
         // this.closeSession();
         this.resetSummarySale();
+        this._nav.navigateRoot('summary-sales-close-session');
 
       }).catch((err) => {
         this.transactionInProgress = false

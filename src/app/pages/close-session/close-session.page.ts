@@ -18,6 +18,8 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { CloseSessionPrintFormat, PrintService } from '../../services/print.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { SessionType } from '../../services/enums/session-types';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -704,22 +706,41 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         // });
 
 
-        const now = new Date();
-        const UTC = now.getTime();
-        const localOffset = -1 * now.getTimezoneOffset() * 60000;
-        const currentTime = Math.round(new Date(UTC + localOffset).getTime());
-
+        // const now = new Date();
+        // const UTC = now.getTime();
+        // const localOffset = -1 * now.getTimezoneOffset() * 60000;
+        // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+        const currentTime = LocalTimerService.getCurrentTime();
+        
         this.utilService.setLoader(true);
-        const closeSessionDoc = {
-            '_id': 'CloseSession--' + AppStateService.get('session_id'),
-            'SessionId': AppStateService.get('session_id'),
-            'SessionCheck': sessionCheck,
-            'ClosingBalance': this.total,
-            'CloseDateWithTime': currentTime,
-            'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-            'TerminalId': this.terminalId,
-            'SessionDenominations': sessionDenominations
-        };
+
+        let closeSessionDoc;
+
+        if(this.router.url.includes('summary-sales-close-session')) {
+            closeSessionDoc = {
+                '_id': 'CloseSession--' + AppStateService.get('session_id'),
+                'SessionId': AppStateService.get('session_id'),
+                'SessionCheck': sessionCheck,
+                'ClosingBalance': this.total,
+                'SessionType': SessionType.MANUALSALE,
+                'CloseDateWithTime': currentTime,
+                'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                'TerminalId': this.terminalId,
+                'SessionDenominations': sessionDenominations
+            };
+        } else {
+             closeSessionDoc = {
+                '_id': 'CloseSession--' + AppStateService.get('session_id'),
+                'SessionId': AppStateService.get('session_id'),
+                'SessionCheck': sessionCheck,
+                'ClosingBalance': this.total,
+                'CloseDateWithTime': currentTime,
+                'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                'TerminalId': this.terminalId,
+                'SessionDenominations': sessionDenominations
+            };
+        }
+        
 
 
 
@@ -729,7 +750,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             let openingBalance = 0;
 
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             });
@@ -804,7 +825,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 let openingBalance = 0;
 
                 sessionDocs = sessionDocs.filter(s => {
-                    return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+                    return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                         Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                         && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
                 });

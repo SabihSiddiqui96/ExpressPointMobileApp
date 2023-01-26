@@ -12,6 +12,7 @@ import { SettingService } from '../../services/setting.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { SignalRService } from '../../services/SignalR.service';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 export class QuickClassroomSalePage {
 
@@ -106,13 +107,13 @@ export class QuickClassroomSalePage {
 
         const sessionId = this.generateUUID();
 
-        const now = new Date();
-        const UTC = now.getTime();
-        const localOffset = -1 * now.getTimezoneOffset() * 60000;
-        const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+        // const now = new Date();
+        // const UTC = now.getTime();
+        // const localOffset = -1 * now.getTimezoneOffset() * 60000;
+        const currentTime = LocalTimerService.getCurrentTime();
 
-        const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
-
+        // const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+        const currentDate = LocalTimerService.GetLocalDateAsString()
         if (AppStateService.get('NewSessionDate') !== undefined) {
             if (currentDate !== AppStateService.get('NewSessionDate')) {
                 PouchQueriesService.ResetPreviousSaleData();
@@ -131,7 +132,7 @@ export class QuickClassroomSalePage {
             isStillOpen: true,
             isSentToServer: false,
             OpenDateWithTime: currentTime,
-            OpenDate: new Date().setHours(0, 0, 0, 0),
+            OpenDate: currentDate,
             OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
             TerminalId: this.terminalId
         };
@@ -164,8 +165,8 @@ export class QuickClassroomSalePage {
 
             let sessionDocs = data.rows.map(row => row.doc);
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
-                Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+                    Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             });
 

@@ -24,6 +24,7 @@ import { Router } from '@angular/router';
 import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { TransactionTypes } from '../../services/enums/transaction-types';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 @Component({
     selector: 'app-classroom-sale',
@@ -32,6 +33,7 @@ import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.s
 })
 export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit, OnDestroy {
 
+   
 
     public ngOnInit() {
         if (this.specialRosterList.length === 0) { // Saketh for Special SpecialRosters
@@ -596,7 +598,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'PersonIdentifier': doc.PersonIdentifier
                         };
                     });
-                    students = _.sortBy(students, ['LastName','FirstName']);
+                    students = _.sortBy(students, ['LastName', 'FirstName']);
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -679,7 +681,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                     });
 
-                    students = _.sortBy(students,['LastName','FirstName']);
+                    students = _.sortBy(students, ['LastName', 'FirstName']);
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -786,7 +788,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             students = students.filter(r => r.isActive === true);
                         }
 
-                        students = _.sortBy(students, ['LastName','FirstName']);
+                        students = _.sortBy(students, ['LastName', 'FirstName']);
                         console.log(students);
 
 
@@ -1000,10 +1002,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
             this.studentList.map(student => {
 
-                const now = new Date();
-                const UTC = now.getTime();
-                const localOffset = (-1) * now.getTimezoneOffset() * 60000;
-                const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+                // const now = new Date();
+                // const UTC = now.getTime();
+                // const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+                // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+                const currentTime = LocalTimerService.getCurrentTime();
                 const itemAddedAt = (new Date).getTime().toString();
                 let studentExists: boolean = false;
 
@@ -1155,7 +1158,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     // console.clear()
                     items = [];
 
-                    this.persons = _.sortBy(this.persons, ['LastName','FirstName']);
+                    this.persons = _.sortBy(this.persons, ['LastName', 'FirstName']);
                     this.persons.map(person => {
                         person.Image = null;
                         if (person.PersonId === student.PersonId) {

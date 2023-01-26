@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { ViewChild, ElementRef } from '@angular/core';
 import {
@@ -22,6 +22,8 @@ import { Router } from '@angular/router';
 import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SettingService } from '../../services/setting.service';
+import { LocalTimerService } from '../../services/local-timer.service';
+import { SessionType } from '../../services/enums/session-types';
 
 @Component({
   selector: 'app-open-session',
@@ -40,6 +42,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public isCordovaApp: boolean;
   public content_height;
   public onKeyDownCallback;
+  public currentRoute:string;
+  public pageTitle:string;
 
   ngOnInit() {
     this.router.events.pipe(startWith([]),
@@ -49,6 +53,12 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         this.type = this.router.getCurrentNavigation().extras.state.navData.type;
       }
     });
+    if(this.router.url.includes('summary-sale')) {
+      this.currentRoute = 'summarySales';
+      this.pageTitle = 'Summary Sales';
+    } else {
+      this.pageTitle = 'Open Service';
+    }
 
     this.setGridSize(100);// Short timeout to ensure we don't see an animation of increasing height
     this.setGridSize(400);// Delayed timeout to ensure the case when rendering was delayed
@@ -639,6 +649,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   }
 
   public openSession() {
+   
     this.saveInProgress = true;
     const sessionDenominations = [];
 
@@ -659,12 +670,15 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
     const sessionId = this.generateUUID();
 
-    const now = new Date();
-    const UTC = now.getTime();
-    const localOffset = -1 * now.getTimezoneOffset() * 60000;
-    const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+    // const now = new Date();
+    // const UTC = now.getTime();
+    // const localOffset = -1 * now.getTimezoneOffset() * 60000;
+    // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
-    const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+    // const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+    const currentTime = LocalTimerService.getCurrentTime();
+    const currentDate = LocalTimerService.GetLocalDateAsString();
+
     const sessionDate = AppStateService.get('NewSessionDate');
     const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
 
@@ -677,22 +691,43 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     } else {
       AppStateService.set('NewSessionDate', currentDate);
     }
+    let sessionDoc;
 
-    const sessionDoc = {
-      _id: 'OpenSession--' + sessionId,
-      SessionId: sessionId,
-      SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-      SessionDenominations: sessionDenominations,
-      OpeningBalance: this.replaceTotalSign(),
-      // "Status": "New",
-      isStillOpen: true,
-      isSentToServer: false,
-      OpenDateWithTime: currentTime,
-      OpenDate: new Date().setHours(0, 0, 0, 0),
-      OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
-      TerminalId: this.terminalId,
-      LoginWithoutSetup: LoginWithoutSetup
-    };
+    if(this.router.url.includes('summary-sale')) {
+      sessionDoc = {
+        _id: 'OpenSession--' + sessionId,
+        SessionId: sessionId,
+        SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+        SessionDenominations: sessionDenominations,
+        OpeningBalance: this.replaceTotalSign(),
+        SessionType: SessionType.MANUALSALE,
+        // "Status": "New",
+        isStillOpen: true,
+        isSentToServer: false,
+        OpenDateWithTime: currentTime,
+        OpenDate: currentDate,
+        OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
+        TerminalId: this.terminalId,
+        LoginWithoutSetup: LoginWithoutSetup
+      };
+    } else {
+       sessionDoc = {
+        _id: 'OpenSession--' + sessionId,
+        SessionId: sessionId,
+        SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+        SessionDenominations: sessionDenominations,
+        OpeningBalance: this.replaceTotalSign(),
+        // "Status": "New",
+        isStillOpen: true,
+        isSentToServer: false,
+        OpenDateWithTime: currentTime,
+        OpenDate: currentDate,
+        OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
+        TerminalId: this.terminalId,
+        LoginWithoutSetup: LoginWithoutSetup
+      };
+    }
+    
 
     PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {
       AppStateService.set('session_id', sessionId);
@@ -713,7 +748,9 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
       this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
 
-
+      if(this.currentRoute === 'summarySales') {
+        this._nav.navigateRoot('record-sales');
+      } else {
       switch (this.type) {
         case 'MenuService': if (this.useDynamicMenus) {
           this._nav.navigateRoot('dynamic-menu');
@@ -725,6 +762,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         case 'Transactions': this._nav.navigateRoot('transaction-details-popup'); break;
         case 'PreOrders': this._nav.navigateRoot('pre-orders'); break;
       }
+    }
     });
   }
 
