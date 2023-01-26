@@ -749,7 +749,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
 
       if(this.currentRoute === 'summarySales') {
-        this._nav.navigateRoot('record-sales');
+        this._nav.navigateRoot('record-sales', {queryParams: {sessionId : sessionId}});
       } else {
       switch (this.type) {
         case 'MenuService': if (this.useDynamicMenus) {
