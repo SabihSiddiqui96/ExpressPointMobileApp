@@ -1576,7 +1576,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     });
                     categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
 
-
                     if (categoryButtons.length > 0) {
                         this.callModalCtrl(categoryButtons, 'All Categories', true);
 
