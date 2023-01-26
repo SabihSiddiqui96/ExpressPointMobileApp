@@ -13,6 +13,7 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { SettingService } from '../../services/setting.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 
 @Component({
@@ -114,13 +115,15 @@ export class QuickClassroomSalePage implements OnInit {
 
         const sessionId = this.generateUUID();
 
-        const now = new Date();
-        const UTC = now.getTime();
-        const localOffset = -1 * now.getTimezoneOffset() * 60000;
-        const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+        // const now = new Date();
+        // const UTC = now.getTime();
+        // const localOffset = -1 * now.getTimezoneOffset() * 60000;
+        // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
-        const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
-
+        // const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
+        const currentTime = LocalTimerService.getCurrentTime();
+        const currentDate = LocalTimerService.GetLocalDateAsString();
+        
         if (AppStateService.get('NewSessionDate') !== undefined) {
             if (currentDate !== AppStateService.get('NewSessionDate')) {
                 PouchQueriesService.ResetPreviousSaleData();
@@ -139,7 +142,7 @@ export class QuickClassroomSalePage implements OnInit {
             isStillOpen: true,
             isSentToServer: false,
             OpenDateWithTime: currentTime,
-            OpenDate: new Date().setHours(0, 0, 0, 0),
+            OpenDate: currentDate,
             OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
             TerminalId: this.terminalId
         };

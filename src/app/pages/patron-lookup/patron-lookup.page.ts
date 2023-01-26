@@ -160,6 +160,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public isCordovaApp: boolean;
     public eventType: string;
     public PinIdLabel: string;
+    showModalPopup: boolean = true;
 
     constructor(
         public modalCtrl: ModalController,
@@ -177,7 +178,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         private popoverCtrl: PopoverController, public platform: Platform,
         public loadingCtrl: LoadingController, public electronService: ElectronService,
         public router: Router, public appStateService: AppStateService, public settingService: SettingService,
-        public pouchQuery: PouchQueriesService) {
+        public pouchQuery: PouchQueriesService) {   
         this.patronAccount = 'patron_pin';
         this.advancedPatron = 'by_patron';
         AppStateService.set('currentTab', this.patronAccount);
@@ -257,17 +258,24 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public ngOnInit() {
-
-
-        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
-        PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
         
+       if(this.utilService.isElectronApp()) {
+        this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+            sessionStorage.setItem('InputDirection',queueInput.InputDirection);
+            });
+        }
+
+        document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+        document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false);
+        PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
+
         if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined) {
             if (AppStateService.get('pnpPeripherals')) {
                 document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
                 document.addEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
             }
             else {
+                 document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
                 this.electronService.ipcRenderer.send('launch-peripheral-app');
             }
         }
@@ -1445,9 +1453,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     if (incomingID !== '') {
                         let queueInput = {
                             'PIN': incomingID,
-                            'InputDirection': 0
+                            'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem('InputDirection')
                         }
                         this.lookUpService.setQ(queueInput);
+                        this.lookUpService.showModalPopup = false;
                     }
                     incomingID = '';
                     this.inputBuffer = [];
@@ -1870,5 +1879,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.modalCtrl.dismiss({
             'flag': flag
         });
+        this.showModalPopup = true;
     }
 }

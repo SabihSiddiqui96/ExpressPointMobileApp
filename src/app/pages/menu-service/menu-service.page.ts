@@ -277,6 +277,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     private popupSubscription: Subscription;
     private ALACASREST: boolean = false;
     public static onKeyUpCallback;
+    public hideStudentId: boolean;
 
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
@@ -298,7 +299,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
         }
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
 
         if (AppStateService.get('session_id')) {
             this.sessionId = AppStateService.get('session_id');
@@ -385,6 +385,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.showSelectAccount = Boolean(Number(SettingService.getSiteSettingValue('CHGVISTSTD')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
+        //this.hideStudentId = true;
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
         this.dayOfWeek = wDay[day.getUTCDay()];
@@ -777,6 +779,7 @@ public ResetForNewStudent(){
         IsCard: false,
         CardNumber: ''
     };
+    this.refreshHideStudentSetting();
 
 }
     public selectPatron(patronData) {
@@ -2151,10 +2154,10 @@ public ResetForNewStudent(){
                             'BackColor': m.BackColor,
                             'ForeColor': m.ForeColor,
                             'IsDynamicMenu': m.IsDynamicMenu
-
                         };
                         return mic;
                     });
+
                     categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu','DisplayOrder', 'ButtonDescription'], ['desc','asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
@@ -2383,13 +2386,12 @@ public ResetForNewStudent(){
             await res.present();
         });
     }
-    
+
     public makeSale(transactionType) {
         // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
-
-
+        //this.refreshHideStudentSetting();
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             if (transactionType !== 0) {
@@ -3377,6 +3379,11 @@ public ResetForNewStudent(){
         return AppStateService.get(key);
     }
 
+    public refreshHideStudentSetting(){
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
+        //this.hideStudentId = true;
+    }
+
     public goToLookUp() {
         // this.event.publish('patronLargeImagehide', null);
         /**************************keep this?****************************** */
@@ -3395,6 +3402,7 @@ public ResetForNewStudent(){
                     queueCount: this.lookUpService.personsQ.length
                 });
             }
+            this.refreshHideStudentSetting();
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};

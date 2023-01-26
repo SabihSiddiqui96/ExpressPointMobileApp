@@ -310,6 +310,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public printAllSetting: number = 0;
     private ALACASREST: boolean = false;
 
+    public hideStudentId: boolean;
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
 
@@ -414,6 +415,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
 
         /**
        * Use the site Terminal if the Device Terminal is not set.
@@ -910,6 +912,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }, 500);
     }
 
+    public refreshHideStudentSetting(){
+        this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
+        //this.hideStudentId = true;
+    }
+
     public getPatronDetails(patronSelectedData) {
         // console.clear();
         this.patronDetails = JSON.parse(patronSelectedData);
@@ -918,6 +925,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // this.transactionNumber += 1;
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
         // Reset Order Data 
+        this.refreshHideStudentSetting();
         this.orderData = {
             accountBalance: 0.00,
             subTotal: 0.00,
@@ -2882,6 +2890,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public makeSale(transactionType) {
         this.event.publish('patronLargeImagehide', null);
         // this.IsStaticMenuSelected = false // static menu change
+        this.refreshHideStudentSetting();
         this.transactionInProgress = true;
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
@@ -3431,8 +3440,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 :  Number(this.cashTendAmount),
-                'ChangeReturned':   Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -3548,7 +3557,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                         'Balance': Number(this.patronDetails.Balance).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 :  this.cashDue,
+                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 : this.cashDue,
                         'MenuItemTemplate': this.GetMenuItemsPriceList(items),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
@@ -3568,7 +3577,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 this.isIOS = this.platform.is('ios');
                 this.isAndroid = this.utilService.isPlatformAndroid();
-            
+
                 PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
                     if (!(result && result.id)) {
                         if (this.isIOS || this.isAndroid) {
@@ -4910,7 +4919,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'isCategory': true,
                             'BackColor': m.BackColor,
                             'ForeColor': m.ForeColor,
-                            'IsDynamicMenu': m.IsDynamicMenu    
+                            'IsDynamicMenu': m.IsDynamicMenu
                         };
                         return mic;
                     });
