@@ -15,7 +15,7 @@ import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { SettingService } from '../../services/setting.service';
 import { Events } from '../../services/events.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { CloseSessionPrintFormat, PrintService } from '../../services/print.service';
 import { LocalTimerService } from '../../services/local-timer.service';
@@ -29,11 +29,20 @@ import { SessionType } from '../../services/enums/session-types';
 export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
     @ViewChild("CloseSessionViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+    sessionId: string;
 
     ngOnInit() {
         this.setGridSize(100);// Short timeout to ensure we don't see an animation of increasing height
         this.setGridSize(400);// Delayed timeout to ensure the case when rendering was delayed
         this.onKeyDownCallback = this.onKeyDown.bind(this);
+
+        this.route.queryParams
+            .subscribe(params => {
+                console.log(params); // { orderby: "price" }
+                this.sessionId = params.sessionId;
+                console.log(this.sessionId); // price
+            }
+    );
 
     }
 
@@ -116,7 +125,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         public popupMessageService: PopupMessageService, private pouchQuery: PouchQueriesService,
         public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public keyboard: Keyboard,
-        private elementRef: ElementRef, public printService: PrintService) {
+        private elementRef: ElementRef, public printService: PrintService, private route: ActivatedRoute) {
 
         this.isCordovaApp = UtilService.isCordovaApp;
         this.IsElectron = this.utilService.isElectronApp();
@@ -718,8 +727,8 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
         if(this.router.url.includes('summary-sales-close-session')) {
             closeSessionDoc = {
-                '_id': 'CloseSession--' + AppStateService.get('session_id'),
-                'SessionId': AppStateService.get('session_id'),
+                '_id': 'CloseSession--' + this.sessionId,
+                'SessionId': this.sessionId,
                 'SessionCheck': sessionCheck,
                 'ClosingBalance': this.total,
                 'SessionType': SessionType.MANUALSALE,
@@ -754,8 +763,13 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             });
+            let sid;
 
-            let sid = AppStateService.get('session_id');
+            if(this.router.url.includes('summary-sales-close-session')) {
+                sid = this.sessionId;
+            } else {
+                sid = AppStateService.get('session_id');
+            }
             sessionDocs.map(doc => {
                 doc.isStillOpen = false;
                 sid = doc.SessionId;

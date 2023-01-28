@@ -1957,7 +1957,7 @@ public ResetForNewStudent(){
 
                     const itemData = this.orderData.items[i];
 
-                    if (priceTypeId === itemData.price_type_id && itemData.Name === menuItem.ButtonDescription) {
+                    if (priceTypeId === itemData.price_type_id && itemData.RefId === menuItem.RefId ) {
                         if (parseInt(itemData.Quantity) < 999) {
                             quantity = parseInt(itemData.Quantity) + 1;
                             itemPrice = currPrice + itemData.Price;
