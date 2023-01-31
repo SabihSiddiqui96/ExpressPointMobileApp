@@ -1546,7 +1546,7 @@ export class AppComponent {
           },
           queryParams: { refresh: new Date().getTime() }
         };
-        this.navCtrl.navigateRoot("open-session", navigationExtras);
+        this.navCtrl.navigateRoot("payments", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
       } else {
         this.currentPage = "";
