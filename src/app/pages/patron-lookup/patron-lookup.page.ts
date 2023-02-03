@@ -261,7 +261,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         
        if(this.utilService.isElectronApp()) {
         this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
-            sessionStorage.setItem('InputDirection',queueInput.InputDirection);
+            sessionStorage.setItem(queueInput.PIN,queueInput.InputDirection);
             });
         }
 
@@ -1453,7 +1453,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     if (incomingID !== '') {
                         let queueInput = {
                             'PIN': incomingID,
-                            'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem('InputDirection')
+                            'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                         }
                         this.lookUpService.setQ(queueInput);
                         this.lookUpService.showModalPopup = false;
