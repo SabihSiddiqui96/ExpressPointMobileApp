@@ -35,7 +35,7 @@ export class SummarySalePage implements OnInit {
         this.sessionId = params.sessionId;
         console.log(this.sessionId); // price
       }
-    );
+      );
   }
   public selectedMealType = -1;
   public selectedMealTypeName = 'Meal Type';
@@ -262,8 +262,6 @@ export class SummarySalePage implements OnInit {
 
           if (data.PriceTypeDescription === 'Reduced') {
             summarySaleDoc.Show = 0;
-
-            summarySale.push(summarySaleDoc);
           } else if (data.PriceTypeDescription === 'Paid') {
             summarySaleDoc.Show = 0;
           } else if (data.PriceTypeDescription === 'Free' || data.PriceTypeDescription === 'Second Meal') {
@@ -284,34 +282,34 @@ export class SummarySalePage implements OnInit {
               summarySaleDoc.Index = index
 
               index++
+              this.summaryMealCount.push(summarySaleDoc);
             } else {
-              PouchQueriesService.GetRdaGradeGroups().then((res) => {
-                const siteRdaGrades = res.rows.map(row => row.doc);
-                if (siteRdaGrades.length > 0) {
-                  siteRdaGrades.map(doc => {
-                    summarySaleDoc.PriceType = pricetype + ' (' + doc.Description + ')';
-                    summarySaleDoc.RdaGroupId = doc.RDAGroupId;
+
+                PouchQueriesService.GetRdaGradeGroups().then((res) => {
+                  const siteRdaGrades = res.rows.map(row => row.doc);
+                  if (siteRdaGrades.length > 0) {
+                    siteRdaGrades.forEach(doc => {
+                      summarySaleDoc.PriceType = pricetype + ' (' + doc.Description + ')';
+                      summarySaleDoc.RdaGroupId = doc.RDAGroupId;
+                      summarySaleDoc.IsStudent = 1
+                      summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
+                      summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
+                      summarySaleDoc.Index = index
+                      index++
+                      this.summaryMealCount.push(summarySaleDoc);
+
+                    });
+                  } else {
+                    summarySaleDoc.PriceType = pricetype;
                     summarySaleDoc.IsStudent = 1
                     summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
                     summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
                     summarySaleDoc.Index = index
-
                     index++
-                  });
-                } else {
-                  summarySaleDoc.PriceType = pricetype;
-                  summarySaleDoc.IsStudent = 1
-                  summarySaleDoc.MenuItemPrice = this.getPrice(summarySaleDoc.PriceTypeId, summarySaleDoc.RdaGroupId, summarySaleDoc.IsStudent)
-                  summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
-                  summarySaleDoc.Index = index
-                  index++
+                    this.summaryMealCount.push(summarySaleDoc);
 
-                }
-              });
-              // summarySaleDoc.PriceType = 'Student';
-              // summarySaleDoc.Show = 1;
-              // summarySaleDoc.Index = index
-              // index++
+                  }
+                });
             }
 
           } else {
@@ -327,17 +325,13 @@ export class SummarySalePage implements OnInit {
             summarySaleDoc.Show = summarySaleDoc.MenuItemPrice >= 0 ? 1 : 2;
             summarySaleDoc.Index = index
             index++
+            this.summaryMealCount.push(summarySaleDoc);
           }
 
 
 
-          summarySale.push(summarySaleDoc);
         });
       }
-      this.zone.run(() => {
-        this.summaryMealCount = summarySale;
-        this.summaryMealCount = this.summaryMealCount.filter(m => m.Show >= 1);
-      });
     }).catch(err => console.log(err));
     // console.log('PRice Types from DB' + JSON.stringify(this.priceTypeIDs));
   }
@@ -360,53 +354,53 @@ export class SummarySalePage implements OnInit {
   }
 
   public showPopup(type) {
-    if(this.filter.selected_mealtype!== -1 && type === 'classMealtype'){
+    if (this.filter.selected_mealtype !== -1 && type === 'classMealtype') {
       this.popupMessageService.showMessage(PopupMessageCode.E05516);
-    } else if(this.filter.selected_menuitem !== -2 && type === 'classMealitem') {
+    } else if (this.filter.selected_menuitem !== -2 && type === 'classMealitem') {
       this.popupMessageService.showMessage(PopupMessageCode.E05517);
     } else {
-    let postData = {};
-    switch (type) {
-      case 'classMealtype': postData = {
-        'type': type, 'data': this.mealTypes,
-        'selectedValue': this.filter.selected_mealtype
-      }; break;
-      case 'classMealitem': postData = {
-        'type': type, 'data': this.menuItems, 'selectedValue': this.filter.selected_menuitem
-      }; break;
-    }
+      let postData = {};
+      switch (type) {
+        case 'classMealtype': postData = {
+          'type': type, 'data': this.mealTypes,
+          'selectedValue': this.filter.selected_mealtype
+        }; break;
+        case 'classMealitem': postData = {
+          'type': type, 'data': this.menuItems, 'selectedValue': this.filter.selected_menuitem
+        }; break;
+      }
 
-    if (postData['data'].length > 0) {
-      const popover = this.popoverCtrl.create({
-        component: AllPopupPage,
-        componentProps: postData
-        , cssClass: this.utilService.popupCenter.cssClass
-      }).then(async (res) => {
-        await res.present();
-      });
+      if (postData['data'].length > 0) {
+        const popover = this.popoverCtrl.create({
+          component: AllPopupPage,
+          componentProps: postData
+          , cssClass: this.utilService.popupCenter.cssClass
+        }).then(async (res) => {
+          await res.present();
+        });
 
-      this.event.subscribe('menu-service-popup', (userEventData) => {
-        this.event.destroy('menu-service-popup');
-        if (userEventData.selectedData) {
-          const selectedData = userEventData.selectedData;
-          const choice = userEventData.type;
+        this.event.subscribe('menu-service-popup', (userEventData) => {
+          this.event.destroy('menu-service-popup');
+          if (userEventData.selectedData) {
+            const selectedData = userEventData.selectedData;
+            const choice = userEventData.type;
 
-          switch (choice) {
-            case 'classMealtype': this.filter.selected_mealtype = selectedData.value;
-              this.filter.selected_mealtype_name = selectedData.label;
-              this.getMenuItemsByMealType();
-              break;
-            case 'classMealitem': this.filter.selected_menuitem = selectedData.value;
-              this.filter.selected_menuitem_name = selectedData.label;
-              this.GetPriceFoMenuItem().then(() => {
-                this.getPriceTypes();
-              })
-              break;
+            switch (choice) {
+              case 'classMealtype': this.filter.selected_mealtype = selectedData.value;
+                this.filter.selected_mealtype_name = selectedData.label;
+                this.getMenuItemsByMealType();
+                break;
+              case 'classMealitem': this.filter.selected_menuitem = selectedData.value;
+                this.filter.selected_menuitem_name = selectedData.label;
+                this.GetPriceFoMenuItem().then(() => {
+                  this.getPriceTypes();
+                })
+                break;
+            }
           }
-        }
-      });
+        });
+      }
     }
-  }
   }
 
   public getMenuItemsByMealType() {
@@ -612,7 +606,7 @@ export class SummarySalePage implements OnInit {
         // this.utilService.showToast('Summary sale successful');
         // this.closeSession();
         this.resetSummarySale();
-        this._nav.navigateRoot('summary-sales-close-session',{queryParams: {sessionId : this.sessionId}});
+        this._nav.navigateRoot('summary-sales-close-session', { queryParams: { sessionId: this.sessionId } });
 
       }).catch((err) => {
         this.transactionInProgress = false
