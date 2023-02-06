@@ -249,7 +249,7 @@ export class SummarySalePage implements OnInit {
         const priceTypes = priceTypeDoc;
         let index = 0
         priceTypes.map(data => {
-          const summarySaleDoc = {
+          let summarySaleDoc = {
             'PriceTypeId': data.PriceTypeId,
             'PriceType': data.PriceTypeDescription,
             'MealCount': 0,
@@ -297,6 +297,17 @@ export class SummarySalePage implements OnInit {
                       summarySaleDoc.Index = index
                       index++
                       this.summaryMealCount.push(summarySaleDoc);
+                      
+                      summarySaleDoc = {
+                        'PriceTypeId': data.PriceTypeId,
+                        'PriceType': data.PriceTypeDescription,
+                        'MealCount': 0,
+                        'Show': 1,
+                        'Index': 0,
+                        'RdaGroupId': 0,
+                        'IsStudent': 0,
+                        'MenuItemPrice': 0
+                      };
 
                     });
                   } else {
@@ -448,35 +459,35 @@ export class SummarySalePage implements OnInit {
     }
   }
 
-  public IncrementMealCount(priceTypeId, mealCount) {
+  public IncrementMealCount(index, mealCount) {
     this.isMealCount = true;
     mealCount++;
 
-    const summaryIndex = _.findIndex(
-      this.summaryMealCount,
-      c => c.PriceTypeId === priceTypeId
-    );
-    if (summaryIndex >= 0) {
-      this.changeMealCount(summaryIndex, mealCount);
+    // const summaryIndex = _.findIndex(
+    //   this.summaryMealCount,
+    //   c => c.PriceTypeId === priceTypeId
+    // );
+    if (index >= 0) {
+      this.changeMealCount(index, mealCount);
     }
 
   }
 
-  public DecrementMealCount(priceTypeId, mealCount) {
+  public DecrementMealCount(index, mealCount) {
     if (mealCount > 0) {
       mealCount--;
-      const summaryIndex = _.findIndex(
-        this.summaryMealCount,
-        c => c.PriceTypeId === priceTypeId
-      );
-      if (summaryIndex >= 0) {
-        this.changeMealCount(summaryIndex, mealCount);
+      // const summaryIndex = _.findIndex(
+      //   this.summaryMealCount,
+      //   c => c.Index === index
+      // );
+      if (index >= 0) {
+        this.changeMealCount(index, mealCount);
       }
     }
   }
 
-  public setActiveField(priceTypeId, mealCount) {
-    this.activeField = priceTypeId;
+  public setActiveField(index, mealCount) {
+    this.activeField = index;
     this.activeFieldMealCount = mealCount;
     this.customKeys = mealCount.toString();
   }
