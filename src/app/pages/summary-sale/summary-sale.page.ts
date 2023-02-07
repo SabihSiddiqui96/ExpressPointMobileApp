@@ -501,7 +501,7 @@ export class SummarySalePage implements OnInit {
     }
     const summaryIndex = _.findIndex(
       this.summaryMealCount,
-      c => c.PriceTypeId === this.activeField
+      c => c.Index === this.activeField
     );
 
     if (key !== 'X' && key !== 'GO') {
