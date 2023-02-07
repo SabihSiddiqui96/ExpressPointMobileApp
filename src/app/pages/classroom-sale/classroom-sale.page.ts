@@ -33,7 +33,7 @@ import { LocalTimerService } from '../../services/local-timer.service';
 })
 export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit, OnDestroy {
 
-   
+
 
     public ngOnInit() {
         if (this.specialRosterList.length === 0) { // Saketh for Special SpecialRosters
@@ -1570,11 +1570,12 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'DisplayOrder': m.DisplayOrder,
                             'isCategory': true,
                             'BackColor': m.BackColor,
-                            'ForeColor': m.ForeColor
+                            'ForeColor': m.ForeColor,
+                            'IsDynamicMenu': m.IsDynamicMenu
                         };
                         return mic;
                     });
-                    categoryButtons = _.orderBy(categoryButtons, ['DisplayOrder', 'ButtonDescription'], ['asc', 'asc']);
+                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu', 'DisplayOrder', 'ButtonDescription'], ['desc', 'asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         this.callModalCtrl(categoryButtons, 'All Categories', true);
