@@ -57,6 +57,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     };
 
     public specialAccounts;
+    isServerLookup: boolean;
     public specialAccountsArray = [];
     public static specialAccountDescriptions = [];
     public siteList: any = [];
@@ -161,6 +162,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public eventType: string;
     public PinIdLabel: string;
     showModalPopup: boolean = true;
+    enablePinSchool: boolean;
 
     constructor(
         public modalCtrl: ModalController,
@@ -974,12 +976,18 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.homeRoomList = [];
     }
 
+
     public AdvancedPatronLookup() {
+        if(this.patronAccount === 'advanced' && this.enablePinSchool) {
+            this.isServerLookup = true;
+        } else {
+            this.isServerLookup = false;
+        }
         if (this.selectedSite !== -1 && (this.patronSearch.firstname !== '' || this.patronSearch.lastname !== '' || this.patronSearch.externalId !== '')) {
             this.loadingID = LoadingService.generateLoadingID();
             this.loadingService.present(this.loadingID, null, false).then(() => {
                 this.lookUpService.AdvancedPatronlookup(this.selectedSite, this.patronSearch.firstname,
-                    this.patronSearch.lastname, this.patronSearch.externalId)
+                    this.patronSearch.lastname, this.patronSearch.externalId, this.isServerLookup)
                     .then(() => {
                         this.loadingService.dismiss(this.loadingID);
                     }).catch((err) => {
@@ -1858,6 +1866,13 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.enableProgAdult = false;
                     }
                     break;
+                case SiteSettingCodes[SiteSettingCodes.PINSCHOL]:
+                    if (setting.SiteSettingValue === "1") {
+                        this.enablePinSchool = true;
+                    } else {
+                        this.enablePinSchool = false;
+                    }
+                break;
                 case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:
                     if (setting.SiteSettingValue === "1") {
                         //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup

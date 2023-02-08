@@ -595,7 +595,7 @@ export class LookupService {
   
      */
     public AdvancedPatronlookup(selectedsite, firstname,
-        lastname, externalId) {
+        lastname, externalId, isServerLookup) {
         let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
         if (SearchByPin === '-1') {
             PouchQueriesService.PINLookup(externalId).then((data) => {
@@ -629,6 +629,11 @@ export class LookupService {
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
+                        if(this.lookupResults.length === 0) {
+                            if(isServerLookup) {
+                                this.patronFromServer(firstname, lastname, externalId);
+                            }
+                        }
                         this.handlePersonResults(true).then(() => {
                             this.utilService.setLoader(false);
                         }).catch(() => this.utilService.setLoader(false));
@@ -642,7 +647,9 @@ export class LookupService {
                     });
             } else {
                 this.utilService.setLoader(false);
-                this.patronFromServer(firstname, lastname, externalId);
+                if(isServerLookup) {
+                    this.patronFromServer(firstname, lastname, externalId);
+                }
 
             }
 
