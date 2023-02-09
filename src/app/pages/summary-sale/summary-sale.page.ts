@@ -535,12 +535,12 @@ export class SummarySalePage implements OnInit {
         let nextElement = _.find(this.summaryMealCount, (o) => o.Show == 1 && o.Index > summaryIndex)
         if (nextElement) {
           if (nextElement.Index < this.summaryMealCount.length) {
-            this.activeField = this.summaryMealCount[nextElement.Index].PriceTypeId;
+            this.activeField = this.summaryMealCount[nextElement.Index].Index;
           } else {
-            this.activeField = this.summaryMealCount[0].PriceTypeId;
+            this.activeField = this.summaryMealCount[0].Index;
           }
         } else {
-          this.activeField = this.summaryMealCount[0].PriceTypeId;
+          this.activeField = this.summaryMealCount[0].Index;
         }
 
       }
