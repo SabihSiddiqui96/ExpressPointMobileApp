@@ -231,9 +231,9 @@ export class LookupService {
     }
 
 
-    public lookupFromNonUniquePIN(queueInput, index?) {   // Second lookup, requiring cashier interaction: On server
+    public lookupFromNonUniquePIN(queueInput, index?, enablePinSchool = true) {   // Second lookup, requiring cashier interaction: On server
         return new Promise((resolve) => {
-            this.lookupByPIN(queueInput.PersonName, queueInput.InputDirection).then(() => {
+            this.lookupByPIN(queueInput.PersonName, queueInput.InputDirection, enablePinSchool).then(() => {
 
                 // this.handlePersonResults()
                 if (index) {
@@ -354,7 +354,7 @@ export class LookupService {
     }
 
 
-    public lookupByPIN(pin, inputDirection = Direction.None) {
+    public lookupByPIN(pin, inputDirection = Direction.None,enablePinSchool) {
         this.studentPin = pin;
 
         this.localResultSet = this.serverResultSet = null;
@@ -364,7 +364,6 @@ export class LookupService {
         if (this.canServeVisitingPatrons == true && this.CanServeVisitingAdults == true) {
             this.canServeVisitingPatrons = true;
             this.CanServeVisitingAdults = false;
-
         }
         return new Promise((resolve) => {
 
@@ -375,18 +374,23 @@ export class LookupService {
                     this.handlePersonResults(false, inputDirection);
                     // resolve(this.lookupResults);
                 } else {
-                    let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-                    if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
-                        this.serverLookup(pin, selectedSite).then(() => {
-                            this.handlePersonResults(false, inputDirection);
-                            // resolve(this.lookupResults);
-                        }, (error) => {
+                    if(enablePinSchool) {
+                        let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                        if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
+                            this.serverLookup(pin, selectedSite).then(() => {
+                                this.handlePersonResults(false, inputDirection);
+                                // resolve(this.lookupResults);
+                            }, (error) => {
 
-                        });
+                            });
+                        } else {
+                            this.lookupResults = [];
+                            this.handlePersonResults(false, inputDirection);
+                        }
                     } else {
-                        this.lookupResults = [];
-                        this.handlePersonResults(false, inputDirection);
+                        this.popupMessageService.showMessage(PopupMessageCode.E24518);
                     }
+                    
                 }
                 resolve(null);
             });
@@ -630,9 +634,7 @@ export class LookupService {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
                         if(this.lookupResults.length === 0) {
-                            if(isServerLookup) {
-                                this.patronFromServer(firstname, lastname, externalId);
-                            }
+                            this.patronFromServer(firstname, lastname, externalId);
                         }
                         this.handlePersonResults(true).then(() => {
                             this.utilService.setLoader(false);
@@ -647,10 +649,7 @@ export class LookupService {
                     });
             } else {
                 this.utilService.setLoader(false);
-                if(isServerLookup) {
-                    this.patronFromServer(firstname, lastname, externalId);
-                }
-
+                this.patronFromServer(firstname, lastname, externalId);
             }
 
         });

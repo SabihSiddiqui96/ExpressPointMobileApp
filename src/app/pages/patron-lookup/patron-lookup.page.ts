@@ -162,7 +162,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public eventType: string;
     public PinIdLabel: string;
     showModalPopup: boolean = true;
-    enablePinSchool: boolean;
+    enablePinSchool: boolean = true;
 
     constructor(
         public modalCtrl: ModalController,
@@ -894,7 +894,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             queueCount: this.lookUpService.personsQ.length
         });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
-            this.lookUpService.lookupByPIN(this.patronSearch.keyword, Direction.None).then((patrons) => {
+            this.lookUpService.lookupByPIN(this.patronSearch.keyword, Direction.None, this.enablePinSchool).then((patrons) => {
                 this.patronSearch.keyword = '';
             });
         } else {

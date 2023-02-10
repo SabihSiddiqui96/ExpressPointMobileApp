@@ -226,6 +226,7 @@ export enum PopupMessageCode { // refer PR_PopupMessage_Detail table
     E18446 = 'E18446',
     E18496 = 'E18496',
     E18497 = 'E18497',
+    E24518 = 'E24518',
 
     // 19 Pre Order
     E19379 = 'E19379',
