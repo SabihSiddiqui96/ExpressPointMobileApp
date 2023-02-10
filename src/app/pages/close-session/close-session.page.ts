@@ -42,7 +42,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 this.sessionId = params.sessionId;
                 console.log(this.sessionId); // price
             }
-    );
+            );
 
     }
 
@@ -663,26 +663,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                     this.saveInProgress = false;
                 }
             });
-            // const alert = this.alertCtrl.create({
-            //     header: 'Confirm',
-            //     message: 'Your closing balance is less than your starting balance. Are you sure you want to continue?',
-            //     buttons: [
-            //         {
-            //             text: 'No',
-            //             role: 'cancel',
-            //             handler: () => {
-            //                 console.log('Cancel clicked');
-            //             }
-            //         },
-            //         {
-            //             text: 'Yes',
-            //             handler: () => {
-            //                 this.closeSession();
-            //             }
-            //         }
-            //     ]
-            // });
-            // alert.present();
+         
         } else {
             this.closeSession();
         }
@@ -702,30 +683,13 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 sessionDenominations.push(denoArray);
             }
         }
-
-
-        // const ckList = this.checkList;
-        // ckList.forEach((value, index) => {
-        //     let checkArray = {};
-        //     checkArray = {
-        //         'Amount': ckList[index]['Amount'],
-        //         'CheckNumber': ckList[index]['CheckNumber']
-        //     };
-        //     sessionCheck.push(checkArray);
-        // });
-
-
-        // const now = new Date();
-        // const UTC = now.getTime();
-        // const localOffset = -1 * now.getTimezoneOffset() * 60000;
-        // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
         const currentTime = LocalTimerService.getCurrentTime();
-        
+
         this.utilService.setLoader(true);
 
         let closeSessionDoc;
 
-        if(this.router.url.includes('summary-sales-close-session')) {
+        if (this.router.url.includes('summary-sales-close-session')) {
             closeSessionDoc = {
                 '_id': 'CloseSession--' + this.sessionId,
                 'SessionId': this.sessionId,
@@ -738,7 +702,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 'SessionDenominations': sessionDenominations
             };
         } else {
-             closeSessionDoc = {
+            closeSessionDoc = {
                 '_id': 'CloseSession--' + AppStateService.get('session_id'),
                 'SessionId': AppStateService.get('session_id'),
                 'SessionCheck': sessionCheck,
@@ -749,7 +713,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 'SessionDenominations': sessionDenominations
             };
         }
-        
+
 
 
 
@@ -757,22 +721,18 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
             let sessionDocs = data.rows.map(row => row.doc);
             let openingBalance = 0;
+            let sid;
 
             sessionDocs = sessionDocs.filter(s => {
                 return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
-                    && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                    && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
+                    && s.SessionId === closeSessionDoc.SessionId;
             });
-            let sid;
 
-            if(this.router.url.includes('summary-sales-close-session')) {
-                sid = this.sessionId;
-            } else {
-                sid = AppStateService.get('session_id');
-            }
+            
             sessionDocs.map(doc => {
                 doc.isStillOpen = false;
-                sid = doc.SessionId;
                 openingBalance = doc.OpeningBalance
                 PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => {
                 });
@@ -785,7 +745,9 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 this.PrintCloseSessionReport();
                 AppStateService.set('removedSessionId', sid);
                 AppStateService.remove('openingBalance');
+                if (closeSessionDoc.SessionType === SessionType.EXPRESSPOINT) {
                 AppStateService.remove('session_id');
+                }
                 AppStateService.remove('TransactionNumber');
                 AppStateService.remove('BonusAmount');
                 this.utilService.setLoader(false);

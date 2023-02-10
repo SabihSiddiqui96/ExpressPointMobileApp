@@ -25,6 +25,7 @@ import * as _ from "lodash";
 import { NavigationExtras, Router } from "@angular/router";
 import { LoadingService } from "../../services/loading.service";
 import { LocalTimerService } from "../../services/local-timer.service";
+import { SessionType } from "../../services/enums/session-types";
 
 @Component({
   selector: "app-service-selection",
@@ -346,7 +347,9 @@ export class ServiceSelectionPage implements OnInit {
               Number(s.OpenedBy) ===
               JSON.parse(AppStateService.get("login_details")).UserId &&
               s.SchoolId ===
-              JSON.parse(AppStateService.get("SelectedSite")).SchoolId
+              JSON.parse(AppStateService.get("SelectedSite")).SchoolId &&
+              s.SessionType === SessionType.EXPRESSPOINT
+
             );
           });
 
