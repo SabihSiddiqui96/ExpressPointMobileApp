@@ -1278,7 +1278,9 @@ export class PouchQueriesService {
             if (doc.saleData.IsSynced === false) {
               // && doc.saleData.IsSent == false
               // doc.saleData.IsSent = true
-
+              doc.saleData.DepositAmount = parseFloat(doc.saleData.DepositAmount);
+              doc.saleData.AmountTendered = parseFloat(doc.saleData.AmountTendered);
+              doc.saleData.ChangeReturned = parseFloat(doc.saleData.ChangeReturned);
               this.http.SaveTransactionRecord(doc.saleData).subscribe(
                 data => {
                   console.log('Posted Transaction');
