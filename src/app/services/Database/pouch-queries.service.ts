@@ -1234,7 +1234,7 @@ export class PouchQueriesService {
         const sessionDocs = res.rows.map(row => row.doc);
         sessionDocs.map(doc => {
 
-          if (doc.isSentToServer === false && doc.SessionId !== null && doc.isStillOpen) {
+          if (doc.isSentToServer === false && doc.SessionId !== null ) {
             this.http.postOpenSession(doc).
               subscribe(
                 data => {

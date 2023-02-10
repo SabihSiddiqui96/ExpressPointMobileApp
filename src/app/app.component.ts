@@ -48,6 +48,8 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SignalRService } from './services/SignalR.service';
 import { SetupDbService } from "./services/setup-db.service";
 import { LocalTimerService } from "./services/local-timer.service";
+import { Session } from "inspector";
+import { SessionType } from "./services/enums/session-types";
 
 declare var Fullscreen: any;
 @Component({
@@ -1372,7 +1374,8 @@ export class AppComponent {
       'SessionCheck': sessionCheck,
       'ClosingBalance': 0,
       'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-      'TerminalId': this.terminalId
+      'TerminalId': this.terminalId,
+      'SessionType': SessionType.EXPRESSPOINT
     };
 
     PouchQueriesService.GetAllOpenSessions().then(data => {
@@ -1381,13 +1384,14 @@ export class AppComponent {
       sessionDocs = sessionDocs.filter(s => {
         return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
           Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
-          && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+          && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
+          && s.SessionType=== SessionType.EXPRESSPOINT;
       });
 
       let sid = AppStateService.get('session_id');
       sessionDocs.map(doc => {
         doc.isStillOpen = false;
-        sid = doc.SessionId;
+        doc.SessionId = sid ;
         PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => {
         });
       });
@@ -1546,7 +1550,7 @@ export class AppComponent {
           },
           queryParams: { refresh: new Date().getTime() }
         };
-        this.navCtrl.navigateRoot("payments", navigationExtras);
+        this.navCtrl.navigateRoot("open-session", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
       } else {
         this.currentPage = "";

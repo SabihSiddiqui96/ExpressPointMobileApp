@@ -42,8 +42,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public isCordovaApp: boolean;
   public content_height;
   public onKeyDownCallback;
-  public currentRoute:string;
-  public pageTitle:string;
+  public currentRoute: string;
+  public pageTitle: string;
 
   ngOnInit() {
     this.router.events.pipe(startWith([]),
@@ -53,7 +53,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         this.type = this.router.getCurrentNavigation().extras.state.navData.type;
       }
     });
-    if(this.router.url.includes('summary-sale')) {
+    if (this.router.url.includes('summary-sale')) {
       this.currentRoute = 'summarySales';
       this.pageTitle = 'Summary Sales';
     } else {
@@ -649,7 +649,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   }
 
   public openSession() {
-   
+
     this.saveInProgress = true;
     const sessionDenominations = [];
 
@@ -693,7 +693,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     }
     let sessionDoc;
 
-    if(this.router.url.includes('summary-sale')) {
+    if (this.router.url.includes('summary-sale')) {
       sessionDoc = {
         _id: 'OpenSession--' + sessionId,
         SessionId: sessionId,
@@ -711,12 +711,13 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         LoginWithoutSetup: LoginWithoutSetup
       };
     } else {
-       sessionDoc = {
+      sessionDoc = {
         _id: 'OpenSession--' + sessionId,
         SessionId: sessionId,
         SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
         SessionDenominations: sessionDenominations,
         OpeningBalance: this.replaceTotalSign(),
+        SessionType: SessionType.EXPRESSPOINT,
         // "Status": "New",
         isStillOpen: true,
         isSentToServer: false,
@@ -727,42 +728,43 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         LoginWithoutSetup: LoginWithoutSetup
       };
     }
-    
+
 
     PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {
-      AppStateService.set('session_id', sessionId);
-      AppStateService.set('openingBalance', this.replaceTotalSign());
-      // if (AppStateService.get('TransactionNumber')) {
-      //   AppStateService.set('TransactionNumber', AppStateService.get('TransactionNumber'));
-      // } else {
-      AppStateService.set('TransactionNumber', 0);
-      AppStateService.set('BonusAmount', 0);
-      // }
+      if (sessionDoc.SessionType === SessionType.EXPRESSPOINT) {
+        AppStateService.set('session_id', sessionId);
+        AppStateService.set('openingBalance', this.replaceTotalSign());
+        // if (AppStateService.get('TransactionNumber')) {
+        //   AppStateService.set('TransactionNumber', AppStateService.get('TransactionNumber'));
+        // } else {
+        AppStateService.set('TransactionNumber', 0);
+        AppStateService.set('BonusAmount', 0);
+        // }
 
 
-      PouchQueriesService.DeleteSyncedTransactions().then(() => { });
-      /////////////////////////////////////////////////////////////
+        PouchQueriesService.DeleteSyncedTransactions().then(() => { });
+        /////////////////////////////////////////////////////////////
 
-      // this.utilService.setLoader(false);
+        // this.utilService.setLoader(false);
 
 
-      this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
-
-      if(this.currentRoute === 'summarySales') {
-        this._nav.navigateRoot('record-sales', {queryParams: {sessionId : sessionId}});
-      } else {
-      switch (this.type) {
-        case 'MenuService': if (this.useDynamicMenus) {
-          this._nav.navigateRoot('dynamic-menu');
-        } else {
-          this._nav.navigateRoot('menu-service');
-        } break;
-        case 'ClassroomSale': this._nav.navigateRoot('classroom-sale'); break;
-        case 'Payments': this._nav.navigateRoot('payments'); break;
-        case 'Transactions': this._nav.navigateRoot('transaction-details-popup'); break;
-        case 'PreOrders': this._nav.navigateRoot('pre-orders'); break;
+        this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
       }
-    }
+      if (this.currentRoute === 'summarySales') {
+        this._nav.navigateRoot('record-sales', { queryParams: { sessionId: sessionId } });
+      } else {
+        switch (this.type) {
+          case 'MenuService': if (this.useDynamicMenus) {
+            this._nav.navigateRoot('dynamic-menu');
+          } else {
+            this._nav.navigateRoot('menu-service');
+          } break;
+          case 'ClassroomSale': this._nav.navigateRoot('classroom-sale'); break;
+          case 'Payments': this._nav.navigateRoot('payments'); break;
+          case 'Transactions': this._nav.navigateRoot('transaction-details-popup'); break;
+          case 'PreOrders': this._nav.navigateRoot('pre-orders'); break;
+        }
+      }
     });
   }
 

@@ -13,6 +13,7 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { SignalRService } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { SessionType } from '../../services/enums/session-types';
 
 export class QuickClassroomSalePage {
 
@@ -134,7 +135,8 @@ export class QuickClassroomSalePage {
             OpenDateWithTime: currentTime,
             OpenDate: currentDate,
             OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
-            TerminalId: this.terminalId
+            TerminalId: this.terminalId,
+            SessionType: SessionType.EXPRESSPOINT
         };
 
         PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {
@@ -158,7 +160,8 @@ export class QuickClassroomSalePage {
             'SessionCheck': sessionCheck,
             'ClosingBalance': 0,
             'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-            'TerminalId': this.terminalId
+            'TerminalId': this.terminalId,
+            'SessionType': SessionType.EXPRESSPOINT
         };
 
         PouchQueriesService.GetAllOpenSessions().then(data => {
@@ -167,13 +170,14 @@ export class QuickClassroomSalePage {
             sessionDocs = sessionDocs.filter(s => {
                 return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
-                    && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                    && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
+                    && s.SessionType === SessionType.EXPRESSPOINT;
             });
 
             let sid = AppStateService.get('session_id');
             sessionDocs.map(doc => {
                 doc.isStillOpen = false;
-                sid = doc.SessionId;
+                doc.SessionId = sid;
                 PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => {
                 });
             });
