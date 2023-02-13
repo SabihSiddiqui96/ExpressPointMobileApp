@@ -1853,7 +1853,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                 if (this.mealCount === 1 && menuItem.IsReimbursable) {
                     if ((this.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                        (this.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+                        (this.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                        && this.filter.selected_mealtype_name !== 'Special Milk') {
 
                         if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                             cepPriceApply = true;

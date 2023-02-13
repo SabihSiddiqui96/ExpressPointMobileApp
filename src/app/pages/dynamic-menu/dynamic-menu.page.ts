@@ -912,7 +912,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }, 500);
     }
 
-    public refreshHideStudentSetting(){
+    public refreshHideStudentSetting() {
         this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
         //this.hideStudentId = true;
     }
@@ -2945,7 +2945,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
-                
+
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
@@ -4337,7 +4337,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
-            if(this.patronDetails !==null){
+            if (this.patronDetails !== null) {
                 this.logDBService.logData({
                     event: EventType.QUEUE,
                     patronId: this.patronDetails.PersonId,
@@ -4775,20 +4775,21 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 priceTypeId = this.secondMealPriceType;
 
             }
-            if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
-                cepPriceApply = true;
-            } else { // student is not CEP => Check CHRGNCEP setting to charge or not
-                if (this.isSiteCEP === true) {
-                    if (this.setting.CHRGNCEP === false) {
-                        cepPriceApply = true;
-                    } else if (this.setting.CHRGNCEP === true) {
+            if (this.selectedMealTypeName !== 'Special Milk') {
+                if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
+                    cepPriceApply = true;
+                } else { // student is not CEP => Check CHRGNCEP setting to charge or not
+                    if (this.isSiteCEP === true) {
+                        if (this.setting.CHRGNCEP === false) {
+                            cepPriceApply = true;
+                        } else if (this.setting.CHRGNCEP === true) {
+                            cepPriceApply = false;
+                        }
+                    } else {
                         cepPriceApply = false;
                     }
-                } else {
-                    cepPriceApply = false;
                 }
             }
-
         }
         if (this.systemMenuItem !== undefined) {
             PouchQueriesService.GetPrice(this.systemMenuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {

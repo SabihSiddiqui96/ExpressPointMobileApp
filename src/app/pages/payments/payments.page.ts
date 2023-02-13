@@ -457,8 +457,10 @@ export class DoPayment {
                 this.bonusAmount = (total * bonusPercentage) / 100;
                 return this.bonusAmount;
             } else {
-                const factor = Math.floor(total / thresholdAmount);
-                this.bonusAmount = factor * bonusAmount;
+                //const factor = Math.floor(total / thresholdAmount);
+                //this.bonusAmount = factor * bonusAmount;
+                this.bonusAmount =  bonusAmount;
+
                 return this.bonusAmount;
             }
         } else {

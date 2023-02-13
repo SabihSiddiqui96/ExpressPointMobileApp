@@ -764,24 +764,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
             await res.present();
         });
     }
-public ResetForNewStudent(){
-    this.cashDue = 0;
-    this.isDepositByEXNEGBAL = false;
-    this.orderData = {
-        accountBalance: 0.00,
-        subTotal: 0.00,
-        tax: 0.00,
-        totalAmount: 0.00,
-        items: [],
-        IsDeposit: false,
-        IsCheck: false,
-        CheckNumber: '',
-        IsCard: false,
-        CardNumber: ''
-    };
-    this.refreshHideStudentSetting();
+    public ResetForNewStudent() {
+        this.cashDue = 0;
+        this.isDepositByEXNEGBAL = false;
+        this.orderData = {
+            accountBalance: 0.00,
+            subTotal: 0.00,
+            tax: 0.00,
+            totalAmount: 0.00,
+            items: [],
+            IsDeposit: false,
+            IsCheck: false,
+            CheckNumber: '',
+            IsCard: false,
+            CardNumber: ''
+        };
+        this.refreshHideStudentSetting();
 
-}
+    }
     public selectPatron(patronData) {
         if (!this.transactionInProgress) {
             this.transactionInProgress = true;
@@ -792,7 +792,7 @@ public ResetForNewStudent(){
 
             this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             // Reset Order Data 
-           this.ResetForNewStudent();
+            this.ResetForNewStudent();
 
             AppStateService.remove('currentTab');
             if (this.menuGridCount === 0) {
@@ -1844,7 +1844,8 @@ public ResetForNewStudent(){
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
                 if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                    && this.selectedMealTypeName !== 'Special Milk') {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                         cepPriceApply = true;
@@ -1957,7 +1958,7 @@ public ResetForNewStudent(){
 
                     const itemData = this.orderData.items[i];
 
-                    if (priceTypeId === itemData.price_type_id && itemData.RefId === menuItem.RefId ) {
+                    if (priceTypeId === itemData.price_type_id && itemData.RefId === menuItem.RefId) {
                         if (parseInt(itemData.Quantity) < 999) {
                             quantity = parseInt(itemData.Quantity) + 1;
                             itemPrice = currPrice + itemData.Price;
@@ -2158,7 +2159,7 @@ public ResetForNewStudent(){
                         return mic;
                     });
 
-                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu','DisplayOrder', 'ButtonDescription'], ['desc','asc', 'asc']);
+                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu', 'DisplayOrder', 'ButtonDescription'], ['desc', 'asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');
@@ -2909,7 +2910,7 @@ public ResetForNewStudent(){
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : 0,
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
                 'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
-                'ChangeReturned':  Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -3008,7 +3009,7 @@ public ResetForNewStudent(){
                         'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                         'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                        'ChangeReturned':  Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                        'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                         'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
@@ -3379,7 +3380,7 @@ public ResetForNewStudent(){
         return AppStateService.get(key);
     }
 
-    public refreshHideStudentSetting(){
+    public refreshHideStudentSetting() {
         this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
         //this.hideStudentId = true;
     }
