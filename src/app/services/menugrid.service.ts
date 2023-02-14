@@ -51,6 +51,18 @@ export class MenugridService {
     });
 
   }
+  public getNonCEPMealTypes(mealTypes) :any{
+    return new Promise((resolve) => {
+      let nonCEPMealTypes = new Set();
+      mealTypes.forEach(m => {
+        if (m.MealTypeDescription === 'Special Milk') {
+          nonCEPMealTypes.add(m.MealTypeId)
+        }
+      }
+      );
+      resolve(nonCEPMealTypes)
+    });
+  }
 
 
 

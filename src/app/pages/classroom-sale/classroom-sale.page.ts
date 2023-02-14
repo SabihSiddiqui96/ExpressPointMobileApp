@@ -92,6 +92,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public selectedSpecialRosterName: any;
     public specialRosterPersonList: any = [];
     public allCategories = [];
+    public nonCEPMealTypes = new Set();
+
     // public HomeRoomList:any=[];
     public selectedSpecialRosterPersonId: any;
     public selectedSpecialRosterPersonName: any;
@@ -340,17 +342,25 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     // }
 
     public getMealTypes() {
-        PouchQueriesService.GetMealTypes().then((res) => {
+        // PouchQueriesService.GetMealTypes().then((res) => {
 
-            this.mealTypes = res.rows.map(row => {
-                return row.doc;
-            });
+        //     this.mealTypes = res.rows.map(row => {
+        //         return row.doc;
+        //     });
 
-            this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
+        //     this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
 
-            this.menuItems = [];
-            this.utilService.setLoader(false);
-        });
+        //     this.menuItems = [];
+        //     this.utilService.setLoader(false);
+        // });
+
+        this.menuGridService.getMealTypes(this.schoolId).then(res => {
+            this.mealTypes = res['MealTypes'];
+        }).then(() => {
+            this.menuGridService.getNonCEPMealTypes(this.mealTypes).then((res) => {
+                this.nonCEPMealTypes = res;
+            })
+        })
     }
 
 

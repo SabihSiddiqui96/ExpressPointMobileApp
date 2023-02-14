@@ -301,6 +301,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public transactionInProgress: boolean = false;
     public personName;
     public allCategories = []; // Used to store all menu item categories
+    public nonCEPMealTypes = new Set();
     public selectedAccountDetails: any = {};
     public showSelectAccount: boolean = true;
     public isStaffNVisitor: boolean = false;
@@ -1470,58 +1471,38 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         });
 
     }
-
     public getMealTypes() {
-        // this.utilService.setLoader(true);
         return new Promise((resolve, reject) => {
-            PouchQueriesService.GetMealTypes()
-                .then((res) => {
-                    this.secondMealPriceType = JSON.parse(AppStateService.get('site_details')).SecondMealPriceTypeId;
-                    this.paidMealPriceType = JSON.parse(AppStateService.get('site_details')).PaidMealPriceTypeId;
+            this.menuGridService.getMealTypes(this.schoolId).then((res) => {
+                this.secondMealPriceType = JSON.parse(AppStateService.get('site_details')).SecondMealPriceTypeId;
+                this.paidMealPriceType = JSON.parse(AppStateService.get('site_details')).PaidMealPriceTypeId;
 
-                    this.mealTypes = res.rows.map(row => {
-                        return row.doc;
+                this.mealTypes = res["Mealtypes"];
+                let defaultMealType = res["DefaultMealType"];
+
+                if (defaultMealType.length > 0) {
+                    this.selectedMealType = defaultMealType[0].MealTypeId;
+                    AppStateService.set('mealType', defaultMealType[0].MealTypeId);
+                    this.defaultMealTypeId = defaultMealType[0].MealTypeId;
+                    this.selectedMealTypeName = this.defaultmealTypeName = defaultMealType[0].MealTypeDescription;
+                    this.GetSystemMenuItem(this.selectedMealType);
+                    this.getMenuCalendars();
+                } else {
+                    this.menuTypes = [];
+                    this.selectedMealType = -1;
+                    this.selectedMealTypeName = 'Meal Type';
+                }
+                resolve(null);
+
+            })
+                .then(() => {
+                    this.menuGridService.getNonCEPMealTypes(this.mealTypes).then(result => {
+                        this.nonCEPMealTypes = result;
                     });
-
-                    this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
-
-                    const time = new Date();
-                    const stime =
-                        ('0' + time.getHours()).slice(-2) + ':' +
-                        ('0' + time.getMinutes()).slice(-2) + ':' +
-                        ('0' + time.getSeconds()).slice(-2);
-
-                    for (let i = 0; i < this.mealTypes.length; i++) {
-                        const m = this.mealTypes[i];
-                        if (stime >= m.StartTime && stime <= m.EndTime) {
-                            this.defaultMealTypeId = m.MealTypeId;
-                            this.defaultMealTypeIdApi = m.MealTypeId;
-                            AppStateService.set('mealType', m.MealTypeId);
-                            break;
-                        }
-                    }
-                    for (const typ in this.mealTypes) {
-                        if (this.mealTypes[typ].MealTypeId === this.defaultMealTypeId) {
-                            this.defaultmealTypeName = this.mealTypes[typ].MealTypeDescription;
-                        }
-                    }
-                    if (this.defaultMealTypeId !== 0) {
-                        this.selectedMealType = this.defaultMealTypeId;
-                        this.selectedMealTypeName = this.defaultmealTypeName;
-                        this.GetSystemMenuItem(this.selectedMealType);
-                        this.getMenuCalendars();
-
-                    } else {
-                        this.menuTypes = [];
-                        this.selectedMealType = -1;
-                    }
-                    //  this.utilService.setLoader(false);
-                    resolve(null);
                 })
                 .catch((err) => { console.log(err); resolve(null); });
 
         });
-
 
     }
 
@@ -4775,7 +4756,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 priceTypeId = this.secondMealPriceType;
 
             }
-            if (this.selectedMealTypeName !== 'Special Milk') {
+            if (!this.nonCEPMealTypes.has(this.systemMenuItem.MealTypeId)) {
                 if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                     cepPriceApply = true;
                 } else { // student is not CEP => Check CHRGNCEP setting to charge or not
@@ -5226,7 +5207,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
                 if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                    && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                         cepPriceApply = true;
@@ -5241,12 +5223,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             cepPriceApply = false;
                         }
                     }
-                    // if (this.patronDetails.SchoolId == this.schoolId) {
-                    //             CEP_price_apply = this.IsSiteCEP;
-                    //         }
-                    //         else {
-                    //             CEP_price_apply = this.patronDetails.isStudentCEP;
-                    //         }
                 }
             }
 

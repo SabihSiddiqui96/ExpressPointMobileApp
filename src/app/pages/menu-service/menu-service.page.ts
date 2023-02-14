@@ -238,6 +238,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public menuItemsArr = [];
     public isSecondMeal: boolean;
     public allCategories = [];
+    public nonCEPMealTypes = new Set();
+
 
     public terminalDefaultMenu = [];
 
@@ -1330,27 +1332,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public getMealTypes() {
         return new Promise((resolve, reject) => {
-            PouchQueriesService.GetMealTypes()
-                .then((res) => {
-                    this.secondMealPriceType = JSON.parse(AppStateService.get('site_details')).SecondMealPriceTypeId;
-                    this.paidMealPriceType = JSON.parse(AppStateService.get('site_details')).PaidMealPriceTypeId;
+            this.menuGridService.getMealTypes(this.schoolId).then((res) => {
+                this.secondMealPriceType = JSON.parse(AppStateService.get('site_details')).SecondMealPriceTypeId;
+                this.paidMealPriceType = JSON.parse(AppStateService.get('site_details')).PaidMealPriceTypeId;
+                this.mealTypes = res["Mealtypes"];
+                let defaultMealType = res["DefaultMealType"];
 
-                    const time = new Date();
-                    const stime =
-                        ('0' + time.getHours()).slice(-2) + ':' +
-                        ('0' + time.getMinutes()).slice(-2) + ':' +
-                        ('0' + time.getSeconds()).slice(-2);
-
-                    this.mealTypes = res.rows.map(row => row.doc);
-                    this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
-
-                    const mealType = _.chain(this.mealTypes).filter(m => stime >= m.StartTime && stime <= m.EndTime).value();
-
-                    if (mealType.length > 0) {
-                        this.selectedMealType = mealType[0].MealTypeId;
-                        AppStateService.set('mealType', mealType[0].MealTypeId);
-                        this.defaultMealTypeId = mealType[0].MealTypeId;
-                        this.selectedMealTypeName = this.defaultmealTypeName = mealType[0].MealTypeDescription;
+                    if (defaultMealType.length > 0) {
+                        this.selectedMealType = defaultMealType[0].MealTypeId;
+                        AppStateService.set('mealType', defaultMealType[0].MealTypeId);
+                        this.defaultMealTypeId = defaultMealType[0].MealTypeId;
+                        this.selectedMealTypeName = this.defaultmealTypeName = defaultMealType[0].MealTypeDescription;
                         this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
                     } else {
                         this.menuTypes = [];
@@ -1358,6 +1350,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.selectedMealTypeName = 'Meal Type';
                     }
                     resolve(null);
+               
+            })
+            .then(() => {
+                    this.menuGridService.getNonCEPMealTypes(this.mealTypes).then(result => {
+                        this.nonCEPMealTypes = result;
+                        console.clear()
+                        console.log(this.nonCEPMealTypes)
+                    });
                 })
                 .catch((err) => { console.log(err); resolve(null); });
 
@@ -1522,7 +1522,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 PositionOnGrid: menuGridDetails.Buttons[i].Position,
                                 // Prices: menuGridDetails.Buttons[i].Prices,
                                 RefId: menuGridDetails.Buttons[i].RefId,
-                                IsTaxable: menuGridDetails.Buttons[i].IsTaxable
+                                IsTaxable: menuGridDetails.Buttons[i].IsTaxable,
+                                MealTypeId: menuGridDetails.Buttons[i].MealTypeId
                             });
 
                             if ((i + 1) <= (menuGridDetails.Buttons.length - 1)) {
@@ -1845,7 +1846,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
                 if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
                     (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
-                    && this.selectedMealTypeName !== 'Special Milk') {
+                    && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                         cepPriceApply = true;
@@ -1860,12 +1861,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             cepPriceApply = false;
                         }
                     }
-                    // if (this.patronDetails.SchoolId == this.schoolId) {
-                    //             CEP_price_apply = this.IsSiteCEP;
-                    //         }
-                    //         else {
-                    //             CEP_price_apply = this.patronDetails.isStudentCEP;
-                    //         }
                 }
             }
 
@@ -2071,74 +2066,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public setMealCount(mealCount) {
         this.mealCount = mealCount;
     }
-    // public showSubcategories(grid) {
-
-    //     if (this.patronDetails.PersonId) {
-    //         PouchQueriesService.GetItemsInCategory(grid.RefId)
-    //             .then((items) => {
-    //                 let buttons = items.docs[0].Buttons;
-    //                 // this.utilService.setLoader(true)
-    //                 let subMenuGridName = grid.ButtonDescription;
-    //                 if (buttons != undefined || buttons != null) {
-    //                     if (this.patronDetails.RestrictedMenuItems) {
-    //                         if (this.patronDetails.RestrictedMenuItems.length > 0) {
-    //                             for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
-    //                                 for (let k = 0; k < buttons.length; k++) {
-    //                                     if (this.patronDetails.RestrictedMenuItems[i] == buttons[k].RefId) {
-    //                                         buttons[k]['restrictedItem'] = true;
-    //                                     }
-    //                                 }
-    //                             }
-    //                         }
-    //                         else {
-    //                             if (buttons.length > 0) {
-    //                                 for (let k = 0; k < buttons.length; k++) {
-    //                                     buttons[k]['restrictedItem'] = false;
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
-    //                 } else {
-    //                     this.utilService.showToast('This Category does not have any Menu Items.');
-    //                 }
-
-    //                 if (buttons != undefined || buttons != null) {
-    //                     if (buttons.length > 0) {
-
-    //                         let modal = this.modalCtrl.create(MenuCategoryModelPage,
-    //                             {
-    //                                 'submenuGrid': buttons,
-    //                                 'subMenuGridName': subMenuGridName,
-    //                                 'DefaultMenuItemId': this.menuGrid.DefaultMenuItemId,
-    //                                 'PatronId': this.patronDetails.PersonId
-    //                             });
-
-    //                         modal.present();
-
-    //                         if (!!(this.utilService.checkEvent(this.event, 'menu_subcategory:select'))) {
-    //                             this.event.subscribe('menu_subcategory:select', (userEventData) => {
-    //                                 console.log(userEventData.subgrid);
-
-    //                                 if (userEventData.subgrid) {
-    //                                     this.addMenuToCart(userEventData.subgrid);
-    //                                 }
-    //                             });
-    //                         }
-    //                     }
-    //                 } else {
-
-    //                     this.utilService.showToast('This Category does not have any Menu Items.');
-    //                 }
-    //                 // this.utilService.setLoader(false);
-
-    //             }).catch(err => console.log(err));
-    //     } else {
-    //         this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');
-    //         return;
-    //     }
-    // }
-
-
 
     public showAllCategories() {
         // if (this.patronDetails) {
@@ -3791,6 +3718,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 .catch((err) => { console.log(err); resolve(null); });
         });
     }
+
     public checkForCategory(menuItemId) {
         const menuItem = {};
         this.allCategories.forEach((item) => {
