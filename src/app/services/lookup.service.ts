@@ -323,6 +323,12 @@ export class LookupService {
     public populatePersonsFromQ() {
         if (this.personsQ.length > 0) {
             this.utilService.setLoader(true);
+            this.personsQ.map((patron) => {
+                let input = sessionStorage.getItem(patron.Identifier);
+                if(input) {
+                    patron.InputDirection = input;
+                }
+            })
             this.showPatronModel(this.personsQ, true, false);
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E24396);
