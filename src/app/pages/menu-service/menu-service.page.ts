@@ -239,8 +239,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public isSecondMeal: boolean;
     public allCategories = [];
     public nonCEPMealTypes = new Set();
-
-
     public terminalDefaultMenu = [];
 
     public userId: string;
@@ -1355,8 +1353,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             .then(() => {
                     this.menuGridService.getNonCEPMealTypes(this.mealTypes).then(result => {
                         this.nonCEPMealTypes = result;
-                        console.clear()
-                        console.log(this.nonCEPMealTypes)
                     });
                 })
                 .catch((err) => { console.log(err); resolve(null); });
