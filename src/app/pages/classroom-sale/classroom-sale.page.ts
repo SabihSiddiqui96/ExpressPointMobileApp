@@ -355,7 +355,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         // });
 
         this.menuGridService.getMealTypes(this.schoolId).then(res => {
-            this.mealTypes = res['MealTypes'];
+            this.mealTypes = res['Mealtypes'];
         }).then(() => {
             this.menuGridService.getNonCEPMealTypes(this.mealTypes).then((res) => {
                 this.nonCEPMealTypes = res;
