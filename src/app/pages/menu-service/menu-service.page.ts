@@ -32,7 +32,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc, TransactionDoc } from '../../services/transaction.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
@@ -174,7 +174,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         IsCard: false,
         CardNumber: ''
     };
-    public saleData = {};
+    public saleData: TransactionDoc;
 
     public selectedMealType = -1;
     public selectedMealTypeName = 'Meal Type';
@@ -2828,17 +2828,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'SalesTax': Math.round(this.orderData.tax * 100) / 100,
                 'IsCard': this.orderData.IsCard,
                 'CardNumber': this.orderData.CardNumber,
-                'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : 0,
-                'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
-                'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : 0,
+                'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toString() : '0',
+                'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toString(),
+                'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toString() : '0',
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
-                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(this.cashtendAmount).toString(),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString(),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
                 'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
+                'TotalAmount': Number(this.orderData.totalAmount).toString(),
                 'ServingSiteId': this.siteName,
                 'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                 'UserId': this.userId,
@@ -2862,7 +2862,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             };
             personSaledetails.push({
                 '_id': this.saleData['_id'],
-                'Balance': this.saleData['NewBalance'],
+                'Balance': Number(this.saleData['NewBalance']),
                 'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
             });
 

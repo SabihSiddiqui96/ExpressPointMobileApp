@@ -10,6 +10,7 @@ import { Events as CustomEvents } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { Observable, Subject } from 'rxjs';
 import { LocalTimerService } from './local-timer.service';
+import { PrintReceiptTypes } from './enums/print-receipt-types';
 
 @Injectable({
     providedIn: 'root'
@@ -423,43 +424,58 @@ export class TransactionService {
 
 
 // export let Transactions: any = TransactionService.getAllTransactions()
-@Injectable()
-export class TransactionDoc {
+// @Injectable()
+export interface TransactionDoc {
 
-    public PaymentAmount: number;
-    public Balance: number;
-    public AccountId: string;
-    public ServingSchoolId: string;
-    public BuyerSchoolId: string;
-    public SessionId: string;
-    public BuyerId: string;
-    public IsDeposit: boolean;
-    public IsCheck: boolean;
-    public TransactionType: number;
-    public PriceTypeId: number;
-    public BuyerGradeId: number | null;
-    public MealTypeId: number | null;
-    public MenuItems: any = [];
-    public CheckNumber: number;
-    public TransactionDate: number;
-    public TransactionNumber: number;
-    public PrincipalId: string | null;
-    public PrincipalAccountId: string;
-    public TerminalId: number;
-    public MealType: string;
-    public FirstName: string;
-    public LastName: string;
-    public PersonName: string;
-    public IsSynced: boolean;
-    public DeviceTransactionId: string;
-    public IsMarked: boolean;
-    public IsSent: boolean;
-    public IsfromSameDay: boolean;
-    public IsProcessed: boolean;
-    public SalesTax: number;
-    public IsCard: boolean;
-    public CardNumber: string;
-
+    PaymentAmount: number;
+    Balance: number;
+    AccountId: string;
+    ServingSchoolId: string;
+    BuyerSchoolId: string;
+    SessionId: string;
+    BuyerId: string;
+    IsDeposit: boolean;
+    IsCheck: boolean;
+    TransactionType: number;
+    PriceTypeId: number;
+    BuyerGradeId: number | null;
+    MealTypeId: number | null;
+    MenuItems: any;
+    CheckNumber: string;
+    TransactionDate: number;
+    TransactionNumber: number;
+    PrincipalId: string | null;
+    PrincipalAccountId: string;
+    TerminalId: number;
+    MealType: string;
+    FirstName: string;
+    LastName: string;
+    PersonName: string;
+    IsSynced: boolean;
+    DeviceTransactionId: string;
+    IsMarked: boolean;
+    IsSent: boolean;
+    IsfromSameDay: boolean;
+    IsProcessed: boolean;
+    SalesTax: number;
+    IsCard: boolean;
+    CardNumber: string;
+    OldBalance: string;
+    DepositAmount: string;
+    NewBalance: string;
+    BonusAmount: string;
+    AmountTendered: string;
+    ChangeReturned: string;
+    Identifier: string;
+    Site: string;
+    Grade: string;
+    Teacher: string;
+    TotalAmount: string;
+    ServingSiteId: string;
+    ReceiptType: PrintReceiptTypes;
+    UserId: string;
+    PersonIdentifier: string;
+    _id: string;
 
 }
 

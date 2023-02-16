@@ -26,7 +26,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc, TransactionDoc } from '../../services/transaction.service';
 import { MenugridService } from '../../services/menugrid.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
@@ -206,7 +206,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         IsCard: false,
         CardNumber: ''
     };
-    public saleData = {};
+    public saleData: TransactionDoc;
 
     public highestGradeId;
 
@@ -3315,7 +3315,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             } else if (transactionType === 2) {
                 updatedPatronDetails.Balance = balance - saleToatal;
             }
-            let paymentData, paymentDoc;
+            let paymentData: TransactionDoc, paymentDoc;
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
                 && this.orderData.IsDeposit) {
                 paymentData = {
@@ -3349,20 +3349,21 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'IsSent': false,
                     'IsfromSameDay': false,
                     'IsProcessed': false,
-                    'TerminalName': this.terminalName,
+                    'SalesTax': 0,
+                    // 'TerminalName': this.terminalName,
                     'IsCard': false,
                     'CardNumber': '',
-                    'OldBalance': parseFloat(this.selectedAccountDetails.Balance),
-                    'DepositAmount': Number(this.cashTendAmount),
-                    'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString()),
+                    'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toString(),
+                    'DepositAmount': Number(this.cashTendAmount).toString(),
+                    'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString()).toString(),
                     'BonusAmount': this.bonusAmount,
-                    'AmountTendered': 0,
+                    'AmountTendered': '0',
                     'Identifier': this.patronDetails.Identifier,
                     'Site': this.patronDetails.SiteCode,
                     'Grade': this.patronDetails.GradeDescription,
                     'Teacher': this.patronDetails.HomeRoom,
-                    'ChangeReturned': 0,
-                    'TotalAmount': 0,
+                    'ChangeReturned': '0',
+                    'TotalAmount': '0',
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                     'UserId': this.userId,
@@ -3377,7 +3378,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 personSaledetails.push({
                     '_id': paymentData['_id'],
-                    'Balance': paymentData['NewBalance'],
+                    'Balance': Number(paymentData['NewBalance']),
                     'PreviousSales': [{}]
                 });
                 this.transactionNumber = this.transactionNumber + 1;
@@ -3418,11 +3419,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'IsCard': this.orderData.IsCard,
                 'CardNumber': this.orderData.CardNumber,
                 'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
+                'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toString(),
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
-                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(this.cashTendAmount).toString(),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString(),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -3452,7 +3453,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             personSaledetails.push({
                 '_id': this.saleData['_id'],
-                'Balance': this.saleData['NewBalance'],
+                'Balance': Number(this.saleData['NewBalance']),
                 'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
             });
 
