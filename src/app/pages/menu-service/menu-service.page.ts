@@ -2815,6 +2815,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'PrincipalId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.PersonId : this.principalId,
                 'PrincipalAccountId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.AccountId : this.principalAccountId,
                 'TerminalId': parseInt(this.terminalId),
+                'TerminalName': this.terminalName,
                 'MealType': this.selectedMealTypeName,
                 'FirstName': this.patronDetails.FirstName,
                 'LastName': this.patronDetails.LastName,

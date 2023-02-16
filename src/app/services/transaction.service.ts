@@ -475,6 +475,7 @@ export interface TransactionDoc {
     ReceiptType: PrintReceiptTypes;
     UserId: string;
     PersonIdentifier: string;
+    TerminalName: string
     _id: string;
 
 }
