@@ -9,7 +9,7 @@ import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SettingService } from '../../services/setting.service';
-import { TransactionService, SessionCheckDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SuspiciousTransactionDoc, TransactionDoc } from '../../services/transaction.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
@@ -644,7 +644,7 @@ export class DoPayment {
                 'TransactionNumber': this.transactionNumber
             };
 
-            const saleData = {
+            const saleData: TransactionDoc = {
                 'PaymentAmount': amount,
                 'Balance': 0,
                 'AccountId': this.navPatronDetails.AccountId,
@@ -675,20 +675,21 @@ export class DoPayment {
                 'IsSent': false,
                 'IsfromSameDay': false,
                 'IsProcessed': false,
+                'SalesTax': 0,
                 'TerminalName': this.terminalName,
                 'IsCard': false,
                 'CardNumber': '',
                 'OldBalance': Number(parseFloat(this.newBalance) - parseFloat(this.cashAmount.toString())).toFixed(2),
-                'DepositAmount': this.cashAmount === undefined || this.cashAmount === null ? 0 : Number(this.cashAmount),
+                'DepositAmount': this.cashAmount === undefined || this.cashAmount === null ? '0' : Number(this.cashAmount).toString(),
                 'NewBalance': Number(this.newBalance).toFixed(2),
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': amount === undefined || amount === null ? 0 : Number(amount),
+                'AmountTendered': amount === undefined || amount === null ? '0' : Number(amount).toString(),
                 'Identifier': this.navPatronDetails.Identifier,
                 'Site': this.navPatronDetails.SiteCode,
                 'Grade': this.navPatronDetails.GradeDescription,
                 'Teacher': this.navPatronDetails.HomeRoom,
-                'ChangeReturned': 0,
-                'TotalAmount': 0,
+                'ChangeReturned': '0',
+                'TotalAmount': '0',
                 'ServingSiteId': this.siteName,
                 'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                 'UserId': this.userId,

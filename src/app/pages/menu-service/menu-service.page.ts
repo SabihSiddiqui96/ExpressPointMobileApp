@@ -32,7 +32,7 @@ import { SwitchHandsService } from '../../services/switch-hands.service';
 import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc } from '../../services/transaction.service';
+import { TransactionService, SessionCheckDoc, SessionCardDoc, TerminalSaleStatusDoc, SuspiciousTransactionDoc, TransactionDoc } from '../../services/transaction.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
@@ -174,7 +174,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         IsCard: false,
         CardNumber: ''
     };
-    public saleData = {};
+    public saleData: TransactionDoc;
 
     public selectedMealType = -1;
     public selectedMealTypeName = 'Meal Type';
@@ -238,7 +238,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public menuItemsArr = [];
     public isSecondMeal: boolean;
     public allCategories = [];
-
+    public nonCEPMealTypes = new Set();
     public terminalDefaultMenu = [];
 
     public userId: string;
@@ -764,24 +764,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
             await res.present();
         });
     }
-public ResetForNewStudent(){
-    this.cashDue = 0;
-    this.isDepositByEXNEGBAL = false;
-    this.orderData = {
-        accountBalance: 0.00,
-        subTotal: 0.00,
-        tax: 0.00,
-        totalAmount: 0.00,
-        items: [],
-        IsDeposit: false,
-        IsCheck: false,
-        CheckNumber: '',
-        IsCard: false,
-        CardNumber: ''
-    };
-    this.refreshHideStudentSetting();
+    public ResetForNewStudent() {
+        this.cashDue = 0;
+        this.isDepositByEXNEGBAL = false;
+        this.orderData = {
+            accountBalance: 0.00,
+            subTotal: 0.00,
+            tax: 0.00,
+            totalAmount: 0.00,
+            items: [],
+            IsDeposit: false,
+            IsCheck: false,
+            CheckNumber: '',
+            IsCard: false,
+            CardNumber: ''
+        };
+        this.refreshHideStudentSetting();
 
-}
+    }
     public selectPatron(patronData) {
         if (!this.transactionInProgress) {
             this.transactionInProgress = true;
@@ -792,7 +792,7 @@ public ResetForNewStudent(){
 
             this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             // Reset Order Data 
-           this.ResetForNewStudent();
+            this.ResetForNewStudent();
 
             AppStateService.remove('currentTab');
             if (this.menuGridCount === 0) {
@@ -1330,27 +1330,17 @@ public ResetForNewStudent(){
 
     public getMealTypes() {
         return new Promise((resolve, reject) => {
-            PouchQueriesService.GetMealTypes()
-                .then((res) => {
-                    this.secondMealPriceType = JSON.parse(AppStateService.get('site_details')).SecondMealPriceTypeId;
-                    this.paidMealPriceType = JSON.parse(AppStateService.get('site_details')).PaidMealPriceTypeId;
+            this.menuGridService.getMealTypes(this.schoolId).then((res) => {
+                this.secondMealPriceType = JSON.parse(AppStateService.get('site_details')).SecondMealPriceTypeId;
+                this.paidMealPriceType = JSON.parse(AppStateService.get('site_details')).PaidMealPriceTypeId;
+                this.mealTypes = res["Mealtypes"];
+                let defaultMealType = res["DefaultMealType"];
 
-                    const time = new Date();
-                    const stime =
-                        ('0' + time.getHours()).slice(-2) + ':' +
-                        ('0' + time.getMinutes()).slice(-2) + ':' +
-                        ('0' + time.getSeconds()).slice(-2);
-
-                    this.mealTypes = res.rows.map(row => row.doc);
-                    this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
-
-                    const mealType = _.chain(this.mealTypes).filter(m => stime >= m.StartTime && stime <= m.EndTime).value();
-
-                    if (mealType.length > 0) {
-                        this.selectedMealType = mealType[0].MealTypeId;
-                        AppStateService.set('mealType', mealType[0].MealTypeId);
-                        this.defaultMealTypeId = mealType[0].MealTypeId;
-                        this.selectedMealTypeName = this.defaultmealTypeName = mealType[0].MealTypeDescription;
+                    if (defaultMealType.length > 0) {
+                        this.selectedMealType = defaultMealType[0].MealTypeId;
+                        AppStateService.set('mealType', defaultMealType[0].MealTypeId);
+                        this.defaultMealTypeId = defaultMealType[0].MealTypeId;
+                        this.selectedMealTypeName = this.defaultmealTypeName = defaultMealType[0].MealTypeDescription;
                         this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
                     } else {
                         this.menuTypes = [];
@@ -1358,6 +1348,12 @@ public ResetForNewStudent(){
                         this.selectedMealTypeName = 'Meal Type';
                     }
                     resolve(null);
+               
+            })
+            .then(() => {
+                    this.menuGridService.getNonCEPMealTypes(this.mealTypes).then(result => {
+                        this.nonCEPMealTypes = result;
+                    });
                 })
                 .catch((err) => { console.log(err); resolve(null); });
 
@@ -1522,7 +1518,8 @@ public ResetForNewStudent(){
                                 PositionOnGrid: menuGridDetails.Buttons[i].Position,
                                 // Prices: menuGridDetails.Buttons[i].Prices,
                                 RefId: menuGridDetails.Buttons[i].RefId,
-                                IsTaxable: menuGridDetails.Buttons[i].IsTaxable
+                                IsTaxable: menuGridDetails.Buttons[i].IsTaxable,
+                                MealTypeId: menuGridDetails.Buttons[i].MealTypeId
                             });
 
                             if ((i + 1) <= (menuGridDetails.Buttons.length - 1)) {
@@ -1844,7 +1841,8 @@ public ResetForNewStudent(){
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
                 if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                    && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                         cepPriceApply = true;
@@ -1859,12 +1857,6 @@ public ResetForNewStudent(){
                             cepPriceApply = false;
                         }
                     }
-                    // if (this.patronDetails.SchoolId == this.schoolId) {
-                    //             CEP_price_apply = this.IsSiteCEP;
-                    //         }
-                    //         else {
-                    //             CEP_price_apply = this.patronDetails.isStudentCEP;
-                    //         }
                 }
             }
 
@@ -1957,7 +1949,7 @@ public ResetForNewStudent(){
 
                     const itemData = this.orderData.items[i];
 
-                    if (priceTypeId === itemData.price_type_id && itemData.RefId === menuItem.RefId ) {
+                    if (priceTypeId === itemData.price_type_id && itemData.RefId === menuItem.RefId) {
                         if (parseInt(itemData.Quantity) < 999) {
                             quantity = parseInt(itemData.Quantity) + 1;
                             itemPrice = currPrice + itemData.Price;
@@ -2070,74 +2062,6 @@ public ResetForNewStudent(){
     public setMealCount(mealCount) {
         this.mealCount = mealCount;
     }
-    // public showSubcategories(grid) {
-
-    //     if (this.patronDetails.PersonId) {
-    //         PouchQueriesService.GetItemsInCategory(grid.RefId)
-    //             .then((items) => {
-    //                 let buttons = items.docs[0].Buttons;
-    //                 // this.utilService.setLoader(true)
-    //                 let subMenuGridName = grid.ButtonDescription;
-    //                 if (buttons != undefined || buttons != null) {
-    //                     if (this.patronDetails.RestrictedMenuItems) {
-    //                         if (this.patronDetails.RestrictedMenuItems.length > 0) {
-    //                             for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
-    //                                 for (let k = 0; k < buttons.length; k++) {
-    //                                     if (this.patronDetails.RestrictedMenuItems[i] == buttons[k].RefId) {
-    //                                         buttons[k]['restrictedItem'] = true;
-    //                                     }
-    //                                 }
-    //                             }
-    //                         }
-    //                         else {
-    //                             if (buttons.length > 0) {
-    //                                 for (let k = 0; k < buttons.length; k++) {
-    //                                     buttons[k]['restrictedItem'] = false;
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
-    //                 } else {
-    //                     this.utilService.showToast('This Category does not have any Menu Items.');
-    //                 }
-
-    //                 if (buttons != undefined || buttons != null) {
-    //                     if (buttons.length > 0) {
-
-    //                         let modal = this.modalCtrl.create(MenuCategoryModelPage,
-    //                             {
-    //                                 'submenuGrid': buttons,
-    //                                 'subMenuGridName': subMenuGridName,
-    //                                 'DefaultMenuItemId': this.menuGrid.DefaultMenuItemId,
-    //                                 'PatronId': this.patronDetails.PersonId
-    //                             });
-
-    //                         modal.present();
-
-    //                         if (!!(this.utilService.checkEvent(this.event, 'menu_subcategory:select'))) {
-    //                             this.event.subscribe('menu_subcategory:select', (userEventData) => {
-    //                                 console.log(userEventData.subgrid);
-
-    //                                 if (userEventData.subgrid) {
-    //                                     this.addMenuToCart(userEventData.subgrid);
-    //                                 }
-    //                             });
-    //                         }
-    //                     }
-    //                 } else {
-
-    //                     this.utilService.showToast('This Category does not have any Menu Items.');
-    //                 }
-    //                 // this.utilService.setLoader(false);
-
-    //             }).catch(err => console.log(err));
-    //     } else {
-    //         this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');
-    //         return;
-    //     }
-    // }
-
-
 
     public showAllCategories() {
         // if (this.patronDetails) {
@@ -2158,7 +2082,7 @@ public ResetForNewStudent(){
                         return mic;
                     });
 
-                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu','DisplayOrder', 'ButtonDescription'], ['desc','asc', 'asc']);
+                    categoryButtons = _.orderBy(categoryButtons, ['IsDynamicMenu', 'DisplayOrder', 'ButtonDescription'], ['desc', 'asc', 'asc']);
 
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');
@@ -2891,6 +2815,7 @@ public ResetForNewStudent(){
                 'PrincipalId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.PersonId : this.principalId,
                 'PrincipalAccountId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.AccountId : this.principalAccountId,
                 'TerminalId': parseInt(this.terminalId),
+                'TerminalName': this.terminalName,
                 'MealType': this.selectedMealTypeName,
                 'FirstName': this.patronDetails.FirstName,
                 'LastName': this.patronDetails.LastName,
@@ -2904,17 +2829,17 @@ public ResetForNewStudent(){
                 'SalesTax': Math.round(this.orderData.tax * 100) / 100,
                 'IsCard': this.orderData.IsCard,
                 'CardNumber': this.orderData.CardNumber,
-                'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : 0,
-                'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
-                'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : 0,
+                'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toString() : '0',
+                'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toString(),
+                'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toString() : '0',
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
-                'ChangeReturned':  Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(this.cashtendAmount).toString(),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString(),
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
                 'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
+                'TotalAmount': Number(this.orderData.totalAmount).toString(),
                 'ServingSiteId': this.siteName,
                 'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                 'UserId': this.userId,
@@ -2938,7 +2863,7 @@ public ResetForNewStudent(){
             };
             personSaledetails.push({
                 '_id': this.saleData['_id'],
-                'Balance': this.saleData['NewBalance'],
+                'Balance': Number(this.saleData['NewBalance']),
                 'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
             });
 
@@ -3008,7 +2933,7 @@ public ResetForNewStudent(){
                         'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
                         'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                         'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                        'ChangeReturned':  Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                        'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                         'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
                         'ServingSiteId': this.siteName,
                         'TransactionNumber': this.transactionNumber,
@@ -3379,7 +3304,7 @@ public ResetForNewStudent(){
         return AppStateService.get(key);
     }
 
-    public refreshHideStudentSetting(){
+    public refreshHideStudentSetting() {
         this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
         //this.hideStudentId = true;
     }
@@ -3790,6 +3715,7 @@ public ResetForNewStudent(){
                 .catch((err) => { console.log(err); resolve(null); });
         });
     }
+
     public checkForCategory(menuItemId) {
         const menuItem = {};
         this.allCategories.forEach((item) => {

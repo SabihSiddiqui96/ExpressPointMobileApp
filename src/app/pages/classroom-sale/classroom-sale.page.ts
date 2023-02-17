@@ -16,7 +16,7 @@ import { SettingService } from '../../services/setting.service';
 import { RestrictionsService } from '../../services/restrictions.service';
 import { MenuCategoryModelPage } from '../../pages/menu-category-model/menu-category-model.page';
 import { MenugridService } from '../../services/menugrid.service';
-import { TransactionService, TerminalSaleStatusDoc } from '../../services/transaction.service';
+import { TransactionService, TerminalSaleStatusDoc, TransactionDoc } from '../../services/transaction.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
@@ -92,6 +92,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public selectedSpecialRosterName: any;
     public specialRosterPersonList: any = [];
     public allCategories = [];
+    public nonCEPMealTypes = new Set();
+
     // public HomeRoomList:any=[];
     public selectedSpecialRosterPersonId: any;
     public selectedSpecialRosterPersonName: any;
@@ -133,7 +135,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         IsCheck: false,
         CheckNumber: ''
     };
-    public saleData = {};
+    public saleData: TransactionDoc;
     public isSiteCEP;
     public alacarteTotal = 0.00;
     public setting = {
@@ -340,17 +342,25 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     // }
 
     public getMealTypes() {
-        PouchQueriesService.GetMealTypes().then((res) => {
+        // PouchQueriesService.GetMealTypes().then((res) => {
 
-            this.mealTypes = res.rows.map(row => {
-                return row.doc;
-            });
+        //     this.mealTypes = res.rows.map(row => {
+        //         return row.doc;
+        //     });
 
-            this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
+        //     this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
 
-            this.menuItems = [];
-            this.utilService.setLoader(false);
-        });
+        //     this.menuItems = [];
+        //     this.utilService.setLoader(false);
+        // });
+
+        this.menuGridService.getMealTypes(this.schoolId).then(res => {
+            this.mealTypes = res['Mealtypes'];
+        }).then(() => {
+            this.menuGridService.getNonCEPMealTypes(this.mealTypes).then((res) => {
+                this.nonCEPMealTypes = res;
+            })
+        })
     }
 
 
@@ -990,7 +1000,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             this.utilService.setLoader(true);
             this.paymentProcessing = true;
             this.classorderData = [];
-            let orderdata = {};
+            let orderdata: TransactionDoc;
 
             if (this.getSelectedStudentCount() === 0) {
                 this.utilService.setLoader(false);
@@ -1090,8 +1100,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'PriceTypeId': student.PriceTypeId,
                         'BuyerGradeId': student.GradeId,
                         'MealTypeId': +this.filter.selected_mealtype,
-                        'SchoolTypeId': schoolTypeId,
-                        'MenuItemId': +this.filter.selected_menuitem,
+                        // 'SchoolTypeId': schoolTypeId,
+                        // 'MenuItemId': +this.filter.selected_menuitem,
                         'MenuItems': items,
                         'CheckNumber': '',
                         'TransactionDate': currentTime,
@@ -1105,7 +1115,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'LastName': student.LastName,
                         'IsSynced': false,
                         'DeviceTransactionId': deviceTransactionId,
-                        'Date': day,
+                        'TerminalName': this.terminalName,
+                        // 'Date': day,
                         'IsMarked': false,
                         'IsSent': false,
                         'IsfromSameDay': false,
@@ -1114,16 +1125,16 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'IsCard': false,
                         'CardNumber': '',
                         'OldBalance': student.Balance,
-                        'DepositAmount': 0,
+                        'DepositAmount': '0',
                         'NewBalance': (student.Balance - Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2),
-                        'BonusAmount': 0,
-                        'AmountTendered': 0,
+                        'BonusAmount': '0',
+                        'AmountTendered': '0',
                         'Identifier': student.Identifier,
                         'Site': student.Site,
                         'Grade': student.GradeDescription,
                         'Teacher': student.Teacher,
-                        'ChangeReturned': 0,
-                        'TotalAmount': Math.round((student.Price + studentTotalTax) * 100) / 100,
+                        'ChangeReturned': '0',
+                        'TotalAmount': Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toString(),
                         'ServingSiteId': this.siteName,
                         'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                         'UserId': this.userId,
@@ -1146,9 +1157,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'SaleDate': currentTime
                     };
                     personSaledetails.push({
-                        '_id': this.saleData['_id'],
-                        'Balance': this.saleData['NewBalance'],
-                        'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
+                        '_id': orderdata['_id'],
+                        'Balance': Number(orderdata['NewBalance']),
+                        'PreviousSales': [{ 'MealTypeId': orderdata['MealTypeId'], 'SalesByMealType': items }]
                     });
 
 
@@ -1853,7 +1864,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                 if (this.mealCount === 1 && menuItem.IsReimbursable) {
                     if ((this.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                        (this.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+                        (this.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                        && this.filter.selected_mealtype_name !== 'Special Milk') {
 
                         if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                             cepPriceApply = true;
