@@ -499,7 +499,7 @@ export class HttpService {
     }
 
     public SaveTransactionRecord(orderData): any {
-        return this.http.post(API_URL + 'Recordtransaction', orderData, { responseType: 'text' }).pipe(map(res => res));
+        return this.http.post(API_URL + 'RecordtransactionV3', orderData, { responseType: 'text' }).pipe(map(res => res));
     }
 
     public saveErrorLogs(errorLog) {
