@@ -1157,9 +1157,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'SaleDate': currentTime
                     };
                     personSaledetails.push({
-                        '_id': this.saleData['_id'],
-                        'Balance': Number(this.saleData['NewBalance']),
-                        'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
+                        '_id': orderdata['_id'],
+                        'Balance': Number(orderdata['NewBalance']),
+                        'PreviousSales': [{ 'MealTypeId': orderdata['MealTypeId'], 'SalesByMealType': items }]
                     });
 
 
