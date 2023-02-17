@@ -83,7 +83,7 @@ export class LookupService {
         });
         // this.event.unsubscribe('getServerResults')
 
-        if (this.utilService.isElectronApp() && !this.showModalPopup) {
+        if (this.utilService.isElectronApp() && this.showModalPopup) {
             this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
                 this.setQ(queueInput);
                 this.showModalPopup = false;
@@ -196,8 +196,6 @@ export class LookupService {
                     person.InputDirection = queueInput.InputDirection;
                     this.pushPersonToQ(person, this.personsQ.length);
                 } else { // non-unique results or 0 results: Insert the PIN in the Q.
-
-
                     this.personsQ.push({
                         'PersonName': queueInput.PIN,
                         'FirstName': '',
@@ -329,6 +327,7 @@ export class LookupService {
                     patron.InputDirection = input;
                 }
             })
+            this.personsQ = this.personsQ.filter(f => f.FirstName !== "");
             this.showPatronModel(this.personsQ, true, false);
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E24396);
