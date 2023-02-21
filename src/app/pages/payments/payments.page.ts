@@ -694,6 +694,9 @@ export class DoPayment {
                 'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                 'UserId': this.userId,
                 'PersonIdentifier': this.navPatronDetails.PersonIdentifier,
+                'OrderId': null,
+                'OrderNumber':'',
+                'IsServed': false,
                 '_id': this.navPatronDetails._id
 
             };

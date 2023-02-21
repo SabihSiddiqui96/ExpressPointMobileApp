@@ -1336,21 +1336,21 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.mealTypes = res["Mealtypes"];
                 let defaultMealType = res["DefaultMealType"];
 
-                    if (defaultMealType.length > 0) {
-                        this.selectedMealType = defaultMealType[0].MealTypeId;
-                        AppStateService.set('mealType', defaultMealType[0].MealTypeId);
-                        this.defaultMealTypeId = defaultMealType[0].MealTypeId;
-                        this.selectedMealTypeName = this.defaultmealTypeName = defaultMealType[0].MealTypeDescription;
-                        this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
-                    } else {
-                        this.menuTypes = [];
-                        this.selectedMealType = -1;
-                        this.selectedMealTypeName = 'Meal Type';
-                    }
-                    resolve(null);
-               
+                if (defaultMealType.length > 0) {
+                    this.selectedMealType = defaultMealType[0].MealTypeId;
+                    AppStateService.set('mealType', defaultMealType[0].MealTypeId);
+                    this.defaultMealTypeId = defaultMealType[0].MealTypeId;
+                    this.selectedMealTypeName = this.defaultmealTypeName = defaultMealType[0].MealTypeDescription;
+                    this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
+                } else {
+                    this.menuTypes = [];
+                    this.selectedMealType = -1;
+                    this.selectedMealTypeName = 'Meal Type';
+                }
+                resolve(null);
+
             })
-            .then(() => {
+                .then(() => {
                     this.menuGridService.getNonCEPMealTypes(this.mealTypes).then(result => {
                         this.nonCEPMealTypes = result;
                     });
@@ -2726,7 +2726,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             const sortedItems = this.sortMenuItems(items);
 
-            let paymentData, paymentDoc;
+            let paymentData: TransactionDoc, paymentDoc;
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
                 && this.orderData.IsDeposit) {
                 paymentData = {
@@ -2763,21 +2763,25 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'TerminalName': this.terminalName,
                     'IsCard': false,
                     'CardNumber': '',
-                    'OldBalance': parseFloat(this.selectedAccountDetails.Balance),
+                    'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toFixed(2),
                     'DepositAmount': this.cashtendAmount,
-                    'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString()),
-                    'BonusAmount': this.bonusAmount,
-                    'AmountTendered': 0,
+                    'NewBalance': (parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString())).toFixed(2),
+                    'BonusAmount': this.bonusAmount.toFixed(2),
+                    'AmountTendered': '0',
                     'Identifier': this.patronDetails.Identifier,
                     'Site': this.patronDetails.SiteCode,
                     'Grade': this.patronDetails.GradeDescription,
                     'Teacher': this.patronDetails.HomeRoom,
-                    'ChangeReturned': 0,
-                    'TotalAmount': 0,
+                    'ChangeReturned': '0',
+                    'TotalAmount': '0',
+                    'SalesTax': 0,
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                     'UserId': this.userId,
                     'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                    'OrderId': null,
+                    'OrderNumber':'',
+                    'IsServed': false,
                     '_id': this.selectedAccountDetails._id
                 };
 
@@ -2787,7 +2791,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 };
                 personSaledetails.push({
                     '_id': paymentData['_id'],
-                    'Balance': paymentData['NewBalance'],
+                    'Balance': Number(paymentData['NewBalance']),
                     'PreviousSales': [{}]
                 });
                 this.transactionNumber = this.transactionNumber + 1;
@@ -2834,7 +2838,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toString() : '0',
                 'BonusAmount': Number(this.bonusAmount).toFixed(2),
                 'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(this.cashtendAmount).toString(),
-                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString(),
+                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() !== 'NaN' ? Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() : '0',
                 'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                 'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                 'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
@@ -2844,6 +2848,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                 'UserId': this.userId,
                 'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                'OrderId': null,
+                'OrderNumber': '',
+                'IsServed': false,
                 '_id': this.patronDetails._id
             };
 
