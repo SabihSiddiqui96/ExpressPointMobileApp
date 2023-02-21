@@ -3368,6 +3368,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
                     'UserId': this.userId,
                     'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                    'OrderId': null,
+                    'OrderNumber':'',
+                    'IsServed': false,
                     '_id': this.selectedAccountDetails._id
                 };
 
@@ -3434,6 +3437,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                 'UserId': this.userId,
                 'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                'OrderId': null,
+                'OrderNumber':'',
+                'IsServed': false,
                 '_id': this.patronDetails._id
             };
 

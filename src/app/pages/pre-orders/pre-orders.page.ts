@@ -13,7 +13,7 @@ import { UtilService } from '../../services/util.service';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SettingService } from '../../services/setting.service';
 import { AppStateService } from '../../services/app-state.service';
-import { TransactionService } from '../../services/transaction.service';
+import { TransactionDoc, TransactionService } from '../../services/transaction.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
@@ -327,7 +327,7 @@ export class PreOrdersPage implements OnInit {
 
         this.utilService.setLoader(true);
         this.paymentProcessing = true;
-        let transcationDoc = {};
+        let transcationDoc: TransactionDoc;
         const saleDoc = {};
 
 
@@ -435,7 +435,18 @@ export class PreOrdersPage implements OnInit {
                 // };
                 // Creating Transaction Doc to store in Transaction Table
                 transcationDoc = {
+                    '_id': student._id,
                     'Balance': student.Balance,
+                    'FirstName': student.FirstName,
+                    'LastName': student.LastName,
+                    'IsfromSameDay': true,
+                    'SalesTax': 0,
+                    'UserId': 'test,',
+                    'IsCard': false,
+                    'CardNumber': '',
+                    'TerminalName': this.terminalName,
+                    'PersonIdentifier': student.PersonIdentifier,
+
                     'PaymentAmount': student.Price,
                     'AccountId': student.AccountId,
                     'ServingSchoolId': this.schoolId,
@@ -448,7 +459,7 @@ export class PreOrdersPage implements OnInit {
                     'PriceTypeId': student.PriceTypeId,
                     'BuyerGradeId': student.GradeId,
                     'MealTypeId': student.MealTypeId,
-                    'SchoolTypeId': schoolTypeId,
+                    // 'SchoolTypeId': schoolTypeId,
                     'MenuItems': items,
                     'CheckNumber': '',
                     'TransactionDate': currentTime,
@@ -461,22 +472,22 @@ export class PreOrdersPage implements OnInit {
                     'IsSynced': false,
                     'IsProcessed': false,
                     'DeviceTransactionId': deviceTransactionId,
-                    'Date': day,
+                    // 'Date': day,
                     'IsMarked': false,
                     'IsSent': false,
                     'OrderNumber': student.OrderNumber,
                     'OrderId': student.OrderId,
                     'IsServed': true,
                     'OldBalance': student.Balance,
-                    'DepositAmount': 0,
+                    'DepositAmount': '0',
                     'NewBalance': (student.Balance - student.Price).toFixed(2),
-                    'BonusAmount': 0,
-                    'AmountTendered': 0,
+                    'BonusAmount': '0',
+                    'AmountTendered': '0',
                     'Identifier': student.Identifier,
                     'Site': student.SiteCode,
                     'Grade': student.GradeDescription,
                     'Teacher': student.HomeRoom,
-                    'ChangeReturned': 0,
+                    'ChangeReturned': '0',
                     'TotalAmount': student.Price,
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT

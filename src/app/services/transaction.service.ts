@@ -475,7 +475,10 @@ export interface TransactionDoc {
     ReceiptType: PrintReceiptTypes;
     UserId: string;
     PersonIdentifier: string;
-    TerminalName: string
+    TerminalName: string;
+    OrderId: number| null;
+    OrderNumber: string,
+    IsServed: boolean
     _id: string;
 
 }
