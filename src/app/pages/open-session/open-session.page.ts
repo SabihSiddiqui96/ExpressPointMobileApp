@@ -24,6 +24,7 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SettingService } from '../../services/setting.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SessionType } from '../../services/enums/session-types';
+import { OpenSessionDoc } from '../../Interfaces/OpenSessionDoc';
 
 @Component({
   selector: 'app-open-session',
@@ -691,7 +692,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     } else {
       AppStateService.set('NewSessionDate', currentDate);
     }
-    let sessionDoc;
+    let sessionDoc: OpenSessionDoc;
 
     if (this.router.url.includes('summary-sale')) {
       sessionDoc = {
@@ -705,6 +706,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         isStillOpen: true,
         isSentToServer: false,
         OpenDateWithTime: currentTime,
+        OpenSessionDate: currentTime,
         OpenDate: currentDate,
         OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
         TerminalId: this.terminalId,
@@ -722,6 +724,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         isStillOpen: true,
         isSentToServer: false,
         OpenDateWithTime: currentTime,
+        OpenSessionDate : currentTime,
         OpenDate: currentDate,
         OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
         TerminalId: this.terminalId,
