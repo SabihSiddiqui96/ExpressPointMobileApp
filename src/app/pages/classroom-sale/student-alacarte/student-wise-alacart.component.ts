@@ -11,6 +11,8 @@ export class StudentWiseAlacarteComponent implements OnInit {
 
     @Input() studentWiseAlaCarte;
     @Input() student;
+    @Input() taxMeal;
+    @Input() taxPercent;
 
     constructor(){}
 

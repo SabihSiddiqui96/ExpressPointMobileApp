@@ -168,13 +168,17 @@
           
           <ion-item box-header *ngIf="selectAllSetting== 1 && studentLoaded"
             [ngClass]="{'ion-hide' : (previousMealsCount == totalStudent || totalStudent==0 )}">
-            <ion-label class="ion-text-right ion-padding">
+
+            <ng-container slot="end">
+              <ion-label class="ion-text-right ion-padding">List</ion-label>
+                <ion-toggle style="padding-bottom: 5px;" color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
+              <ion-label style="max-width:11rem;" class="ion-text-left ion-padding">Picture</ion-label>
+            </ng-container>
+            
+
+            <ion-label style="max-width:11rem;" class="ion-text-right ion-padding">
               <strong>Select All</strong>
             </ion-label>
-
-            <ion-label >List</ion-label>
-              <ion-toggle style="padding-bottom: 5px;" color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
-            <ion-label>Picture</ion-label>
 
             <ion-checkbox slot="end" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons()" title="Select All">
             </ion-checkbox>
@@ -193,14 +197,17 @@
             <ng-container style="height: 100%;" *ngIf="isGridView">
               <ion-col size="2" size-lg="2" size-md="3" size-sm="4" sizeXs="6" style="height: 20rem;"
               *ngFor="let student of studentList; let i=index">
-                <ion-card class="card" style="width: 100%;height: 93%;" (click)="launchAlacarteItemsPopups(student)">
+                <ion-card class="card" style="width: 100%;height: 93%;">
                   <ion-grid>
                     <ion-row>
                       <ion-col size="4" style="width: 7rem;">
-                        <ion-checkbox id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
+                        <ng-container *ngIf="student.IsAllergent" [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }">
+                          <ion-checkbox   id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
                           [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
-                        </ion-checkbox>
-                        <ion-avatar class="avatar-small">
+                          </ion-checkbox>
+                          <ion-icon large name="md-checkmark" style="font-size: 31px; font-weight: bold;" color="secondary" *ngIf="student.HadMeal"></ion-icon>
+                        </ng-container>
+                        <ion-avatar class="avatar-small" (click)="launchAlacarteItemsPopups(student)">
                           <!-- <ion-icon name="contact" *ngIf="!student.Image"></ion-icon> -->
                           <img src="{{student.Image}}" *ngIf="student.Image">
                           <img src="assets/img/default_male.png" *ngIf="!student.Image && student.Gender === 'M'">
@@ -210,7 +217,7 @@
                         </ion-avatar>
                       </ion-col>
                       <ion-col size="8" style="width:12rem;height: 100%;">
-                        <ion-row style="width: 12rem;">
+                        <ion-row style="width: 12rem;" (click)="launchAlacarteItemsPopups(student)">
                             <ion-label>
                               <strong>{{student.LastName}},&nbsp;{{student.FirstName}}</strong>
                                 <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
@@ -222,8 +229,8 @@
                           | currency:'USD':true:'1.2-2'}}
                             </span>
                         </ion-row>
-                        <ion-row style="width: 12rem;">
-                            <ion-button class="alertBtn" default expand="block"
+                        <ion-row style="width: 12rem;height: 25px;">
+                            <ion-button class="alertBtn" *ngIf="student.ShowAlert" default expand="block"
                               (click)="setRestrictions(student)">
                               Alerts
                               <span>*</span>
@@ -246,63 +253,6 @@
                           </ion-button>
                         </ion-item>
                       </ion-col>
-                    </ion-row>
-                    <ion-row>
-                      <ion-list *ngFor="let item of studentWiseAlaCarte; let i = index">
-                        <ion-card *ngIf="studentWiseAlaCarte.length > 0 && item.alaCartItemCount > 0" class="ion-card">
-                          <ion-card-header (click)="toggleSection(i)"
-                            *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0"
-                            [ngClass]="{'section-active': item.open, 'section': !item.open}">
-                            
-                            <ion-icon name="pin" slot="start"></ion-icon>
-                          
-                            A La Carte Items
-                          </ion-card-header>
-                          <ion-row *ngIf="item.personId == student.PersonId && item.open">
-                            <ion-col size="12" size-md="12">
-                              <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
-                                <ion-button fill="clear" color="danger"
-                                  (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
-                                  <ion-icon slot="icon-only" sytle="font-size:21px;" name="md-close-circle"></ion-icon>
-                                </ion-button>
-                                <ion-label>
-                                  <strong>{{items.MenuItemDescription}}</strong>
-                                </ion-label>
-                                <ion-label>
-                                  <strong>{{items.Price | currency:'USD':true:'1.2-2'}}</strong>
-                                </ion-label>
-                              </ion-item>
-                            </ion-col>
-                          </ion-row>
-                          <ion-row
-                            *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0 && item.open && taxMeal ==1 && taxPercent!= undefined && student.IsSaleTaxable">
-                            <ion-col size="12" size-md="12">
-                              <ion-item lines="none">
-                                
-                                <ion-label>
-                                  <span>Tax <ion-icon name="at"></ion-icon> {{taxPercent}}%</span>
-                                </ion-label>
-                                <ion-label>
-                                  <span>{{ item.alaCartTotalTax | currency:'USD':true:'1.2-2'}} </span>
-                                </ion-label>
-                              </ion-item>
-                            </ion-col>
-                            <ion-col size="12" size-md="12">
-                              <ion-item>
-                                <ion-button fill="clear">
-                                  <ion-icon slot="icon-only" name="logo-usd"></ion-icon>
-                                </ion-button>
-                                <ion-label>
-                                  <strong>Total</strong>
-                                </ion-label>
-                                <ion-label>
-                                  <strong>{{item.alaCartTotalWithTax  | currency:'USD':true:'1.2-2'}} </strong>
-                                </ion-label>
-                              </ion-item>
-                            </ion-col>
-                          </ion-row>
-                        </ion-card>
-                      </ion-list>
                     </ion-row>
                   </ion-grid>
                 </ion-card>

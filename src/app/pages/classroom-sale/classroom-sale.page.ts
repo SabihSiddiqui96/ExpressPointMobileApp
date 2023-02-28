@@ -369,6 +369,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.isGridView = !this.isGridView;
     }
 
+    toggleView() {
+        this.isGridView = !this.isGridView;
+    }
+
 
 
     public getSpecialRostersList() {
@@ -519,17 +523,19 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     launchAlacarteItemsPopups(student) {
         let postData = {
             student: student,
-            studentWiseAlaCarte: this.studentWiseAlaCarte
+            studentWiseAlaCarte: this.studentWiseAlaCarte,
+            taxMeal: this.taxMeal,
+            taxPercent : this.taxPercent
         }
-        if(this.studentWiseAlaCarte.length > 0) {
-            this.popoverCtrl.create({
+        //if(this.studentWiseAlaCarte.length > 0) {
+            this.modalCtrl.create({
                 component: StudentWiseAlacarteComponent,
                 componentProps: postData
-                , cssClass: this.utilService.popupCenter.cssClass
+                , cssClass: 'alacarte'
               }).then(async (res) => {
                 await res.present();
               });
-        }
+        //}
        
     }
 

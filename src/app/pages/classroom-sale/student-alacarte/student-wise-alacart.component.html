@@ -1,9 +1,9 @@
 <ion-row>
     <ion-list *ngFor="let item of studentWiseAlaCarte; let i = index">
-      <ion-card *ngIf="studentWiseAlaCarte.length > 0 && item.alaCartItemCount > 0" class="ion-card">
+      <ion-card *ngIf="studentWiseAlaCarte.length > 0 && item.alaCartItemCount > 0" class="ion-card" style="margin: 0px !important;">
         <ion-card-header (click)="toggleSection(i)"
           *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0"
-          [ngClass]="{'section-active': item.open, 'section': !item.open}">
+          class="section">
           
           <ion-icon name="pin" slot="start"></ion-icon>
          
