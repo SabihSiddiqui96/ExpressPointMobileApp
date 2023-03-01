@@ -369,12 +369,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.isGridView = !this.isGridView;
     }
 
-    toggleView() {
-        this.isGridView = !this.isGridView;
-    }
-
-
-
     public getSpecialRostersList() {
 
         PouchQueriesService.GetSpecialRosters().then(res => {
