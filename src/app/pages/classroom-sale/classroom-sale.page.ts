@@ -516,10 +516,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     launchAlacarteItemsPopups(student) {
         let postData = {
-            student: student,
-            studentWiseAlaCarte: this.studentWiseAlaCarte,
-            taxMeal: this.taxMeal,
-            taxPercent : this.taxPercent
+            'student': student,
+            'studentWiseAlaCarte': this.studentWiseAlaCarte,
+            'taxMeal': this.taxMeal,
+            'taxPercent' : this.taxPercent
         }
         if(this.studentWiseAlaCarte.length > 0) {
             this.modalCtrl.create({

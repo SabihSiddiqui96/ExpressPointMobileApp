@@ -200,8 +200,14 @@
                 <ion-card class="card" style="width: 100%;height: 93%;">
                   <ion-grid>
                     <ion-row>
-                      <ion-col size="4" style="width: 7rem;">
-                        <ng-container *ngIf="student.IsAllergent" [ngStyle]="{'background-color':student.IsAllergent ? '#ddd' : '' }">
+                      <ion-col size="4" style="width: 7rem;" *ngIf="student">
+                        <ng-container  *ngIf="student.IsAllergent" style="background-color:'#ddd';">
+                          <ion-checkbox   id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
+                          [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
+                          </ion-checkbox>
+                          <ion-icon large name="md-checkmark" style="font-size: 31px; font-weight: bold;" color="secondary" *ngIf="student.HadMeal"></ion-icon>
+                        </ng-container>
+                        <ng-container *ngIf="!student.IsAllergent" style="background-color:'';">
                           <ion-checkbox   id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
                           [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
                           </ion-checkbox>
@@ -284,7 +290,7 @@
                         [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
                       | currency:'USD':true:'1.2-2'}}
                       </span>
-                      <ion-button class="alertBtn" *ngIf="student.ShowAlert" default expand="block"
+                      <ion-button class="alertBtn" *ngIf="student.ShowAlert" style="width:12rem !important;" expand="block"
                         (click)="setRestrictions(student)">
                         Alerts
 

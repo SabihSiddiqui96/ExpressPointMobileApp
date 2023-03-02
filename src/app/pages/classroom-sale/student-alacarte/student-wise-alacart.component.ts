@@ -17,6 +17,7 @@ export class StudentWiseAlacarteComponent implements OnInit {
     constructor(){}
 
     ngOnInit() {
+        console.log(this.studentWiseAlaCarte);
 
     }
 }
