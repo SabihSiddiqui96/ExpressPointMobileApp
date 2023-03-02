@@ -521,7 +521,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             taxMeal: this.taxMeal,
             taxPercent : this.taxPercent
         }
-        //if(this.studentWiseAlaCarte.length > 0) {
+        if(this.studentWiseAlaCarte.length > 0) {
             this.modalCtrl.create({
                 component: StudentWiseAlacarteComponent,
                 componentProps: postData
@@ -529,7 +529,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
               }).then(async (res) => {
                 await res.present();
               });
-        //}
+        }
        
     }
 
