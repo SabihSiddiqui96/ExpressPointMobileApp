@@ -521,7 +521,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'taxMeal': this.taxMeal,
             'taxPercent' : this.taxPercent
         }
-        if(this.studentWiseAlaCarte.length > 0) {
+        if(this.studentWiseAlaCarte.length > 0 && student.PersonId === this.studentWiseAlaCarte[0].personId) {
             this.modalCtrl.create({
                 component: StudentWiseAlacarteComponent,
                 componentProps: postData
