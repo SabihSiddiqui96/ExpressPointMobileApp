@@ -39,7 +39,7 @@ import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { MenugridService } from '../../services/menugrid.service';
 import { Events } from '../../services/events.service';
 import ConfettiGenerator from "confetti-js";
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { PrintService, TransactionDetailPrintFormat } from '../../services/print.service';
 import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { TransactionTypes } from '../../services/enums/transaction-types'

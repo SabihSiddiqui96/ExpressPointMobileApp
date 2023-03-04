@@ -2,8 +2,9 @@ import { UtilService } from '../../services/util.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
-import { PopoverController } from '@ionic/angular';
+import { NavController, PopoverController } from '@ionic/angular';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
+import { NavigationExtras } from '@angular/router';
 
 enum PopupType {
     DayOfWeek = "dayOfWeek",
@@ -60,7 +61,8 @@ export class ServiceToolbarComponent implements OnInit {
     constructor(
         private popupMessageService: PopupMessageService,
         private popoverCtrl: PopoverController,
-        private utilService: UtilService
+        private utilService: UtilService,
+        public navCtrl: NavController
     ) { }
 
     ngOnInit() { }
