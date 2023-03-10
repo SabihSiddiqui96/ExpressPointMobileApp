@@ -19,10 +19,15 @@
               <span *ngIf="selectedMealType == -1">Meal Type</span>
             </ion-button>
           </ion-col>
-          <ion-col size="6">
+          <ion-col size="4">
             <ion-button expand="block" (click)="showPopup('servingLine')">
               <span *ngIf="selectedServingLine != -1">{{selectedServingLineName}}</span>
               <span *ngIf="selectedServingLine == -1">Serving Line</span>
+            </ion-button>
+          </ion-col>
+          <ion-col size="2">
+            <ion-button class="btn-full-size-icon" expand="block" (click)="toggleMenus()">
+              {{isDynamicMenuSelected ? 'Alacarte' : 'Meal Service'}}
             </ion-button>
           </ion-col>
           <ion-col size="1">
@@ -38,7 +43,7 @@
         </ion-row>
       </ion-toolbar>
     </ion-header>
-    <ion-content *ngIf="isStaticMenuSelected==true" vh-100 top-margin (click)="emptySpaceClick()">
+    <ion-content *ngIf="!isDynamicMenuSelected" vh-100 top-margin (click)="emptySpaceClick()">
       <div *ngIf="menuGrid.hasOwnProperty('Buttons')" class="menu-static">
         <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
           <ion-col *ngFor="let grid of grid_row; let j=index" style="width:20%">
@@ -60,7 +65,7 @@
         </ion-row>
       </div>
     </ion-content>
-    <ion-content *ngIf="isStaticMenuSelected==false" vh-100 top-margin (click)="emptySpaceClick()">
+    <ion-content *ngIf="isDynamicMenuSelected" vh-100 top-margin (click)="emptySpaceClick()">
       <ion-row *ngIf="selectedServingLine != -1" class="menu-dynamic">
         <ion-col style="width:20%" *ngFor="let category of menuItemCategories; let i=index">
           <!-- <div class="category_text">{{category.CategoryName}}</div> -->

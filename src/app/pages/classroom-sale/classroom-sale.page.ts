@@ -25,6 +25,7 @@ import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { TransactionTypes } from '../../services/enums/transaction-types';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { StudentWiseAlacarteComponent } from './student-alacarte/student-wise-alacart.component';
 
 @Component({
     selector: 'app-classroom-sale',
@@ -61,6 +62,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public gradeList: any = [{ 'GradeId': -1, 'GradeDescription': 'Please Select' }];
     public menuItems: any = [{ 'MenuItemId': -1, 'MenuItemDescription': 'Please Select' }];
     public mealTypes: any = [{ 'MealTypeId': -1, 'MealTypeDescription': 'Please Select' }];
+    isGridView: boolean = true;
 
     public filter = {
         'selected_grade': -1, 'selected_grade_name': '',
@@ -363,7 +365,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         })
     }
 
-
+    toggleView() {
+        this.isGridView = !this.isGridView;
+    }
 
     public getSpecialRostersList() {
 
@@ -508,6 +512,25 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         } else {
             this.studentBtnDisable = true;
         }
+    }
+
+    launchAlacarteItemsPopups(student) {
+        let postData = {
+            'student': student,
+            'studentWiseAlaCarte': this.studentWiseAlaCarte,
+            'taxMeal': this.taxMeal,
+            'taxPercent' : this.taxPercent
+        }
+        if(this.studentWiseAlaCarte.length > 0 && student.PersonId === this.studentWiseAlaCarte[0].personId) {
+            this.modalCtrl.create({
+                component: StudentWiseAlacarteComponent,
+                componentProps: postData
+                , cssClass: 'alacarte'
+              }).then(async (res) => {
+                await res.present();
+              });
+        }
+       
     }
 
 
@@ -2187,6 +2210,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.showAddPaymentPopover(student).then((data) => {
             console.log('Funds are added');
         });
+    }
+
+    public showAlacartePopup(student){
+
     }
 
     public showAddPaymentPopover(person, itemPrice?) {

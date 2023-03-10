@@ -1,0 +1,57 @@
+<ion-row>
+    <ion-list *ngFor="let item of studentWiseAlaCarte; let i = index" style="padding: 0px !important;">
+      <ion-card *ngIf="studentWiseAlaCarte.length > 0 && item.alaCartItemCount > 0" class="ion-card" style="margin: 0px !important;height: 25rem;">
+        <ion-card-header (click)="toggleSection(i)"
+          *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0"
+          class="section">
+          
+          <ion-icon name="pin" slot="start"></ion-icon>
+         
+          A La Carte Items
+        </ion-card-header>
+        <ion-row *ngIf="item.personId == student.PersonId && item.open">
+          <ion-col size="12" size-md="12">
+            <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
+              <ion-button fill="clear" color="danger"
+                (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
+                <ion-icon slot="icon-only" sytle="font-size:21px;" name="md-close-circle"></ion-icon>
+              </ion-button>
+              <ion-label>
+                <strong>{{items.MenuItemDescription}}</strong>
+              </ion-label>
+              <ion-label>
+                <strong>{{items.Price | currency:'USD':true:'1.2-2'}}</strong>
+              </ion-label>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row
+          *ngIf="item.personId == student.PersonId && item.alaCartItemCount > 0 && item.open && taxMeal ==1 && taxPercent!= undefined && student.IsSaleTaxable">
+          <ion-col size="12" size-md="12">
+            <ion-item lines="none">
+              
+              <ion-label>
+                <span>Tax <ion-icon name="at"></ion-icon> {{taxPercent}}%</span>
+              </ion-label>
+              <ion-label>
+                <span>{{ item.alaCartTotalTax | currency:'USD':true:'1.2-2'}} </span>
+              </ion-label>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12" size-md="12">
+            <ion-item>
+              <ion-button fill="clear">
+                <ion-icon slot="icon-only" name="logo-usd"></ion-icon>
+              </ion-button>
+              <ion-label>
+                <strong>Total</strong>
+              </ion-label>
+              <ion-label>
+                <strong>{{item.alaCartTotalWithTax  | currency:'USD':true:'1.2-2'}} </strong>
+              </ion-label>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-card>
+    </ion-list>
+  </ion-row>
