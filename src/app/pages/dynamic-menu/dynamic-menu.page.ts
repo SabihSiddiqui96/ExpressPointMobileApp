@@ -1870,9 +1870,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, defaultServingSize).
                     then((res) => {
+                        let contributions;
+                        if(res.rows && res.rows.length > 0){
+                             contributions = res.rows[0].doc.Contributions;
+                        }if (res.docs && res.docs.length > 0) {
+                             contributions = res.docs[0].Contributions;
+                        }
 
-                        if (res.docs.length > 0) {
-                            const contributions = res.docs[0].Contributions;
+                        if (contributions) {
                             if (contributions.length > 0) {
 
                                 contributions.forEach(contribution => {
@@ -2995,6 +3000,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if (bool) {
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
+                        if(this.isDynamicMenuSelected) {
+                            this.getMenuDetails();
+                        } else {
+                            this.changeMenuType();
+                        }
                     }
                 });
 
