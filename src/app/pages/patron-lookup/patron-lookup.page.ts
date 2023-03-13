@@ -180,7 +180,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         private popoverCtrl: PopoverController, public platform: Platform,
         public loadingCtrl: LoadingController, public electronService: ElectronService,
         public router: Router, public appStateService: AppStateService, public settingService: SettingService,
-        public pouchQuery: PouchQueriesService) {   
+        public pouchQuery: PouchQueriesService) {
         this.patronAccount = 'patron_pin';
         this.advancedPatron = 'by_patron';
         AppStateService.set('currentTab', this.patronAccount);
@@ -260,15 +260,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public ngOnInit() {
-        
-       if(this.utilService.isElectronApp()) {
-        this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
-            sessionStorage.setItem(queueInput.PIN,queueInput.InputDirection);
+
+        if (this.utilService.isElectronApp()) {
+            this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+                sessionStorage.setItem(queueInput.PIN, queueInput.InputDirection);
             });
         }
 
         this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-        document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+            document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
         document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
         PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
@@ -279,7 +279,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 document.addEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
             }
             else {
-                 document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+                document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
                 this.electronService.ipcRenderer.send('launch-peripheral-app');
             }
         }
@@ -667,52 +667,44 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             PouchQueriesService.GetSpecialAccounts().then((res) => {
                 let specialAccounts = res.rows.map(row => row.doc);
 
-                specialAccounts = _.sortBy(specialAccounts, ['Description']);
+                // specialAccounts = _.sortBy(specialAccounts, ['Description']);
                 PatronLookupPage.specialAccountDescriptions = _.map(specialAccounts, 'Description');
                 const accountArray = [];
                 let i = 0;
                 for (const accounts of specialAccounts) {
                     let pushAcct = false;
-                    if (!accountArray[i]) {
-                        accountArray[i] = [];
-                    }
 
+                    // Display order should be kept this way unless it comes from product.
                     if (accounts.CommandCode == CommandCodes[CommandCodes.NEWSTUDENT] && this.enableNewStudent === true) {
                         pushAcct = true;
-                    }
-                    if (accounts.CommandCode == CommandCodes[CommandCodes.VISITOR] && this.enableVisitor === true) {
-                        pushAcct = true;
+                        accounts['DisplayOrder'] = 0
                     }
                     if (accounts.CommandCode == CommandCodes[CommandCodes.NEWTEACHER] && this.enableStaff === true) {
                         pushAcct = true;
+                        accounts['DisplayOrder'] = 1
                     }
                     if (accounts.CommandCode == CommandCodes[CommandCodes.FSSTAFF] && this.enableProgAdult === true) {
                         pushAcct = true;
+                        accounts['DisplayOrder'] = 2
                     }
-                    if (pushAcct) {
-                        accountArray[i].push(accounts);
+                    if (accounts.CommandCode == CommandCodes[CommandCodes.VISITOR] && this.enableVisitor === true) {
+                        pushAcct = true;
+                        accounts['DisplayOrder'] = 3
                     }
 
-                    if (accountArray[i].length >= 2) {
-                        i++;
+                    i = Math.floor(accounts['DisplayOrder'] / 2) // setting which row the special account shoudl showup in 
+                    if (pushAcct) {
+                        if (!accountArray[i])
+                            accountArray[i] = [];
+
+                        accountArray[i].push(accounts);
+                        accountArray[i].sort((a, b) => {
+                            return a.DisplayOrder - b.DisplayOrder;
+                        })
                     }
                 }
-                accountArray[1].push(accountArray[0].find(f => f.CommandCode === "FSSTAFF"));
-                accountArray[0].push(accountArray[1].find(f => f.CommandCode === "NEWSTUDENT"))
-                accountArray[0] = accountArray[0].filter(f => f.CommandCode !== "FSSTAFF");
-                accountArray[1] = accountArray[1].filter(f => f.CommandCode !== "NEWSTUDENT");
-                let accountArray00 = accountArray[0][1];
-                let accountArray01 = accountArray[0][0];
-                accountArray[0] = [];
-                accountArray[0].push(accountArray00);
-                accountArray[0].push(accountArray01);
-                let accountArray10 = accountArray[1][1];
-                let accountArray11 = accountArray[1][0];
-                accountArray[1] = [];
-                accountArray[1].push(accountArray10);
-                accountArray[1].push(accountArray11);
+
                 this.specialAccountsArray = accountArray;
-                // this.utilService.setLoader(false);
             });
         }
     }
@@ -980,7 +972,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
 
     public AdvancedPatronLookup() {
-        if(this.patronAccount === 'advanced' && this.enablePinSchool) {
+        if (this.patronAccount === 'advanced' && this.enablePinSchool) {
             this.isServerLookup = true;
         } else {
             this.isServerLookup = false;
@@ -1433,7 +1425,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
     public onPeripheralKey(event) {
-        if(!this.router.url.includes('payments')) {
+        if (!this.router.url.includes('payments')) {
             this.logDBService.logData({
                 event: EventType.LOOKUP,
                 type: LogType.INFO,
@@ -1445,7 +1437,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.isEnterKeyHandled = false;
                 return;
             }
-    
+
             let incomingID = '';
             if (event.keyCode === 8 || event.keyCode === 13 ||
                 (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) {
@@ -1484,7 +1476,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 // event.stopImmediatePropagation();
                 if (event.preventDefault) { event.preventDefault() }
                 //else{event.stop()};
-    
+
                 event.returnValue = false;
                 event.stopPropagation();
                 // });
@@ -1494,7 +1486,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 incomingID = '';
             }
         }
-       
+
     }
 
     public onKeyDown(event: KeyboardEvent) {
@@ -1874,7 +1866,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     } else {
                         this.enablePinSchool = false;
                     }
-                break;
+                    break;
                 case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:
                     if (setting.SiteSettingValue === "1") {
                         //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup
