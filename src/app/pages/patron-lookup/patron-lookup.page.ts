@@ -787,17 +787,20 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public GetGradesBySchool() {
-        PouchQueriesService.GetSatellitecombinedSiteGrades().then(res => {
+        return new Promise((resolve)=>{
+            PouchQueriesService.GetSatellitecombinedSiteGrades().then(res => {
 
-            if (res.rows.length > 0) {
-                let grades = res.rows.map(row => row.doc);
-                grades = _.chain(grades).sortBy('GradeOrder').uniqBy(h => h.GradeId).map(g => ({
-                    'GradeId': g.GradeId, 'GradeDescription': g.GradeDescription.trim(), 'RDAGroupId': g.RDAGroupId
-                })).value();
-                // grades.push({ 'GradeId': 0, 'GradeDescription': 'ALL' });
-                this.gradeList = grades;
-            }
-        });
+                if (res.rows.length > 0) {
+                    let grades = res.rows.map(row => row.doc);
+                    grades = _.chain(grades).sortBy('GradeOrder').uniqBy(h => h.GradeId).map(g => ({
+                        'GradeId': g.GradeId, 'GradeDescription': g.GradeDescription.trim(), 'RDAGroupId': g.RDAGroupId
+                    })).value();
+                    // grades.push({ 'GradeId': 0, 'GradeDescription': 'ALL' });
+                    this.gradeList = grades;
+                    resolve(this.gradeList)
+                }
+            });
+        })
     }
 
     public getSpecialRostersList() {
@@ -814,20 +817,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             });
 
             this.specialRosterList = _.uniq(specialrosters);
-            //  PouchQueriesService.GetSpecialRosters().then(res => {
-            //
-            //      console.log(res);
-            // if (res.rows.length > 0) {
-            //     var specialrosters = res.rows.map(row => { return row.doc });
-            //     var sp = _.chain(specialrosters).
-            //         specialrosters = _.chain(specialrosters).sortBy('SpecialRosterId').map(g => {
-            //             return { "SpecialRosterId": g.SpecialRosterId, "SpecialRosterName": g.SpecialRosterName.trim() }
-            //         }).value();
-            //     this.special_roster_list = _.uniq(specialrosters);
-
-            //     //this.selected_special_roster_id =specialrosters[0];
-            //     // this.utilService.setLoader(false);
-            // }
         });
     }
 
@@ -1375,34 +1364,33 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
 
     public showGradePopup(patron) {
+            this.GetGradesBySchool().then(()=>{
+                const postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
 
-        this.GetGradesBySchool();
+                if (postData['data'].length > 0) {
+                    const popover = this.popoverCtrl.create({
+                        component: AllPopupPage,
+                        componentProps: postData
+                        , cssClass: this.utilService.popupCenter.cssClass
+                    }).then(async (res) => {
+                        await res.present();
+                    });
+        
+                    this.event.subscribe('menu-service-popup', (userEventData) => {
+                        this.event.destroy("menu-service-popup");
+                        if (userEventData.selectedData) {
+                            const selectedData = userEventData.selectedData;
+                            const type = userEventData.type;
+                            if (type === 'patronGrade') {
+                                this.selectedGrade = selectedData.value;
+                                this.selectedGradeName = selectedData.label;
+                                this.onChangeGradeInSpecialStudent(this.selectedGrade, patron);
+                            }
+                        }
+                    });
+                }       
+            })
 
-
-        const postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
-
-        if (postData['data'].length > 0) {
-            const popover = this.popoverCtrl.create({
-                component: AllPopupPage,
-                componentProps: postData
-                , cssClass: this.utilService.popupCenter.cssClass
-            }).then(async (res) => {
-                await res.present();
-            });
-
-            this.event.subscribe('menu-service-popup', (userEventData) => {
-                this.event.destroy("menu-service-popup");
-                if (userEventData.selectedData) {
-                    const selectedData = userEventData.selectedData;
-                    const type = userEventData.type;
-                    if (type === 'patronGrade') {
-                        this.selectedGrade = selectedData.value;
-                        this.selectedGradeName = selectedData.label;
-                        this.onChangeGradeInSpecialStudent(this.selectedGrade, patron);
-                    }
-                }
-            });
-        }
     }
     public onChangeGradeInSpecialStudent(selectedGrade, patron) {
 
