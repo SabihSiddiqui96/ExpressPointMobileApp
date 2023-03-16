@@ -3307,7 +3307,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
+            if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL ) {
                 paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
             }
             if (paymentAmnt > this.orderData.totalAmount) {

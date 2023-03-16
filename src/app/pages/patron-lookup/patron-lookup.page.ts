@@ -180,7 +180,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         private popoverCtrl: PopoverController, public platform: Platform,
         public loadingCtrl: LoadingController, public electronService: ElectronService,
         public router: Router, public appStateService: AppStateService, public settingService: SettingService,
-        public pouchQuery: PouchQueriesService) {   
+        public pouchQuery: PouchQueriesService) {
         this.patronAccount = 'patron_pin';
         this.advancedPatron = 'by_patron';
         AppStateService.set('currentTab', this.patronAccount);
@@ -260,15 +260,15 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public ngOnInit() {
-        
-       if(this.utilService.isElectronApp()) {
-        this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
-            sessionStorage.setItem(queueInput.PIN,queueInput.InputDirection);
+
+        if (this.utilService.isElectronApp()) {
+            this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+                sessionStorage.setItem(queueInput.PIN, queueInput.InputDirection);
             });
         }
 
         this.isIOS ? document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false) :
-        document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+            document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
         document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
         PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
@@ -279,7 +279,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 document.addEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
             }
             else {
-                 document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+                document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
                 this.electronService.ipcRenderer.send('launch-peripheral-app');
             }
         }
@@ -671,52 +671,44 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             PouchQueriesService.GetSpecialAccounts().then((res) => {
                 let specialAccounts = res.rows.map(row => row.doc);
 
-                specialAccounts = _.sortBy(specialAccounts, ['Description']);
+                // specialAccounts = _.sortBy(specialAccounts, ['Description']);
                 PatronLookupPage.specialAccountDescriptions = _.map(specialAccounts, 'Description');
                 const accountArray = [];
                 let i = 0;
                 for (const accounts of specialAccounts) {
                     let pushAcct = false;
-                    if (!accountArray[i]) {
-                        accountArray[i] = [];
-                    }
 
+                    // Display order should be kept this way unless it comes from product.
                     if (accounts.CommandCode == CommandCodes[CommandCodes.NEWSTUDENT] && this.enableNewStudent === true) {
                         pushAcct = true;
-                    }
-                    if (accounts.CommandCode == CommandCodes[CommandCodes.VISITOR] && this.enableVisitor === true) {
-                        pushAcct = true;
+                        accounts['DisplayOrder'] = 0
                     }
                     if (accounts.CommandCode == CommandCodes[CommandCodes.NEWTEACHER] && this.enableStaff === true) {
                         pushAcct = true;
+                        accounts['DisplayOrder'] = 1
                     }
                     if (accounts.CommandCode == CommandCodes[CommandCodes.FSSTAFF] && this.enableProgAdult === true) {
                         pushAcct = true;
+                        accounts['DisplayOrder'] = 2
                     }
-                    if (pushAcct) {
-                        accountArray[i].push(accounts);
+                    if (accounts.CommandCode == CommandCodes[CommandCodes.VISITOR] && this.enableVisitor === true) {
+                        pushAcct = true;
+                        accounts['DisplayOrder'] = 3
                     }
 
-                    if (accountArray[i].length >= 2) {
-                        i++;
+                    i = Math.floor(accounts['DisplayOrder'] / 2) // setting which row the special account shoudl showup in 
+                    if (pushAcct) {
+                        if (!accountArray[i])
+                            accountArray[i] = [];
+
+                        accountArray[i].push(accounts);
+                        accountArray[i].sort((a, b) => {
+                            return a.DisplayOrder - b.DisplayOrder;
+                        })
                     }
                 }
-                accountArray[1].push(accountArray[0].find(f => f.CommandCode === "FSSTAFF"));
-                accountArray[0].push(accountArray[1].find(f => f.CommandCode === "NEWSTUDENT"))
-                accountArray[0] = accountArray[0].filter(f => f.CommandCode !== "FSSTAFF");
-                accountArray[1] = accountArray[1].filter(f => f.CommandCode !== "NEWSTUDENT");
-                let accountArray00 = accountArray[0][1];
-                let accountArray01 = accountArray[0][0];
-                accountArray[0] = [];
-                accountArray[0].push(accountArray00);
-                accountArray[0].push(accountArray01);
-                let accountArray10 = accountArray[1][1];
-                let accountArray11 = accountArray[1][0];
-                accountArray[1] = [];
-                accountArray[1].push(accountArray10);
-                accountArray[1].push(accountArray11);
+
                 this.specialAccountsArray = accountArray;
-                // this.utilService.setLoader(false);
             });
         }
     }
@@ -799,17 +791,20 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public GetGradesBySchool() {
-        PouchQueriesService.GetSatellitecombinedSiteGrades().then(res => {
+        return new Promise((resolve)=>{
+            PouchQueriesService.GetSatellitecombinedSiteGrades().then(res => {
 
-            if (res.rows.length > 0) {
-                let grades = res.rows.map(row => row.doc);
-                grades = _.chain(grades).sortBy('GradeOrder').uniqBy(h => h.GradeId).map(g => ({
-                    'GradeId': g.GradeId, 'GradeDescription': g.GradeDescription.trim(), 'RDAGroupId': g.RDAGroupId
-                })).value();
-                // grades.push({ 'GradeId': 0, 'GradeDescription': 'ALL' });
-                this.gradeList = grades;
-            }
-        });
+                if (res.rows.length > 0) {
+                    let grades = res.rows.map(row => row.doc);
+                    grades = _.chain(grades).sortBy('GradeOrder').uniqBy(h => h.GradeId).map(g => ({
+                        'GradeId': g.GradeId, 'GradeDescription': g.GradeDescription.trim(), 'RDAGroupId': g.RDAGroupId
+                    })).value();
+                    // grades.push({ 'GradeId': 0, 'GradeDescription': 'ALL' });
+                    this.gradeList = grades;
+                    resolve(this.gradeList)
+                }
+            });
+        })
     }
 
     public getSpecialRostersList() {
@@ -826,20 +821,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             });
 
             this.specialRosterList = _.uniq(specialrosters);
-            //  PouchQueriesService.GetSpecialRosters().then(res => {
-            //
-            //      console.log(res);
-            // if (res.rows.length > 0) {
-            //     var specialrosters = res.rows.map(row => { return row.doc });
-            //     var sp = _.chain(specialrosters).
-            //         specialrosters = _.chain(specialrosters).sortBy('SpecialRosterId').map(g => {
-            //             return { "SpecialRosterId": g.SpecialRosterId, "SpecialRosterName": g.SpecialRosterName.trim() }
-            //         }).value();
-            //     this.special_roster_list = _.uniq(specialrosters);
-
-            //     //this.selected_special_roster_id =specialrosters[0];
-            //     // this.utilService.setLoader(false);
-            // }
         });
     }
 
@@ -984,7 +965,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
 
     public AdvancedPatronLookup() {
-        if(this.patronAccount === 'advanced' && this.enablePinSchool) {
+        if (this.patronAccount === 'advanced' && this.enablePinSchool) {
             this.isServerLookup = true;
         } else {
             this.isServerLookup = false;
@@ -1387,34 +1368,33 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
 
     public showGradePopup(patron) {
+            this.GetGradesBySchool().then(()=>{
+                const postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
 
-        this.GetGradesBySchool();
+                if (postData['data'].length > 0) {
+                    const popover = this.popoverCtrl.create({
+                        component: AllPopupPage,
+                        componentProps: postData
+                        , cssClass: this.utilService.popupCenter.cssClass
+                    }).then(async (res) => {
+                        await res.present();
+                    });
+        
+                    this.event.subscribe('menu-service-popup', (userEventData) => {
+                        this.event.destroy("menu-service-popup");
+                        if (userEventData.selectedData) {
+                            const selectedData = userEventData.selectedData;
+                            const type = userEventData.type;
+                            if (type === 'patronGrade') {
+                                this.selectedGrade = selectedData.value;
+                                this.selectedGradeName = selectedData.label;
+                                this.onChangeGradeInSpecialStudent(this.selectedGrade, patron);
+                            }
+                        }
+                    });
+                }       
+            })
 
-
-        const postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
-
-        if (postData['data'].length > 0) {
-            const popover = this.popoverCtrl.create({
-                component: AllPopupPage,
-                componentProps: postData
-                , cssClass: this.utilService.popupCenter.cssClass
-            }).then(async (res) => {
-                await res.present();
-            });
-
-            this.event.subscribe('menu-service-popup', (userEventData) => {
-                this.event.destroy("menu-service-popup");
-                if (userEventData.selectedData) {
-                    const selectedData = userEventData.selectedData;
-                    const type = userEventData.type;
-                    if (type === 'patronGrade') {
-                        this.selectedGrade = selectedData.value;
-                        this.selectedGradeName = selectedData.label;
-                        this.onChangeGradeInSpecialStudent(this.selectedGrade, patron);
-                    }
-                }
-            });
-        }
     }
     public onChangeGradeInSpecialStudent(selectedGrade, patron) {
 
@@ -1437,7 +1417,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
     public onPeripheralKey(event) {
-        if(!this.router.url.includes('payments')) {
+        if (!this.router.url.includes('payments')) {
             this.logDBService.logData({
                 event: EventType.LOOKUP,
                 type: LogType.INFO,
@@ -1449,7 +1429,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.isEnterKeyHandled = false;
                 return;
             }
-    
+
             let incomingID = '';
             if(this.isCharAllowedInPin) {
                 if (event.keyCode === 8 || event.keyCode === 13 ||

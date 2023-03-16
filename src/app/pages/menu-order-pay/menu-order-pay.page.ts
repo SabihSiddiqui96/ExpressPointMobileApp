@@ -1149,25 +1149,33 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
     }
+    public finalCheckOrderData() {
+        return new Promise((resolve) => {
+            this.navOrderData.IsDeposit = this.depositChangeDue;
+            resolve(null);
+        })
+    }
 
 
     public eventPublish() {
+        this.finalCheckOrderData().then(() => {
+            this.event.publish('menu-order:pay', {
+                'orderData': this.navOrderData,
+                'cashtend_amount': this.cashtendAmount,
+                'isDepositByEXNEGBAL': this.isDepositByEXNEGBAL,
+                'amountTowardsBalance': Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)),
+                'cashDue': this.changeDue,
+                'selectedAccountDetails': this.showPatron == true ? this.accountDetails : null
+            });
 
-        this.event.publish('menu-order:pay', {
-            'orderData': this.navOrderData,
-            'cashtend_amount': this.cashtendAmount,
-            'isDepositByEXNEGBAL': this.isDepositByEXNEGBAL,
-            'amountTowardsBalance': Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)),
-            'cashDue': this.changeDue,
-            'selectedAccountDetails': this.showPatron == true ? this.accountDetails : null
-        });
+            this.event.subscribe('menu-order-popup:close', (userEventData) => {
+                this.event.destroy('menu-order-popup:close');
+                this.event.destroy('menu-order:pay');
+                this.isCompleteTransactionProcessing = false;
+                this.close();
+            });
+        })
 
-        this.event.subscribe('menu-order-popup:close', (userEventData) => {
-            this.event.destroy('menu-order-popup:close');
-            this.event.destroy('menu-order:pay');
-            this.isCompleteTransactionProcessing = false;
-            this.close();
-        });
 
     }
 
