@@ -99,7 +99,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public swapRight: boolean;
     public swapLeft: boolean;
     public switchHandsClicked: boolean = false;
-
+    public isCharAllowedInPin = true;
 
     public alphaKeys = '';
     public keyboardVisible: boolean = false;
@@ -616,8 +616,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             return false;
         }
         let inputChar = (<HTMLInputElement>event.target).value;
-
-        const pattern = /^[0-9]+$/;
+        let pattern;
+        if(this.isCharAllowedInPin) {
+             pattern = /^[a-zA-Z0-9]*$/;
+        } else {
+             pattern = /^[0-9]+$/;
+        }
         let newInputChar = '';
 
         // divide input char into char array
@@ -1427,54 +1431,104 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             }
 
             let incomingID = '';
-            if (event.keyCode === 8 || event.keyCode === 13 ||
-                (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) {
-                // event.keyCode == 46 (backspace)
-                this.inputBuffer.push(event);
-                if (event.keyCode === 13) {
-                    console.log('Enter pressed');
-                    this.inputBuffer.map(c => {
-                        if (c.keyCode !== 13 && c.keyCode !== 8) {
-                            incomingID += c.key;
-                        } else if (c.keyCode === 8) {
-                            incomingID = incomingID.slice(0, -1);
+            if(this.isCharAllowedInPin) {
+                if (event.keyCode === 8 || event.keyCode === 13 ||
+                    (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 97 && event.keyCode <= 122) || (event.keyCode >= 96 && event.keyCode <= 105)) {
+                    // event.keyCode == 46 (backspace)
+                    this.inputBuffer.push(event);
+                    if (event.keyCode === 13) {
+                        console.log('Enter pressed');
+                        this.inputBuffer.map(c => {
+                            if (c.keyCode !== 13 && c.keyCode !== 8) {
+                                incomingID += c.key;
+                            } else if (c.keyCode === 8) {
+                                incomingID = incomingID.slice(0, -1);
+                            }
+                        });
+                        if (incomingID !== '') {
+                            let queueInput = {
+                                'PIN': incomingID,
+                                'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
+                            }
+                            this.lookUpService.setQ(queueInput);
+                            this.lookUpService.showModalPopup = false;
                         }
-                    });
-                    if (incomingID !== '') {
-                        let queueInput = {
-                            'PIN': incomingID,
-                            'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
-                        }
-                        this.lookUpService.setQ(queueInput);
-                        this.lookUpService.showModalPopup = false;
+                        incomingID = '';
+                        this.inputBuffer = [];
+                        //this.patronSearch.keyword = '';
                     }
-                    incomingID = '';
+                } else if (event['keyCode'] === 9) {
+                    // setTimeout(() => {
+                    console.log('Peripheral Key ---- Stop Propagation')
+                    event.preventDefault();
+                    var oldEPD = Event.prototype.preventDefault;
+                    Event.prototype.preventDefault = function () {
+                        // debugger;
+                        oldEPD.call(this);
+                    };
+                    // event.stopImmediatePropagation();
+                    if (event.preventDefault) { event.preventDefault() }
+                    //else{event.stop()};
+        
+                    event.returnValue = false;
+                    event.stopPropagation();
+                    // });
+                    // event.stopPropagation();
+                } else {
                     this.inputBuffer = [];
-                    //this.patronSearch.keyword = '';
+                    incomingID = '';
                 }
-            } else if (event['keyCode'] === 9) {
-                // setTimeout(() => {
-                console.log('Peripheral Key ---- Stop Propagation')
-                event.preventDefault();
-                var oldEPD = Event.prototype.preventDefault;
-                Event.prototype.preventDefault = function () {
-                    // debugger;
-                    oldEPD.call(this);
-                };
-                // event.stopImmediatePropagation();
-                if (event.preventDefault) { event.preventDefault() }
-                //else{event.stop()};
-
-                event.returnValue = false;
-                event.stopPropagation();
-                // });
-                // event.stopPropagation();
             } else {
-                this.inputBuffer = [];
-                incomingID = '';
+                if (event.keyCode === 8 || event.keyCode === 13 ||
+                    (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) {
+                    // event.keyCode == 46 (backspace)
+                    this.inputBuffer.push(event);
+                    if (event.keyCode === 13) {
+                        console.log('Enter pressed');
+                        this.inputBuffer.map(c => {
+                            if (c.keyCode !== 13 && c.keyCode !== 8) {
+                                incomingID += c.key;
+                            } else if (c.keyCode === 8) {
+                                incomingID = incomingID.slice(0, -1);
+                            }
+                        });
+                        if (incomingID !== '') {
+                            let queueInput = {
+                                'PIN': incomingID,
+                                'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
+                            }
+                            this.lookUpService.setQ(queueInput);
+                            this.lookUpService.showModalPopup = false;
+                        }
+                        incomingID = '';
+                        this.inputBuffer = [];
+                        //this.patronSearch.keyword = '';
+                    }
+                } else if (event['keyCode'] === 9) {
+                    // setTimeout(() => {
+                    console.log('Peripheral Key ---- Stop Propagation')
+                    event.preventDefault();
+                    var oldEPD = Event.prototype.preventDefault;
+                    Event.prototype.preventDefault = function () {
+                        // debugger;
+                        oldEPD.call(this);
+                    };
+                    // event.stopImmediatePropagation();
+                    if (event.preventDefault) { event.preventDefault() }
+                    //else{event.stop()};
+        
+                    event.returnValue = false;
+                    event.stopPropagation();
+                    // });
+                    // event.stopPropagation();
+                } else {
+                    this.inputBuffer = [];
+                    incomingID = '';
+                }
             }
+            
         }
-
+       
     }
 
     public onKeyDown(event: KeyboardEvent) {
@@ -1670,18 +1724,34 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if (this.isIOS) {
             isKeyAllowed = true;
         } else {
-            if (!event.shiftKey && !event.altKey && !event.ctrlKey &&
-                // numbers   
-                key >= 48 && key <= 57 ||
-                // Backspace and Tab and Enter
-                key == 8 || key == 9 || key == 13
-            ) {
-                isKeyAllowed = true;
+            if(this.isCharAllowedInPin) {
+                if (!event.shiftKey && !event.altKey && !event.ctrlKey &&
+                    // numbers   
+                    key >= 48 && key <= 57 || (key >= 97 && key <= 122) ||
+                    // Backspace and Tab and Enter
+                    key == 8 || key == 9 || key == 13 
+                ) {
+                    isKeyAllowed = true;
+                } else {
+                    isKeyAllowed = false;
+                    //this.patronSearch.keyword = null;
+                    return false;
+                }
             } else {
-                isKeyAllowed = false;
-                //this.patronSearch.keyword = null;
-                return false;
+                if (!event.shiftKey && !event.altKey && !event.ctrlKey &&
+                    // numbers   
+                    key >= 48 && key <= 57 ||
+                    // Backspace and Tab and Enter
+                    key == 8 || key == 9 || key == 13
+                ) {
+                    isKeyAllowed = true;
+                } else {
+                    isKeyAllowed = false;
+                    //this.patronSearch.keyword = null;
+                    return false;
+                }
             }
+            
         }
 
         if (isKeyAllowed && (event.keyCode === 13 || event.key === 'Enter')) {
@@ -1854,7 +1924,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     } else {
                         this.enablePinSchool = false;
                     }
-                    break;
+                break;
+                case SiteSettingCodes[SiteSettingCodes.ALNUMPIN]:
+                    if (setting.SiteSettingValue === "1") {
+                        this.isCharAllowedInPin = true;
+                    } else {
+                        this.isCharAllowedInPin = false;
+                    }
+                break;
                 case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:
                     if (setting.SiteSettingValue === "1") {
                         //In Advanced Patron Lookup SearchByPin functions opposite to normal Lookup

@@ -100,6 +100,8 @@ import { HashingService } from './services/hashing.service'
 import { LocalTimerService } from './services/local-timer.service';
 import { DeviceControlsService } from './services/device-controls.service';
 import { HasPropPipe } from './pipes/hasProperty.pipe';
+import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
+//import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
     declarations: [
@@ -146,7 +148,8 @@ import { HasPropPipe } from './pipes/hasProperty.pipe';
         PatronListModalPage,
         CloseSessionPage,
         QuickClassroomSalePage,
-        HasPropPipe
+        HasPropPipe,
+        StudentWiseAlacarteComponent
     ],
     entryComponents: [
 
@@ -168,6 +171,7 @@ import { HasPropPipe } from './pipes/hasProperty.pipe';
         CloseSessionCardPage,
         CloseSessionCheckPage,
         TransactionMealTypePopupPage,
+        StudentWiseAlacarteComponent,
         /** ModalController, PopoverController */
 
         /** Components */

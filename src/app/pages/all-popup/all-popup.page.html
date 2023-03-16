@@ -189,6 +189,8 @@
                               <ion-row style="width: 12rem;">
                                   <ion-label>
                                       {{patron.label}}
+                                      <span *ngIf="patron.hadmeal == true && this.navPage!='Payments'"> *</span>
+                                      <p *ngIf="isPatronType" class="center_text_content">&nbsp;</p>
                                       <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
                                   </ion-label>   
                                   <ion-label *ngIf="patron.GradeDescription">Grade : {{patron.Grade}}</ion-label><br />

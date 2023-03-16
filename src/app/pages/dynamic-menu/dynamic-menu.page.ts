@@ -33,7 +33,7 @@ import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { Events } from '../../services/events.service';
 import ConfettiGenerator from "confetti-js";
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { PrintService, TransactionDetailPrintFormat } from '../../services/print.service';
 import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { TransactionTypes } from '../../services/enums/transaction-types'
@@ -147,6 +147,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public hideBalSetting: number = 0;
     public alaCarteCash: Array<string>;
     public alaCarteCharge: Array<string>;
+
+    toggleName: string  = 'Alacarte';
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
@@ -1002,7 +1004,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
 
 
-        if (this.isStaticMenuSelected) { //  Menu Item Restrictions with Static menus in Dynamic Menus
+        if (!this.isDynamicMenuSelected) { //  Menu Item Restrictions with Static menus in Dynamic Menus
             this.setStaticMenuRestrictions();
         } else {
             // To Add Previous menuItemRestrictions
@@ -1085,7 +1087,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.showAllergiesAndNotes();
 
         ////////////////////////  To Add Default menuItem for Static menus
-        if (this.isStaticMenuSelected === true) {
+        if (!this.isDynamicMenuSelected) {
 
             // check if default menu item is restricted
             if (this.defaultMenuItemId !== 0) {
@@ -1583,7 +1585,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 (document.activeElement as HTMLElement).blur();
             }, 0);
 
-            if (this.isStaticMenuSelected === true) {
+            if (!this.isDynamicMenuSelected) {
                 if (menuItem.emptygrid === true) {
                     return false;
                 }
@@ -1642,7 +1644,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.mealFormed = false;
         }
         const index = _.findIndex(this.orderData.items, { 'RefId': item.RefId, 'ItemIndex': item.ItemIndex });
-        if (this.isStaticMenuSelected) {
+        if (!this.isDynamicMenuSelected) {
             this.deleteForStaticMenu(index);
         } else {
             let items = [];
@@ -1868,9 +1870,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, defaultServingSize).
                     then((res) => {
+                        let contributions;
+                        if(res.rows && res.rows.length > 0){
+                             contributions = res.rows[0].doc.Contributions;
+                        }if (res.docs && res.docs.length > 0) {
+                             contributions = res.docs[0].Contributions;
+                        }
 
-                        if (res.docs.length > 0) {
-                            const contributions = res.docs[0].Contributions;
+                        if (contributions) {
                             if (contributions.length > 0) {
 
                                 contributions.forEach(contribution => {
@@ -2870,7 +2877,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public makeSale(transactionType) {
         this.event.publish('patronLargeImagehide', null);
-        // this.IsStaticMenuSelected = false // static menu change
+        // !this.isDynamicMenuSelected = false // static menu change
         this.refreshHideStudentSetting();
         this.transactionInProgress = true;
         if (this.orderData.items.length === 0) {
@@ -2993,6 +3000,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if (bool) {
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
+                        if(this.isDynamicMenuSelected) {
+                            this.getMenuDetails();
+                        } else {
+                            this.changeMenuType();
+                        }
                     }
                 });
 
@@ -3694,7 +3706,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 });
                                 this.event.publish('patron-released', { 'patronDetails': null });
                             } else {
-                                if (this.isStaticMenuSelected === false) {
+                                if (!this.isDynamicMenuSelected) {
                                     if (AppStateService.get('servingLine')) {
                                         // console.log('inservingline')
                                         const previousServingline = JSON.parse(AppStateService.get('servingLine'));
@@ -3709,8 +3721,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     if (AppStateService.get('menuType')) {
                                         // console.log('menuType')
                                         const menuType = JSON.parse(AppStateService.get('menuType'));
-                                        // this.selectedMenuType = selectedData.value;
-                                        // this.selectedMenuTypeName = selectedData.label;
                                         this.selectedServingLine = menuType.menuTypeId;
                                         this.selectedServingLineName = menuType.menuTypeName;
                                         this.isDynamicMenuSelected = false;
@@ -3732,6 +3742,78 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
             }
         });
+    }
+
+
+    toggleMenus() {
+        if(this.selectedMealTypeName !== 'Meal Type' && this.selectedServingLineName !== 'Serving Line') {
+            if (this.isDynamicMenuSelected) {
+                // set serving line
+                if(this.servingLineId!= null) {
+                    const servingLine = {
+                        'servingLine': this.selectedServingLine,
+                        'servingLineDescription': this.selectedServingLineName,
+                        'selectedMealType': this.selectedMealType,
+                        'servingLineId': this.servingLineId
+                    };
+                    AppStateService.set('servingLine', JSON.stringify(servingLine));
+                }
+                //this.is to change serving line to standard menu when dynamic menu is selected while switching to static.
+                if(this.selectedServingLineName.includes('Dynamic')) {
+                    let menuCalendars = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
+                    this.selectedServingLine = menuCalendars[0].MenuId;
+                    this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
+                    this.servingLineId = menuCalendars[0].ServingLineId;
+                }
+               
+                // get menu type
+                if(AppStateService.get('menuType')!= undefined) {
+                    let data = JSON.parse(AppStateService.get('menuType'));
+                    this.selectedMenuType = data.menuTypeId;
+                    this.selectedMenuTypeName = data.menuTypeName;
+                    this.selectedMealType = data.selectedMealType;
+                }
+                //this is required otherwise change menu type check will not pass if selectedMenuType === -1
+                if(this.selectedMenuType === -1) {
+                    this.selectedMenuType = this.selectedServingLine;
+                    this.selectedMenuTypeName = this.selectedServingLineName;
+                }
+                // switch to static menu 
+                this.changeMenuType();
+                this.toggleName = 'Alacarte';
+               
+            } else {
+                //set static menu
+                let menuType
+                if(this.selectedMenuTypeName !== 'Menu Type' && this.selectedMealType !== -1) {
+                    menuType = {
+                        'menuTypeId': this.selectedMenuType,
+                        'menuTypeName': this.selectedMenuTypeName,
+                        'selectedMealType': this.selectedMealType
+                    };
+                    AppStateService.set('menuType', JSON.stringify(menuType));
+                }
+                //load serving line
+                if(AppStateService.get('servingLine')!= undefined) {
+                    let data = JSON.parse(AppStateService.get('servingLine'));
+                    this.selectedServingLine = data.servingLine;
+                    this.selectedServingLineName = data.servingLineDescription;
+                    this.selectedMealType = data.selectedMealType;
+                    this.servingLineId = data.servingLineId;
+                }
+                //load dyanmic menu
+                this.getMenuDetails();
+                this.toggleName = 'Meal Service';
+            }
+        } else {
+            if(this.selectedServingLineName == 'Serving Line') {
+                this.showPopup('servingLine');
+            }
+            if(this.selectedMealTypeName == 'Meal Type') {
+                this.showPopup('mealType');
+            }
+        }
+        this.isDynamicMenuSelected = !this.isDynamicMenuSelected;
     }
 
     public GetMenuItemsPriceList(menuItems) {
@@ -4111,7 +4193,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.isMarked = false;
         this.reviewType = 0;
         this.menuItemsArr = [];
-        if (this.isStaticMenuSelected) {
+        if (!this.isDynamicMenuSelected) {
             if (this.menuGrid['Buttons'].length) {
                 for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
                     this.menuGrid['Buttons'][k]['restrictedItem'] = false;
@@ -4255,15 +4337,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 this.isDynamicMenuSelected = selectedData.key;
                                 this.servingLineId = selectedData.servingLineId;
 
-
-                                if (this.isDynamicMenuSelected === true) {
+                                if (this.isDynamicMenuSelected) {
                                     const servingLine = {
                                         'servingLine': this.selectedServingLine,
                                         'servingLineDescription': this.selectedServingLineName,
                                         'selectedMealType': this.selectedMealType,
                                         'servingLineId': this.servingLineId
                                     };
-                                    this.isStaticMenuSelected = false;
+                                    this.isDynamicMenuSelected = false;
                                     AppStateService.set('servingLine', JSON.stringify(servingLine));
                                     this.getMenuDetails();
                                     // this.checkMenuItemRestrictions();
@@ -4275,7 +4356,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         'menuTypeName': this.selectedMenuTypeName,
                                         'selectedMealType': this.selectedMealType
                                     };
-                                    this.isStaticMenuSelected = true;
+                                    this.isDynamicMenuSelected = false;
                                     AppStateService.set('menuType', JSON.stringify(menuType));
                                     this.changeMenuType();
 
@@ -4415,7 +4496,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 } else {
                     this.loadMenuTypesForStaticMenus(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
                     this.hasServingLines = true;
-                    this.isStaticMenuSelected = false;
+                    this.isDynamicMenuSelected = true;
 
 
                     if (AppStateService.get('servingLine') !== undefined) {
@@ -4638,7 +4719,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         if (this.isStaticDefaultMenu) {
 
                             this.selectedServingLine = -1;
-                            this.isStaticMenuSelected = true;
                             this.isDynamicMenuSelected = false;
                             this.selectedServingLine = menuId;
                             this.selectedServingLineName = menuGridName || '';
@@ -4649,7 +4729,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         else {
 
                             this.isDynamicMenuSelected = true;
-                            this.isStaticMenuSelected = false;
                             this.GetCarryOverDetails().then(() => {
                                 this.GetMenuDetailForDynamicMenu();
 
@@ -5126,7 +5205,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
 
     public addMenuItemFromAllCategories(allCategoryMenuItem, priceTypeId, categoryId) {
-        if (this.isStaticMenuSelected) {
+        if (!this.isDynamicMenuSelected) {
             allCategoryMenuItem['NoContributions'] = true;
             this.Confirmed_CartMenuItem(allCategoryMenuItem, priceTypeId);
         } else {
@@ -5687,7 +5766,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         // this.utilService.showToast('This meal type does not have any menus for the day you have selected.');
                     }
                     if (this.defaultMenuGridId !== 0 && this.hasServingLines === false) {
-                        this.isStaticMenuSelected = true;
+                        this.isDynamicMenuSelected = false;
                         this.selectedServingLine = this.defaultMenuGridId;
                         this.selectedServingLineName = defaultMenuGridDescription || '';
                         this.loadMenuGridForStaticmenus(this.defaultMenuGridId, schoolId);
@@ -5695,7 +5774,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                     } else {
                         if (filteredMenuGrids.length !== 0 && this.hasServingLines === false) {
-                            this.isStaticMenuSelected = true;
+                            this.isDynamicMenuSelected = false;
                             this.selectedServingLine = this.menuCalendars[0].MenuId;
                             this.selectedServingLineName = this.menuCalendars[0].ServingLineDescription;
                             this.loadMenuGridForStaticmenus(this.selectedServingLine, schoolId);
@@ -5894,7 +5973,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         if (this.patronId !== undefined && this.patronDetails !== undefined) {
             // console.clear()
-            if (this.isStaticMenuSelected === false) {
+            if (this.isDynamicMenuSelected) {
                 if (this.patronDetails.RestrictedMenuItems) {
                     if (this.patronDetails.RestrictedMenuItems.length > 0) {
                         for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {

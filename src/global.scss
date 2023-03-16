@@ -148,6 +148,19 @@ button:focus {outline:0;}
   }
 }
 
+.alacarte {
+  .modal-wrapper {
+      width: 300px !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      min-height: 250px !important;
+      height: 250px !important;
+      top: 20% !important;
+      left: 45% !important;
+      padding: 0px !important;
+  }
+}
+
 ion-button {
   text-transform: none;
 }
@@ -165,3 +178,6 @@ ion-button {
       left: 15% !important;
     }
 }
+
+
+
