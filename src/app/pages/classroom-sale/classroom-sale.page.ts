@@ -158,6 +158,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public taxMeal: number;
     public taxPercent: number;
     public canOpenPOS: boolean;
+    public stateEigSetting: boolean = false;
 
     public hasStudentsWithoutPriceTypes = false;
     constructor(public _nav: NavController,
@@ -203,7 +204,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.taxPercent = parseFloat(SettingService.getSettingValue('TAXPERCENT'));
         this.setting.CHRGNCEP = Boolean(parseInt(SettingService.getSettingValue('CHRGNCEP')));
         this.canDoBulkPrePay = SettingService.isUserPermitted('BULKPAY');
-
+        this.stateEigSetting = Boolean(parseInt(SettingService.getSettingValue('STATEEIG')));
         if (this.canDoBulkPrePay) {
             this.hideAddFunds = false;
         } else {
@@ -519,18 +520,18 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'student': student,
             'studentWiseAlaCarte': this.studentWiseAlaCarte,
             'taxMeal': this.taxMeal,
-            'taxPercent' : this.taxPercent
+            'taxPercent': this.taxPercent
         }
-        if(this.studentWiseAlaCarte.length > 0 && student.PersonId === this.studentWiseAlaCarte[0].personId) {
+        if (this.studentWiseAlaCarte.length > 0 && student.PersonId === this.studentWiseAlaCarte[0].personId) {
             this.modalCtrl.create({
                 component: StudentWiseAlacarteComponent,
                 componentProps: postData
                 , cssClass: 'alacarte'
-              }).then(async (res) => {
+            }).then(async (res) => {
                 await res.present();
-              });
+            });
         }
-       
+
     }
 
 
@@ -1165,6 +1166,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'OrderId': null,
                         'OrderNumber': '',
                         'IsServed': false,
+                        'AppVersion': this.utilService.versionNumber,
+                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                         '_id': student._id
                     };
 
@@ -1209,7 +1212,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                     'MenuItemDescription': this.filter.selected_menuitem_name,
                                     'TerminalName': this.terminalName,
                                     'TransactionNo': this.transactionNumber,
-                                    'IsTaxable': this.filter.selected_menuItem_isTaxable
+                                    'IsTaxable': this.filter.selected_menuItem_isTaxable,
+                                    'StatePriceTypeId': student.StatePriceTypeId
                                 });
                             }
 
@@ -1733,7 +1737,16 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             this.patronDetails.GradeId = null;
         }
 
-        PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
+        this.setCreditLimit();
+    }
+    public setCreditLimit() {
+        const priceTypeId = this.stateEigSetting ?
+            (this.patronDetails.StatePriceTypeId == null
+                || this.patronDetails.StatePriceTypeId == undefined) ?
+                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+            : this.patronDetails.PriceTypeId;
+
+        PouchQueriesService.GetCreditLimit(priceTypeId, this.patronDetails.RDAGroupId,
             this.patronDetails.IsStudent, this.priceMode).then((res) => {
 
                 if (res.rows.length > 0) {
@@ -1743,7 +1756,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 // this._appservice.setLoader(false);
             }).catch(err => console.log(err));
     }
-
 
     public getSpecialInstructionCount() {
 
@@ -1820,7 +1832,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public addMenuToCart(menuItem) {
         if (this.patronId) {
 
-            let priceTypeId = this.patronDetails['PriceTypeId'];
+            let priceTypeId = this.stateEigSetting ?
+                (this.patronDetails.StatePriceTypeId == null
+                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                : this.patronDetails.PriceTypeId;
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
                 this.mealCount = 1;
             }
@@ -1842,7 +1858,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         // this.showConfrim(txt, 'second_meal', { 'menu_item': menuItem, 'price_type_id': priceTypeId }); // todo
                     } else {
 
-                        priceTypeId = this.patronDetails['PriceTypeId'];
+                        priceTypeId = this.stateEigSetting ?
+                            (this.patronDetails.StatePriceTypeId == null
+                                || this.patronDetails.StatePriceTypeId == undefined) ?
+                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                            : this.patronDetails.PriceTypeId;
                         this.mealCount = this.mealCount + 1;
                         this.Confirmed_CartMenuItem(menuItem, priceTypeId);
                     }
@@ -1962,7 +1982,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         this.patronDetails['Items'] = [];
                         const restriction = this.restrictService.checkChargeRestriction(menuItem, null, this.patronDetails, details);
                         if (!restriction.ChargeRestriction) {
-                            this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day);
+                            this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day,this.patronDetails.StatePriceTypeId);
                         } else {
 
                             this.addRestrictedAlaCarteItemsInCart(restriction, menuItem, studentAlaCarteDoc, currPrice,
@@ -2035,7 +2055,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         text: 'Pay',
                         handler: () => {
                             this.showAddPaymentPopover(this.patronDetails, currPrice).then((data) => {
-                                this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day);
+                                this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, this.patronDetails.StatePriceTypeId);
                             });
                         }
                     },
@@ -2212,7 +2232,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         });
     }
 
-    public showAlacartePopup(student){
+    public showAlacartePopup(student) {
 
     }
 
@@ -2250,7 +2270,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     // Student Ala Carte items list is empty
-    public addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day) {
+    public addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day,statePriceTypeId) {
         this.alaCartItems = [];
         let isRestrictedItem;
         if (this.restrictableAlaCarteItems.indexOf(menuItem.RefId) !== -1 ||
@@ -2269,7 +2289,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'MenuItemDescription': menuItem.ButtonDescription,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
-            'IsTaxable': menuItem.IsTaxable
+            'IsTaxable': menuItem.IsTaxable,
+            'StatePriceTypeId': statePriceTypeId
         });
         const tax = this.menuGridService.calculateTax(this.alaCartItems, this.patronDetails.IsSaleTaxable);
         studentAlaCarteDoc = {
@@ -2307,7 +2328,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'MenuItemDescription': menuItem.ButtonDescription,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
-            'IsTaxable': menuItem.IsTaxable
+            'IsTaxable': menuItem.IsTaxable,
+            'StatePriceTypeId': this.patronDetails.StatePriceTypeId
         });
         studentAlaCarte['alaCartTotalTax'] = this.menuGridService.calculateTax(items, this.patronDetails.IsSaleTaxable);
 

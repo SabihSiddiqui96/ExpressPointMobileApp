@@ -281,6 +281,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
+    public stateEigSetting: boolean = false;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -386,6 +387,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
         this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
+        this.stateEigSetting = Boolean(parseInt(SettingService.getSettingValue('STATEEIG')));
         //this.hideStudentId = true;
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
@@ -1030,7 +1032,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public setCreditLimit() {
-        PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
+        const priceTypeId = this.stateEigSetting ?
+            (this.patronDetails.StatePriceTypeId == null
+                || this.patronDetails.StatePriceTypeId == undefined) ?
+                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+            : this.patronDetails.PriceTypeId;
+
+        PouchQueriesService.GetCreditLimit(priceTypeId, this.patronDetails.RDAGroupId,
             this.patronDetails.IsStudent, this.priceMode).then((res) => {
                 if (res.rows.length > 0) {
                     this.patronDetails['CreditLimit'] = res.rows[0].doc.CreditLimit;
@@ -1793,7 +1801,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
+        if (!isSecondMeal) priceTypeId = this.stateEigSetting ?
+            (this.patronDetails.StatePriceTypeId == null
+                || this.patronDetails.StatePriceTypeId == undefined) ?
+                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+            : this.patronDetails.PriceTypeId;
         // this.utilService.setLoader(true);
         let menuItemNo = 0;
 
@@ -1824,6 +1836,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
         PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+
 
             let secondmeal = false;
             let currPrice = 0;
@@ -1992,7 +2005,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
-                        'CurrentPaidMealPrice': this.currPaidMealPrice
+                        'CurrentPaidMealPrice': this.currPaidMealPrice,
+                        'StatePriceTypeId':this.patronDetails.StatePriceTypeId
                     });
                 }
             } else {
@@ -2631,6 +2645,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'MenuItemDescription': this.orderData.items[i]['Name'],
                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
+                            'StatePriceTypeId': this.orderData.items[i]['StatePriceTypeId'],
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
                             'TerminalName': this.terminalName,
@@ -2780,8 +2795,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'UserId': this.userId,
                     'PersonIdentifier': this.patronDetails.PersonIdentifier,
                     'OrderId': null,
-                    'OrderNumber':'',
+                    'OrderNumber': '',
                     'IsServed': false,
+                    'AppVersion': this.utilService.versionNumber,
+                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                     '_id': this.selectedAccountDetails._id
                 };
 
@@ -2851,6 +2868,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'OrderId': null,
                 'OrderNumber': '',
                 'IsServed': false,
+                'AppVersion': this.utilService.versionNumber,
+                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                 '_id': this.patronDetails._id
             };
 
