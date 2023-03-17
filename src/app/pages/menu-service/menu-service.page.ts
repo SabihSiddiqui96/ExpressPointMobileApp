@@ -2715,7 +2715,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // let TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0) {
+            if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL) {
                 paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
             }
             if (paymentAmnt > this.orderData.totalAmount) {
