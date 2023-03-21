@@ -1053,7 +1053,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if ((this.selectedGrade === -1 || this.selectedGrade === 0) && this.selectedHomeroom !== -1) {
             this.utilService.setLoader(true);
 
-            PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.selectedHomeroomName).then((res) => {
+            PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.selectedHomeroomName, this.schoolId, this.selectedSite).then((res) => {
                 // this.patronSelectList = res.docs;
                 this.patronSelectList = res.docs.map((patron) => {
                     // this.utilService.isNetworkOnline().then((isNetworkOnline) => {

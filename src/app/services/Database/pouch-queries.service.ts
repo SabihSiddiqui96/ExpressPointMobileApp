@@ -639,7 +639,7 @@ export class PouchQueriesService {
     // });
   }
 
-  public static GetStudentsForClassroomSaleByHomeroomName(homeRoomName) {
+  public static GetStudentsForClassroomSaleByHomeroomName(homeRoomName, schoolId, selectedSite) {
 
     const args = {
       homeRoomName: homeRoomName
@@ -655,12 +655,22 @@ export class PouchQueriesService {
         if (o.HomeRoom === undefined || o.HomeRoom === null) {
           return false;
         }
-        if (homeRoomName.toString().toLowerCase() === o.HomeRoom.toString().toLowerCase()) {
-          searchResult.docs.push(o);
-          return true;
+        if(o.SchoolId === schoolId && selectedSite!== '00000000-0000-0000-0000-000000000000') {
+          if (homeRoomName.toString().toLowerCase() === o.HomeRoom.toString().toLowerCase()) {
+            searchResult.docs.push(o);
+            return true;
+          } else {
+            return false;
+          }
         } else {
-          return false;
+          if (homeRoomName.toString().toLowerCase() === o.HomeRoom.toString().toLowerCase()) {
+            searchResult.docs.push(o);
+            return true;
+          } else {
+            return false;
+          }
         }
+       
       });
 
       resolve(searchResult);
@@ -1740,7 +1750,6 @@ export class PouchQueriesService {
         console.log(JSON.stringify(heartBeatDetails));
         if (heartBeatDetails.length > 0) {
           heartBeatDetails.map(doc => {
-
             this.http.saveHeartBeatDetails(doc).subscribe(
               data => {
                 console.log('Posted Heart Beat Details' + JSON.stringify(data));

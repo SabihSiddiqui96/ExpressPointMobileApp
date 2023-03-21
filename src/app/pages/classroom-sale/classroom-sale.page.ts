@@ -583,7 +583,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                 this.utilService.setLoader(true);
 
-                PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.filter.selected_homeroom_name).then(res => {
+                PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.filter.selected_homeroom_name, this.schoolId, '').then(res => {
 
                     this.persons = res.docs;
 
