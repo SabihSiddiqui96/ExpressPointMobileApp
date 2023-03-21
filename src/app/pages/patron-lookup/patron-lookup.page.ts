@@ -99,7 +99,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public swapRight: boolean;
     public swapLeft: boolean;
     public switchHandsClicked: boolean = false;
-    public isCharAllowedInPin = true;
+    public isCharAllowedInPin = false;
 
     public alphaKeys = '';
     public keyboardVisible: boolean = false;
@@ -307,6 +307,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
         this.getAllSiteSettings();
         this.GetSpecialAccounts();
+
+        this.isCharAllowedInPin = Boolean(parseInt(SettingService.getSettingValue('ALNUMPIN')));
 
         this.event.destroy('patronLookup:ready');
         this.event.subscribe('patronLookup:ready', (userEventData) => {
@@ -1433,7 +1435,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             let incomingID = '';
             if(this.isCharAllowedInPin) {
                 if (event.keyCode === 8 || event.keyCode === 13 ||
-                    (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 97 && event.keyCode <= 122) || (event.keyCode >= 96 && event.keyCode <= 105)) {
+                    (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 97 && event.keyCode <= 122) || (event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 96 && event.keyCode <= 105)) {
                     // event.keyCode == 46 (backspace)
                     this.inputBuffer.push(event);
                     if (event.keyCode === 13) {
@@ -1923,13 +1925,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.enablePinSchool = true;
                     } else {
                         this.enablePinSchool = false;
-                    }
-                break;
-                case SiteSettingCodes[SiteSettingCodes.ALNUMPIN]:
-                    if (setting.SiteSettingValue === "1") {
-                        this.isCharAllowedInPin = true;
-                    } else {
-                        this.isCharAllowedInPin = false;
                     }
                 break;
                 case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:

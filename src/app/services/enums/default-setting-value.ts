@@ -45,5 +45,6 @@ export enum DefaultSettingValue {
     WRNTMDFSAM = 15,
     ENABLELOG = '0',
     BALCHK = '0',
-    STATEEIG ='0'
+    STATEEIG ='0',
+    ALNUMPIN = '0'
 }
