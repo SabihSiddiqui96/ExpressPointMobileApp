@@ -1801,11 +1801,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.stateEigSetting ?
-            (this.patronDetails.StatePriceTypeId == null
-                || this.patronDetails.StatePriceTypeId == undefined) ?
-                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-            : this.patronDetails.PriceTypeId;
+        if (!isSecondMeal) {
+            if (menuItem.IsReimbursable) {
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+            } else {
+                priceTypeId = this.patronDetails.PriceTypeId;
+            }
+
+        }
         // this.utilService.setLoader(true);
         let menuItemNo = 0;
 
@@ -2006,7 +2013,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
                         'CurrentPaidMealPrice': this.currPaidMealPrice,
-                        'StatePriceTypeId':this.patronDetails.StatePriceTypeId
+                        'StatePriceTypeId': this.patronDetails.StatePriceTypeId
                     });
                 }
             } else {

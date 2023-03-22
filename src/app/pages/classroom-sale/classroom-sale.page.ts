@@ -1832,12 +1832,22 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public addMenuToCart(menuItem) {
         if (this.patronId) {
 
-            let priceTypeId = this.stateEigSetting ?
-                (this.patronDetails.StatePriceTypeId == null
-                    || this.patronDetails.StatePriceTypeId == undefined) ?
-                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                : this.patronDetails.PriceTypeId;
+            let priceTypeId = this.patronDetails.PriceTypeId;
+
+            if (menuItem.IsReimbursable) {
+                this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+            }
+
+
+
+
+
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
+                
                 this.mealCount = 1;
             }
 
@@ -1982,7 +1992,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         this.patronDetails['Items'] = [];
                         const restriction = this.restrictService.checkChargeRestriction(menuItem, null, this.patronDetails, details);
                         if (!restriction.ChargeRestriction) {
-                            this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day,this.patronDetails.StatePriceTypeId);
+                            this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, this.patronDetails.StatePriceTypeId);
                         } else {
 
                             this.addRestrictedAlaCarteItemsInCart(restriction, menuItem, studentAlaCarteDoc, currPrice,
@@ -2270,7 +2280,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     // Student Ala Carte items list is empty
-    public addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day,statePriceTypeId) {
+    public addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, statePriceTypeId) {
         this.alaCartItems = [];
         let isRestrictedItem;
         if (this.restrictableAlaCarteItems.indexOf(menuItem.RefId) !== -1 ||

@@ -1607,37 +1607,26 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.showSubcategories(menuItem);
                 }
             } else {
-                // const aLCItems = this.orderData.items.filter(i => {
-                //   return !i.IsPartOfMeal;
-                // });
-                // if (this.mealFormed) {
-                //   const value = this.checkALCInItems(aLCItems);
-                //   if (value) {
-                //     return false;
-                //   } else {
-                //     this.addMenuToCart(menuItem);
-                //   }
-                // } else {
-                //   if (aLCItems) {
-                //     const value = this.checkALCInItems(aLCItems);
-                //     if (value) {
-                //       return false;
-                //     } else {
-                //       this.addMenuToCart(menuItem);
-                //     }
-                //   } else {
-                //     this.addMenuToCart(menuItem);
-                //   }
-                // }
+              
                 if (!menuItem.MenuItemId) {
                     menuItem.MenuItemId = menuItem.RefId;
                 }
                 // StateEligibility PriceTupe
-                let priceTypeId = this.stateEigSetting ?
-                    (this.patronDetails.StatePriceTypeId == null
-                        || this.patronDetails.StatePriceTypeId == undefined) ?
-                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                    : this.patronDetails.PriceTypeId;
+                // let priceTypeId = this.stateEigSetting ?
+                //     (this.patronDetails.StatePriceTypeId == null
+                //         || this.patronDetails.StatePriceTypeId == undefined) ?
+                //         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                //     : this.patronDetails.PriceTypeId;
+                let priceTypeId = this.patronDetails.PriceTypeId;
+                    if (menuItem.IsReimbursable) {
+                        priceTypeId = this.stateEigSetting ?
+                            (this.patronDetails.StatePriceTypeId == null
+                                || this.patronDetails.StatePriceTypeId == undefined) ?
+                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                            : this.patronDetails.PriceTypeId;
+                    } else {
+                        priceTypeId = this.patronDetails.PriceTypeId;
+                    }
 
                 PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
                     if (price.rows.length > 0) {
@@ -2478,11 +2467,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.stateEigSetting ?
-            (this.patronDetails.StatePriceTypeId == null
-                || this.patronDetails.StatePriceTypeId == undefined) ?
-                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-            : this.patronDetails.PriceTypeId;
+        if (!isSecondMeal) {
+            if (menuItem.IsReimbursable) {
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+            } else {
+                priceTypeId = this.patronDetails.PriceTypeId;
+            }
+        }
 
         if (menuItem.MenuItemId === undefined) {
             menuItem.MenuItemId = menuItem.RefId;
@@ -5302,12 +5297,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.stateEigSetting ?
-            (this.patronDetails.StatePriceTypeId == null
-                || this.patronDetails.StatePriceTypeId == undefined) ?
-                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-            : this.patronDetails.PriceTypeId;
-
+        if (!isSecondMeal) {
+            if (menuItem.IsReimbursable) {
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+            } else {
+                priceTypeId = this.patronDetails.PriceTypeId;
+            }
+        }
         let menuItemNo = 0;
         if (menuItem.RefId) {
             menuItemNo = menuItem.RefId;
@@ -5545,11 +5545,18 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 // this.utilService.showToast('The selected item is restricted for this patron.');
                 return;
             }
-            let priceTypeId = this.stateEigSetting ?
-                (this.patronDetails.StatePriceTypeId == null
-                    || this.patronDetails.StatePriceTypeId == undefined) ?
-                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                : this.patronDetails.PriceTypeId;
+            let priceTypeId =  this.patronDetails.PriceTypeId;
+            if (this.patronDetails['IsSecondMeal'] !== true) {
+                if (menuItem.IsReimbursable) {
+                    priceTypeId = this.stateEigSetting ?
+                        (this.patronDetails.StatePriceTypeId == null
+                            || this.patronDetails.StatePriceTypeId == undefined) ?
+                            this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                        : this.patronDetails.PriceTypeId;
+                } else {
+                    priceTypeId = this.patronDetails.PriceTypeId;
+                }
+            }
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
                 this.mealCount = 1;
@@ -5581,11 +5588,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         });
                     } else {
 
-                        priceTypeId = this.stateEigSetting ?
-                            (this.patronDetails.StatePriceTypeId == null
-                                || this.patronDetails.StatePriceTypeId == undefined) ?
-                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                            : this.patronDetails.PriceTypeId;
+                        // priceTypeId = this.stateEigSetting ?
+                        //     (this.patronDetails.StatePriceTypeId == null
+                        //         || this.patronDetails.StatePriceTypeId == undefined) ?
+                        //         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                        //     : this.patronDetails.PriceTypeId;
                         this.mealCount = this.mealCount + 1;
                         this.Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId);
                     }
