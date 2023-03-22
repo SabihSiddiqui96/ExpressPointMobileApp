@@ -2663,22 +2663,26 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             /**
                              * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
                              */
-                            if (this.cashtendAmount <= this.orderData.totalAmount) {
-                                paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
+                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
+                            //     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
 
-                            } else {
-                                // console.clear()
-                                paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            }
-                            //   this.orderData.IsDeposit = true
+                            // } else {
+                            //     // console.clear()
+                            //     paymentAmnt = parseFloat(this.orderData.totalAmount);
+                            // }
+
+                            /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
+                             * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
+                             */
+                            paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
                         }
                     }
                 } else {
                     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
                     if (this.cashtendAmount > this.orderData.totalAmount) {
-                        if (this.orderData.IsDeposit === false) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
+                        // if (this.orderData.IsDeposit === false) {
+                        //     paymentAmnt = this.orderData.totalAmount;
+                        // }
                         if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
                             paymentAmnt = this.orderData.totalAmount;
                         }
@@ -2780,7 +2784,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'UserId': this.userId,
                     'PersonIdentifier': this.patronDetails.PersonIdentifier,
                     'OrderId': null,
-                    'OrderNumber':'',
+                    'OrderNumber': '',
                     'IsServed': false,
                     '_id': this.selectedAccountDetails._id
                 };
