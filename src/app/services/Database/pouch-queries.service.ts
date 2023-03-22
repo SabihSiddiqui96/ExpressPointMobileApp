@@ -20,7 +20,7 @@ declare var require: any;
 })
 export class PouchQueriesService {
 
-  constructor(private http: HttpService, public appStateService: AppStateService
+  constructor(private http: HttpService, public appStateService: AppStateService,
     public pouchDBService: PouchDBService, public settingService: SettingService, public utilService: UtilService) {
 
   }
