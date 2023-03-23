@@ -641,8 +641,8 @@ export class LookupService {
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
-                        if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.canServeVisitingPatrons)) {
-                            this.patronFromServer(firstname, lastname, externalId);
+                        if (this.lookupResults.length === 0) {
+                            this.patronFromServer(firstname, lastname, externalId, selectedsite);
                         }
                         this.handlePersonResults(true).then(() => {
                             this.utilService.setLoader(false);
@@ -657,13 +657,13 @@ export class LookupService {
                     });
             } else {
                 this.utilService.setLoader(false);
-                this.patronFromServer(firstname, lastname, externalId);
+                this.patronFromServer(firstname, lastname, externalId, selectedsite);
             }
 
         });
     }
 
-    public patronFromServer(firstname, lastname, externalId) {
+    public patronFromServer(firstname, lastname, externalId, selectedsite) {
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (!isNetworkOnline) {
                 this.popupMessageService.showMessage(PopupMessageCode.E24399);
@@ -688,6 +688,10 @@ export class LookupService {
                             this.loader.dismiss();
 
                             this.lookupResults = data.patrons;
+                            if (selectedsite.toString() !== '00000000-0000-0000-0000-000000000000') {
+                                //Selected the currentSite , So the results should only have the current site data. 
+                                this.lookupResults = this.lookupResults.filter(r => r.SchoolId === selectedsite);
+                            }
 
                             if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
                                 this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
@@ -695,6 +699,7 @@ export class LookupService {
                             if (this.canServeVisitingPatrons && !this.CanServeVisitingAdults) {
                                 this.lookupResults = this.lookupResults.filter(r => r.IsStudent === true);
                             }
+
 
                             this.handlePersonResults(true);
                         },
