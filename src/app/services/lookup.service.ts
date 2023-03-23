@@ -104,7 +104,7 @@ export class LookupService {
         this.lookupAndPushPersonToQ(queueInput).then(() => {
             if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
                 AppStateService.get('currentTab') !== 'advanced') {
-                this.selectPatron(this.personsQ[0]);               
+                this.selectPatron(this.personsQ[0]);
             }
         });
     }
@@ -247,20 +247,20 @@ export class LookupService {
     public showPatronModel(patronList, isFromQueue, isFromAdvPatronSearch: boolean) {
         return new Promise((resolve) => {
             const isVisitingPatronAllowed = (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) ? true : false;
-                this.modalCtrl.create({
-                    component: PatronListModalPage,
-                    componentProps: {
-                        'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
-                        'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
-                    },
-                    showBackdrop: true,
-                    backdropDismiss: false,
-                    cssClass: 'patron-modal-popup'
-                }).then(async (res) => {
-                    await res.present().then(() => {
-                        resolve('Success');
-                    });
+            this.modalCtrl.create({
+                component: PatronListModalPage,
+                componentProps: {
+                    'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
+                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
+                },
+                showBackdrop: true,
+                backdropDismiss: false,
+                cssClass: 'patron-modal-popup'
+            }).then(async (res) => {
+                await res.present().then(() => {
+                    resolve('Success');
                 });
+            });
         });
 
     }
@@ -323,7 +323,7 @@ export class LookupService {
             this.utilService.setLoader(true);
             this.personsQ.map((patron) => {
                 let input = sessionStorage.getItem(patron.Identifier);
-                if(input) {
+                if (input) {
                     patron.InputDirection = input;
                 }
             })
@@ -359,7 +359,7 @@ export class LookupService {
     }
 
 
-    public lookupByPIN(pin, inputDirection = Direction.None,enablePinSchool) {
+    public lookupByPIN(pin, inputDirection = Direction.None, enablePinSchool) {
         this.studentPin = pin;
 
         this.localResultSet = this.serverResultSet = null;
@@ -379,7 +379,7 @@ export class LookupService {
                     this.handlePersonResults(false, inputDirection);
                     // resolve(this.lookupResults);
                 } else {
-                    if(enablePinSchool) {
+                    if (enablePinSchool) {
                         let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
                         if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
                             this.serverLookup(pin, selectedSite).then(() => {
@@ -395,7 +395,7 @@ export class LookupService {
                     } else {
                         this.popupMessageService.showMessage(PopupMessageCode.E24518);
                     }
-                    
+
                 }
                 resolve(null);
             });
@@ -606,6 +606,9 @@ export class LookupService {
     public AdvancedPatronlookup(selectedsite, firstname,
         lastname, externalId, isServerLookup) {
         let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
+        this.canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
+        this.CanServeVisitingAdults = SettingService.isUserPermitted('OTHRSADLT');
+
         if (SearchByPin === '-1') {
             PouchQueriesService.PINLookup(externalId).then((data) => {
                 this.lookupPinResults = data.rows.map(row => row.doc);
@@ -631,14 +634,14 @@ export class LookupService {
                             }
 
                         });
-                        this.lookupResults = docs;    
+                        this.lookupResults = docs;
                         if (SearchByPin === '-1' && this.lookupResults.length === 0) {
                             this.lookupResults = this.lookupResults.concat(this.lookupPinResults);
-                        }            
+                        }
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
-                        if(this.lookupResults.length === 0) {
+                        if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.canServeVisitingPatrons)) {
                             this.patronFromServer(firstname, lastname, externalId);
                         }
                         this.handlePersonResults(true).then(() => {
@@ -688,6 +691,9 @@ export class LookupService {
 
                             if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
                                 this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
+                            }
+                            if (this.canServeVisitingPatrons && !this.CanServeVisitingAdults) {
+                                this.lookupResults = this.lookupResults.filter(r => r.IsStudent === true);
                             }
 
                             this.handlePersonResults(true);
