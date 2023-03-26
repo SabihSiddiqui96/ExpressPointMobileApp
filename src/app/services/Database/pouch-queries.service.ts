@@ -9,6 +9,7 @@ import { UtilService } from '../util.service';
 import { AppStateService } from '../app-state.service';
 import { SettingService } from '../setting.service';
 import { HashingService } from '../hashing.service';
+import { LocalTimerService } from '../local-timer.service';
 declare var require: any;
 
 // PouchDB.plugin(require('pouchdb-upsert'));
@@ -1551,11 +1552,7 @@ export class PouchQueriesService {
   }
 
   public PostDeviceHeartBeat() {
-    const now = new Date();
-    const UTC = now.getTime();
-    const localOffset = (-1) * now.getTimezoneOffset() * 60000;
-    const heartBeatTime = Math.round((new Date(UTC + localOffset).getTime() / 1000));
-
+    const heartBeatTime = LocalTimerService.getCurrentTime();
     let deviceInfo;
     if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') != null) {
       deviceInfo = JSON.parse(AppStateService.get('DeviceInfo'));
@@ -1564,19 +1561,6 @@ export class PouchQueriesService {
     return new Promise((resolve, reject) => {
       let stats = { 'sent': 0, 'pending': 0 };
       if (deviceInfo.TerminalId) {
-        // PouchQueriesService.GetAllPendingTransactions().then((res) => {
-        // const transactions = res.rows.map(row => row.doc);
-        // if (transactions.length > 0) {
-        //     transactions.map(doc => {
-        //         if (doc.saleData.IsSynced === true) {
-        //             sent = sent + 1;
-        //         } else {
-        //             pending = pending + 1;
-
-        //         }
-        //     });
-        //     // Sent = transactions.length - Pending
-        // }
         if (AppStateService.get('TransactionStats')) {
           stats = JSON.parse(AppStateService.get('TransactionStats'));
         }

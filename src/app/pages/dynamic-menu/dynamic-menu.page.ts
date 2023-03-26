@@ -1598,28 +1598,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.showSubcategories(menuItem);
                 }
             } else {
-                // const aLCItems = this.orderData.items.filter(i => {
-                //   return !i.IsPartOfMeal;
-                // });
-                // if (this.mealFormed) {
-                //   const value = this.checkALCInItems(aLCItems);
-                //   if (value) {
-                //     return false;
-                //   } else {
-                //     this.addMenuToCart(menuItem);
-                //   }
-                // } else {
-                //   if (aLCItems) {
-                //     const value = this.checkALCInItems(aLCItems);
-                //     if (value) {
-                //       return false;
-                //     } else {
-                //       this.addMenuToCart(menuItem);
-                //     }
-                //   } else {
-                //     this.addMenuToCart(menuItem);
-                //   }
-                // }
                 if (!menuItem.MenuItemId) {
                     menuItem.MenuItemId = menuItem.RefId;
                 }
@@ -3274,16 +3252,21 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         if (this.orderData.IsDeposit === true) {
                             paymentAmnt = parseFloat(this.cashTendAmount);
                         } else {
-                            /**
+                             /**
                              * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
                              */
-                            if (this.cashTendAmount < this.orderData.totalAmount) {
-                                paymentAmnt = parseFloat(this.cashTendAmount);
+                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
+                            //     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
 
-                            } else {
-                                paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            }
-                            //   this.orderData.IsDeposit = true
+                            // } else {
+                            //     // console.clear()
+                            //     paymentAmnt = parseFloat(this.orderData.totalAmount);
+                            // }
+
+                            /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
+                             * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
+                             */
+                            paymentAmnt = parseFloat(this.cashTendAmount) - this.cashDue;
                         }
                     }
                 } else {
