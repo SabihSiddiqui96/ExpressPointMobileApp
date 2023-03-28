@@ -3364,10 +3364,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;
-            const payment = parseFloat(paymentAmnt.toFixed(2));
             const saleToatal = this.orderData.totalAmount;
             if (transactionType === 1) {
-                updatedPatronDetails.Balance = balance - (saleToatal - payment);
+                updatedPatronDetails.Balance = balance - (saleToatal - paymentAmnt);
             } else if (transactionType === 2) {
                 updatedPatronDetails.Balance = balance - saleToatal;
             }
@@ -3446,7 +3445,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 AppStateService.set('TransactionNumber', this.transactionNumber);
             }
             this.saleData = {
-                'PaymentAmount': parseFloat(paymentAmnt.toFixed(2)),
+                'PaymentAmount': Math.round(paymentAmnt * 100) / 100,
                 'Balance': this.patronDetails.Balance,
                 'AccountId': this.patronDetails.AccountId,
                 'ServingSchoolId': this.schoolId,

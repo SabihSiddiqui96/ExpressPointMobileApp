@@ -730,7 +730,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 let chngDue = (+amnt) - (this.navOrderData.totalAmount);
                 // Partial Pay changes 
                 if (this.navPatronDetails.Balance > 0) {
-                    chngDue = (+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount);
+                    if ((this.navPatronDetails.Balance - this.navOrderData.totalAmount) <= 0)
+                        chngDue = (+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount);
+                    else
+                        chngDue = +amnt;
                     // Change Due cant be more than amount tendered
                     if (chngDue > +amnt) {
                         chngDue = +amnt - this.navOrderData.totalAmount;
@@ -741,15 +744,16 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 } else {
                     this.changeDue = 0.00;
                 }
-                let amountTowardsBal = 0.00;
 
                 if (this.depositChangeDue) {
                     this.changeDue = 0.00;
                     this.depositAmount = ((+amnt) - (this.navOrderData.totalAmount)).toFixed(2);
                     // Partial Pay changes 
                     if (this.navPatronDetails.Balance > 0) {
-                        this.depositAmount = ((+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount)).toFixed(2);
-
+                        if ((this.navPatronDetails.Balance - this.navOrderData.totalAmount) <= 0)
+                            this.depositAmount = ((+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount)).toFixed(2);
+                        else
+                            this.depositAmount = (+amnt).toFixed(2);
                         //Deposit amount cant be more than Amount Tendered
                         if (this.depositAmount > +amnt) {
                             this.depositAmount = (+amnt - this.navOrderData.totalAmount).toFixed(2);
@@ -783,12 +787,16 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             let changDue = (+amnt) - (this.navOrderData.totalAmount);
 
                             if (this.navPatronDetails.Balance > 0) {
-                                changDue = (+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount);
+                                if ((this.navPatronDetails.Balance - this.navOrderData.totalAmount) <= 0)
+                                    changDue = (+amnt + this.navPatronDetails.Balance) - (this.navOrderData.totalAmount);
+                                else
+                                    changDue = +amnt;
                                 // Change Due cant be more than amount tendered
                                 if (changDue > +amnt) {
                                     changDue = +amnt - this.navOrderData.totalAmount;
                                 }
                             }
+
                             this.changeDue = changDue > 0 ? changDue : 0.00;
                             if (this.depositChangeDue) {
                                 this.depositAmount = '$' + this.changeDue.toFixed(2);
