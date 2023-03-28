@@ -1729,7 +1729,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             if(this.isCharAllowedInPin) {
                 if (!event.shiftKey && !event.altKey && !event.ctrlKey &&
                     // numbers   
-                    key >= 48 && key <= 57 || (key >= 97 && key <= 122) ||
+                    key >= 48 && key <= 57 || (key >= 97 && key <= 122) || (key>=65 && key<=90) ||
                     // Backspace and Tab and Enter
                     key == 8 || key == 9 || key == 13 
                 ) {
