@@ -317,6 +317,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
     public stateEigSetting: boolean = false;
+    public PaymentAmount: number = 0.00;
 
 
     @HostListener('document:keyup', ['$event'])
@@ -3182,6 +3183,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.amountTowardsBalance = userEventData.amountTowardsBalance;
                     this.cashDue = userEventData.cashDue;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
+                    this.PaymentAmount = userEventData.PaymentAmount;
                     this.makeSalePay();
                 } else {
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
@@ -3286,65 +3288,77 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'StatePriceTypeId': this.patronDetails.StatePriceTypeId
                 });
             }
-            let paymentAmnt = this.orderData.totalAmount;
-            if (transactionType === 1) {
-                if (this.setting.EXNEGBAL === true) {
-                    if (this.isDepositByEXNEGBAL === true) {
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashTendAmount);
-                        } else {
-                            paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
-                            this.orderData.IsDeposit = true;
-                        }
-                    } else {
-                        // console.clear()
-                        // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashTendAmount);
-                        } else {
-                            /**
-                             * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-                             */
-                            if (this.cashTendAmount < this.orderData.totalAmount) {
-                                paymentAmnt = parseFloat(this.cashTendAmount);
 
-                            } else {
-                                paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            }
-                            //   this.orderData.IsDeposit = true
-                        }
-                    }
-                } else {
-                    paymentAmnt = parseFloat(this.cashTendAmount);
-                    if (this.cashTendAmount > this.orderData.totalAmount) {
-                        if (this.orderData.IsDeposit === false) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                        if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                    }
-                }
-                /* not sure if to add this or not */
-                if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                    paymentAmnt = this.orderData.totalAmount;
-                }
-                /* not sure if to add this or not */
+            let paymentAmnt = this.orderData.totalAmount;
+
+            if (transactionType == 1) {
+                paymentAmnt = this.PaymentAmount
             }
+
+             /** Commented This code for PartialPaySetting - Start  */
+            // let paymentAmnt = this.orderData.totalAmount;
+            // if (transactionType === 1) {
+            //     if (this.setting.EXNEGBAL === true) {
+            //         if (this.isDepositByEXNEGBAL === true) {
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashTendAmount);
+            //             } else {
+            //                 paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
+            //                 this.orderData.IsDeposit = true;
+            //             }
+            //         } else {
+            //             // console.clear()
+            //             // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashTendAmount);
+            //             } else {
+            //                 /**
+            //                  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+            //                  */
+            //                 if (this.cashTendAmount < this.orderData.totalAmount) {
+            //                     paymentAmnt = parseFloat(this.cashTendAmount);
+
+            //                 } else {
+            //                     paymentAmnt = parseFloat(this.orderData.totalAmount);
+            //                 }
+            //                 //   this.orderData.IsDeposit = true
+            //             }
+            //         }
+            //     } else {
+            //         paymentAmnt = parseFloat(this.cashTendAmount);
+            //         if (this.cashTendAmount > this.orderData.totalAmount) {
+            //             if (this.orderData.IsDeposit === false) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //             if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //         }
+            //     }
+            //     /* not sure if to add this or not */
+            //     if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //         paymentAmnt = this.orderData.totalAmount;
+            //     }
+            //     /* not sure if to add this or not */
+            // }
 
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
-            AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL ) {
-                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
-            }
-            if (paymentAmnt > this.orderData.totalAmount) {
-                this.orderData.IsDeposit = true
-            }
+            // if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL ) {
+            //     paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            // }
+            // if (paymentAmnt > this.orderData.totalAmount) {
+            //     this.orderData.IsDeposit = true
+            // }
+
+            /** Commented This code for PartialPaySetting - End  */
+
+            
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
+            AppStateService.set('TransactionNumber', this.transactionNumber);
 
             const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;

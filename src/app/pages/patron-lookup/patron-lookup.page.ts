@@ -1453,7 +1453,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
                             this.lookUpService.setQ(queueInput);
-                            this.lookUpService.showModalPopup = false;
+                            this.utilService.showModalPopup = false;
                         }
                         incomingID = '';
                         this.inputBuffer = [];
@@ -1500,7 +1500,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
                             this.lookUpService.setQ(queueInput);
-                            this.lookUpService.showModalPopup = false;
+                            this.utilService.showModalPopup = false;
                         }
                         incomingID = '';
                         this.inputBuffer = [];

@@ -71,6 +71,7 @@ enum SuspiciousActivityTypes {
 export class MenuServicePage implements OnInit, OnDestroy {
     public printAllSetting: Number = 0;
     public localStorageValue: string = 'currentTab';
+    public PaymentAmount: number = 0.00;
 
 
     public ngOnInit() {
@@ -2581,6 +2582,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.amountTowardsBalance = userEventData.amountTowardsBalance;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
                     this.cashDue = userEventData.cashDue;
+                    this.PaymentAmount = userEventData.PaymentAmount;
                     this.makeSalePay();
                 } else {
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
@@ -2667,51 +2669,58 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
 
             let paymentAmnt = this.orderData.totalAmount;
-            if (transactionType === 1) {
-                if (this.setting.EXNEGBAL) {
-                    if (this.isDepositByEXNEGBAL === true) {
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashtendAmount);
-                        } else {
-                            paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
-                            this.orderData.IsDeposit = true;
-                        }
-                    } else {
-                        // console.clear()
-                        // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashtendAmount);
-                        } else {
-                            /**
-                             * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-                             */
-                            if (this.cashtendAmount <= this.orderData.totalAmount) {
-                                paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
 
-                            } else {
-                                // console.clear()
-                                paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            }
-                            //   this.orderData.IsDeposit = true
-                        }
-                    }
-                } else {
-                    paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
-                    if (this.cashtendAmount > this.orderData.totalAmount) {
-                        if (this.orderData.IsDeposit === false) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                        if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                    }
-                }
-                /* not sure if to add this or not */
-                if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                    paymentAmnt = this.orderData.totalAmount;
-                }
-                /* not sure if to add this or not */
+            if (transactionType == 1) {
+                paymentAmnt = this.PaymentAmount
             }
+            /** Commented This code for PartialPaySetting - Start  */
+            // let paymentAmnt = this.orderData.totalAmount;
+            // if (transactionType === 1) {
+            //     if (this.setting.EXNEGBAL) {
+            //         if (this.isDepositByEXNEGBAL === true) {
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashtendAmount);
+            //             } else {
+            //                 paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
+            //                 this.orderData.IsDeposit = true;
+            //             }
+            //         } else {
+            //             // console.clear()
+            //             // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashtendAmount);
+            //             } else {
+            //                 /**
+            //                  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+            //                  */
+            //                 if (this.cashtendAmount <= this.orderData.totalAmount) {
+            //                     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
+
+            //                 } else {
+            //                     // console.clear()
+            //                     paymentAmnt = parseFloat(this.orderData.totalAmount);
+            //                 }
+            //                 //   this.orderData.IsDeposit = true
+            //             }
+            //         }
+            //     } else {
+            //         paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
+            //         if (this.cashtendAmount > this.orderData.totalAmount) {
+            //             if (this.orderData.IsDeposit === false) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //             if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //         }
+            //     }
+            //     /* not sure if to add this or not */
+            //     if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //         paymentAmnt = this.orderData.totalAmount;
+            //     }
+            //     /* not sure if to add this or not */
+            // }
+            /** Commented This code for PartialPaySetting - End  */
 
 
             const now = new Date();
@@ -2722,13 +2731,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // let TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL) {
-                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
-            }
-            if (paymentAmnt > this.orderData.totalAmount) {
-                this.orderData.IsDeposit = true
-            }
-
+            /** Commented This code for PartialPaySetting - Start  */
+            // if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL) {
+            //     paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            // }
+            // if (paymentAmnt > this.orderData.totalAmount) {
+            //     this.orderData.IsDeposit = true
+            // }
+            /** Commented This code for PartialPaySetting - end  */
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance

@@ -37,7 +37,7 @@ export class LookupService {
     public lookupPinResults = [];
     public personDetails: any;
     public studentPin;
-    showModalPopup: boolean = true;
+    // showModalPopup: boolean = true;
 
     public CanServeVisitingAdults = null;
 
@@ -83,10 +83,10 @@ export class LookupService {
         });
         // this.event.unsubscribe('getServerResults')
 
-        if (this.utilService.isElectronApp() && this.showModalPopup) {
+        if (this.utilService.isElectronApp() && this.utilService.showModalPopup) {
             this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
                 this.setQ(queueInput);
-                this.showModalPopup = false;
+                this.utilService.showModalPopup = false;
             });
         }
     }

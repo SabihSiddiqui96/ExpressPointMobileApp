@@ -41,6 +41,7 @@ export class UtilService {
   public popupCenter = { cssClass: 'user_ppup center_ppup' };
   public popOption = { cssClass: 'user_ppup' };
   public isMenuSoldPopupOpen:boolean = false;
+  showModalPopup: boolean = true;
 
   constructor(private loadingCtrl: LoadingController, private alertCtrl: AlertController,
     public toastCtrl: ToastController,

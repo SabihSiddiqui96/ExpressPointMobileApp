@@ -7,7 +7,6 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { Events } from '../../services/events.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
-import { LookupService } from '../../services/lookup.service';
 
 @Component({
     selector: 'app-patron-list-modal',
@@ -57,7 +56,7 @@ export class PatronListModalPage implements OnInit {
     public loadMoreClicks = 0;
     public disableLoadMore: boolean = false;
 
-    constructor(public navCtrl: NavController, public lookUpService: LookupService,
+    constructor(public navCtrl: NavController,
         public event: Events, public utilService: UtilService,
         public http: HttpService, public router: Router, public appStateService: AppStateService) {
         // , public lookUpService:LookUpServiceProvider
@@ -71,7 +70,7 @@ export class PatronListModalPage implements OnInit {
         this.modalController.dismiss({
           'dismissed': true
         });
-        this.lookUpService.showModalPopup = true;
+        this.utilService.showModalPopup = true;
       }
 
     public getPatronImages(list) {
