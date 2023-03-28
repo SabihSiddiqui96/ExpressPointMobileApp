@@ -1171,6 +1171,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
                 }
             }).catch(err => console.log(err));
+
+             // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
+        if (priceTypeId === this.patronDetails.StatePriceTypeId) {
+            PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
+                this.patronDetails.IsStudent, this.priceMode).then((res) => {
+                    if (res.rows.length > 0) {
+                        this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+                    }
+                }).catch(err => console.log(err));
+        }
     }
     public setPreviousSalesCount() {
         const previousSales = this.patronDetails.PreviousSales;
@@ -1618,16 +1628,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 //         || this.patronDetails.StatePriceTypeId == undefined) ?
                 //         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                 //     : this.patronDetails.PriceTypeId;
-                let priceTypeId = this.patronDetails.PriceTypeId;
-                    if (menuItem.IsReimbursable) {
-                        priceTypeId = this.stateEigSetting ?
+                let priceTypeId = this.stateEigSetting ?
                             (this.patronDetails.StatePriceTypeId == null
                                 || this.patronDetails.StatePriceTypeId == undefined) ?
                                 this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                             : this.patronDetails.PriceTypeId;
-                    } else {
-                        priceTypeId = this.patronDetails.PriceTypeId;
-                    }
+                    
 
                 PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
                     if (price.rows.length > 0) {
@@ -2469,15 +2475,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         if (!isSecondMeal) {
-            if (menuItem.IsReimbursable) {
                 priceTypeId = this.stateEigSetting ?
                     (this.patronDetails.StatePriceTypeId == null
                         || this.patronDetails.StatePriceTypeId == undefined) ?
                         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                     : this.patronDetails.PriceTypeId;
-            } else {
-                priceTypeId = this.patronDetails.PriceTypeId;
-            }
         }
 
         if (menuItem.MenuItemId === undefined) {
@@ -5312,15 +5314,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         if (!isSecondMeal) {
-            if (menuItem.IsReimbursable) {
                 priceTypeId = this.stateEigSetting ?
                     (this.patronDetails.StatePriceTypeId == null
                         || this.patronDetails.StatePriceTypeId == undefined) ?
                         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                     : this.patronDetails.PriceTypeId;
-            } else {
-                priceTypeId = this.patronDetails.PriceTypeId;
-            }
         }
         let menuItemNo = 0;
         if (menuItem.RefId) {
@@ -5561,15 +5559,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             let priceTypeId =  this.patronDetails.PriceTypeId;
             if (this.patronDetails['IsSecondMeal'] !== true) {
-                if (menuItem.IsReimbursable) {
                     priceTypeId = this.stateEigSetting ?
                         (this.patronDetails.StatePriceTypeId == null
                             || this.patronDetails.StatePriceTypeId == undefined) ?
                             this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                         : this.patronDetails.PriceTypeId;
-                } else {
-                    priceTypeId = this.patronDetails.PriceTypeId;
-                }
             }
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
