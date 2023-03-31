@@ -4888,8 +4888,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
             : this.patronDetails.PriceTypeId;
 
-        if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-            (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+        if (this.patronDetails.IsStudent === true) {
             if (this.patronDetails.IsSecondMeal === true) {
                 priceTypeId = this.secondMealPriceType;
 
@@ -5353,8 +5352,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                if ( this.patronDetails.IsStudent === true
                     && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school

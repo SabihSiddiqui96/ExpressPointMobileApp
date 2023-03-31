@@ -1867,8 +1867,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             currPaidMealPrice = this.paidMealPrice;
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                if (this.patronDetails.IsStudent
                     && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
