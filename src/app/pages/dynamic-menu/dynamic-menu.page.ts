@@ -994,7 +994,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.largeImageIsShowing = false;
                 }
             }
-
+            let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
+            if(inputDirId) {
+                this.patronDetails.InputDirection = inputDirId;
+                sessionStorage.removeItem(this.patronDetails.Identifier);
+            }
             //   }).catch((err) => {
             //     console.log(err);
             //     this.largeImageToShow = false;

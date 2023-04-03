@@ -898,6 +898,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
             }
+            let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
+            if(inputDirId) {
+                this.patronDetails.InputDirection = inputDirId;
+                sessionStorage.removeItem(this.patronDetails.Identifier);
+            }
         }).catch((err) => {
             console.log('Error in gettng image ' + err);
             this.largeImageToShow = false;
