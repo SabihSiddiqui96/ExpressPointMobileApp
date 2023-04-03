@@ -490,7 +490,9 @@ export class PreOrdersPage implements OnInit {
                     'ChangeReturned': '0',
                     'TotalAmount': student.Price,
                     'ServingSiteId': this.siteName,
-                    'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT
+                    'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
+                    'AppVersion': this.utilService.versionNumber,
+                    'StatePriceTypeId': student["StatePriceTypeId"],
                 };
                 const onlineOrderTransactionDoc = {
                     '_id': 'Transaction--' + deviceTransactionId,

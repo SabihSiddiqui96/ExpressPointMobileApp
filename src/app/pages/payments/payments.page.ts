@@ -695,8 +695,10 @@ export class DoPayment {
                 'UserId': this.userId,
                 'PersonIdentifier': this.navPatronDetails.PersonIdentifier,
                 'OrderId': null,
-                'OrderNumber':'',
+                'OrderNumber': '',
                 'IsServed': false,
+                'AppVersion': this.utilService.versionNumber,
+                'StatePriceTypeId': this.navPatronDetails["StatePriceTypeId"],
                 '_id': this.navPatronDetails._id
 
             };
@@ -925,7 +927,7 @@ export class PaymentsPage extends DoPayment implements OnInit {
         public popupMessageService: PopupMessageService, public modalCtrl: ModalController, public router: Router,
         public appStateService: AppStateService, public pouchDBService: PouchDBService,
         public settingService: SettingService, public pouchQuery: PouchQueriesService, public printService: PrintService,
-        public signalRService: SignalRService, public platform: Platform ) {
+        public signalRService: SignalRService, public platform: Platform) {
 
         super(navCtrl, alertCtrl, event, lookUpService, utilService, transactionService, popupMessageService, modalCtrl, router,
             appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService, platform);

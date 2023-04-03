@@ -44,5 +44,8 @@ export enum DefaultSettingValue {
     MULTIREAD = '1',
     WRNTMDFSAM = 15,
     ENABLELOG = '0',
-    BALCHK = '0'
+    BALCHK = '0',
+    STATEEIG = '0',
+    ALNUMPIN = '0',
+    PARTIALPAY = '0'
 }

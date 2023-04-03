@@ -316,6 +316,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public hideStudentId: boolean;
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
+    public stateEigSetting: boolean = false;
+    public PaymentAmount: number = 0.00;
+
 
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -419,7 +422,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
         this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
-
+        this.stateEigSetting = Boolean(parseInt(SettingService.getSettingValue('STATEEIG')));
         /**
        * Use the site Terminal if the Device Terminal is not set.
        */
@@ -991,7 +994,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.largeImageIsShowing = false;
                 }
             }
-
+            let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
+            if(inputDirId) {
+                this.patronDetails.InputDirection = inputDirId;
+                sessionStorage.removeItem(this.patronDetails.Identifier);
+            }
             //   }).catch((err) => {
             //     console.log(err);
             //     this.largeImageToShow = false;
@@ -1144,15 +1151,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             }
         }
-
-        PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
-            this.patronDetails.IsStudent, this.priceMode).then((res) => {
-                if (res.rows.length > 0) {
-                    this.patronDetails['CreditLimit'] = res.rows[0].doc.CreditLimit;
-                    this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
-                }
-            }).catch(err => console.log(err));
-
+        this.getCreditLimit();
         this.GetSystemMenuItemsPriceByPatron();
         this.event.publish('patron:newPatronLoaded', JSON.stringify(this.patronDetails));
         this.utilService.setLoader(false);
@@ -1162,6 +1161,31 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
     }
 
+    public getCreditLimit() {
+        const priceTypeId = this.stateEigSetting ?
+            (this.patronDetails.StatePriceTypeId == null
+                || this.patronDetails.StatePriceTypeId == undefined) ?
+                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+            : this.patronDetails.PriceTypeId;
+
+        PouchQueriesService.GetCreditLimit(priceTypeId, this.patronDetails.RDAGroupId,
+            this.patronDetails.IsStudent, this.priceMode).then((res) => {
+                if (res.rows.length > 0) {
+                    this.patronDetails['CreditLimit'] = res.rows[0].doc.CreditLimit;
+                    this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+                }
+            }).catch(err => console.log(err));
+
+             // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
+        if (priceTypeId === this.patronDetails.StatePriceTypeId) {
+            PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
+                this.patronDetails.IsStudent, this.priceMode).then((res) => {
+                    if (res.rows.length > 0) {
+                        this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+                    }
+                }).catch(err => console.log(err));
+        }
+    }
     public setPreviousSalesCount() {
         const previousSales = this.patronDetails.PreviousSales;
         let previousALCAmt = 0;
@@ -1598,10 +1622,24 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.showSubcategories(menuItem);
                 }
             } else {
+              
                 if (!menuItem.MenuItemId) {
                     menuItem.MenuItemId = menuItem.RefId;
                 }
-                PouchQueriesService.GetPrice(menuItem.MenuItemId, this.patronDetails['PriceTypeId'], this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+                // StateEligibility PriceTupe
+                // let priceTypeId = this.stateEigSetting ?
+                //     (this.patronDetails.StatePriceTypeId == null
+                //         || this.patronDetails.StatePriceTypeId == undefined) ?
+                //         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                //     : this.patronDetails.PriceTypeId;
+                let priceTypeId = this.stateEigSetting ?
+                            (this.patronDetails.StatePriceTypeId == null
+                                || this.patronDetails.StatePriceTypeId == undefined) ?
+                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                            : this.patronDetails.PriceTypeId;
+                    
+
+                PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
                     if (price.rows.length > 0) {
                         let currPrice = 0;
                         this.addMenuToCart(menuItem);
@@ -2017,7 +2055,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         menuItem['NoContributions'] = true;
                                         menuItem['IsPartOfMeal'] = false;
                                     }
-                                    const priceTypeId = this.patronDetails['PriceTypeId'];
+                                    const priceTypeId = this.stateEigSetting ?
+                                        (this.patronDetails.StatePriceTypeId == null
+                                            || this.patronDetails.StatePriceTypeId == undefined) ?
+                                            this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                                        : this.patronDetails.PriceTypeId;
                                     this.Confirmed_CartMenuItem(menuItem, priceTypeId);
 
                                 });
@@ -2122,7 +2164,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 menuItem['IsPartOfMeal'] = false;
                             }
                         }).then(() => {
-                            const priceTypeId = this.patronDetails['PriceTypeId'];
+                            const priceTypeId = this.stateEigSetting ?
+                                (this.patronDetails.StatePriceTypeId == null
+                                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                                : this.patronDetails.PriceTypeId;
                             this.Confirmed_CartMenuItem(menuItem, priceTypeId);
 
                         });
@@ -2432,7 +2478,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
+        if (!isSecondMeal) {
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+        }
 
         if (menuItem.MenuItemId === undefined) {
             menuItem.MenuItemId = menuItem.RefId;
@@ -2501,7 +2553,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'PaidPrice': currPrice,
                     'ShowPaidPrice': false,
                     'NoContributions': menuItem.NoContributions ? true : false,
-                    'isChecked': menuItem.IsPartOfMeal === false ? false : null
+                    'isChecked': menuItem.IsPartOfMeal === false ? false : null,
+                    'StatePriceTypeId': this.patronDetails.StatePriceTypeId,
                 };
 
                 this.orderData.items.push(item);
@@ -3136,6 +3189,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.amountTowardsBalance = userEventData.amountTowardsBalance;
                     this.cashDue = userEventData.cashDue;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
+                    this.PaymentAmount = userEventData.PaymentAmount;
                     this.makeSalePay();
                 } else {
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
@@ -3196,7 +3250,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'Date': this.orderData.items[i]['ItemAddedAt'].toString(),
                     'TransactionNo': this.transactionNumber,
                     'TerminalName': this.terminalName,
-                    'MenuId': !this.orderData.items[i]['NoContributions'] ? this.selectedServingLine : null
+                    'MenuId': !this.orderData.items[i]['NoContributions'] ? this.selectedServingLine : null,
+                    'StatePriceTypeId': this.orderData.items[i]['StatePriceTypeId']
                 });
             }
 
@@ -3220,7 +3275,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'Name': systemMealName,
                     'IsPartOfMeal': false, // **verify
                     'Date': (new Date).getTime().toString(),
-                    'TransactionNo': this.transactionNumber
+                    'TransactionNo': this.transactionNumber,
+                    'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+
                 });
                 items.push({
                     'Price': this.systemMenuItem.Price,
@@ -3233,80 +3290,87 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TransactionNo': this.transactionNumber,
                     'TerminalName': this.terminalName,
                     'IsTaxable': this.systemMenuItem.IsTaxable,
-                    'MenuId': null
+                    'MenuId': null,
+                    'StatePriceTypeId': this.patronDetails.StatePriceTypeId
                 });
             }
+
             let paymentAmnt = this.orderData.totalAmount;
-            if (transactionType === 1) {
-                if (this.setting.EXNEGBAL === true) {
-                    if (this.isDepositByEXNEGBAL === true) {
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashTendAmount);
-                        } else {
-                            paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
-                            this.orderData.IsDeposit = true;
-                        }
-                    } else {
-                        // console.clear()
-                        // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashTendAmount);
-                        } else {
-                             /**
-                             * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-                             */
-                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
-                            //     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
 
-                            // } else {
-                            //     // console.clear()
-                            //     paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            // }
-
-                            /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
-                             * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
-                             */
-                            paymentAmnt = parseFloat(this.cashTendAmount) - this.cashDue;
-                        }
-                    }
-                } else {
-                    paymentAmnt = parseFloat(this.cashTendAmount);
-                    if (this.cashTendAmount > this.orderData.totalAmount) {
-                        if (this.orderData.IsDeposit === false) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                        if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                    }
-                }
-                /* not sure if to add this or not */
-                if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                    paymentAmnt = this.orderData.totalAmount;
-                }
-                /* not sure if to add this or not */
+            if (transactionType == 1) {
+                paymentAmnt = this.PaymentAmount
             }
+
+             /** Commented This code for PartialPaySetting - Start  */
+            // let paymentAmnt = this.orderData.totalAmount;
+            // if (transactionType === 1) {
+            //     if (this.setting.EXNEGBAL === true) {
+            //         if (this.isDepositByEXNEGBAL === true) {
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashTendAmount);
+            //             } else {
+            //                 paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
+            //                 this.orderData.IsDeposit = true;
+            //             }
+            //         } else {
+            //             // console.clear()
+            //             // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashTendAmount);
+            //             } else {
+            //                 /**
+            //                  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+            //                  */
+            //                 if (this.cashTendAmount < this.orderData.totalAmount) {
+            //                     paymentAmnt = parseFloat(this.cashTendAmount);
+
+            //                 } else {
+            //                     paymentAmnt = parseFloat(this.orderData.totalAmount);
+            //                 }
+            //                 //   this.orderData.IsDeposit = true
+            //             }
+            //         }
+            //     } else {
+            //         paymentAmnt = parseFloat(this.cashTendAmount);
+            //         if (this.cashTendAmount > this.orderData.totalAmount) {
+            //             if (this.orderData.IsDeposit === false) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //             if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //         }
+            //     }
+            //     /* not sure if to add this or not */
+            //     if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //         paymentAmnt = this.orderData.totalAmount;
+            //     }
+            //     /* not sure if to add this or not */
+            // }
 
             // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
-            AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL ) {
-                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
-            }
-            if (paymentAmnt > this.orderData.totalAmount) {
-                this.orderData.IsDeposit = true
-            }
+            // if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL ) {
+            //     paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            // }
+            // if (paymentAmnt > this.orderData.totalAmount) {
+            //     this.orderData.IsDeposit = true
+            // }
+
+            /** Commented This code for PartialPaySetting - End  */
+
+            
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
             }
+            AppStateService.set('TransactionNumber', this.transactionNumber);
 
             const updatedPatronDetails = Object.assign({}, this.patronDetails);
             const balance = this.patronDetails.Balance;
-            const payment = parseFloat(paymentAmnt.toFixed(2));
             const saleToatal = this.orderData.totalAmount;
             if (transactionType === 1) {
-                updatedPatronDetails.Balance = balance - (saleToatal - payment);
+                updatedPatronDetails.Balance = balance - (saleToatal - paymentAmnt);
             } else if (transactionType === 2) {
                 updatedPatronDetails.Balance = balance - saleToatal;
             }
@@ -3364,8 +3428,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'UserId': this.userId,
                     'PersonIdentifier': this.patronDetails.PersonIdentifier,
                     'OrderId': null,
-                    'OrderNumber':'',
+                    'OrderNumber': '',
                     'IsServed': false,
+                    'AppVersion': this.utilService.versionNumber,
+                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                     '_id': this.selectedAccountDetails._id
                 };
 
@@ -3383,7 +3449,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 AppStateService.set('TransactionNumber', this.transactionNumber);
             }
             this.saleData = {
-                'PaymentAmount': parseFloat(paymentAmnt.toFixed(2)),
+                'PaymentAmount': Math.round(paymentAmnt * 100) / 100,
                 'Balance': this.patronDetails.Balance,
                 'AccountId': this.patronDetails.AccountId,
                 'ServingSchoolId': this.schoolId,
@@ -3433,8 +3499,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 'UserId': this.userId,
                 'PersonIdentifier': this.patronDetails.PersonIdentifier,
                 'OrderId': null,
-                'OrderNumber':'',
+                'OrderNumber': '',
                 'IsServed': false,
+                'AppVersion': this.utilService.versionNumber,
+                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                 '_id': this.patronDetails._id
             };
 
@@ -4818,10 +4886,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public GetSystemMenuItemsPriceByPatron() {
         let cepPriceApply: boolean = false
-        let priceTypeId = this.patronDetails.PriceTypeId;
+        let priceTypeId = this.stateEigSetting ?
+            (this.patronDetails.StatePriceTypeId == null
+                || this.patronDetails.StatePriceTypeId == undefined) ?
+                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+            : this.patronDetails.PriceTypeId;
 
-        if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-            (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)) {
+        if (this.patronDetails.IsStudent === true) {
             if (this.patronDetails.IsSecondMeal === true) {
                 priceTypeId = this.secondMealPriceType;
 
@@ -5162,7 +5233,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             this.event.subscribe('menu_subcategory:select', (userEventData) => {
                                 this.event.destroy('menu_subcategory:select');
                                 if (userEventData.subgrid) {
-                                    const priceTypeId = this.patronDetails['PriceTypeId'];
+                                    const priceTypeId = this.stateEigSetting ?
+                                        (this.patronDetails.StatePriceTypeId == null
+                                            || this.patronDetails.StatePriceTypeId == undefined) ?
+                                            this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                                        : this.patronDetails.PriceTypeId;
 
                                     /*
                                      * Changes for getting the contribution values for Items selected from All Categories Button
@@ -5240,8 +5315,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
-
+        if (!isSecondMeal) {
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+        }
         let menuItemNo = 0;
         if (menuItem.RefId) {
             menuItemNo = menuItem.RefId;
@@ -5276,8 +5356,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                if ( this.patronDetails.IsStudent === true
                     && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
@@ -5427,7 +5506,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,
-                        'NoContributions': true
+                        'NoContributions': true,
+                        'StatePriceTypeId': this.patronDetails.StatePriceTypeId
 
                     });
                     this.isStaticMenuItemSelected = true;
@@ -5478,7 +5558,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 // this.utilService.showToast('The selected item is restricted for this patron.');
                 return;
             }
-            let priceTypeId = this.patronDetails['PriceTypeId'];
+            let priceTypeId =  this.patronDetails.PriceTypeId;
+            if (this.patronDetails['IsSecondMeal'] !== true) {
+                    priceTypeId = this.stateEigSetting ?
+                        (this.patronDetails.StatePriceTypeId == null
+                            || this.patronDetails.StatePriceTypeId == undefined) ?
+                            this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                        : this.patronDetails.PriceTypeId;
+            }
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
                 this.mealCount = 1;
@@ -5510,7 +5597,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         });
                     } else {
 
-                        priceTypeId = this.patronDetails['PriceTypeId'];
+                        // priceTypeId = this.stateEigSetting ?
+                        //     (this.patronDetails.StatePriceTypeId == null
+                        //         || this.patronDetails.StatePriceTypeId == undefined) ?
+                        //         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                        //     : this.patronDetails.PriceTypeId;
                         this.mealCount = this.mealCount + 1;
                         this.Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId);
                     }

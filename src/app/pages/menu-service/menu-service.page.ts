@@ -71,6 +71,7 @@ enum SuspiciousActivityTypes {
 export class MenuServicePage implements OnInit, OnDestroy {
     public printAllSetting: Number = 0;
     public localStorageValue: string = 'currentTab';
+    public PaymentAmount: number = 0.00;
 
 
     public ngOnInit() {
@@ -281,6 +282,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
+    public stateEigSetting: boolean = false;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -386,6 +388,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.printAllSetting = Number(SettingService.getSiteSettingValue('PRTALLTRA'));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
         this.hideStudentId = Boolean(parseInt(SettingService.getSiteSettingValue('HIDSTUID')));
+        this.stateEigSetting = Boolean(parseInt(SettingService.getSettingValue('STATEEIG')));
         //this.hideStudentId = true;
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
@@ -895,6 +898,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
             }
+            let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
+            if(inputDirId) {
+                this.patronDetails.InputDirection = inputDirId;
+                sessionStorage.removeItem(this.patronDetails.Identifier);
+            }
         }).catch((err) => {
             console.log('Error in gettng image ' + err);
             this.largeImageToShow = false;
@@ -1030,13 +1038,30 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public setCreditLimit() {
-        PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
+        const priceTypeId = this.stateEigSetting ?
+            (this.patronDetails.StatePriceTypeId == null
+                || this.patronDetails.StatePriceTypeId == undefined) ?
+                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+            : this.patronDetails.PriceTypeId;
+
+        PouchQueriesService.GetCreditLimit(priceTypeId, this.patronDetails.RDAGroupId,
             this.patronDetails.IsStudent, this.priceMode).then((res) => {
                 if (res.rows.length > 0) {
                     this.patronDetails['CreditLimit'] = res.rows[0].doc.CreditLimit;
                     this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
                 }
             }).catch(err => console.log(err));
+
+            // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
+        if (priceTypeId === this.patronDetails.StatePriceTypeId) {
+            PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
+                this.patronDetails.IsStudent, this.priceMode).then((res) => {
+                    if (res.rows.length > 0) {
+                        this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+                    }
+                }).catch(err => console.log(err));
+        }
+
     }
 
     // To set patron properties based on previous sales count
@@ -1793,7 +1818,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
-        if (!isSecondMeal) priceTypeId = this.patronDetails.PriceTypeId;
+        if (!isSecondMeal) {
+            priceTypeId = this.stateEigSetting ?
+                (this.patronDetails.StatePriceTypeId == null
+                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                : this.patronDetails.PriceTypeId;
+        }
         // this.utilService.setLoader(true);
         let menuItemNo = 0;
 
@@ -1825,6 +1856,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
 
+
             let secondmeal = false;
             let currPrice = 0;
             let cepPriceApply = false;
@@ -1840,8 +1872,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             currPaidMealPrice = this.paidMealPrice;
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                if ((this.patronDetails.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
-                    (this.patronDetails.isSpecialAccount === false && this.patronDetails.IsStudent === true)
+                if (this.patronDetails.IsStudent
                     && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
@@ -1992,7 +2023,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
-                        'CurrentPaidMealPrice': this.currPaidMealPrice
+                        'CurrentPaidMealPrice': this.currPaidMealPrice,
+                        'StatePriceTypeId': this.patronDetails.StatePriceTypeId
                     });
                 }
             } else {
@@ -2560,6 +2592,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.amountTowardsBalance = userEventData.amountTowardsBalance;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
                     this.cashDue = userEventData.cashDue;
+                    this.PaymentAmount = userEventData.PaymentAmount;
                     this.makeSalePay();
                 } else {
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
@@ -2631,6 +2664,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'MenuItemDescription': this.orderData.items[i]['Name'],
                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
+                            'StatePriceTypeId': this.orderData.items[i]['StatePriceTypeId'],
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
                             'TerminalName': this.terminalName,
@@ -2645,55 +2679,58 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
 
             let paymentAmnt = this.orderData.totalAmount;
-            if (transactionType === 1) {
-                if (this.setting.EXNEGBAL) {
-                    if (this.isDepositByEXNEGBAL === true) {
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashtendAmount);
-                        } else {
-                            paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
-                            this.orderData.IsDeposit = true;
-                        }
-                    } else {
-                        // console.clear()
-                        // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
-                        if (this.orderData.IsDeposit === true) {
-                            paymentAmnt = parseFloat(this.cashtendAmount);
-                        } else {
-                            /**
-                             * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-                             */
-                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
-                            //     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
 
-                            // } else {
-                            //     // console.clear()
-                            //     paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            // }
-
-                            /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
-                             * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
-                             */
-                            paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
-                        }
-                    }
-                } else {
-                    paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
-                    if (this.cashtendAmount > this.orderData.totalAmount) {
-                        // if (this.orderData.IsDeposit === false) {
-                        //     paymentAmnt = this.orderData.totalAmount;
-                        // }
-                        if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                            paymentAmnt = this.orderData.totalAmount;
-                        }
-                    }
-                }
-                /* not sure if to add this or not */
-                if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                    paymentAmnt = this.orderData.totalAmount;
-                }
-                /* not sure if to add this or not */
+            if (transactionType == 1) {
+                paymentAmnt = this.PaymentAmount
             }
+            /** Commented This code for PartialPaySetting - Start  */
+            // let paymentAmnt = this.orderData.totalAmount;
+            // if (transactionType === 1) {
+            //     if (this.setting.EXNEGBAL) {
+            //         if (this.isDepositByEXNEGBAL === true) {
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashtendAmount);
+            //             } else {
+            //                 paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
+            //                 this.orderData.IsDeposit = true;
+            //             }
+            //         } else {
+            //             // console.clear()
+            //             // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
+            //             if (this.orderData.IsDeposit === true) {
+            //                 paymentAmnt = parseFloat(this.cashtendAmount);
+            //             } else {
+            //                 /**
+            //                  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+            //                  */
+            //                 if (this.cashtendAmount <= this.orderData.totalAmount) {
+            //                     paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
+
+            //                 } else {
+            //                     // console.clear()
+            //                     paymentAmnt = parseFloat(this.orderData.totalAmount);
+            //                 }
+            //                 //   this.orderData.IsDeposit = true
+            //             }
+            //         }
+            //     } else {
+            //         paymentAmnt = parseFloat(this.cashtendAmount) - this.cashDue;
+            //         if (this.cashtendAmount > this.orderData.totalAmount) {
+            //             if (this.orderData.IsDeposit === false) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //             if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //                 paymentAmnt = this.orderData.totalAmount;
+            //             }
+            //         }
+            //     }
+            //     /* not sure if to add this or not */
+            //     if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+            //         paymentAmnt = this.orderData.totalAmount;
+            //     }
+            //     /* not sure if to add this or not */
+            // }
+            /** Commented This code for PartialPaySetting - End  */
 
 
             const now = new Date();
@@ -2704,13 +2741,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // let TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
             AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL) {
-                paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
-            }
-            if (paymentAmnt > this.orderData.totalAmount) {
-                this.orderData.IsDeposit = true
-            }
-
+            /** Commented This code for PartialPaySetting - Start  */
+            // if (this.cashtendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL) {
+            //     paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
+            // }
+            // if (paymentAmnt > this.orderData.totalAmount) {
+            //     this.orderData.IsDeposit = true
+            // }
+            /** Commented This code for PartialPaySetting - end  */
             // For visitor Sale using Student balance : Payment Amount should be Total Amount
             if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                 paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
@@ -2786,6 +2824,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'OrderId': null,
                     'OrderNumber': '',
                     'IsServed': false,
+                    'AppVersion': this.utilService.versionNumber,
+                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                     '_id': this.selectedAccountDetails._id
                 };
 
@@ -2855,6 +2895,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'OrderId': null,
                 'OrderNumber': '',
                 'IsServed': false,
+                'AppVersion': this.utilService.versionNumber,
+                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
                 '_id': this.patronDetails._id
             };
 

@@ -33,6 +33,7 @@ export class MenuGridComponent {
     @Input() mealCount: any;
     @Input() isSecondMeal: any;
     @Input() secondMealPriceType: any;
+    @Input() stateEigSetting: boolean
     @Output() changes: EventEmitter<MenuGridEvent> = new EventEmitter();
 
     constructor(
@@ -88,7 +89,11 @@ export class MenuGridComponent {
                 // this.utilService.showToast('Student restrictions do not allow the sale of this item.');
                 return;
             }
-            let priceTypeId = patronDetails['PriceTypeId'];
+            let priceTypeId = this.stateEigSetting ?
+                (patronDetails['StatePriceTypeId'] == null
+                    || patronDetails['StatePriceTypeId'] == undefined) ?
+                    patronDetails['PriceTypeId'] : patronDetails['StatePriceTypeId']
+                : patronDetails['PriceTypeId'];
 
             if (patronDetails['IsSecondMeal'] === true && mealCount === 0) {
                 this.changes.emit({
@@ -123,7 +128,12 @@ export class MenuGridComponent {
                         })
                     } else { // adult
 
-                        priceTypeId = patronDetails['PriceTypeId'];
+                        priceTypeId = this.stateEigSetting ?
+                            (patronDetails['StatePriceTypeId'] == null
+                                || patronDetails['StatePriceTypeId'] == undefined) ?
+                                patronDetails['PriceTypeId'] : patronDetails['StatePriceTypeId']
+                            : patronDetails['PriceTypeId'];
+                            
                         this.changes.emit({
                             type: MenuGridEventType.SetMealCount,
                             payload: mealCount + 1

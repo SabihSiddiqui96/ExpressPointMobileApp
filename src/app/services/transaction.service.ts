@@ -476,9 +476,11 @@ export interface TransactionDoc {
     UserId: string;
     PersonIdentifier: string;
     TerminalName: string;
-    OrderId: number| null;
+    OrderId: number | null;
     OrderNumber: string,
-    IsServed: boolean
+    IsServed: boolean,
+    AppVersion: string,
+    StatePriceTypeId: number | null
     _id: string;
 
 }

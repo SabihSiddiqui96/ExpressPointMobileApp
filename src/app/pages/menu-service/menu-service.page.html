@@ -9,7 +9,7 @@
         </app-service-toolbar>
         <ion-content vh-100 top-margin style="position:absolute">
             <app-menu-grid [menuGrid]="menuGrid" [patronDetails]="patronDetails" [orderData]="orderData"
-                [mealCount]="mealCount" [isSecondMeal]="isSecondMeal" [secondMealPriceType]="secondMealPriceType"
+                [mealCount]="mealCount" [isSecondMeal]="isSecondMeal" [secondMealPriceType]="secondMealPriceType" [stateEigSetting] = "stateEigSetting"
                 (changes)="onMenuGridEvent($event)">
             </app-menu-grid>
         </ion-content>

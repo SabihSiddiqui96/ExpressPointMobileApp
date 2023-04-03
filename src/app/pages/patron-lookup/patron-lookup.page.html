@@ -218,7 +218,7 @@
                     <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
                       placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
                       [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
-                      (keyup)="checkNumeric($event);handleKeyDown($event)">
+                      (keyup)="checkNumeric($event)">
                       <!-- (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -492,7 +492,7 @@
                   <ion-label slot="start" position="fixed">{{AdvancedPinLookupLabel}}</ion-label>
 
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
-                    (keyup)="checkNumeric($event);handleKeyDown($event)" (keypress)="keyUpPIN($event)"></ion-input>
+                    (keyup)="checkNumeric($event);"></ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
                     (click)="openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
@@ -710,7 +710,7 @@
                     <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
                       placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
                       [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
-                      (keyup)="checkNumeric($event);handleKeyDown($event)">
+                      (keyup)="checkNumeric($event)">
                       <!-- (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
@@ -798,7 +798,7 @@
                   <ion-label item-start fixed>{{AdvancedPinLookupLabel}}</ion-label>
 
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
-                    (keyup)="checkNumeric($event);handleKeyDown($event)" (keypress)="keyUpPIN($event)"></ion-input>
+                    (keyup)="checkNumeric($event)"></ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
                     (click)="openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>

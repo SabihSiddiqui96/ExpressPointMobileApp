@@ -99,7 +99,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public swapRight: boolean;
     public swapLeft: boolean;
     public switchHandsClicked: boolean = false;
-    public isCharAllowedInPin = true;
+    public isCharAllowedInPin = false;
 
     public alphaKeys = '';
     public keyboardVisible: boolean = false;
@@ -281,6 +281,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             else {
                 document.addEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
                 this.electronService.ipcRenderer.send('launch-peripheral-app');
+                document.addEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);  
             }
         }
         else {
@@ -307,6 +308,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
         this.getAllSiteSettings();
         this.GetSpecialAccounts();
+
+        this.isCharAllowedInPin = Boolean(parseInt(SettingService.getSettingValue('ALNUMPIN')));
 
         this.event.destroy('patronLookup:ready');
         this.event.subscribe('patronLookup:ready', (userEventData) => {
@@ -1051,7 +1054,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if ((this.selectedGrade === -1 || this.selectedGrade === 0) && this.selectedHomeroom !== -1) {
             this.utilService.setLoader(true);
 
-            PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.selectedHomeroomName).then((res) => {
+            PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.selectedHomeroomName, this.schoolId, this.selectedSite).then((res) => {
                 // this.patronSelectList = res.docs;
                 this.patronSelectList = res.docs.map((patron) => {
                     // this.utilService.isNetworkOnline().then((isNetworkOnline) => {
@@ -1433,7 +1436,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             let incomingID = '';
             if(this.isCharAllowedInPin) {
                 if (event.keyCode === 8 || event.keyCode === 13 ||
-                    (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 97 && event.keyCode <= 122) || (event.keyCode >= 96 && event.keyCode <= 105)) {
+                    (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 97 && event.keyCode <= 122) || (event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 96 && event.keyCode <= 105)) {
                     // event.keyCode == 46 (backspace)
                     this.inputBuffer.push(event);
                     if (event.keyCode === 13) {
@@ -1451,7 +1454,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
                             this.lookUpService.setQ(queueInput);
-                            this.lookUpService.showModalPopup = false;
+                            this.utilService.showModalPopup = false;
                         }
                         incomingID = '';
                         this.inputBuffer = [];
@@ -1498,7 +1501,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
                             this.lookUpService.setQ(queueInput);
-                            this.lookUpService.showModalPopup = false;
+                            this.utilService.showModalPopup = false;
                         }
                         incomingID = '';
                         this.inputBuffer = [];
@@ -1727,7 +1730,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             if(this.isCharAllowedInPin) {
                 if (!event.shiftKey && !event.altKey && !event.ctrlKey &&
                     // numbers   
-                    key >= 48 && key <= 57 || (key >= 97 && key <= 122) ||
+                    key >= 48 && key <= 57 || (key >= 97 && key <= 122) || (key>=65 && key<=90) ||
                     // Backspace and Tab and Enter
                     key == 8 || key == 9 || key == 13 
                 ) {
@@ -1923,13 +1926,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.enablePinSchool = true;
                     } else {
                         this.enablePinSchool = false;
-                    }
-                break;
-                case SiteSettingCodes[SiteSettingCodes.ALNUMPIN]:
-                    if (setting.SiteSettingValue === "1") {
-                        this.isCharAllowedInPin = true;
-                    } else {
-                        this.isCharAllowedInPin = false;
                     }
                 break;
                 case SiteSettingCodes[SiteSettingCodes.SRCHBYPIN]:

@@ -37,6 +37,7 @@ export class LocalTimerService {
 
         return currentTime
     })
+
     public static getUTCTime = (() => { return new Date().getTime() })
     public static GetLocalDateAsString = (() => { return new Date().toLocaleDateString() })
     public static GetLocalDateTimeAsString = (() => { return new Date().toLocaleDateString() })
