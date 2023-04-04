@@ -175,7 +175,7 @@
                               
                           <ion-col style="width: 7rem;">
                               
-                              <ion-avatar item-start *ngIf="(this.navType=='patronPatron' || this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' )">
+                              <ion-avatar item-start *ngIf="this.navOptionList.includes(this.navType)">
                                   <img src="{{patron.Image}}" *ngIf="patron.Image">
                                   <img src="assets/img/default_male.png"
                                       *ngIf="!patron.Image && patron.Gender === 'M'">
@@ -218,7 +218,7 @@
         <ion-col>
           <ion-item lines="none" [style.background-color]="list.BackColor">
             <ion-avatar slot="start" class="avatar-small"
-              *ngIf="(this.navType=='patronPatron' || this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' ) && !this.isGridView">
+              *ngIf="(this.navOptionList.includes(this.navType) ) && !this.isGridView">
               <img src="{{list.Image}}" *ngIf="list.Image">
               <img src="assets/img/default_male.png" *ngIf="!list.Image && list.Gender === 'M'">
               <img src="assets/img/default_female.png" *ngIf="!list.Image && list.Gender === 'F'">
