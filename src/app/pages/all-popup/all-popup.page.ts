@@ -35,6 +35,7 @@ export class AllPopupPage implements OnInit {
     @Input() page;
     @Input() selectedValue;
     isGridView = true;
+    navOptionList = ['patronPatron','patronSpecialRosterPersonList','patronlist'];
 
     ngOnInit() {
         this.isElectron = this.utilService.isElectronApp();
