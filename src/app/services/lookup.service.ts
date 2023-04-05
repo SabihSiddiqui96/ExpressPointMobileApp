@@ -524,17 +524,8 @@ export class LookupService {
     }
 
     public getSettingValuesRequired() {
-        // // if (this.serveInactiveStudents == null) {
-        // this.getSettingValue('SERINACSTU').then(s => { this.serveInactiveStudents = parseInt(s); });
-        // // }
-        // // if (this.useExactPIN == null) {
-        // this.getSettingValue('POSEXCTPIN').then(s => { this.useExactPIN = parseInt(s); });
-        // // }
-        // if (this.canServeVisitingPatrons == null && AppStateService.get('login_details')) {
-        //   this.canServeVisitingPatrons = JSON.parse(AppStateService.get('Settings'));.canServeVisitingPatrons;
-        // }
+       
         this.useExactPIN = parseInt(SettingService.getSettingValue('POSEXCTPIN'));
-        // SERINACSTU - Setting has been moved at site level rather than district level
         this.serveInactiveStudents = parseInt(SettingService.getSiteSettingValue('SERINACSTU'));
         this.canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
         this.CanServeVisitingAdults = SettingService.isUserPermitted('OTHRSADLT');
@@ -641,7 +632,7 @@ export class LookupService {
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
-                        if (this.lookupResults.length === 0) {
+                        if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.CanServeVisitingAdults)) {
                             this.patronFromServer(firstname, lastname, externalId, selectedsite);
                         }
                         this.handlePersonResults(true).then(() => {

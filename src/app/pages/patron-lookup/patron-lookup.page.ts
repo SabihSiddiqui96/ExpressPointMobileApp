@@ -1057,23 +1057,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             PouchQueriesService.GetStudentsForClassroomSaleByHomeroomName(this.selectedHomeroomName, this.schoolId, this.selectedSite).then((res) => {
                 // this.patronSelectList = res.docs;
                 this.patronSelectList = res.docs.map((patron) => {
-                    // this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                    //     if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
-                    //         if (patron['Image'] === null || patron['Image'] === undefined) {
-
-                    //             this.http.GetPersonImage(patron.PersonId).subscribe(data => {
-                    //                 if (data != null) {
-                    //                     console.log(data);
-                    //                     patron.Image = data;
-                    //                 }
-                    //             }, e => { console.log(e); }, () => {
-                    //             });
-                    //         }
-                    //         // PouchQueriesService.DifferentialUpsertForPersonImage(HPList);
-                    //     }
-
-                    // });
-
                     patron['value'] = patron.PersonId;
                     patron['label'] = patron.PersonName;
                     patron['PreviousSales'] = patron.PreviousSales;
@@ -1101,25 +1084,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.utilService.setLoader(true);
             this.selectedHomeroom = parseInt(this.selectedHomeroom);
             PouchQueriesService.GetStudentsForClassroomSale(this.selectedHomeroom).then((res) => {
-                // this.patronSelectList = res.docs;
                 this.patronSelectList = res.docs.map((patron) => {
-                    // this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                    //     if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
-                    //         if (patron['Image'] === null || patron['Image'] === undefined) {
-
-                    //             this.http.GetPersonImage(patron.PersonId).subscribe(data => {
-                    //                 if (data != null) {
-                    //                     console.log(data);
-                    //                     patron.Image = data;
-                    //                 }
-                    //             }, e => { console.log(e); }, () => {
-                    //             });
-                    //         }
-                    //         // PouchQueriesService.DifferentialUpsertForPersonImage(HPList);
-                    //     }
-
-                    // });
-
                     patron['value'] = patron.PersonId;
                     patron['label'] = patron.PersonName;
                     patron['PreviousSales'] = patron.PreviousSales;
@@ -1127,7 +1092,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     return patron;
                 });
 
-                // console.clear()
                 this.patronSelectList = _.sortBy(this.patronSelectList, ['label']);
                 this.personlist = this.patronSelectList;
 
@@ -1156,7 +1120,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         });
     }
     public onChangeSpecialRoster(selectedSpecialRosterId) {
-        // console.clear()
         PouchQueriesService.GetPatronsBySpecialRoster(selectedSpecialRosterId).then(res => {
 
             this.specialRosterPersonList = res.docs.map(doc => {
@@ -1197,32 +1160,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             if (this.specialRosterPersonList.length === 0) {
                 this.popupMessageService.showMessage(PopupMessageCode.E18497);
                 // this.utilService.showToast('No students in this Special Roster');
-            } else {
-                // this.specialRosterPersonList.map(student => {
-                //     this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                //         if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
-
-                //             this.http.GetPersonImage(student.PersonId).subscribe(data => {
-                //                 if (data != null) {
-                //                     console.log(data);
-                //                     student.Image = data;
-
-                //                 }
-                //             }, e => { console.log(e); }, () => {
-                //             });
-                //             //  PouchQueriesService.DifferentialUpsertForPersonImage(SPPList);
-
-                //         }
-                //     });
-
-                // });
-            }
+            } 
             if (this.returnToWhatPage === 'SpecialRoster') {
                 this.showPopup('patronSpecialRosterPersonList');
             }
 
         });
-        // AppStateService.remove('SpecialRosterId');
 
     }
     public selectSpecialRosterPatron() {
