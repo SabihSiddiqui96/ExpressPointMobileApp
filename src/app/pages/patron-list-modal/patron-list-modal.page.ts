@@ -25,7 +25,9 @@ export class PatronListModalPage implements OnInit {
     ngOnInit() {
         this.navPatronList = this.patron_list;
         this.searchResultCount = this.navPatronList.length;
-        this.isFromServer = this.navPatronList['0'].IsFromServer ? true : false;
+        if(this.navPatronList && this.navPatronList.length > 0) {
+            this.isFromServer = this.navPatronList['0'].IsFromServer ? true : false;
+        }
         this.navIsFromQueue = this.isFromQueue;
         this.navIsFromAdvPatronSearch = this.isFromAdvPatronSearch;
         this.navAllowVisitingPatron = this.allowVisitingPatron;
