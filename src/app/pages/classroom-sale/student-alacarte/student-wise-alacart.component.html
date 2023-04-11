@@ -1,5 +1,5 @@
-<ion-row>
-      <ion-card class="ion-card" style="margin: 0px !important;height: 25rem; width: 100%;">
+<ion-row style="height: 100%;">
+      <ion-card class="ion-card" style="margin: 0px !important;height: auto; width: 100%;">
         <ion-card-header 
           class="section">
           
@@ -9,7 +9,7 @@
         </ion-card-header>
         <ion-list *ngFor="let item of studentWiseAlaCarte; let i = index" style="padding: 0px !important;">
         <ion-row *ngIf="item.personId == student.PersonId && item.open && item.alaCartItemCount > 0">
-          <ion-col size="12" size-md="12">
+          <ion-col size="12" size-md="12" style="overflow-y: scroll; height: 30vh;">
             <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
               <ion-button fill="clear" color="danger"
               (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
