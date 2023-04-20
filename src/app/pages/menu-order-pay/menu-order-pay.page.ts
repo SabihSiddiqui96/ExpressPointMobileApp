@@ -1028,8 +1028,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
 
         if (this.navIsSpecialAccount && this.showPatron && this.showSelectAccount) {
-            this.navOrderData.IsCard = false;
-            this.navOrderData.IsCheck = false;
+            // this.navOrderData.IsCard = false;
+            // this.navOrderData.IsCheck = false;
             // this.cashtendAmount = 0.00;
             this.eventPublish();
             return;
@@ -1159,57 +1159,78 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
     public finalCheckOrderData() {
         return new Promise((resolve) => {
+            if (!this.navOrderData.IsCheck && !this.navOrderData.IsCard && !(this.isPrincipleAccountClicked)) {
 
-            this.navOrderData.IsDeposit = this.depositChangeDue;
-            this.paymentAmnt = this.orderData.totalAmount;
-            if (this.EXNEGBAL) {
-                if (this.isDepositByEXNEGBAL === true) {
-                    if (this.orderData.IsDeposit === true) {
-                        this.paymentAmnt = this.cashtendAmount;
+                this.navOrderData.IsDeposit = this.depositChangeDue;
+                this.paymentAmnt = this.orderData.totalAmount;
+                if (this.EXNEGBAL) {
+                    if (this.isDepositByEXNEGBAL === true) {
+                        if (this.orderData.IsDeposit === true) {
+                            this.paymentAmnt = this.cashtendAmount;
+                        } else {
+                            this.paymentAmnt = parseFloat(Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) + this.orderData.totalAmount);
+                            this.orderData.IsDeposit = true;
+                        }
                     } else {
-                        this.paymentAmnt = parseFloat(Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) + this.orderData.totalAmount);
-                        this.orderData.IsDeposit = true;
+                        if (this.orderData.IsDeposit === true) {
+                            this.paymentAmnt = this.cashtendAmount;
+                        } else {
+                            // /**
+                            //  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+                            //  */
+                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
+                            //     this.paymentAmnt = this.cashtendAmount - this.changeDue;
+
+                            // } else {
+                            //     this.paymentAmnt = parseFloat(this.orderData.totalAmount);
+                            // }
+
+
+                            /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
+                                * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
+                                */
+                            this.paymentAmnt = this.cashtendAmount - this.changeDue;
+                        }
                     }
                 } else {
-                    if (this.orderData.IsDeposit === true) {
-                        this.paymentAmnt = this.cashtendAmount;
-                    } else {
-                        // /**
-                        //  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-                        //  */
-                        // if (this.cashtendAmount <= this.orderData.totalAmount) {
-                        //     this.paymentAmnt = this.cashtendAmount - this.changeDue;
-
-                        // } else {
-                        //     this.paymentAmnt = parseFloat(this.orderData.totalAmount);
+                    this.paymentAmnt = this.cashtendAmount - this.changeDue;
+                    if (this.cashtendAmount > this.orderData.totalAmount) {
+                        // if (this.orderData.IsDeposit === false) {
+                        //     this.paymentAmnt = this.orderData.totalAmount;
                         // }
-
-
-                        /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
-                            * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
-                            */
-                        this.paymentAmnt = this.cashtendAmount - this.changeDue;
+                        if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
+                            this.paymentAmnt = this.orderData.totalAmount;
+                        }
                     }
                 }
-            } else {
-                this.paymentAmnt = this.cashtendAmount - this.changeDue;
-                if (this.cashtendAmount > this.orderData.totalAmount) {
-                    // if (this.orderData.IsDeposit === false) {
-                    //     this.paymentAmnt = this.orderData.totalAmount;
-                    // }
-                    if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                        this.paymentAmnt = this.orderData.totalAmount;
-                    }
+
+                if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
+                    this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
                 }
             }
             /* not sure if to add this or not */
-            if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                this.paymentAmnt = this.orderData.totalAmount;
+            if (this.navOrderData.IsCheck === true) {
+                if (this.cashtendAmount > this.navOrderData.totalAmount) {
+                    this.paymentAmnt = this.cashtendAmount;
+                    this.navOrderData.IsDeposit = true;
+                    this.depositAmount = '$' + (+this.cashtendAmount - this.navOrderData.totalAmount)
+                    this.changeDue = 0.00;
+                    this.isDepositByEXNEGBAL = false
+                } else {
+                    this.paymentAmnt = this.navOrderData.totalAmount;
+                    this.navOrderData.IsDeposit = false;
+                    this.depositAmount = '$0.00';
+                    this.changeDue = 0.00;
+                }
+            }
+            if (this.navOrderData.IsCard === true) {
+                this.paymentAmnt = this.navOrderData.totalAmount;
+                this.navOrderData.IsDeposit = false;
+                this.depositAmount = '$0.00';
+                this.changeDue = 0.00;
             }
 
-            if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
-                this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
-            }
+
 
             /* not sure if to add this or not */
             resolve(null);
