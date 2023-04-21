@@ -2019,7 +2019,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'IniTotalPrice': itemPrice,
                         'IsStudent': this.patronDetails.IsStudent,
                         'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
-                        'ItemAddedAt': (new Date).getTime(),  // epoch timestamp at the time of adding item to the sale
+                        'ItemAddedAt': LocalTimerService.getTime('time'),  // epoch timestamp at the time of adding item to the sale
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
@@ -3326,7 +3326,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = LocalTimerService.getTime('time');
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

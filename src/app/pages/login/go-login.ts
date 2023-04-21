@@ -527,7 +527,7 @@ export class GoLogin implements OnDestroy {
                             this.disableLogin = false;
                             this.canProceed = false;
                             this.loginDetails.NoFailedAttempts = this.loginDetails.NoFailedAttempts + 1;
-                            this.loginDetails.LastFailedLoginDate = new Date().getTime();
+                            this.loginDetails.LastFailedLoginDate = LocalTimerService.getTime('time');
                             this.utilService.showToast('UserName/Password Combination is not correct. Please try again.');
 
 

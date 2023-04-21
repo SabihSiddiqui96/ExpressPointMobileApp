@@ -1348,7 +1348,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = LocalTimerService.getTime('time');
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

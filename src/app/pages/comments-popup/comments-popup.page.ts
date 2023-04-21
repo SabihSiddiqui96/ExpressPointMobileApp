@@ -13,6 +13,7 @@ import { PouchQueriesService } from '../../services/Database/pouch-queries.servi
 import { PouchDBService, EXP_TRANSACTIONS, EXP_COMMON } from '../../services/pouch-db.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 
 @Component({
@@ -56,7 +57,7 @@ export class CommentsPopupPage implements OnInit {
     });
     this.reView[`Comments`] = this.comment;
     this.reViewReasonDoc = {
-      '_id': 'Review--' + new Date().getTime(),
+      '_id': 'Review--' + LocalTimerService.getTime('time'),
       'Review': this.reView
     };
 

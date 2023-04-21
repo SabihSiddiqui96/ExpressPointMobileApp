@@ -9,6 +9,7 @@ import { SessionCardDoc, TransactionService } from '../../services/transaction.s
 import { SettingService } from '../../services/setting.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 @Component({
   selector: 'app-close-session-card',
@@ -83,7 +84,7 @@ export class CloseSessionCardPage implements OnInit {
       }
 
       amnt = parseFloat(amnt);
-      const createdDate = new Date().getTime();
+      const createdDate = LocalTimerService.getTime('time');
 
       const sessionCardDoc: SessionCardDoc = {
         '_id': 'SessionCard--' + createdDate,

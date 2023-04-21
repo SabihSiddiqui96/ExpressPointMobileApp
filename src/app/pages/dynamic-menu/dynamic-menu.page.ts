@@ -465,9 +465,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.GetDaySelection();
 
             this.terminalDefaultMenu = [];
-
             const now = new Date();
-            const UTC = now.getTime();
+            const UTC = LocalTimerService.getTime('time');
             const localOffset = (-1) * now.getTimezoneOffset() * 60000;
             const currentDate = new Date(UTC + localOffset);
 
