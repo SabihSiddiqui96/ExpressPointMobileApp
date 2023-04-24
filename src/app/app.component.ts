@@ -1236,6 +1236,7 @@ export class AppComponent {
               this.pouchQuery.PostTransactions().then(() => {
                 this.pouchQuery.PostReviewReason().then(() => { });
                 this.pouchQuery.PostTerminalStatus().then(() => { });
+                this.pouchQuery.PostVersionUpdateStatus().then(() => { });
                 this.pouchQuery.PostSessionCheck().then(() => { });
                 this.pouchQuery.PostSessionCard().then(() => { });
                 this.pouchQuery.PostClassRoomSales().then(() => {

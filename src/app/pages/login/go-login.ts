@@ -42,6 +42,7 @@ export class GoLogin implements OnDestroy {
     public passwordType: string = 'password';
     public passwordIcon: string = 'eye-off';
     public LoginWithoutSetup: boolean = false;
+    terminalId: Number;
 
 
     constructor(public _nav: NavController, public loading: LoadingController, public alertCtrl: AlertController,
@@ -191,7 +192,20 @@ export class GoLogin implements OnDestroy {
                     subscribe
                     (
                         data => {
-                            if (data.access_token) {
+                            if (data.access_token) {                                
+                                let appVersion = this.utilService.versionNumber;
+                                // let isIOS = this.utilService.isPlatformIos();
+                                // let isAndroid = this.utilService.isPlatformAndroid();
+                                if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') != null) {
+                                    this.terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
+                                    if (this.utilService.isElectronApp()) {
+                                        appVersion = this.utilService.getAppVersion();
+                                    }
+                                    if (appVersion == null || appVersion == undefined) {
+                                        appVersion ="0.0.0"
+                                    } 
+                                    this.deviceService.SaveVersionUpdateStatus('VersionUpdate--1',this.terminalId, appVersion, false).then(() => { });
+                                }
                                 AppStateService.set('access_token', data.access_token);
                                 AppStateService.set('login_details', JSON.stringify(data));
                                 UtilService.userNameLoggedIn = data.UserDetails.userName;

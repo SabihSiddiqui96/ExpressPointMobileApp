@@ -155,7 +155,7 @@ export class PouchQueriesService {
             && (RegExp(lastNameRegex, 'igm').test(obj.LastName))
             && ((RegExp(externalIdRegex, 'i').test(obj.PersonIdentifier) && (SearchByPin === '1' || SearchByPin === '-1')
               || (RegExp(externalIdRegex, 'i').test(obj.Identifier) && (SearchByPin === '0' || SearchByPin === '-1')
-            && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId))))) {
+                && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId))))) {
             SearchKeys.push(obj.id);
             return true;
           } else {
@@ -670,7 +670,7 @@ export class PouchQueriesService {
             return false;
           }
         }
-       
+
       });
 
       resolve(searchResult);
@@ -1226,6 +1226,15 @@ export class PouchQueriesService {
       include_docs: true
     });
   }
+
+  public static GetVersionUpdateRecord() {
+    return EXP_SYSTEM.allDocs({
+      startkey: 'VersionUpdate--',
+      endkey: 'VersionUpdate\uffff',
+      include_docs: true
+    });
+  }
+
   //#endregion: SummarySale
   //#region : Sync
   public static GetDataforofflineUse() {
@@ -1562,7 +1571,7 @@ export class PouchQueriesService {
   }
 
   public PostDeviceHeartBeat() {
-    
+
     const heartBeatTime = LocalTimerService.getCurrentTime();
 
     let deviceInfo;
@@ -1617,6 +1626,38 @@ export class PouchQueriesService {
         } else {
           resolve(null);
         }
+      });
+    });
+  }
+
+  public PostVersionUpdateStatus() {
+    return new Promise((resolve, reject) => {
+      PouchQueriesService.GetVersionUpdateRecord().then((res) => {
+        const versionStatus = res.rows.map(row => row.doc);
+        if (versionStatus.length > 0) {
+          versionStatus.map((doc) => {
+            if (doc.IsSynced === false) {
+              let deviceInfo;
+              if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') != null) {
+                deviceInfo = JSON.parse(AppStateService.get('DeviceInfo'));
+              }
+              if (deviceInfo) {
+                doc.TerminalId = deviceInfo.TerminalId;
+                this.http.SaveAppVersion(doc).subscribe(
+                  data => {
+                    console.log('Posted Version Update Status' + JSON.stringify(data));
+                    doc.IsSynced = true;
+                    PouchDBService.UpsertSingleDoc(doc, EXP_SYSTEM).then(() => { resolve(null); });
+                  },
+                  error => { console.log(error); },
+                  () => {
+                    resolve(null);
+                  });
+              }
+            }
+          });
+        }
+
       });
     });
   }

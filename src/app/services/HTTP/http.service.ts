@@ -571,6 +571,11 @@ export class HttpService {
         ).pipe(map(res => res));
     }
 
+    public SaveAppVersion(versionData) {
+        return this.http.post(API_URL + 'SaveVersionUpdateLog', versionData
+        ).pipe(map(res => res));
+    }
+
     public SaveTerminalStatus(terminalStatusModel): any {
         return this.http.post(API_URL + 'SaveTerminalStatusModel', terminalStatusModel
         ).pipe(map(res => res));

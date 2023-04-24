@@ -3368,6 +3368,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
         /**************************keep this?****************************** */
         if (this.orderData.items.length === 0) {
+            //checking for special account doesnot have any items
+            if(this.patronDetails.isSpecialAccount == true){
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                return;
+            }
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
@@ -3409,6 +3414,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public showQ() {
         if (this.orderData.items.length === 0) {
+            //checking for special account doesnot have any items
+            if(this.patronDetails.isSpecialAccount == true){
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                return;
+            }
             this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             this.lookUpService.populatePersonsFromQ();
 
