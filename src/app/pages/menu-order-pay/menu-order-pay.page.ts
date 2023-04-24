@@ -1225,6 +1225,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             }
             if (this.navOrderData.IsCard === true) {
                 this.paymentAmnt = this.navOrderData.totalAmount;
+                this.navOrderData.CardNumber = this.cashCardNum
+                this.navOrderData.IsCard = true
                 this.navOrderData.IsDeposit = false;
                 this.depositAmount = '$0.00';
                 this.changeDue = 0.00;
