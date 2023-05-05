@@ -1210,6 +1210,30 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
                 this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
             }
+            /* not sure if to add this or not */
+            if (this.navOrderData.IsCheck === true) {
+                if (this.cashtendAmount > this.navOrderData.totalAmount) {
+                    this.paymentAmnt = this.cashtendAmount;
+                    this.navOrderData.IsDeposit = true;
+                    this.depositAmount = '$' + (+this.cashtendAmount - this.navOrderData.totalAmount)
+                    this.changeDue = 0.00;
+                    this.isDepositByEXNEGBAL = false
+                } else {
+                    this.paymentAmnt = this.navOrderData.totalAmount;
+                    this.navOrderData.IsDeposit = false;
+                    this.depositAmount = '$0.00';
+                    this.changeDue = 0.00;
+                }
+            }
+            if (this.navOrderData.IsCard === true) {
+                this.paymentAmnt = this.navOrderData.totalAmount;
+                this.navOrderData.CardNumber = this.cashCardNum
+                this.navOrderData.IsCard = true
+                this.navOrderData.IsDeposit = false;
+                this.depositAmount = '$0.00';
+                this.changeDue = 0.00;
+            }
+
 
             /* not sure if to add this or not */
             resolve(null);
