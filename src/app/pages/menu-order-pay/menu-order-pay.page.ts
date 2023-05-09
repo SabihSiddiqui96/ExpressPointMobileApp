@@ -1235,10 +1235,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                     this.changeDue = 0.00;
                 }
             }
-
-
-
-            /* not sure if to add this or not */
             resolve(null);
         })
     }
