@@ -1028,9 +1028,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
 
         if (this.navIsSpecialAccount && this.showPatron && this.showSelectAccount) {
-            this.navOrderData.IsCard = false;
-            this.navOrderData.IsCheck = false;
-            // this.cashtendAmount = 0.00;
             this.eventPublish();
             return;
         }
