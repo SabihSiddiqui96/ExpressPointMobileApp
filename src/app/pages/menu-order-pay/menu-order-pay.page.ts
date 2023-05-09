@@ -1219,7 +1219,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                     this.isDepositByEXNEGBAL = false
                 } else {
                     this.paymentAmnt = this.navOrderData.totalAmount;
-                    this.navOrderData.IsDeposit = false;
+                    this.navOrderData.IsDeposit = true;
                     this.depositAmount = '$0.00';
                     this.changeDue = 0.00;
                 }
@@ -1228,7 +1228,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.paymentAmnt = this.navOrderData.totalAmount;
                 this.navOrderData.CardNumber = this.cashCardNum
                 this.navOrderData.IsCard = true
-                this.navOrderData.IsDeposit = false;
+                this.navOrderData.IsDeposit = true;
                 this.depositAmount = '$0.00';
                 this.changeDue = 0.00;
             }

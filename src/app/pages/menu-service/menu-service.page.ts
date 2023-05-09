@@ -899,7 +899,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.largeImageIsShowing = false;
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
-            if(inputDirId) {
+            if (inputDirId) {
                 this.patronDetails.InputDirection = inputDirId;
                 sessionStorage.removeItem(this.patronDetails.Identifier);
             }
@@ -1052,7 +1052,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }).catch(err => console.log(err));
 
-            // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
+        // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
         if (priceTypeId === this.patronDetails.StatePriceTypeId) {
             PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
                 this.patronDetails.IsStudent, this.priceMode).then((res) => {
@@ -2803,8 +2803,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'IsfromSameDay': false,
                     'IsProcessed': false,
                     'TerminalName': this.terminalName,
-                    'IsCard': false,
-                    'CardNumber': "",
+                    'IsCard': this.orderData.IsCard,
+                    'CardNumber': this.orderData.CardNumber,
                     'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toFixed(2),
                     'DepositAmount': this.cashtendAmount,
                     'NewBalance': (parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString())).toFixed(2),
