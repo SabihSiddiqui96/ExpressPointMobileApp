@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { PouchQueriesService } from '../services/Database/pouch-queries.service';
-import { AlertController, NavController } from '@ionic/angular';
+import { AlertController, ModalController, NavController } from '@ionic/angular';
 import { AppStateService } from './app-state.service';
 import { HttpService } from '../services/HTTP/http.service';
 import { PouchDBService, EXP_TRANSACTIONS } from '../services/pouch-db.service';
@@ -9,6 +9,10 @@ import { UtilService } from '../services/util.service';
 import { Events as CustomEvents } from '../services/events.service';
 import { ElectronService } from './electron.service';
 import { Observable, Subject } from 'rxjs';
+import { LookupService } from './lookup.service';
+import { TimerComponent } from '../pages/menu-service/components/timer-modal/timer-modal.component';
+import { CreditCardTransactionService } from './Credit-Card-Transaction.service'
+import { CCTransactionStatusType } from './enums/Credit-Card-Transaction-Status-Types';
 import { LocalTimerService } from './local-timer.service';
 import { PrintReceiptTypes } from './enums/print-receipt-types';
 
@@ -25,7 +29,9 @@ export class TransactionService {
 
     constructor(private http: HttpService, private pouchQuery: PouchQueriesService,
         private utilService: UtilService, private electronService: ElectronService,
-        private alertCtrl: AlertController, private event: CustomEvents, private navCtrl: NavController) {
+        private alertCtrl: AlertController, private event: CustomEvents,
+        private navCtrl: NavController, public lookUpService: LookupService,
+        private modalCtrl: ModalController, public creditCardTransactionService: CreditCardTransactionService) {
 
         if (this.utilService.isElectronApp()) {
             this.electronService.ipcRenderer.on('Check-For-transactions', () => {
@@ -418,7 +424,105 @@ export class TransactionService {
         });
     }
 
+    public SendSquareTransaction(squareTransaction: SquareTransactionDoc) {
+        return new Promise((resolve) => {
+            this.http.SendSquareTransaction(squareTransaction).subscribe
+                (
+                    (data) => {
+                        // this.creditCardTransactionService.SquareTransactionStatusSubject.subscribe(value => {
+                        //     if (value) {
+                        //         if (value != CCTransactionStatusType.PENDING && value !== CCTransactionStatusType.IN_PROGRESS) {
+                        //             // this.dismissPopup();
+                        //             resolve(value);
+                        //         }
+                        //     } else {
 
+                        //     }
+                        // })
+                        resolve(null);
+
+                    },
+                    error => {
+                        console.log(error);
+                        resolve(null);
+                    });
+        });
+    }
+
+    public CalculatePaymentAmountMenuService(orderData, transactionType, PaymentAmount, selectedAccountDetails) {
+        let paymentAmnt = orderData.totalAmount;
+
+        if (transactionType == 1) {
+            paymentAmnt = PaymentAmount
+        }
+        // let paymentAmnt = orderData.totalAmount;
+        // if (transactionType === 1) {
+        //     if (EXNEGBAL) {
+        //         if (isDepositByEXNEGBAL === true) {
+        //             if (orderData.IsDeposit === true) {
+        //                 paymentAmnt = parseFloat(cashtendAmount);
+        //             } else {
+        //                 paymentAmnt = parseFloat(amountTowardsBalance + orderData.totalAmount);
+        //                 orderData.IsDeposit = true;
+        //             }
+        //         } else {
+        //             if (orderData.IsDeposit === true) {
+        //                 paymentAmnt = parseFloat(cashtendAmount);
+        //             } else {
+        //                 /**
+        //                  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
+        //                  */
+        //                 if (cashtendAmount < orderData.totalAmount) {
+        //                     paymentAmnt = parseFloat(cashtendAmount);
+
+        //                 } else {
+        //                     paymentAmnt = parseFloat(orderData.totalAmount);
+        //                 }
+        //                 //   orderData.IsDeposit = true
+        //             }
+        //         }
+        //     } else {
+        //         paymentAmnt = parseFloat(cashtendAmount);
+        //         if (cashtendAmount > orderData.totalAmount) {
+        //             if (orderData.IsDeposit === false) {
+        //                 paymentAmnt = orderData.totalAmount;
+        //             }
+        //             if (patronDetails.isSpecialAccount === true && orderData.IsCheck === true) {
+        //                 paymentAmnt = orderData.totalAmount;
+        //             }
+        //         }
+        //     }
+        //     /* not sure if to add this or not */
+        //     if (patronDetails.isSpecialAccount === true && orderData.IsCheck === true) {
+        //         paymentAmnt = orderData.totalAmount;
+        //     }
+        //     /* not sure if to add this or not */
+        // }
+
+        // if (cashtendAmount > orderData.totalAmount && amountTowardsBalance > 0) {
+        //     paymentAmnt = orderData.totalAmount + amountTowardsBalance;
+        // }
+
+
+        // // For visitor Sale using Student balance : Payment Amount should be Total Amount
+        // if (this.lookUpService.menuPayselectAccountClick === true && selectedAccountDetails.PersonId !== '') {
+        //     paymentAmnt = orderData.totalAmount; // + amountTowardsBalance
+        // }
+        // For visitor Sale using Student balance : Payment Amount should be Total Amount
+        if (this.lookUpService.menuPayselectAccountClick === true && selectedAccountDetails.PersonId !== '') {
+            paymentAmnt = orderData.totalAmount; // + this.amountTowardsBalance
+        }
+
+
+        return paymentAmnt
+    }
+
+    public CalculateIsDepositValue(paymentAmnt, orderData) {
+        if (paymentAmnt > orderData.totalAmount) {
+            return true
+        }
+        return false;
+    }
 }
 
 
@@ -540,3 +644,30 @@ export class SuspiciousTransactionDoc {
     public SuspiciousActivityType: number;
     public Comment: string;
 }
+
+
+@Injectable()
+export class SquareTransactionDoc {
+    public checkout: Checkout;
+    public idempotency_key: string;
+
+}
+
+@Injectable()
+export class Checkout {
+    public amount_money: AmountMoney;
+    public device_options: DeviceOptions;
+    public reference_id: string
+}
+
+@Injectable()
+export class AmountMoney {
+    public amount: number;
+    public currency: string;
+}
+@Injectable()
+export class DeviceOptions {
+    public device_id: string;
+}
+
+

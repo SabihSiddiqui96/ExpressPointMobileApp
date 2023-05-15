@@ -340,7 +340,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
-        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService: LogsDBService,
+        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService:  LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
@@ -3172,7 +3172,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'canLoadPrevPatron': this.canLoadPrevPatron,
                     'lastPatronDetails': this.lastPatron,
                     'selectedPatronDetails': this.utilService.selectAccountClick === true ? this.selectedAccountDetails : null,
-                    'showPatron': this.utilService.selectAccountClick === true ? true : false
+                    'showPatron': this.utilService.selectAccountClick === true ? true : false,
+                    'squareReferenceId': this.deviceTransactionId
                 }
             }).then(async (res) => {
                 await res.present();

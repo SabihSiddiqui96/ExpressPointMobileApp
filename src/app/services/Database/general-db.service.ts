@@ -29,7 +29,8 @@ export class GeneralDBService {
     const promises = [this.SyncAllEXPSettings(), this.SyncDenominations(),
     this.SyncSiteDetails(), this.SyncMealTypes(),
     this.SyncCreditLimits(), this.SyncGrades(), this.SyncRdaGroupsBySchool(), this.SyncPriceTypes(), this.SyncPopupMessages(),
-    this.SyncHomeRooms(), this.SyncSpecialRosters(), this.SyncReviewTypes(), this.SyncAllSiteSettings()];
+    this.SyncHomeRooms(), this.SyncSpecialRosters(), this.SyncReviewTypes(), this.SyncAllSiteSettings(),
+    this.GetSellerRelatedData()];
     /*, this.SyncPopupMessages() -- Commenting this code for ExpressPoint Release to work*/
     if (isOrderingEnabled) {
       promises.push(this.SyncOrders());
@@ -78,6 +79,41 @@ export class GeneralDBService {
           error => {
             this.syncStatus = 'Failed';
             this.events.publish('data:syncDetails', { SiteSettings: { SyncAllEXPSettings: "F" } });
+            console.log(error);
+            resolve(null);
+          });
+    });
+  }
+
+  public GetSellerRelatedData() {
+    let sellerDetailsDoc = {}
+    this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "S" } });
+    const terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId
+    return new Promise((resolve, reject) => {
+
+      this.http.GetSellerRelatedData(terminalId).
+        subscribe
+        (
+          data => {
+            if (data != null) {
+              sellerDetailsDoc = {
+                'AuthorizationToken': data.AuthorizationToken,
+                'ApiURL': data.ApiURL,
+                'RegionId': data.RegionId,
+                'DeviceId': data.DeviceId
+              };
+
+              AppStateService.set("SellerDetails", JSON.stringify(sellerDetailsDoc))
+            }
+
+            this.syncStatus = 'Success';
+            this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "D" } });
+            resolve(null);
+
+          },
+          error => {
+            this.syncStatus = 'Failed';
+            this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "F" } });
             console.log(error);
             resolve(null);
           });
@@ -601,30 +637,6 @@ export class GeneralDBService {
     });
   }
 
-
-
-
-  // public SyncSiteSettings() {
-  //   return new Promise((resolve, reject) => {
-  //     if (AppStateService.get('SelectedSite')) {
-  //       this.http.GetSiteSettings().subscribe(siteSettings => {
-  //         AppStateService.set('SiteSettings', JSON.stringify(siteSettings));
-  //         this.syncStatus = 'Success';
-  //         resolve(null);
-
-  //       },
-  //         error => {
-  //           this.syncStatus = 'Failed';
-  //           console.log(error);
-  //           resolve(null);
-  //         });
-  //     } else {
-  //       this.syncStatus = 'Failed';
-  //       resolve(null);
-
-  //     }
-  //   });
-  // }
 
   public SyncAllSiteSettings() {
     this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings: "S" } });

@@ -127,11 +127,17 @@
               [ngClass]="cardNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'"
               [(ngModel)]="cashCardNum" id="card" placeholder="Last 4 digits of card"
               style="width: -webkit-fill-available" appKeyDownEvent> -->
-            <ion-label class="ion-text-right" width-100 (click)="changeActiveInput('card')"
+            <ion-label *ngIf="!SquareSetting" class="ion-text-right" width-100 (click)="changeActiveInput('card')"
               [ngClass]="cardNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
               {{cashCardNum}} <input type="text" placeholder="Last 4 digits of card" class='placeholder-input-label'
                 disabled />
             </ion-label>
+            <div *ngIf="SquareSetting" style="text-align: center;padding:5rem 5rem 3rem 5rem;">
+              <label style="padding:0.5rem;">Square Transaction in Progress ...</label><br /><br />
+              <label style="font-size: 24px;font-weight: bold;">{{counter | formatTime}}</label>
+              <ion-button *ngIf="ShowSquareRetry" (click)="makeSale(true)">Retry Square Transaction
+              </ion-button>
+            </div>
           </ion-item>
         </ion-list>
       </ion-card>
@@ -308,8 +314,8 @@
 
         Use Principal Account
       </ion-button>
-      <ion-button size="large" color="slate" (click)="makeSale()" style="font-size: 135%;"
-        [disabled]="checkPayDisable() || saveInProgress || isCompleteTransactionProcessing">
+      <ion-button size="large" color="slate" (click)="makeSale(ShowSquareRetry)" style="font-size: 135%;"
+        [disabled]="checkPayDisable() || saveInProgress || isCompleteTransactionProcessing || ShowSquareRetry">
         Complete Transaction
         <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
       </ion-button>

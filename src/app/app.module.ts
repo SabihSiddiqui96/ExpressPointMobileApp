@@ -100,6 +100,9 @@ import { HashingService } from './services/hashing.service'
 import { LocalTimerService } from './services/local-timer.service';
 import { DeviceControlsService } from './services/device-controls.service';
 import { HasPropPipe } from './pipes/hasProperty.pipe';
+import { TimerComponent } from './pages/menu-service/components/timer-modal/timer-modal.component';
+import { FormatTimePipe } from './pipes/format-time.pipe';
+import { CreditCardTransactionService } from './services/Credit-Card-Transaction.service';
 import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
@@ -149,6 +152,8 @@ import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-ala
         CloseSessionPage,
         QuickClassroomSalePage,
         HasPropPipe,
+        FormatTimePipe,
+        TimerComponent,
         StudentWiseAlacarteComponent
     ],
     entryComponents: [
@@ -200,7 +205,8 @@ import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-ala
         SummarySalePage,
         TabsPage,
         CloseSessionPage,
-        QuickClassroomSalePage
+        QuickClassroomSalePage,
+        TimerComponent
         /** Components */
     ],
     imports: [
@@ -264,6 +270,7 @@ import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-ala
         LocalTimerService,
         SystemDBService,
         DeviceControlsService,
+        CreditCardTransactionService,
         { provide: HTTP_INTERCEPTORS, useClass: HttpInterceptorService, multi: true },
         [{ provide: ErrorHandler, useClass: ErrorHandler },
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }]

@@ -448,6 +448,14 @@ export class HttpService {
     }
 
 
+    public GetSellerRelatedData(terminalId): any {
+        return this.http.get(API_URL + 'GetSellerRelatedData/' + terminalId).pipe(map(res => res));
+    }
+
+    public GetCCTransactionStatusFromPrimero(referenceId): any {
+        return this.http.get(API_URL + 'GetCCTransactionStatusFromSquare/' + referenceId).pipe(map(res => res));
+    }
+
     //#endregion: GETs
 
     //#region:POSTs
@@ -607,6 +615,23 @@ export class HttpService {
             JSON.stringify(passwordData),
         ).pipe(map(res => res));
     }
+
+    public SendSquareTransaction(TransactionData): any {
+        const ApiURL = JSON.parse(AppStateService.get("SellerDetails")).ApiURL
+        return this.http.post(ApiURL,
+            JSON.stringify(TransactionData),
+        ).pipe(map(res => res));
+    }
+    public CancelSquareTransaction(checkoutId): any {
+        const ApiURL = JSON.parse(AppStateService.get("SellerDetails")).ApiURL
+        return this.http.post(ApiURL + '/' + checkoutId + '/cancel', {}).pipe(map(res => res));
+    }
+    public GetSquareTransactionStatusFromSquare(checkoutId): any {
+        const ApiURL = JSON.parse(AppStateService.get("SellerDetails")).ApiURL
+        return this.http.get(ApiURL + '/' + checkoutId).pipe(map(res => res));
+    }
+
+
 
     //#endregion: POSTs
 }

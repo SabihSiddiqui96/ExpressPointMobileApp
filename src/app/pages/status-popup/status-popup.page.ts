@@ -149,6 +149,9 @@ export class StatusPopupPage implements OnInit {
                                 case 'SyncOrders':
                                     this.progressSiteSettingsLabels.set(key, 'Orders');
                                     break;
+                                    case 'GetSellerRelatedData':
+                                        this.progressSiteSettingsLabels.set(key, 'Seller Data');
+                                        break;
                                 default:
                                     this.progressSiteSettingsLabels.set(key, key);
                                     break;
