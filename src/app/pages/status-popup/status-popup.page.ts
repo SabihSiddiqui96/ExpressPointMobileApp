@@ -33,6 +33,7 @@ export class StatusPopupPage implements OnInit {
         this.detailSyncStatus.set("DynamicMenusDB", new Map<string, string>());
         this.detailSyncStatus.set("SetupPersonDB", new Map<string, string>());
         this.detailSyncStatus.set("SetupUsersDB", new Map<string, string>());
+        this.detailSyncStatus.set("DeviceSettings", new Map<string, string>());
         if (
             AppStateService.get("DeviceInfo") !== undefined ||
             AppStateService.get("DeviceInfo") != null
@@ -276,6 +277,23 @@ export class StatusPopupPage implements OnInit {
                             this.progressSetupUsersDBLabel.delete(key);
                         }
                     }
+                    else if (data.DeviceSettings) {
+                        const key = Object.keys(data.DeviceSettings)[0];
+                        this.detailSyncStatus.get("DeviceSettings").set(key, data.DeviceSettings[key]);
+                        if (!this.progressDeviceSettingsLabel.get(key)) {
+                            switch (key) {
+                                case 'SyncAllDeviceSettings':
+                                    this.progressDeviceSettingsLabel.set(key, 'DeviceSettings');
+                                    break;
+                                default:
+                                    this.progressDeviceSettingsLabel.set(key, key);
+                                    break;
+                            }
+                        }
+                        if (data.DeviceSettings[key][Object.keys(data.DeviceSettings[key])[0]] === 'D') {
+                            this.progressDeviceSettingsLabel.delete(key);
+                        }
+                    }
                 });
             }
             this.progressSiteSettingsCurrent = this.progressSiteSettingsTotal - this.progressSiteSettingsLabels.size;
@@ -283,6 +301,7 @@ export class StatusPopupPage implements OnInit {
             this.progressDynamicMenusDBCurrent = this.progressDynamicMenusDBTotal - this.progressDynamicMenusDBLabels.size;
             this.progressSetupPersonDBCurrent = this.progressSetupPersonDBTotal - this.progressSetupPersonDBLabels.size;
             this.progressSetupUsersDBCurrent = this.progressSetupUsersDBTotal - this.progressSetupUsersDBLabel.size;
+            this.progressDeviceSettingsCurrent = this.progressDeviceSettingsTotal - this.progressDeviceSettingsLabel.size;
         });
     }
 
@@ -307,6 +326,9 @@ export class StatusPopupPage implements OnInit {
     public progressSetupUsersDBCurrent = 0;
     public progressSetupUsersDBTotal = 1;
     public progressSetupUsersDBLabel = new Map<string, string>();
+    public progressDeviceSettingsCurrent = 0;
+    public progressDeviceSettingsTotal = 1;
+    public progressDeviceSettingsLabel = new Map<string, string>();
     public showDetailProgressType = 1; // 0 - do not show text, 1 - show text together, 2 - show individual text
 
     constructor(

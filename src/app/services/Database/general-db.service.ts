@@ -30,7 +30,7 @@ export class GeneralDBService {
     this.SyncSiteDetails(), this.SyncMealTypes(),
     this.SyncCreditLimits(), this.SyncGrades(), this.SyncRdaGroupsBySchool(), this.SyncPriceTypes(), this.SyncPopupMessages(),
     this.SyncHomeRooms(), this.SyncSpecialRosters(), this.SyncReviewTypes(), this.SyncAllSiteSettings(),
-    this.GetSellerRelatedData()];
+    this.GetSellerRelatedData(),this.SyncAllDeviceSettings()];
     /*, this.SyncPopupMessages() -- Commenting this code for ExpressPoint Release to work*/
     if (isOrderingEnabled) {
       promises.push(this.SyncOrders());
@@ -659,6 +659,59 @@ export class GeneralDBService {
       } else {
         this.syncStatus = 'Failed';
         this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings: "F" } });
+        resolve(null);
+
+      }
+    });
+  }
+
+  public SyncAllDeviceSettings() {
+    const settings = [];
+    this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "S" } });
+    return new Promise((resolve, reject) => {
+
+      if (AppStateService.get('DeviceInfo')) {
+        this.http.GetAllDeviceSettings().subscribe(allDeviceSettings => {        
+          if (allDeviceSettings != null) {
+            let deviceInfo;
+            if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') != null) {
+              deviceInfo = JSON.parse(AppStateService.get('DeviceInfo'));
+            }
+            AppStateService.set('AllDeviceSettings', JSON.stringify(allDeviceSettings));
+            allDeviceSettings.map(setting => {
+              const devSettingDoc = {
+                '_id': 'DeviceSetting' + setting.DeviceSettingCode.trim().toUpperCase(),
+                'DeviceSettingCode': setting.DeviceSettingCode.trim().toUpperCase(),
+                'DeviceSettingDescription': setting.DeviceSettingDescription,
+                'DeviceSettingValue': setting.DeviceSettingValue,
+                'DeviceSettingId': setting.DeviceSettingId,
+                'IsSynced':true,
+                'TerminalId' : deviceInfo.TerminalId
+              };
+              settings.push(devSettingDoc);
+            });
+          }
+          if (settings.length > 0) {
+            this.syncStatus = 'Success';
+            PouchDBService.UpsertDocs(settings, EXP_COMMON).then(() => {
+              this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "D" } });
+              resolve(null);
+            });
+          } else {
+            this.syncStatus = 'Success';
+            this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "D" } });
+            resolve(null);
+          }
+        },
+          error => {
+            this.syncStatus = 'Failed';
+            console.log(error);
+            this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "F" } });
+            resolve(null);
+          });
+      } else {
+        this.syncStatus = 'Failed';
+        this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "F" } });
         resolve(null);
 
       }

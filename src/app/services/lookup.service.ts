@@ -251,7 +251,7 @@ export class LookupService {
                 component: PatronListModalPage,
                 componentProps: {
                     'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
-                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
+                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed
                 },
                 showBackdrop: true,
                 backdropDismiss: false,
@@ -459,10 +459,8 @@ export class LookupService {
                         this.http.PatronLookup(pin, schoolId).
                             subscribe
                             (
-                                data => {
-                                    this.loader.dismiss();
+                                data => {                                  
                                     this.lookupResults = data.patrons;
-
                                     if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
                                         this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
                                     }

@@ -17,6 +17,7 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { DeviceConfigurationPage } from '../device-configuration/device-configuration.page';
 import { SetupDbService } from '../../services/setup-db.service';
+import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 
 @Component({
   selector: 'app-device-controls',
@@ -24,10 +25,12 @@ import { SetupDbService } from '../../services/setup-db.service';
   styleUrls: ['./device-controls.page.scss'],
 })
 export class DeviceControlsPage implements OnInit {
+  isGridView:boolean;
 
 
-
-  ngOnInit() {
+  ngOnInit() {    
+        const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
+        this.isGridView = isGridViewParent;
   }
 
   /**
@@ -382,4 +385,22 @@ export class DeviceControlsPage implements OnInit {
       })
     }
   }
+
+  public OnChangePatronDisplay(event) {
+    const isPicture = event.detail['checked'];
+    let deviceSetting = isPicture == true ? '1' : '0';   
+    AppStateService.set("GridViewPatronIsPic", isPicture);
+    let settings = AppStateService.get('AllDeviceSettings');
+    settings = JSON.parse(settings);
+    let setting = settings.filter(s => {
+      return s.DeviceSettingCode.trim().toUpperCase() === 'PATDISLP';
+    });
+    if (setting.length > 0) {
+      setting[0].DeviceSettingValue = deviceSetting;
+      AppStateService.set('AllDeviceSettings', JSON.stringify(settings));
+      AppStateService.set('IsDeviceSettingsChanged', 1);
+    }
+    this.deviceService.SaveDeviceSettingToPouchDB('PATDISLP', deviceSetting).then(() => { });
+  }
+
 }

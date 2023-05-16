@@ -194,9 +194,7 @@ export class AppComponent {
       .pipe(distinctUntilChanged())
       .subscribe((value) => {
         let evenType;
-        debugger;
         if (value == true) {
-          debugger;
           AppStateService.set("HeartBeatLastOfflineDate", LocalTimerService.getTime('time'));
           evenType = "disconnect";
         } else {
@@ -1237,6 +1235,7 @@ export class AppComponent {
                 this.pouchQuery.PostReviewReason().then(() => { });
                 this.pouchQuery.PostTerminalStatus().then(() => { });
                 this.pouchQuery.PostVersionUpdateStatus().then(() => { });
+                this.pouchQuery.PostDeviceSettings().then(() => { });
                 this.pouchQuery.PostSessionCheck().then(() => { });
                 this.pouchQuery.PostSessionCard().then(() => { });
                 this.pouchQuery.PostClassRoomSales().then(() => {

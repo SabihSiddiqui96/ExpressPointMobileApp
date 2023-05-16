@@ -436,6 +436,14 @@ export class HttpService {
             return this.http.get(API_URL + 'GetAllSiteSettings/' + schoolId).pipe(map(res => res));
         }
     }
+
+    public GetAllDeviceSettings(): any {
+        const terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;        
+        if (terminalId) {
+            return this.http.get(API_URL + 'GetAllDeviceSettings/' + terminalId).pipe(map(res => res));
+        }
+    }
+
     public GetAllUsers(): any {
         const schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
 
@@ -581,6 +589,11 @@ export class HttpService {
 
     public SaveAppVersion(versionData) {
         return this.http.post(API_URL + 'SaveVersionUpdateLog', versionData
+        ).pipe(map(res => res));
+    }
+
+    public SaveDeviceSetting(deviceSetting) {
+        return this.http.post(API_URL + 'SaveDeviceSetting', deviceSetting
         ).pipe(map(res => res));
     }
 

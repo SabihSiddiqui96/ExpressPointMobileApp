@@ -86,4 +86,21 @@ export class SettingService {
     }
 
   }
+
+  public static getDeviceSettingValue(deviceSettingCode) {
+    if (AppStateService.get('AllDeviceSettings')) {
+      const siteSettings = JSON.parse(AppStateService.get('AllDeviceSettings'));
+      const setting = siteSettings.filter(s => {
+        return s.DeviceSettingCode.trim().toUpperCase() === deviceSettingCode.trim().toUpperCase();
+      });
+      if (setting.length > 0) {
+        return setting[0].DeviceSettingValue;
+      } else {
+        return '0';
+      }
+    }
+    else{
+      return '0';
+    }
+  }
 }

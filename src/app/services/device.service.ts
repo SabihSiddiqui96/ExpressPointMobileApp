@@ -18,7 +18,7 @@ import { Events } from './events.service';
 import { Status } from './enums/device-status';
 import { HashingService } from './hashing.service';
 import { PouchQueriesService } from './Database/pouch-queries.service';
-import { PouchDBService, EXP_SYSTEM } from './pouch-db.service';
+import { PouchDBService, EXP_SYSTEM, EXP_COMMON } from './pouch-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -619,13 +619,30 @@ export class DeviceService {
               if(doc.CodeVersion != versionupdatedoc.CodeVersion){
               doc.IsSynced = false;
               doc.CodeVersion = versionupdatedoc.CodeVersion;
-              PouchDBService.UpsertSingleDoc(versionupdatedoc, EXP_SYSTEM).then(() => { resolve(null); });             
+              PouchDBService.UpsertSingleDoc(doc, EXP_SYSTEM).then(() => { resolve(null); });             
               }
             });
           }
           else{
             PouchDBService.UpsertSingleDoc(versionupdatedoc, EXP_SYSTEM).then(() => { resolve(null); });
           }  
+        });
+    });
+  }
+
+  public SaveDeviceSettingToPouchDB(code, value) {
+    return new Promise((resolve) => {      
+        PouchQueriesService.GetDeviceSettingByCode(code).then((res) => {
+          const patronDisplay = res.rows.map(row => row.doc);
+          if (patronDisplay.length > 0) {
+            patronDisplay.map((doc) => {
+              if(doc.DeviceSettingValue != value){
+              doc.IsSynced = false;
+              doc.DeviceSettingValue = value;
+              PouchDBService.UpsertSingleDoc(doc, EXP_COMMON).then(() => { resolve(null); });             
+              }
+            });
+          }
         });
     });
   }

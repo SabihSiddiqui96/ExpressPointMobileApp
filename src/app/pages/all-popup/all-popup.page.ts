@@ -34,10 +34,13 @@ export class AllPopupPage implements OnInit {
     @Input() data;
     @Input() page;
     @Input() selectedValue;
-    isGridView = true;
+    isGridView : boolean;
     navOptionList = ['patronPatron','patronSpecialRosterPersonList','patronlist'];
 
     ngOnInit() {
+        const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
+        const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
+        this.isGridView = (gridViewPatronIsPic != null && gridViewPatronIsPic != undefined) ? Boolean(gridViewPatronIsPic) : isGridViewParent;
         this.isElectron = this.utilService.isElectronApp();
         this.navType = this.type;
         this.isPatronType = this.checkType();
@@ -375,6 +378,7 @@ export class AllPopupPage implements OnInit {
 
     toggleView() {
         this.isGridView = !this.isGridView;
+        AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
 
     public ionViewDidLeave() {

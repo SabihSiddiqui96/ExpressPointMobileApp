@@ -468,7 +468,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.customKeys += key;
             this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
-
+            this.inputBuffer=[];
             this.lookupByPIN();
             this.customKeys = '';
         } else if (key === 'X') {
@@ -727,6 +727,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.GetHomeRoomsByGrade();
         this.patronSelectList = [];
         this.personlist = [];
+        this.inputBuffer=[];
         this.patronSearch.keyword = null;
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
@@ -735,6 +736,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public advancePatronClick() {
         AppStateService.set('currentTab', 'advanced');
+        this.inputBuffer=[];
         // this.returnToWhatPage
         this.patronSearch.keyword = null;
         this.patronSearch.externalId = null;
@@ -744,6 +746,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.setActiveField('externalId');
         setTimeout(() => {
             if (!this.utilService.isElectronApp()) {
+                if(this.patronPinId != null && this.patronPinId != undefined)
                 this.patronPinId.setFocus();
             }
         }, 500);
@@ -1140,9 +1143,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 //     'SchoolId': doc.SchoolId,
                 //     'Identifier': doc.Identifier
                 // };
-            });
-            console.log('Special Roaster List' + JSON.stringify(this.specialRosterPersonList));
-
+            });            
             const canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
 
             /*if (!canServeVisitingPatrons && this.setting.CanServeVisitingAdults === true) {
@@ -1361,7 +1362,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.lookupByPIN();
             }
         }
-    }
+    }   
+
     public onPeripheralKey(event) {
         if (!this.router.url.includes('payments')) {
             this.logDBService.logData({
@@ -1396,7 +1398,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput);
+                            this.lookUpService.setQ(queueInput);                                                      
                             this.utilService.showModalPopup = false;
                         }
                         incomingID = '';
@@ -1443,7 +1445,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput);
+                            this.lookUpService.setQ(queueInput);                             
                             this.utilService.showModalPopup = false;
                         }
                         incomingID = '';

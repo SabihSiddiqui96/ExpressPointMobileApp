@@ -163,8 +163,8 @@
         </div>
         
 
-
-        <ion-row *ngIf="isPatronType && isGridView && (this.navType === 'patronlist' || this.navType === 'patronSpecialRosterPersonList')">
+      <div style="width: 100%;">
+        <ion-row *ngIf="isPatronType && isGridView && (this.navType === 'patronlist' || this.navType === 'patronSpecialRosterPersonList')" style="width: 100%;">
           <ion-row style="width: 100%;">
               <ion-col style="max-height: 12rem;" sizeLg="3" sizeMd="3" sizeXs="6"
                   *ngFor="let patron of lists;let i=index;">
@@ -210,7 +210,7 @@
               </ion-col>
           </ion-row>
         </ion-row>
-
+      </div>
       <div *ngIf="(navType === 'patronlist' || navType === 'patronSpecialRosterPersonList') && !isGridView">
         <ion-row *ngFor=" let list of lists; let i=index;" class="minHeight bg-border"
         [attr.ion-justify-content-center]="isPatronType" [attr.ion-align-items-center]="isPatronType"

@@ -364,6 +364,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetDeviceSettingByCode(settingCode) {
+    return EXP_COMMON.allDocs({
+      startkey: 'DeviceSetting' + settingCode,
+      endkey: 'DeviceSetting' + settingCode + '\uffff',
+      include_docs: true
+    });
+  }
+
   public static GetStudentInfo(personId) {
 
     const args = {
@@ -1235,6 +1243,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetDeviceSettingToSync() {
+    return EXP_COMMON.allDocs({
+      startkey: 'DeviceSetting',
+      endkey: 'DeviceSetting\uffff',
+      include_docs: true
+    });
+  }
+
   //#endregion: SummarySale
   //#region : Sync
   public static GetDataforofflineUse() {
@@ -1659,6 +1675,33 @@ export class PouchQueriesService {
         }
 
       });
+    });
+  }
+
+  public PostDeviceSettings() {    
+    return new Promise((resolve, reject) => {   
+      let devSettingChanged = AppStateService.get('IsDeviceSettingsChanged');
+      if(devSettingChanged != null && devSettingChanged != undefined && devSettingChanged == 1){
+        PouchQueriesService.GetDeviceSettingToSync().then((res) => {
+          const devSetting = res.rows.map(row => row.doc);
+          if (devSetting.length > 0) {
+            devSetting.map((doc) => {        
+              if (doc.IsSynced === false) {  
+                this.http.SaveDeviceSetting(doc).subscribe(
+                  data => {                   
+                    doc.IsSynced = true;
+                    PouchDBService.UpsertSingleDoc(doc, EXP_COMMON).then(() => { resolve(null); });
+                  },
+                  error => { console.log(error); },
+                  () => {
+                    resolve(null);
+                  });
+                }
+            });
+          }
+        });
+        AppStateService.set('IsDeviceSettingsChanged', 0);
+      }
     });
   }
 

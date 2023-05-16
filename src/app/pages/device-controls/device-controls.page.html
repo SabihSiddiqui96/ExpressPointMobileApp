@@ -44,6 +44,13 @@
           </ion-toggle>
         </ion-item>
 
+        <ion-item lines="none" class="bg-transparent" *ngIf='isUserLoggedIn && this.utilService.isAppOnline' style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Patron Display : List </ion-label>       
+          <ion-toggle color="slate" [checked]="isGridView" (ionChange)="OnChangePatronDisplay($event)">          
+          </ion-toggle>
+          Picture
+        </ion-item>
+
         <ion-item *ngIf='isElectronApp && MULTIREAD' lines="none" class="bg-transparent" style="padding-top: 4px;">
           <ion-label class="ion-text-end" position="bottom">Use Plug and Play Peripherals</ion-label>
           <ion-toggle slot="end" color="slate" [(ngModel)]="pnpPeripherals" (ionChange)="configurePeripherals()">

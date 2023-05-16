@@ -1328,7 +1328,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             PouchQueriesService.GetPaymentSettings().
                 then((data) => {
-                    this.paymentValidation = data.rows[0].doc.PaymentSettings;
+                    if(data.rows.length > 0)
+                      this.paymentValidation = data.rows[0].doc.PaymentSettings;
                     resolve(null);
                 })
                 .catch((err) => { console.log(err); resolve(null); });
@@ -3425,7 +3426,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
         if (this.orderData.items.length === 0) {
             //checking for special account doesnot have any items
-            if (this.patronDetails.isSpecialAccount == true) {
+            if(this.patronDetails.isSpecialAccount == true){
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }

@@ -12,13 +12,13 @@
     </ion-toolbar>
 </ion-header>
 <ion-content>
-    <p padding *ngIf="filteredPatronList.length == 0">
+    <p class="ion-padding" *ngIf="filteredPatronList.length == 0">
         No patron(s) found for this search criteria.
     </p>
     <ion-list>
         <ion-grid>
             <ion-row lines="none" bold class="bg-transparent ion-no-padding">
-                <ion-col text-wrap size="5" style="padding-left: 16px;"
+                <ion-col class="ion-text-wrap" size="5" style="padding-left: 16px;"
                     *ngIf="!isFromServer && !navIsFromQueue && navAllowVisitingPatron" (click)="serverLookup()">
                     <ion-label bold style="margin: 13px 8px 13px 0; line-height: 1.5;">Click here if you can't find the
                         Student?
@@ -61,10 +61,6 @@
                 </ion-col>
             </ion-row>
         </ion-grid>
-
-
-       
-
                 <ion-grid>
                     <ion-row>
                         <div *ngIf="!isGridView" style="width: 100% !important;">
@@ -130,11 +126,11 @@
                 
                         </ion-row>
                         </div>
-                        <ion-row *ngIf="isGridView">
+                    <div *ngIf="isGridView" style="width: 100% !important;">
+                        <ion-row style="width: 100% !important;">
                             <ion-col style="max-height: 12rem;" sizeLg="3" sizeMd="3" sizeXs="6"
                                 *ngFor="let patron of filteredPatronList;let i=index;">
-                            <ion-card (click)="selectPatron(patron,i)" class="ion-justify-content-center card-size bg-border" style="height: 10rem;width:20rem;"
-                                align-items-center>
+                            <ion-card (click)="selectPatron(patron,i)" class="ion-align-items-center ion-justify-content-center card-size bg-border" style="height: 10rem;width:20rem;">
                                 <ion-grid>
                                     <ion-row>
                                             <div style="position: absolute;">
@@ -181,6 +177,7 @@
                             </ion-card>
                         </ion-col>
                     </ion-row>
+                </div>
                     </ion-row>
                 </ion-grid>
             
