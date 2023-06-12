@@ -25,7 +25,7 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'ionic cordova build'
+    script: 'ionic cordova build android'
 
 - task: Npm@0
   inputs:
