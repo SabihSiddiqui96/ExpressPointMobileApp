@@ -23,9 +23,15 @@ steps:
     command: 'install'
     arguments: 'ionic -g'
 
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    customCommand: 'install cordova -g'
+
 - task: CmdLine@2
   inputs:
     script: 'ionic cordova build android'
+
 
 - task: Npm@0
   inputs:
