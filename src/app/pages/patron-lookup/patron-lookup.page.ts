@@ -1316,8 +1316,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public showGradePopup(patron) {
             this.GetGradesBySchool().then(()=>{
-                const postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
-
+                let postData = { };
+                if(patron.isSpecialAccount == true){
+                    const gradesData = this.gradeList.filter(item => item.GradeId !== 0);
+                    postData = { 'type': 'patronGrade', 'data': gradesData, 'selectedValue': this.selectedGrade };
+                }
+                else{
+                    postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
+                }
                 if (postData['data'].length > 0) {
                     const popover = this.popoverCtrl.create({
                         component: AllPopupPage,
