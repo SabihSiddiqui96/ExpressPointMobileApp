@@ -28,11 +28,6 @@ steps:
     command: 'custom'
     customCommand: 'install cordova@10.0.0 -g'
 
-
-- task: CmdLine@2
-  inputs:
-    script: 'ionic cordova build android'
-
 - task: Npm@0
   inputs:
     command: 'custom'
