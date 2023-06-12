@@ -26,8 +26,8 @@ steps:
 - task: Npm@1
   inputs:
     command: 'custom'
-    customCommand: 'install cordova@<version> -g'
-  # Replace <version> with the desired version of Cordova
+    customCommand: 'install cordova@10.0.0 -g'
+
 
 - task: CmdLine@2
   inputs:
