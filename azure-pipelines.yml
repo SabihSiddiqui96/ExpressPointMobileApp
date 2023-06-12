@@ -35,13 +35,14 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'ionic cordova build'
+    script: 'ionic cordova build ios'
 
 - task: Npm@0
   inputs:
     cwd: 'electron'
     command: 'install'
-    arguments: '-prod'
+    arguments: '--prod'
+
 
 - task: NuGetCommand@2
   inputs:
