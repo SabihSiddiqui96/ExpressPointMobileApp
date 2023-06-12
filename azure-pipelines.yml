@@ -18,6 +18,11 @@ steps:
     versionSource: 'spec'
     versionSpec: '10.9'
 
+- task: Npm@0
+  inputs:
+    command: 'custom'
+    arguments: 'install ionic -g'
+
 - task: Npm@1
   inputs:
     command: 'custom'
