@@ -20,8 +20,8 @@ steps:
 
 - task: Npm@0
   inputs:
-    command: 'custom'
-    arguments: 'install -g ionic'
+    command: 'install'
+    arguments: 'ionic -g'
 
 - task: Npm@1
   inputs:
