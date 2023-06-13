@@ -5,9 +5,7 @@ variables:
   BuildNumberFormat: '$(BuildDefinitionName)_$(ReleaseNumber).$(SprintNumber).$(HotfixNumber).$(Date:MMdd)$(Rev:r)'
 
 pool:
-  name: PrimeroEdge
-  agent:
-    name: Agent
+  vmImage: 'windows-latest'
 
 steps:
 - checkout: self
