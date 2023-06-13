@@ -5,7 +5,7 @@ variables:
   BuildNumberFormat: '$(BuildDefinitionName)_$(ReleaseNumber).$(SprintNumber).$(HotfixNumber).$(Date:MMdd)$(Rev:r)'
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'macos-latest'
 
 steps:
 - checkout: self
