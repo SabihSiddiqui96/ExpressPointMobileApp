@@ -82,4 +82,4 @@ steps:
   inputs:
     SourceFolder: 'electron\dist'
     Contents: '**'
-    TargetFolder: '\\QAPEWS02\ExpressPointNSIS2\DevelopBranch'
+    TargetFolder: 'C:\Program Files\Cybersoft\Builds\ExpressPoint'
