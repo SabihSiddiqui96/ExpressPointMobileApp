@@ -86,6 +86,6 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-     PathtoPublish: C:\ReleaseManagement\$(Build.DefinitionName)\$(Build.BuildNumber)\ExpressPoint-App
-     ArtifactName: 'drop'
-     publishLocation: 'Container'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
