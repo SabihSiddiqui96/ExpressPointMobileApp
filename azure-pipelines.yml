@@ -83,3 +83,9 @@ steps:
     SourceFolder: 'electron\dist'
     Contents: '**'
     TargetFolder: 'C:\Program Files\Cybersoft\Builds\ExpressPoint'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+     PathtoPublish: C:\ReleaseManagement\$(Build.DefinitionName)\$(Build.BuildNumber)\ExpressPoint-App
+     ArtifactName: 'drop'
+     publishLocation: 'Container'
