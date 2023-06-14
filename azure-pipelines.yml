@@ -88,6 +88,6 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(build.sourcesDirectory)\electron/ExpressPointPeripherals/bin/Release'
+    PathtoPublish: '$(build.sourcesDirectory)\electron\dist\*.exe'
     ArtifactName: 'drop'
     publishLocation: 'Container'
