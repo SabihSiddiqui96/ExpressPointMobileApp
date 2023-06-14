@@ -33,9 +33,9 @@ steps:
     command: 'install'
     arguments: '-D -E @angular/cli'
 
-#- task: CmdLine@2
-#  inputs:
-#    script: 'ionic cordova build ios'
+- task: CmdLine@2
+  inputs:
+    script: 'ionic build'
 
 - task: Npm@0
   inputs:
