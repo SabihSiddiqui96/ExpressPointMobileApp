@@ -88,6 +88,6 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(build.sourcesDirectory)\electron\dist\*.exe'
+    PathtoPublish: '$(build.sourcesDirectory)\electron\dist'
     ArtifactName: 'drop'
     publishLocation: 'Container'
