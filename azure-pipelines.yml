@@ -5,7 +5,7 @@ variables:
   BuildNumberFormat: '$(BuildDefinitionName)_$(ReleaseNumber).$(SprintNumber).$(HotfixNumber).$(Date:MMdd)$(Rev:r)'
 
 pool:
-  vmImage: 'macos-latest'
+  vmImage: 'windows-latest'
 
 steps:
 - checkout: self
@@ -31,9 +31,9 @@ steps:
     command: 'install'
     arguments: '-D -E @angular/cli'
 
-- task: CmdLine@2
-  inputs:
-    script: 'ionic cordova build ios'
+#- task: CmdLine@2
+#  inputs:
+#    script: 'ionic cordova build ios'
 
 - task: Npm@0
   inputs:
