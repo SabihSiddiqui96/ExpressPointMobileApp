@@ -329,12 +329,15 @@ export class PersonDBService {
                     if (mealSaleExists) {
                       updatedDoc.PreviousSales.map(u => {
                         if (u.MealTypeId === n.MealTypeId) {
-                          n.SalesByMealType.map(sd => {
-                            const saleDetailExists = _.some(u.SalesByMealType, { 'Date': sd.Date });
-                            if (!saleDetailExists) {
-                              u.SalesByMealType.push(sd);
-                            }
-                          });
+
+                          const allSales = n.SalesByMealType.concat.apply([], u.SalesByMealType);
+                          u.SalesByMealType = _.uniqWith(allSales, _.isEqual)
+                          // n.SalesByMealType.map(sd => {
+                          //   const saleDetailExists = _.some(u.SalesByMealType, { 'Date': sd.Date });
+                          //   if (!saleDetailExists) {
+                          //     u.SalesByMealType.push(sd);
+                          //   }
+                          // });
                         }
                       });
                     } else {
@@ -348,9 +351,7 @@ export class PersonDBService {
               } else {
                 updatedDoc.PreviousSales = newDoc.PreviousSales;
               }
-
-
-              // updatedDoc.PreviousSales = newDoc.PreviousSales;
+              
             } else {
               updatedDoc.AccountId = newDoc.AccountId;
               updatedDoc.SchoolId = newDoc.SchoolId;

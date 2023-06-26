@@ -531,7 +531,7 @@ export class DoPayment {
 
             if (amnt <= maxpymtamt) {
                 if (amnt >= warnamount) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E17456, ['$' + amnt + '']).then((bool) => {
+                    this.popupMessageService.showMessage(PopupMessageCode.E17456, ['$' + amnt.toFixed(2) + '']).then((bool) => {
                         if (bool) {
                             this.startPayment(IsFromAddFunds);
                         }

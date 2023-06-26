@@ -43,7 +43,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() squareReferenceId;
 
     isEnterKey: boolean = false;
-    private SquareSetting: boolean
+    public SquareSetting: boolean
     private SquareTransactionStarted: boolean = false
     public countDown: Subscription;
     public interval = 3000;

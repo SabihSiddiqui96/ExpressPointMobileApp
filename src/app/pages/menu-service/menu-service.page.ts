@@ -74,7 +74,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public printAllSetting: Number = 0;
     public localStorageValue: string = 'currentTab';
     public PaymentAmount: number = 0.00;
-    public transactionDetails: CCTransactionStatus
+    public transactionDetails: CCTransactionStatus;  
     countDown: Subscription;
     interval = 3000;
     counter = 300;
@@ -1101,7 +1101,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             let soldItemsByMealType = [];
             if (prevSalesByMealType) {
                 const items = _.map(prevSalesByMealType, (o) => o.SalesByMealType);
-                const mealTypeItems = [].concat.apply([], items);
+                const mealTypeItems = _.uniqWith([].concat.apply([], items), _.isEqual);
                 soldItemsByMealType = _.filter(mealTypeItems, (s) => {
                     let date = new Date(_.toInteger(s.Date));
                     return (date.getDate() === today.getDate()
@@ -1932,7 +1932,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     if ((isRestrictedItem != -1 || isRestrictedCategory != -1) &&
                         this.patronDetails.isSpecialAccount === false &&
                         this.patronDetails.IsStudent === true) { // IsStudent Check
-
+                        this.alacarteTotal = this.calcAlaTotal(this.orderData['items']);
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                             this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
@@ -2284,6 +2284,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     component: MenuSoldPopupPage,
                     // event: myEvent,
                     componentProps: { 'patronDetails': this.patronDetails },
+                    showBackdrop: true,
+                    backdropDismiss: false,
                     cssClass: this.utilService.popupCenter.cssClass
                 }).then(async (res) => {
                     await res.present();
