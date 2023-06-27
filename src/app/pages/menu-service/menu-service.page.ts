@@ -1661,7 +1661,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.mealCount = this.mealCount - this.orderData.items[index].Quantity;
                     // this.itemCount -= this.orderData.items[index].Quantity; //itemCount
                 }
-                this.deleteALCItems(index);
+                else {
+                    this.deleteALCItems(index);
+                }
                 this.Confirm_DeleteFormCart(index, false);
             }
         } else {
@@ -1932,7 +1934,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     if ((isRestrictedItem != -1 || isRestrictedCategory != -1) &&
                         this.patronDetails.isSpecialAccount === false &&
                         this.patronDetails.IsStudent === true) { // IsStudent Check
-                        this.alacarteTotal = this.calcAlaTotal(this.orderData['items']);
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                             this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
