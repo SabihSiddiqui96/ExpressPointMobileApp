@@ -190,11 +190,15 @@
                                       <span *ngIf="patron.hadmeal == true && this.navPage!='Payments'"> *</span>
                                       <p *ngIf="isPatronType" class="center_text_content">&nbsp;</p>
                                       <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
-                                  </ion-label>   
+                                  </ion-label> 
+                              </ion-row>
+                              <ion-row style="width: 100%;">
                                   <ion-label *ngIf="patron.Grade">Grade : {{patron.Grade}}</ion-label><br />
                                   <!--<ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
                                       {{patron.IsStudent?'Student': 'A'}}
                                   </ion-label><br />-->
+                              </ion-row>
+                              <ion-row style="width: 100%;">
                                   <ion-label *ngIf="patron.identifier!=null">
                                       PIN - {{patron.identifier}}</ion-label>
                                   <ion-label *ngIf="patron.identifier==null">
