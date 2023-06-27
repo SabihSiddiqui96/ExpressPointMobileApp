@@ -12,24 +12,24 @@
     </ion-toolbar>
 </ion-header>
 <ion-content>
-    <p padding *ngIf="filteredPatronList.length == 0">
+    <p class="ion-padding" *ngIf="filteredPatronList.length == 0">
         No patron(s) found for this search criteria.
     </p>
     <ion-list>
         <ion-grid>
             <ion-row lines="none" bold class="bg-transparent ion-no-padding">
-                <ion-col text-wrap size="5" style="padding-left: 16px;"
+                <ion-col class="ion-text-wrap" size="4" style="padding-left: 16px;"
                     *ngIf="!isFromServer && !navIsFromQueue && navAllowVisitingPatron" (click)="serverLookup()">
                     <ion-label bold style="margin: 13px 8px 13px 0; line-height: 1.5;">Click here if you can't find the
                         Student?
                     </ion-label>
                 </ion-col>
-                <ion-col lines="none" bold class="bg-transparent ion-no-padding" *ngIf="!navIsFromQueue">
+                <ion-col lines="none" size="8" bold class="bg-transparent ion-no-padding" *ngIf="!navIsFromQueue">
                     <ion-grid lines="none" class="ion-no-padding">
                         <ion-row lines="none" bold class="bg-transparent ion-no-padding">
                             <ion-grid nlines="none" class="bg-transparent">
                                 <ion-row>
-                                    <ion-col size="3" lines="none" bold class="bg-transparent ion-no-padding"
+                                    <ion-col lines="none" bold class="bg-transparent ion-no-padding"
                                         style="display: flex;">
                                         <ion-label text-small bold style="margin: auto;text-align:center">Sort
                                             by&nbsp;:
@@ -50,9 +50,10 @@
                                         </ion-button>
                                     </ion-col>
                                     <ion-col>
-                                            <ion-label style="padding: 12px;">List</ion-label>
-                                            <ion-toggle color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
-                                            <ion-label style="padding: 12px;">Picture</ion-label>
+                                        <ion-label style="padding: 4px;">List</ion-label>
+                                        <ion-toggle color="success" (ionChange)="toggleView()"
+                                            [checked]="isGridView"></ion-toggle>
+                                        <ion-label style="padding: 4px;">Picture</ion-label>
                                     </ion-col>
                                 </ion-row>
                             </ion-grid>
@@ -61,129 +62,146 @@
                 </ion-col>
             </ion-row>
         </ion-grid>
+        <ion-grid>
+            <ion-row>
+                <div *ngIf="!isGridView" style="width: 100% !important;">
+                    <ion-row *ngFor="let patron of filteredPatronList;let i=index;"
+                        class="ion-justify-content-center bg-border">
+                        <ion-col size="6">
 
+                            <ion-item (click)="selectPatron(patron,i)" lines="none">
 
-       
+                                <ion-icon slot="start" name="rewind" color="slate"
+                                    *ngIf="patron.InputDirection == 1"></ion-icon>
+                                <ion-icon slot="start" name="fastforward" color="slate"
+                                    *ngIf="patron.InputDirection == 2"></ion-icon>
 
-                <ion-grid>
-                    <ion-row>
-                        <div *ngIf="!isGridView" style="width: 100% !important;">
-                            <ion-row *ngFor="let patron of filteredPatronList;let i=index;" class="ion-justify-content-center bg-border">
-                            <ion-col size="6">
-                
-                                <ion-item (click)="selectPatron(patron,i)" lines="none">
-                
-                                    <ion-icon slot="start" name="rewind" color="slate" *ngIf="patron.InputDirection == 1"></ion-icon>
-                                    <ion-icon slot="start" name="fastforward" color="slate" *ngIf="patron.InputDirection == 2"></ion-icon>
-                
-                                    <ion-avatar slot="start" class="avatar-small">
-                                        <!-- <ion-icon name="contact" *ngIf="!patron.Image"></ion-icon> -->
-                                        <img src="{{patron.Image}}" *ngIf="patron.Image">
-                                        <img src="assets/img/default_male.png" *ngIf="!patron.Image && patron.Gender === 'M'">
-                                        <img src="assets/img/default_female.png" *ngIf="!patron.Image && patron.Gender === 'F'">
-                                        <img style="border-radius: 0%;" src="assets/img/no_image.png"
-                                            *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
-                                    </ion-avatar>
-                
-                                    <ion-label text-large *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
-                                        {{patron.FirstName}}
-                                        {{patron.LastName}}
-                                        <p class="center_text_content">Site: {{patron.SiteCode}}</p>
-                                    </ion-label>
-                
-                                    <ion-label text-large *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
-                                        {{patron.LastName}},
-                                        {{patron.FirstName}}
-                                        <p class="center_text_content">Site: {{patron.SiteCode}}</p>
-                
-                                    </ion-label>
-                                </ion-item>
-                
-                            </ion-col>
-                            <ion-col size="2">
-                                <ion-item (click)="selectPatron(patron,i)" lines="none">
-                                    <ion-label item-content text-large font-bold>
-                                        {{patron.GradeDescription}}
-                                        <p class="center_text_content" font-bold>{{patron.HomeRoom}}</p>
-                                    </ion-label>
-                                </ion-item>
-                            </ion-col>
-                            <ion-col size="1">
-                                <ion-item (click)="selectPatron(patron,i)" lines="none">
-                
-                                    <ion-label text-large font-bold style="text-align:center" *ngIf="patron.IsStudent!=null">
-                                        {{patron.IsStudent?'S':'A'}}
-                                    </ion-label>
-                
-                                </ion-item>
-                            </ion-col>
-                            <ion-col size="3">
-                                <ion-item (click)="selectPatron(patron,i)" lines="none">
-                
-                                    <ion-label item-content text-large style="text-align:center" *ngIf="patron.Identifier!=null">
-                                        {{patron.Identifier}}</ion-label>
-                                    <ion-label item-content text-large style="text-align:center" *ngIf="patron.Identifier==null">
-                                        {{patron.PersonName}}</ion-label>
-                
-                                </ion-item>
-                            </ion-col>
-                
-                        </ion-row>
-                        </div>
-                        <ion-row *ngIf="isGridView">
-                            <ion-col style="max-height: 12rem;" sizeLg="3" sizeMd="3" sizeXs="6"
-                                *ngFor="let patron of filteredPatronList;let i=index;">
-                            <ion-card (click)="selectPatron(patron,i)" class="ion-justify-content-center card-size bg-border" style="height: 10rem;width:20rem;"
-                                align-items-center>
+                                <ion-avatar slot="start" class="avatar-small">
+                                    <!-- <ion-icon name="contact" *ngIf="!patron.Image"></ion-icon> -->
+                                    <img src="{{patron.Image}}" *ngIf="patron.Image">
+                                    <img src="assets/img/default_male.png"
+                                        *ngIf="!patron.Image && patron.Gender === 'M'">
+                                    <img src="assets/img/default_female.png"
+                                        *ngIf="!patron.Image && patron.Gender === 'F'">
+                                    <img style="border-radius: 0%;" src="assets/img/no_image.png"
+                                        *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
+                                </ion-avatar>
+
+                                <ion-label text-large *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
+                                    {{patron.FirstName}}
+                                    {{patron.LastName}}
+                                    <p class="center_text_content">Site: {{patron.SiteCode}}</p>
+                                </ion-label>
+
+                                <ion-label text-large *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
+                                    {{patron.LastName}},
+                                    {{patron.FirstName}}
+                                    <p class="center_text_content">Site: {{patron.SiteCode}}</p>
+
+                                </ion-label>
+                            </ion-item>
+
+                        </ion-col>
+                        <ion-col size="2">
+                            <ion-item (click)="selectPatron(patron,i)" lines="none">
+                                <ion-label item-content text-large font-bold>
+                                    {{patron.GradeDescription}}
+                                    <p class="center_text_content" font-bold>{{patron.HomeRoom}}</p>
+                                </ion-label>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col size="1">
+                            <ion-item (click)="selectPatron(patron,i)" lines="none">
+
+                                <ion-label text-large font-bold style="text-align:center"
+                                    *ngIf="patron.IsStudent!=null">
+                                    {{patron.IsStudent?'S':'A'}}
+                                </ion-label>
+
+                            </ion-item>
+                        </ion-col>
+                        <ion-col size="3">
+                            <ion-item (click)="selectPatron(patron,i)" lines="none">
+
+                                <ion-label item-content text-large style="text-align:center"
+                                    *ngIf="patron.Identifier!=null">
+                                    {{patron.Identifier}}</ion-label>
+                                <ion-label item-content text-large style="text-align:center"
+                                    *ngIf="patron.Identifier==null">
+                                    {{patron.PersonName}}</ion-label>
+
+                            </ion-item>
+                        </ion-col>
+
+                    </ion-row>
+                </div>
+                <div *ngIf="isGridView" style="width: 100% !important;">
+                    <ion-row style="width: 99% !important;">
+                        <ion-col size="3" sizeXl="3" sizeLg="4" sizeMd="6" sizeSm="6" sizeXs="6"
+                            *ngFor="let patron of filteredPatronList;let i=index;">
+                            <ion-card style="height: 15rem;width:99%;" (click)="selectPatron(patron,i)"
+                                class="ion-align-items-center ion-justify-content-center card-size bg-border">
                                 <ion-grid>
                                     <ion-row>
-                                            <div style="position: absolute;">
-                                                <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="rewind" color="slate" ></ion-icon>
-                                                <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="fastforward" color="slate" ></ion-icon>
-                                            </div>
-                                        <ion-col style="width: 7rem;">
-                                            
-                                            <ion-avatar item-start>
-                                                <img src="{{patron.Image}}" *ngIf="patron.Image">
-                                                <img src="assets/img/default_male.png"
+                                        <div style="position: absolute;">
+                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="rewind"
+                                                color="slate"></ion-icon>
+                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="fastforward"
+                                                color="slate"></ion-icon>
+                                        </div>
+                                        <ion-col size="6" style="width: 100%;">
+                                            <ion-avatar class="patronImgLarge" item-start>
+                                                <img class="patronImgLarge" src="{{patron.Image}}" *ngIf="patron.Image">
+                                                <img class="patronImgLarge" src="assets/img/default_male.png"
                                                     *ngIf="!patron.Image && patron.Gender === 'M'">
-                                                <img src="assets/img/default_female.png"
+                                                <img class="patronImgLarge" src="assets/img/default_female.png"
                                                     *ngIf="!patron.Image && patron.Gender === 'F'">
-                                                <img style="border-radius: 0%;" src="assets/img/no_image.png"
+                                                <img class="patronImgLarge" style="border-radius: 0%;"
+                                                    src="assets/img/no_image.png"
                                                     *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
                                             </ion-avatar>
                                         </ion-col>
-                                        <ion-col style="width:12rem;height: 100%;">
-                                            <ion-row style="width: 12rem;">
-                                                <ion-label *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
+                                        <ion-col size="6" style="width:100%;height: 100%;">
+                                            <ion-row style="width: 100%;">
+                                                <ion-label style="min-height:40px;"
+                                                    *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null">
                                                     {{patron.FirstName}}
                                                     {{patron.LastName}}
                                                     <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
                                                 </ion-label>
-                                                <ion-label *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
+                                            </ion-row>
+                                            <ion-row style="width: 100%;">
+                                                <ion-label style="min-height:40px;"
+                                                    *ngIf="nameSortOrder === 'LnFn' && patron.FirstName!=null">
                                                     {{patron.LastName}},
                                                     {{patron.FirstName}}
                                                     <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
-                                                </ion-label>       
-                                                <ion-label *ngIf="patron.GradeDescription">Grade : {{patron.GradeDescription}}</ion-label><br />
+                                                </ion-label>
+                                            </ion-row>
+                                            <ion-row style="width: 100%;">
+                                                <ion-label style="min-height:20px;"
+                                                    *ngIf="patron.GradeDescription">Grade :
+                                                    {{patron.GradeDescription}}</ion-label><br />
                                                 <!--<ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
                                                     {{patron.IsStudent?'Student': 'A'}}
                                                 </ion-label><br />-->
-                                                <ion-label style="text-align:center" *ngIf="patron.Identifier!=null">
+                                            </ion-row>
+                                            <ion-row style="width: 100%;">
+                                                <ion-label *ngIf="patron.Identifier!=null">
                                                     PIN - {{patron.Identifier}}</ion-label>
-                                                <ion-label style="text-align:center" *ngIf="patron.Identifier==null">
+                                                <ion-label *ngIf="patron.Identifier==null">
                                                     {{patron.PersonName}}</ion-label>
                                             </ion-row>
                                         </ion-col>
                                     </ion-row>
                                 </ion-grid>
-
                             </ion-card>
                         </ion-col>
                     </ion-row>
-                    </ion-row>
-                </ion-grid>
-            
+                </div>
+            </ion-row>
+        </ion-grid>
+
 
 
     </ion-list>

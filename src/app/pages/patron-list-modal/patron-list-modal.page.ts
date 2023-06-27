@@ -7,6 +7,7 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { Events } from '../../services/events.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
+import { SettingService } from '../../services/setting.service';
 
 @Component({
     selector: 'app-patron-list-modal',
@@ -20,7 +21,7 @@ export class PatronListModalPage implements OnInit {
     @Input() isFromQueue;
     @Input() isFromAdvPatronSearch;
     @Input() allowVisitingPatron;
-    isGridView = false;
+    isGridView: boolean;
 
     ngOnInit() {
         this.navPatronList = this.patron_list;
@@ -28,6 +29,9 @@ export class PatronListModalPage implements OnInit {
         if(this.navPatronList && this.navPatronList.length > 0) {
             this.isFromServer = this.navPatronList['0'].IsFromServer ? true : false;
         }
+        const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
+        const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
+        this.isGridView = (gridViewPatronIsPic != null && gridViewPatronIsPic != undefined) ? Boolean(gridViewPatronIsPic) : isGridViewParent;
         this.navIsFromQueue = this.isFromQueue;
         this.navIsFromAdvPatronSearch = this.isFromAdvPatronSearch;
         this.navAllowVisitingPatron = this.allowVisitingPatron;
@@ -125,6 +129,7 @@ export class PatronListModalPage implements OnInit {
 
     toggleView(){
         this.isGridView = !this.isGridView;
+        AppStateService.set("GridViewPatronIsPic", this.isGridView);
     }
 
     public updateAdvLookupSortOrder() {
