@@ -148,6 +148,18 @@ button:focus {outline:0;}
   }
 }
 
+.timer-popup {
+  .modal-wrapper {
+    left: calc(50% - (400px/2));
+    top: calc(50% - (400px/2));
+    position: absolute;
+    max-width: 200px;
+    min-height: 200px !important;
+    min-width: 400px;
+    max-height: 200px;
+  }
+}
+
 .alacarte {
   .modal-wrapper {
       width: 300px !important;

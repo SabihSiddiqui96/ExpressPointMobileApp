@@ -34,10 +34,13 @@ export class AllPopupPage implements OnInit {
     @Input() data;
     @Input() page;
     @Input() selectedValue;
-    isGridView = true;
-    navOptionList = ['patronPatron','patronSpecialRosterPersonList','patronlist'];
+    isGridView: boolean;
+    navOptionList = ['patronPatron', 'patronSpecialRosterPersonList', 'patronlist'];
 
     ngOnInit() {
+        const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
+        const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
+        this.isGridView = (gridViewPatronIsPic != null && gridViewPatronIsPic != undefined) ? Boolean(gridViewPatronIsPic) : isGridViewParent;
         this.isElectron = this.utilService.isElectronApp();
         this.navType = this.type;
         this.isPatronType = this.checkType();
@@ -375,6 +378,7 @@ export class AllPopupPage implements OnInit {
 
     toggleView() {
         this.isGridView = !this.isGridView;
+        AppStateService.set("GridViewPatronIsPic", this.isGridView);
     }
 
     public ionViewDidLeave() {
@@ -745,52 +749,9 @@ export class AllPopupPage implements OnInit {
     // @HostListener('document:keydown', ['$event'])
     public handleKeyboardEvent() {
         this.domEvent = fromEvent(document, "keydown").subscribe((event) => {
-            let incomingID = "";
-            this.inputBuffer.push(event);
-            console.log("Input Buffer" + JSON.stringify(this.inputBuffer));
-            if (event["keyCode"] === 13) {
-                console.log("Input Buffer" + JSON.stringify(this.inputBuffer));
-                this.inputBuffer.map((c) => {
-                    if (c.keyCode !== 13 && c.keyCode !== 8) {
-                        incomingID += c.key;
-                    } else if (c.keyCode === 8) {
-                        incomingID = incomingID.slice(0, -1);
-                    }
-                });
-                if (incomingID !== "") {
-                    if (/^Shifto/.test(incomingID)) {
-                        incomingID = incomingID.replace("Shifto", "O");
-                    }
-                    this.select(incomingID, false);
-                }
-                incomingID = "";
-                this.inputBuffer = [];
-            }
+
         });
-        // Peripheral input
-        // let incomingID = '';
-        // // if (event.keyCode === 8 || event.keyCode === 13 ||
-        // //     (event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) {
-        // this.inputBuffer.push(event);
-        // if (event.keyCode === 13) {
-        //     console.log('Input Buffer' + JSON.stringify(this.inputBuffer));
-        //     this.inputBuffer.map(c => {
-        //         if (c.keyCode !== 13 && c.keyCode !== 8) {
-        //             incomingID += c.key;
-        //         } else if (c.keyCode === 8) {
-        //             incomingID = incomingID.slice(0, -1);
-        //         }
-        //     });
-        //     if (incomingID !== '') {
-        //         if (/^Shifto/.test(incomingID)) {
-        //             incomingID = incomingID.replace('Shifto', 'O');
-        //         }
-        //         this.select(incomingID);
-        //     }
-        //     incomingID = '';
-        //     this.inputBuffer = [];
-        // }
-        // }
+
     }
 
     public setActiveField(field) {
