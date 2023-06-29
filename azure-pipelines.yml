@@ -28,25 +28,21 @@ steps:
     command: 'custom'
     customCommand: 'install cordova@10.0.0 -g'
 
-
-- task: CmdLine@2
-  inputs:
-    script: 'ionic cordova build android'
-
 - task: Npm@0
   inputs:
-    command: 'custom'
-    arguments: 'i -D -E @angular/cli'
+    command: 'install'
+    arguments: '-D -E @angular/cli'
 
 - task: CmdLine@2
   inputs:
-    script: 'ionic cordova build'
+    script: 'ionic build'
 
 - task: Npm@0
   inputs:
     cwd: 'electron'
     command: 'install'
-    arguments: '-prod'
+    arguments: '--prod'
+
 
 - task: NuGetCommand@2
   inputs:
@@ -88,4 +84,10 @@ steps:
   inputs:
     SourceFolder: 'electron\dist'
     Contents: '**'
-    TargetFolder: '\\QAPEWS02\ExpressPointNSIS2\DevelopBranch'
+    TargetFolder: 'C:\Program Files\Cybersoft\Builds\ExpressPoint'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(build.sourcesDirectory)\electron\dist'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
