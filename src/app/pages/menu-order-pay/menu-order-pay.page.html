@@ -127,12 +127,13 @@
               [ngClass]="cardNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'"
               [(ngModel)]="cashCardNum" id="card" placeholder="Last 4 digits of card"
               style="width: -webkit-fill-available" appKeyDownEvent> -->
-            <ion-label *ngIf="!SquareSetting" class="ion-text-right" width-100 (click)="changeActiveInput('card')"
+            <ion-label *ngIf="!SquareSetting || squareDeviceId== null" class="ion-text-right" width-100 (click)="changeActiveInput('card')"
               [ngClass]="cardNoClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
               {{cashCardNum}} <input type="text" placeholder="Last 4 digits of card" class='placeholder-input-label'
                 disabled />
             </ion-label>
-            <div *ngIf="SquareSetting" style="text-align: center;padding:5rem 5rem 3rem 5rem;">
+            <div *ngIf="SquareSetting && squareDeviceId!= null "
+              style="text-align: center;padding:5rem 5rem 3rem 5rem;">
               <label style="padding:0.5rem;">Square Transaction in Progress ...</label><br /><br />
               <label style="font-size: 24px;font-weight: bold;">{{counter | formatTime}}</label>
               <ion-button *ngIf="ShowSquareRetry" (click)="makeSale(true)">Retry Square Transaction
@@ -184,7 +185,6 @@
                     </h2>
                     <h2 #confettiHolder *ngIf="!accountDetails.isSpecialAccount">{{personName}}</h2>
                     &nbsp;
-                    <!-- <img *ngIf="isBirthDay" src="assets/img/confetti_right.png"> -->
 
                   </ion-col>
                   <ion-col size="3" size-md="3" size-sm="3">
@@ -238,40 +238,14 @@
                                 |
                                 currency:'USD':true:'1.2-2'}}</span></label>
                           </ion-col>
-                          <!-- <ion-col size="6" style="align-self: flex-end;"
-                                              *ngIf="(accountDetails.GradeId && accountDetails.HadSale===true)">
-                                              <ion-button default expand="block" style="height:3.6rem;"
-                                                  (click)="ShowsolditemsPopover($event)"
-                                                  [ngClass]="(accountDetails.IsSecondMeal!=true)?'btn_previous_items':'btn_previous_meals'"
-                                                  [style.display]="(accountDetails.GradeId && accountDetails.HadSale===true) ? ' ': 'none'"
-                                                  [style.font-size.rem]="(isElectron === true) ? '1.4' : '1.2'">
-                                                  Previous
-                                                  <span style="margin-left: 5px;"
-                                                      *ngIf="accountDetails.IsSecondMeal!=true">Item(s)</span>
-                                                  <span style="margin-left: 5px;"
-                                                      *ngIf="accountDetails.IsSecondMeal==true">Meal(s)</span>
-                                              </ion-button>
-                                          </ion-col> -->
-                          <!-- <ion-col size="0" style="padding: 5px;"
-                                              *ngIf="(accountDetails.GradeId && accountDetails.HadSale===true)">
-                                          </ion-col> -->
                         </ion-row>
                       </ion-grid>
                     </ion-label>
                   </ion-col>
-                  <!-- <ion-col size="1"
-                              *ngIf="(accountDetails.InputDirection == 1) || (accountDetails.InputDirection == 2)"
-                              class="ion-no-padding ion-no-margin" style="font-size: 30px;">
-                              <ion-icon name="rewind" color="slate" *ngIf="accountDetails.InputDirection == 1">
-                              </ion-icon>
-                              <ion-icon name="fastforward" color="slate"
-                                  *ngIf="accountDetails.InputDirection == 2">
-                              </ion-icon>
-                          </ion-col> -->
+                 
                   <ion-col>
                     <ion-avatar float-right style="width: auto !important;">
-                      <!-- <ion-icon name="contact" *ngIf="!patronImage && accountDetails.IsStudent"></ion-icon> -->
-                      <!-- (click)="showLargeImage(10)" -->
+                     
                       <img src="{{patronImage}}" *ngIf="patronImage" style="padding-right:3px!important;">
 
 
