@@ -1734,12 +1734,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         const refId = this.orderData.items[index].RefId;
         const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(refId);
-        this.alacarteCount = this.alacarteCount - this.orderData.items[index].Quantity;
-        this.alacarteTotal = this.alacarteTotal - this.orderData.items[index]['Price'];
+        this.alacarteCount = this.alacarteCount - this.orderData.items[index].Quantity;        
 
         if ((isRestrictedItem !== -1 || isRestrictedCategory !== -1) &&
             this.patronDetails.isSpecialAccount === false &&
             this.patronDetails.IsStudent === true) { // IsStudent Check
+            this.alacarteTotal = this.alacarteTotal - this.orderData.items[index]['Price'];
             this.restrictedAlacarteCount = this.restrictedAlacarteCount - 1;
 
         }
