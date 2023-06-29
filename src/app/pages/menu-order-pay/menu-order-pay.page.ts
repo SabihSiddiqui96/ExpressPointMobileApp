@@ -16,7 +16,6 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { LookupService } from '../../services/lookup.service';
 import { HttpService } from '../../services/HTTP/http.service';
-import { threadId } from 'worker_threads';
 import { Subscription, timer } from "rxjs";
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
@@ -378,6 +377,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public ShowRetrySubscription: Subscription;
     public paymentAmnt: number = 0.00
     public PARTIALPAY: boolean = false;
+    public squareDeviceId: string = undefined;
 
     constructor(public navCtrl: NavController, public event: Events, public navParams: NavParams,
         private alertCtrl: AlertController, private utilService: UtilService,
@@ -392,6 +392,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.showPatron = this.navParams.get('showPatron');
         this.SquareSetting = Boolean(parseInt(SettingService.getSettingValue('ENBLCCTR')));
         this.PARTIALPAY = Boolean(parseInt(SettingService.getSettingValue('PARTIALPAY')));
+        const sellerDetails = AppStateService.get('SellerDetails');
+        if (sellerDetails) {
+          this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
+        }
+        
 
         if (this.SquareSetting) {
             this.ShowRetrySubscription =
