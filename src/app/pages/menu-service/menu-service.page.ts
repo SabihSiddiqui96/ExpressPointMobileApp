@@ -80,6 +80,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     counter = 300;
     tick = 1000;
     private ApiInterval;
+    private squareDeviceId: null;
     // public squareRetry: boolean = false;
     public ngOnInit() {
         this.personQSubscription = this.lookUpService.personsQSubject.subscribe(
@@ -315,6 +316,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
         if (AppStateService.get('settings')) {
             this.setting = JSON.parse(AppStateService.get('settings'));
+        }
+        const sellerDetails = AppStateService.get('SellerDetails');
+        if (sellerDetails) {
+          this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
         }
 
         PatronLookupPage.onKeyUpCallback = this.patronLookup.onPeripheralKey.bind(this);
@@ -3128,9 +3133,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         return new Promise((resolve) => {
             // Setting here 
-            if (this.SquareSetting === true && transactionType == 1 && this.orderData.IsCard === true) {
+          
+            if (this.SquareSetting === true && transactionType == 1 && this.orderData.IsCard === true && this.squareDeviceId!= null) {
                 let squarePaymentAmount = Math.round(paymentAmnt * 100)
-                const squareDeviceId = JSON.parse(AppStateService.get('SellerDetails')).DeviceId
                 const squareTransaction: SquareTransactionDoc = {
                     "idempotency_key": this.deviceTransactionId,
                     "checkout": {
@@ -3139,7 +3144,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             "currency": "USD"
                         },
                         "device_options": {
-                            "device_id": squareDeviceId
+                            "device_id": this.squareDeviceId
                         },
                         "reference_id": this.deviceTransactionId
                     }
