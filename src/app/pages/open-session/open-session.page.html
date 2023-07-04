@@ -36,11 +36,11 @@
               <ion-col size="1" class="ion-align-self-center increment_decrement_btn">
                 <ion-icon name="remove-circle" class="iconmargin pull-right"
                   *ngIf="denomination.DenominationId==activeField"
-                  (click)="decrDenominationCnt(denomination.DenominationId, denomination.Quantity )"></ion-icon>
+                  (click)="decrDenominationCnt(denomination.DenominationId, denomination.Quantity)"></ion-icon>
               </ion-col>
               <ion-col size="2" class="ion-align-self-center">
-                <input id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='COINS'"
-                  (click)="setActiveField(denomination.DenominationId, denomination.Quantity )"
+                <input id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='COINS'"                 
+                  (focus)="setActiveField(denomination.DenominationId, denomination.Quantity)"
                   [ngClass]="{'active-input-label-opencloseBalance': denomination.DenominationId == activeField, 'input-label-opencloseBalance': denomination.DenominationId != activeField}"
                   [(ngModel)]="denomination.Quantity">
               </ion-col>
@@ -51,11 +51,11 @@
               </ion-col>
 
 
-              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':true:'1.2-2'}}
+              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':'symbol':'1.2-2'}}
               </ion-col>
             </ion-row>
           </ion-item-group>
-          <h2 class="ion-text-center" bold>Coins totaling {{denominationTotalCoins | currency:'USD':true:'1.2-2'}}
+          <h2 class="ion-text-center" bold>Coins totaling {{denominationTotalCoins | currency:'USD':'symbol':'1.2-2'}}
           </h2>
         </div>
       </ion-col>
@@ -77,7 +77,7 @@
               </ion-col>
               <ion-col size="2" class="ion-align-self-center">
                 <input id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='BILLS'"
-                  (click)="setActiveField(denomination.DenominationId, denomination.Quantity )"
+                  (focus)="setActiveField(denomination.DenominationId, denomination.Quantity)"
                   [ngClass]="{'active-input-label-opencloseBalance': denomination.DenominationId == activeField, 'input-label-opencloseBalance': denomination.DenominationId != activeField}"
                   [(ngModel)]="denomination.Quantity">
               </ion-col>
@@ -86,11 +86,11 @@
                   (click)="incrDenominationCnt(denomination.DenominationId, denomination.Quantity )"></ion-icon>
               </ion-col>
 
-              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':true:'1.2-2'}}
+              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':'symbol':'1.2-2'}}
               </ion-col>
             </ion-row>
           </ion-item-group>
-          <h2 class="ion-text-center" bold>Bills totaling {{denominationTotalBills | currency:'USD':true:'1.2-2'}}
+          <h2 class="ion-text-center" bold>Bills totaling {{denominationTotalBills | currency:'USD':'symbol':'1.2-2'}}
           </h2>
         </div>
       </ion-col>
@@ -117,7 +117,7 @@
   <ion-row class="ion-justify-content-center ion-padding">
     <ion-col size="12" size-lg="6" push-lg="3" class="ion-text-center ion-align-self-center">
       <h1 class="openbalhead ion-text-center"> Opening Balance&nbsp;</h1>
-      <input type="text" id="openingBalance" (click)="setActiveOpeningBalance('openingBalance',total)"
+      <input type="text" id="openingBalance" (focus)="setActiveOpeningBalance('openingBalance',total)"
         [ngClass]="{'active-input-label-openingbalance': balanceMode == 'openingBalance', 'input-label-openingBalance': balanceMode != 'openingBalance'}"
         [(ngModel)]="total">
       <!-- [disabled]=true -->
