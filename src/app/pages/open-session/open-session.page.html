@@ -22,8 +22,15 @@
 
 <ion-content bg-theme>
   <ion-grid class="ion-no-padding" #OpenSessionViewRoot>
-    <ion-row class="ion-justify-content-center" margin-top-lg>
-
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" style="padding-left:20px; margin:5px; color: #1a9588 !important; font-weight: bold;">
+        <ion-icon name="information-circle"></ion-icon>
+        <ion-label style="color: #1a9588 !important; font-weight: bold;">
+            Maximum allowed total opening balance is: $9999.99. Each denomination allows a maximum of 5 digits.         
+        </ion-label>  
+          <ion-label (click)="moreInfoClick()" style="cursor: pointer; color: blue !important;">More Info.
+          </ion-label>
+      </ion-col>
       <ion-col size="12" size-sm="12" size-md="4" align-self-top>
         <!-- col-12 col-lg-5 col-xl-3  -->
         <div box-denom class="ion-margin-horizontal ion-margin-bottom" #CoinBox>
