@@ -148,7 +148,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public alaCarteCash: Array<string>;
     public alaCarteCharge: Array<string>;
 
-    toggleName: string  = 'Alacarte';
+    toggleName: string = 'Alacarte';
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
@@ -340,7 +340,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
-        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService:  LogsDBService,
+        public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService: LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
@@ -994,7 +994,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
-            if(inputDirId) {
+            if (inputDirId) {
                 this.patronDetails.InputDirection = inputDirId;
                 sessionStorage.removeItem(this.patronDetails.Identifier);
             }
@@ -1175,7 +1175,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
             }).catch(err => console.log(err));
 
-             // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
+        // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
         if (priceTypeId === this.patronDetails.StatePriceTypeId) {
             PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
                 this.patronDetails.IsStudent, this.priceMode).then((res) => {
@@ -1621,7 +1621,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.showSubcategories(menuItem);
                 }
             } else {
-              
+
                 if (!menuItem.MenuItemId) {
                     menuItem.MenuItemId = menuItem.RefId;
                 }
@@ -1632,11 +1632,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 //         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                 //     : this.patronDetails.PriceTypeId;
                 let priceTypeId = this.stateEigSetting ?
-                            (this.patronDetails.StatePriceTypeId == null
-                                || this.patronDetails.StatePriceTypeId == undefined) ?
-                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                            : this.patronDetails.PriceTypeId;
-                    
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+
 
                 PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
                     if (price.rows.length > 0) {
@@ -1886,10 +1886,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 PouchQueriesService.GetDynamicMenuCategoryDetials(menuItem.MenuItemId, defaultServingSize).
                     then((res) => {
                         let contributions;
-                        if(res.rows && res.rows.length > 0){
-                             contributions = res.rows[0].doc.Contributions;
-                        }if (res.docs && res.docs.length > 0) {
-                             contributions = res.docs[0].Contributions;
+                        if (res.rows && res.rows.length > 0) {
+                            contributions = res.rows[0].doc.Contributions;
+                        } if (res.docs && res.docs.length > 0) {
+                            contributions = res.docs[0].Contributions;
                         }
 
                         if (contributions) {
@@ -2478,11 +2478,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         if (!isSecondMeal) {
-                priceTypeId = this.stateEigSetting ?
-                    (this.patronDetails.StatePriceTypeId == null
-                        || this.patronDetails.StatePriceTypeId == undefined) ?
-                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                    : this.patronDetails.PriceTypeId;
+            priceTypeId = this.stateEigSetting ?
+                (this.patronDetails.StatePriceTypeId == null
+                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                : this.patronDetails.PriceTypeId;
         }
 
         if (menuItem.MenuItemId === undefined) {
@@ -3030,7 +3030,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if (bool) {
                         this.postSaleTransaction(transactionType);
                         this.event.publish('patron-released', { 'patronDetails': null });
-                        if(this.isDynamicMenuSelected) {
+                        if (this.isDynamicMenuSelected) {
                             this.getMenuDetails();
                         } else {
                             this.changeMenuType();
@@ -3207,7 +3207,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.transactionService.CheckSessionInAppState().then(() => {
             if (AppStateService.get('session_id')) {
                 this.sessionId = AppStateService.get('session_id');
-            }
+            } `1`
             const date = new Date();
 
 
@@ -3295,353 +3295,290 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 });
             }
 
-            let paymentAmnt = this.orderData.totalAmount;
+            this.menuGridService.hasDifferentPriceType(transactionType, this.orderData.items,
+                this.patronDetails.PriceTypeId,
+                this.patronDetails.StatePriceTypeId, this.secondMealPriceType, this.stateEigSetting).then((res) => {
+                    if (res) {
+                        this.utilService.showWarning("Oops, something went wrong! Please void the transaction and try again.");
+                    } else {
 
-            if (transactionType == 1) {
-                paymentAmnt = this.PaymentAmount
-            }
+                        let paymentAmnt = this.orderData.totalAmount;
 
-             /** Commented This code for PartialPaySetting - Start  */
-            // let paymentAmnt = this.orderData.totalAmount;
-            // if (transactionType === 1) {
-            //     if (this.setting.EXNEGBAL === true) {
-            //         if (this.isDepositByEXNEGBAL === true) {
-            //             if (this.orderData.IsDeposit === true) {
-            //                 paymentAmnt = parseFloat(this.cashTendAmount);
-            //             } else {
-            //                 paymentAmnt = parseFloat(this.amountTowardsBalance + this.orderData.totalAmount);
-            //                 this.orderData.IsDeposit = true;
-            //             }
-            //         } else {
-            //             // console.clear()
-            //             // console.log('this.isDepositByEXNEGBAL  ' + this.isDepositByEXNEGBAL)
-            //             if (this.orderData.IsDeposit === true) {
-            //                 paymentAmnt = parseFloat(this.cashTendAmount);
-            //             } else {
-            //                 /**
-            //                  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
-            //                  */
-            //                 if (this.cashTendAmount < this.orderData.totalAmount) {
-            //                     paymentAmnt = parseFloat(this.cashTendAmount);
+                        if (transactionType == 1) {
+                            paymentAmnt = this.PaymentAmount
+                        }
 
-            //                 } else {
-            //                     paymentAmnt = parseFloat(this.orderData.totalAmount);
-            //                 }
-            //                 //   this.orderData.IsDeposit = true
-            //             }
-            //         }
-            //     } else {
-            //         paymentAmnt = parseFloat(this.cashTendAmount);
-            //         if (this.cashTendAmount > this.orderData.totalAmount) {
-            //             if (this.orderData.IsDeposit === false) {
-            //                 paymentAmnt = this.orderData.totalAmount;
-            //             }
-            //             if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
-            //                 paymentAmnt = this.orderData.totalAmount;
-            //             }
-            //         }
-            //     }
-            //     /* not sure if to add this or not */
-            //     if (this.isSpecialAccount === true && this.orderData.IsCheck === true) {
-            //         paymentAmnt = this.orderData.totalAmount;
-            //     }
-            //     /* not sure if to add this or not */
-            // }
+                        // For visitor Sale using Student balance : Payment Amount should be Total Amount
+                        if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+                            paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
+                        }
+                        AppStateService.set('TransactionNumber', this.transactionNumber);
 
-            // this.TransactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+                        const updatedPatronDetails = Object.assign({}, this.patronDetails);
+                        const balance = this.patronDetails.Balance;
+                        const saleToatal = this.orderData.totalAmount;
+                        if (transactionType === 1) {
+                            updatedPatronDetails.Balance = balance - (saleToatal - paymentAmnt);
+                        } else if (transactionType === 2) {
+                            updatedPatronDetails.Balance = balance - saleToatal;
+                        }
+                        let paymentData: TransactionDoc, paymentDoc;
+                        if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
+                            && this.orderData.IsDeposit) {
+                            paymentData = {
+                                'PaymentAmount': Math.round(parseFloat(this.cashTendAmount) * 100) / 100,
+                                'Balance': parseFloat(this.selectedAccountDetails.Balance),
+                                'AccountId': this.selectedAccountDetails.AccountId,
+                                'ServingSchoolId': siteSchool,
+                                'BuyerSchoolId': this.patronDetails.SchoolId,
+                                'SessionId': this.sessionId,
+                                'BuyerId': this.selectedAccountDetails.PersonId,
+                                'IsDeposit': true,
+                                'IsCheck': this.orderData.IsCheck,
+                                'TransactionType': 4,
+                                'PriceTypeId': this.patronDetails.PriceTypeId,
+                                'BuyerGradeId': this.selectedAccountDetails.GradeId,
+                                'MealTypeId': 0,
+                                'MenuItems': [{}],
+                                'CheckNumber': this.cashCheckNum ? this.cashCheckNum : '',
+                                'TransactionDate': currentTime,
+                                'TransactionNumber': this.transactionNumber,
+                                'PrincipalId': this.principalId,
+                                'PrincipalAccountId': this.principalAccountId,
+                                'TerminalId': this.terminalId,
+                                'MealType': 'Payment',
+                                'FirstName': this.selectedAccountDetails.FirstName,
+                                'LastName': this.selectedAccountDetails.LastName,
+                                'PersonName': this.selectedAccountDetails.PersonName,
+                                'IsSynced': false,
+                                'DeviceTransactionId': this.generateUUID(),
+                                'IsMarked': false,
+                                'IsSent': false,
+                                'IsfromSameDay': false,
+                                'IsProcessed': false,
+                                'SalesTax': 0,
+                                'TerminalName': this.terminalName,
+                                'IsCard': false,
+                                'CardNumber': '',
+                                'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toString(),
+                                'DepositAmount': Number(this.cashTendAmount).toString(),
+                                'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString()).toString(),
+                                'BonusAmount': this.bonusAmount,
+                                'AmountTendered': '0',
+                                'Identifier': this.patronDetails.Identifier,
+                                'Site': this.patronDetails.SiteCode,
+                                'Grade': this.patronDetails.GradeDescription,
+                                'Teacher': this.patronDetails.HomeRoom,
+                                'ChangeReturned': '0',
+                                'TotalAmount': '0',
+                                'ServingSiteId': this.siteName,
+                                'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
+                                'UserId': this.userId,
+                                'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                                'OrderId': null,
+                                'OrderNumber': '',
+                                'IsServed': false,
+                                'AppVersion': this.utilService.versionNumber,
+                                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                                '_id': this.selectedAccountDetails._id
+                            };
 
-            // if (this.cashTendAmount > this.orderData.totalAmount && this.amountTowardsBalance > 0 && this.isDepositByEXNEGBAL ) {
-            //     paymentAmnt = this.orderData.totalAmount + this.amountTowardsBalance;
-            // }
-            // if (paymentAmnt > this.orderData.totalAmount) {
-            //     this.orderData.IsDeposit = true
-            // }
+                            paymentDoc = {
+                                '_id': 'Transaction--' + paymentData.DeviceTransactionId,
+                                'saleData': paymentData
+                            };
 
-            /** Commented This code for PartialPaySetting - End  */
+                            personSaledetails.push({
+                                '_id': paymentData['_id'],
+                                'Balance': Number(paymentData['NewBalance']),
+                                'PreviousSales': [{}]
+                            });
+                            this.transactionNumber = this.transactionNumber + 1;
+                            AppStateService.set('TransactionNumber', this.transactionNumber);
+                        }
+                        this.saleData = {
+                            'PaymentAmount': Math.round(paymentAmnt * 100) / 100,
+                            'Balance': this.patronDetails.Balance,
+                            'AccountId': this.patronDetails.AccountId,
+                            'ServingSchoolId': this.schoolId,
+                            'BuyerSchoolId': this.patronDetails.SchoolId,
+                            'SessionId': this.sessionId,
+                            'BuyerId': this.patronId,
+                            'IsDeposit': this.orderData.IsDeposit,
+                            'IsCheck': this.orderData.IsCheck,
+                            'TransactionType': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType,
+                            'PriceTypeId': this.patronDetails.PriceTypeId,
+                            'BuyerGradeId': this.patronDetails.GradeId,
+                            'MealTypeId': this.defaultMealTypeId,
+                            'MenuItems': items,
+                            'CheckNumber': this.orderData.CheckNumber,
+                            'TransactionDate': currentTime,
+                            'TransactionNumber': this.transactionNumber,
+                            'PrincipalId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.PersonId : this.principalId,
+                            'PrincipalAccountId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.AccountId : this.principalAccountId,
+                            'TerminalId': this.terminalId,
+                            'MealType': this.defaultmealTypeName,
+                            'FirstName': this.patronDetails.FirstName,
+                            'LastName': this.patronDetails.LastName,
+                            'PersonName': this.patronDetails.PersonName,
+                            'TerminalName': this.terminalName,
+                            'IsSynced': false,
+                            'DeviceTransactionId': this.deviceTransactionId,
+                            'IsMarked': this.isMarked,
+                            'IsSent': false,
+                            'IsfromSameDay': false,
+                            'IsProcessed': false,
+                            'SalesTax': Math.round(this.orderData.tax * 100) / 100,
+                            'IsCard': this.orderData.IsCard,
+                            'CardNumber': this.orderData.CardNumber,
+                            'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
+                            'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toString(),
+                            'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
+                            'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                            'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(this.cashTendAmount).toString(),
+                            'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString(),
+                            'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
+                            'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
+                            'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
+                            'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
+                            'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
+                            'ServingSiteId': this.siteName,
+                            'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
+                            'UserId': this.userId,
+                            'PersonIdentifier': this.patronDetails.PersonIdentifier,
+                            'OrderId': null,
+                            'OrderNumber': '',
+                            'IsServed': false,
+                            'AppVersion': this.utilService.versionNumber,
+                            'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                            '_id': this.patronDetails._id
+                        };
 
-            
-            // For visitor Sale using Student balance : Payment Amount should be Total Amount
-            if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-                paymentAmnt = this.orderData.totalAmount; // + this.amountTowardsBalance
-            }
-            AppStateService.set('TransactionNumber', this.transactionNumber);
+                        const transactionDoc = {
+                            '_id': 'Transaction--' + this.deviceTransactionId,
+                            'saleData': this.saleData
+                        };
+                        // if (this.saleData['TransactionNumber'] === 1) {
+                        const terminalStatusDoc: TerminalSaleStatusDoc = {
+                            '_id': 'TerminalStatus--' + this.sessionId + '--' + this.selectedMealType,
+                            'SessionId': this.sessionId,
+                            'MealTypeId': this.selectedMealType,
+                            'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+                            'TerminalId': this.terminalId,
+                            'IsSynced': false,
+                            'SaleDate': currentTime
+                        };
 
-            const updatedPatronDetails = Object.assign({}, this.patronDetails);
-            const balance = this.patronDetails.Balance;
-            const saleToatal = this.orderData.totalAmount;
-            if (transactionType === 1) {
-                updatedPatronDetails.Balance = balance - (saleToatal - paymentAmnt);
-            } else if (transactionType === 2) {
-                updatedPatronDetails.Balance = balance - saleToatal;
-            }
-            let paymentData: TransactionDoc, paymentDoc;
-            if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
-                && this.orderData.IsDeposit) {
-                paymentData = {
-                    'PaymentAmount': Math.round(parseFloat(this.cashTendAmount) * 100) / 100,
-                    'Balance': parseFloat(this.selectedAccountDetails.Balance),
-                    'AccountId': this.selectedAccountDetails.AccountId,
-                    'ServingSchoolId': siteSchool,
-                    'BuyerSchoolId': this.patronDetails.SchoolId,
-                    'SessionId': this.sessionId,
-                    'BuyerId': this.selectedAccountDetails.PersonId,
-                    'IsDeposit': true,
-                    'IsCheck': this.orderData.IsCheck,
-                    'TransactionType': 4,
-                    'PriceTypeId': this.patronDetails.PriceTypeId,
-                    'BuyerGradeId': this.selectedAccountDetails.GradeId,
-                    'MealTypeId': 0,
-                    'MenuItems': [{}],
-                    'CheckNumber': this.cashCheckNum ? this.cashCheckNum : '',
-                    'TransactionDate': currentTime,
-                    'TransactionNumber': this.transactionNumber,
-                    'PrincipalId': this.principalId,
-                    'PrincipalAccountId': this.principalAccountId,
-                    'TerminalId': this.terminalId,
-                    'MealType': 'Payment',
-                    'FirstName': this.selectedAccountDetails.FirstName,
-                    'LastName': this.selectedAccountDetails.LastName,
-                    'PersonName': this.selectedAccountDetails.PersonName,
-                    'IsSynced': false,
-                    'DeviceTransactionId': this.generateUUID(),
-                    'IsMarked': false,
-                    'IsSent': false,
-                    'IsfromSameDay': false,
-                    'IsProcessed': false,
-                    'SalesTax': 0,
-                    'TerminalName': this.terminalName,
-                    'IsCard': false,
-                    'CardNumber': '',
-                    'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toString(),
-                    'DepositAmount': Number(this.cashTendAmount).toString(),
-                    'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString()).toString(),
-                    'BonusAmount': this.bonusAmount,
-                    'AmountTendered': '0',
-                    'Identifier': this.patronDetails.Identifier,
-                    'Site': this.patronDetails.SiteCode,
-                    'Grade': this.patronDetails.GradeDescription,
-                    'Teacher': this.patronDetails.HomeRoom,
-                    'ChangeReturned': '0',
-                    'TotalAmount': '0',
-                    'ServingSiteId': this.siteName,
-                    'ReceiptType': PrintReceiptTypes.PAYMENTRECEIPT,
-                    'UserId': this.userId,
-                    'PersonIdentifier': this.patronDetails.PersonIdentifier,
-                    'OrderId': null,
-                    'OrderNumber': '',
-                    'IsServed': false,
-                    'AppVersion': this.utilService.versionNumber,
-                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
-                    '_id': this.selectedAccountDetails._id
-                };
+                        personSaledetails.push({
+                            '_id': this.saleData['_id'],
+                            'Balance': Number(this.saleData['NewBalance']),
+                            'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
+                        });
 
-                paymentDoc = {
-                    '_id': 'Transaction--' + paymentData.DeviceTransactionId,
-                    'saleData': paymentData
-                };
+                        this.transactionService.SaveTerminalSaleStatus(terminalStatusDoc).then(() => { });
+                        // }
 
-                personSaledetails.push({
-                    '_id': paymentData['_id'],
-                    'Balance': Number(paymentData['NewBalance']),
-                    'PreviousSales': [{}]
-                });
-                this.transactionNumber = this.transactionNumber + 1;
-                AppStateService.set('TransactionNumber', this.transactionNumber);
-            }
-            this.saleData = {
-                'PaymentAmount': Math.round(paymentAmnt * 100) / 100,
-                'Balance': this.patronDetails.Balance,
-                'AccountId': this.patronDetails.AccountId,
-                'ServingSchoolId': this.schoolId,
-                'BuyerSchoolId': this.patronDetails.SchoolId,
-                'SessionId': this.sessionId,
-                'BuyerId': this.patronId,
-                'IsDeposit': this.orderData.IsDeposit,
-                'IsCheck': this.orderData.IsCheck,
-                'TransactionType': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType,
-                'PriceTypeId': this.patronDetails.PriceTypeId,
-                'BuyerGradeId': this.patronDetails.GradeId,
-                'MealTypeId': this.defaultMealTypeId,
-                'MenuItems': items,
-                'CheckNumber': this.orderData.CheckNumber,
-                'TransactionDate': currentTime,
-                'TransactionNumber': this.transactionNumber,
-                'PrincipalId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.PersonId : this.principalId,
-                'PrincipalAccountId': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? this.selectedAccountDetails.AccountId : this.principalAccountId,
-                'TerminalId': this.terminalId,
-                'MealType': this.defaultmealTypeName,
-                'FirstName': this.patronDetails.FirstName,
-                'LastName': this.patronDetails.LastName,
-                'PersonName': this.patronDetails.PersonName,
-                'TerminalName': this.terminalName,
-                'IsSynced': false,
-                'DeviceTransactionId': this.deviceTransactionId,
-                'IsMarked': this.isMarked,
-                'IsSent': false,
-                'IsfromSameDay': false,
-                'IsProcessed': false,
-                'SalesTax': Math.round(this.orderData.tax * 100) / 100,
-                'IsCard': this.orderData.IsCard,
-                'CardNumber': this.orderData.CardNumber,
-                'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toString(),
-                'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
-                'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(this.cashTendAmount).toString(),
-                'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString(),
-                'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
-                'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
-                'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
-                'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
-                'ServingSiteId': this.siteName,
-                'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
-                'UserId': this.userId,
-                'PersonIdentifier': this.patronDetails.PersonIdentifier,
-                'OrderId': null,
-                'OrderNumber': '',
-                'IsServed': false,
-                'AppVersion': this.utilService.versionNumber,
-                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
-                '_id': this.patronDetails._id
-            };
-
-            const transactionDoc = {
-                '_id': 'Transaction--' + this.deviceTransactionId,
-                'saleData': this.saleData
-            };
-            // if (this.saleData['TransactionNumber'] === 1) {
-            const terminalStatusDoc: TerminalSaleStatusDoc = {
-                '_id': 'TerminalStatus--' + this.sessionId + '--' + this.selectedMealType,
-                'SessionId': this.sessionId,
-                'MealTypeId': this.selectedMealType,
-                'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-                'TerminalId': this.terminalId,
-                'IsSynced': false,
-                'SaleDate': currentTime
-            };
-
-            personSaledetails.push({
-                '_id': this.saleData['_id'],
-                'Balance': Number(this.saleData['NewBalance']),
-                'PreviousSales': [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }]
-            });
-
-            this.transactionService.SaveTerminalSaleStatus(terminalStatusDoc).then(() => { });
-            // }
-
-            const sessionCheckDoc: SessionCheckDoc = {
-                '_id': 'SessionCheck--' + date.getTime(),
-                'SessionId': this.sessionId,
-                'CheckNumber': this.orderData.CheckNumber,
-                'Amount': paymentAmnt,
-                'IsDeleted': false,
-                'SessionCheckId': this.utilService.generateUUID(),
-                'IsSynced': false,
-                'CreatedDate': date.getTime()
-            };
+                        const sessionCheckDoc: SessionCheckDoc = {
+                            '_id': 'SessionCheck--' + date.getTime(),
+                            'SessionId': this.sessionId,
+                            'CheckNumber': this.orderData.CheckNumber,
+                            'Amount': paymentAmnt,
+                            'IsDeleted': false,
+                            'SessionCheckId': this.utilService.generateUUID(),
+                            'IsSynced': false,
+                            'CreatedDate': date.getTime()
+                        };
 
 
-            const sessionCardDoc: SessionCardDoc = {
-                '_id': 'SessionCard--' + date.getTime(),
-                'SessionId': this.sessionId,
-                'CardNumber': this.orderData.CardNumber,
-                'Amount': paymentAmnt,
-                'IsDeleted': false,
-                'SessionCardId': this.utilService.generateUUID(),
-                'IsSynced': false,
-                'CreatedDate': date.getTime()
-            };
+                        const sessionCardDoc: SessionCardDoc = {
+                            '_id': 'SessionCard--' + date.getTime(),
+                            'SessionId': this.sessionId,
+                            'CardNumber': this.orderData.CardNumber,
+                            'Amount': paymentAmnt,
+                            'IsDeleted': false,
+                            'SessionCardId': this.utilService.generateUUID(),
+                            'IsSynced': false,
+                            'CreatedDate': date.getTime()
+                        };
 
-            if (transactionType !== 0) {
-                if (updatedPatronDetails.PreviousSales) {
-                    updatedPatronDetails.PreviousSales.map(s => {
-                        if (s.MealTypeId === this.saleData['MealTypeId']) {
-                            for (let i = 0; i < this.orderData.items.length; i++) {
-                                // tslint:disable-next-line:variable-name
-                                const ItemAddedAt = this.orderData.items[i]['ItemAddedAt'] ? this.orderData.items[i]['ItemAddedAt'] :
-                                    this.orderData.items[i]['Date'];
-                                s.SalesByMealType.push({
-                                    'Price': this.orderData.items[i]['IsPartOfMeal'] ? 0 : this.orderData.items[i]['Price'],
-                                    'MenuItemId': this.orderData.items[i]['RefId'],
-                                    'priceTypeId': this.orderData.items[i]['price_type_id'],
-                                    'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
-                                    'MenuItemDescription': this.orderData.items[i]['Name'],
-                                    'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
-                                    'Date': ItemAddedAt.toString(),
-                                    'IsPartOfMeal': this.orderData.items[i]['IsPartOfMeal'],
-                                    'TransactionNo': this.transactionNumber,
-                                    'TerminalName': this.terminalName
+                        if (transactionType !== 0) {
+                            if (updatedPatronDetails.PreviousSales) {
+                                updatedPatronDetails.PreviousSales.map(s => {
+                                    if (s.MealTypeId === this.saleData['MealTypeId']) {
+                                        for (let i = 0; i < this.orderData.items.length; i++) {
+                                            // tslint:disable-next-line:variable-name
+                                            const ItemAddedAt = this.orderData.items[i]['ItemAddedAt'] ? this.orderData.items[i]['ItemAddedAt'] :
+                                                this.orderData.items[i]['Date'];
+                                            s.SalesByMealType.push({
+                                                'Price': this.orderData.items[i]['IsPartOfMeal'] ? 0 : this.orderData.items[i]['Price'],
+                                                'MenuItemId': this.orderData.items[i]['RefId'],
+                                                'priceTypeId': this.orderData.items[i]['price_type_id'],
+                                                'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
+                                                'MenuItemDescription': this.orderData.items[i]['Name'],
+                                                'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
+                                                'Date': ItemAddedAt.toString(),
+                                                'IsPartOfMeal': this.orderData.items[i]['IsPartOfMeal'],
+                                                'TransactionNo': this.transactionNumber,
+                                                'TerminalName': this.terminalName
+                                            });
+                                        }
+                                    } else {
+                                        updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
+                                    }
+                                });
+                            } else {
+                                updatedPatronDetails.PreviousSales = [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }];
+                            }
+                            if (!this.bonusAmount) {
+                                this.bonusAmount = 0;
+                            }
+                            if (this.utilService.isElectronApp()
+                                && (this.printAllSetting === 1
+                                    || (this.printAuto === 1
+                                        && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
+                                const now = new Date();
+                                const transactionReceiptData: TransactionDetailPrintFormat = {
+                                    'PersonName': this.patronDetails.PersonName,
+                                    'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
+                                    'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
+                                    'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
+                                    'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
+                                    'TerminalName': this.terminalName,
+                                    'Cashier': this.userName,
+                                    'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
+                                        this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
+                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
+                                    'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
+                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
+                                    'IsCheck': this.orderData.IsCheck,
+                                    'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
+                                        { hour: 'numeric', minute: 'numeric', hour12: true }),
+                                    'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                                    'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
+                                    'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
+                                    'Balance': Number(this.patronDetails.Balance).toFixed(2),
+                                    'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 : this.cashDue,
+                                    'MenuItemTemplate': this.GetMenuItemsPriceList(items),
+                                    'ServingSiteId': this.siteName,
+                                    'TransactionNumber': this.transactionNumber,
+                                    'CheckNumber': this.orderData.CheckNumber,
+                                    'CardNumber': this.orderData.CardNumber,
+
+                                };
+
+                                const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
+                                this.utilService.publishIpcEvent('print', {
+                                    data: [{ html: receiptFormat }],
+                                    preview: false, copies: this.esrr === 1 ? 2 : 1
                                 });
                             }
-                        } else {
-                            updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
                         }
-                    });
-                } else {
-                    updatedPatronDetails.PreviousSales = [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }];
-                }
-                if (!this.bonusAmount) {
-                    this.bonusAmount = 0;
-                }
-                if (this.utilService.isElectronApp()
-                    && (this.printAllSetting === 1
-                        || (this.printAuto === 1
-                            && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
-                    const now = new Date();
-                    const transactionReceiptData: TransactionDetailPrintFormat = {
-                        'PersonName': this.patronDetails.PersonName,
-                        'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
-                        'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
-                        'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
-                        'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                        'TerminalName': this.terminalName,
-                        'Cashier': this.userName,
-                        'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
-                            this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
-                        'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                        'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
-                        'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
-                        'IsCheck': this.orderData.IsCheck,
-                        'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
-                            { hour: 'numeric', minute: 'numeric', hour12: true }),
-                        'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                        'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
-                        'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                        'Balance': Number(this.patronDetails.Balance).toFixed(2),
-                        'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 : this.cashDue,
-                        'MenuItemTemplate': this.GetMenuItemsPriceList(items),
-                        'ServingSiteId': this.siteName,
-                        'TransactionNumber': this.transactionNumber,
-                        'CheckNumber': this.orderData.CheckNumber,
-                        'CardNumber': this.orderData.CardNumber,
+                        if (this.deviceTransactionId) {
 
-                    };
+                            this.isIOS = this.platform.is('ios');
+                            this.isAndroid = this.utilService.isPlatformAndroid();
 
-                    const receiptFormat = this.printService.getTransactionReceiptFormat(transactionReceiptData, PrintReceiptTypes.TRANSACTIONRECEIPT);
-                    this.utilService.publishIpcEvent('print', {
-                        data: [{ html: receiptFormat }],
-                        preview: false, copies: this.esrr === 1 ? 2 : 1
-                    });
-                }
-            }
-            if (this.deviceTransactionId) {
-
-                this.isIOS = this.platform.is('ios');
-                this.isAndroid = this.utilService.isPlatformAndroid();
-
-                PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
-                    if (!(result && result.id)) {
-                        if (this.isIOS || this.isAndroid) {
-                            this.ShowTransactionConflictPopover();
-                        }
-                        else {
-                            this.ShowTransactionConflictWindowsPopover();
-                        }
-                    }
-                    if (paymentData && paymentDoc) {
-                        if (paymentData.DeviceTransactionId) {
-                            PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then((result) => {
+                            PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
                                 if (!(result && result.id)) {
                                     if (this.isIOS || this.isAndroid) {
                                         this.ShowTransactionConflictPopover();
@@ -3650,157 +3587,171 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         this.ShowTransactionConflictWindowsPopover();
                                     }
                                 }
-                            });
-                        }
-                    }
-                    this.signalRService.sendDataToServer(personSaledetails, this.schoolId
-                    );
-                    if (this.reviewReasonDoc) {
-                        PouchDBService.UpsertSingleDoc(this.reviewReasonDoc, EXP_TRANSACTIONS).then(() => { this.reviewType = 0; });
-                    }
-                    this.utilService.setLoader(false);
-                    this.transactionInProgress = false;
-                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                    this.isMarked = false;
-                    this.deviceTransactionId = null;
-                    this.utilService.setLoader(false);
-
-                    if (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) {
-
-                        const accBal = this.selectedAccountDetails.Balance;
-
-                        if (Number(this.cashTendAmount) != 0 && (Number(this.cashTendAmount) > Number(this.orderData.totalAmount))) {
-                            this.selectedAccountDetails.Balance = accBal + Number(this.amountTowardsBalance);
-                        }
-                        else {
-                            this.selectedAccountDetails.Balance = accBal - this.orderData.totalAmount;;
-                        }
-
-                        PouchDBService.UpsertSingleDoc(this.selectedAccountDetails, EXP_PERSON);
-                    }
-
-                    this.initCashVariables();
-                    if (transactionType === 1 || transactionType === 3) {
-                        this.event.publish('menu-order-popup:close', {});
-                    }
-
-                    if (this.orderData.IsCheck) {
-                        this.transactionService.SaveSessionCheck(sessionCheckDoc).then(() => { });
-                    }
-
-                    if (this.orderData.IsCard) {
-                        this.transactionService.SaveSessionCard(sessionCardDoc).then(() => { });
-                    }
-
-                    if (updatedPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId ||
-                        !updatedPatronDetails.IsFromServer) {
-                        PouchDBService.UpsertSingleDoc(updatedPatronDetails, EXP_PERSON);
-                    }
-                    // this.voidOrder();
-                    this.transactionInProgress = false;
-                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                })
-                    .then(() => {
-                        this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
-                        const spId = AppStateService.get('SpecialRosterId');
-                        // let hmId = AppStateService.get('HomeroomId');
-                        const hmId = this.patronDetails.HomeRoomId;
-
-                        // let gId = AppStateService.get('SelectedHomeroomGrade')
-                        const gId = this.patronDetails.GradeId;
-
-                        this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(
-                            this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
-                        this.restrictedAlacarteCount = 0;
-                        this.alacarteTotal = 0.00;
-                        this.patronDetails = {};
-                        this.patronId = null;
-                        this.patronImage = null;
-                        this.patronDetails = {};
-                        this.mealCount = 0;
-                        this.orderData = {
-                            accountBalance: 0.00,
-                            subTotal: 0.00,
-                            tax: 0.00,
-                            totalAmount: 0.00,
-                            items: [],
-                            IsDeposit: false,
-                            IsCheck: false,
-                            CheckNumber: '',
-                            IsCard: false,
-                            CardNumber: ''
-                        };
-                        this.bonusAmount = 0;
-                        AppStateService.remove('patron_details');
-                        if (this.lookUpService.getQ().length !== 0) {
-                            this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
-                        } else {
-                            // console.clear()
-                            this.displayDetails = false;
-                            this.utilService.selectAccountClick = false;
-                            this.lookUpService.menuPayselectAccountClick = false;
-                            this.selectedAccountDetails = {};
-                            if (this.returnToWhatPage === 'SpecialRoster') {
-                                this.event.publish('patronLookup:ready', {
-                                    'patronIdSelected': JSON.stringify(this.patronId),
-                                    'returnToWhatPage': this.returnToWhatPage,
-                                    'patronRoomSelected': spId
-                                });
-                                this.event.publish('patron-released', { 'patronDetails': null });
-                            } else if (this.returnToWhatPage === 'HomeRoom') {
-                                this.event.publish('patronLookup:ready', {
-                                    'patronIdSelected': JSON.stringify(this.patronId), // Ron ASked
-                                    'returnToWhatPage': this.returnToWhatPage,
-                                    'patronRoomSelected': hmId,
-                                    'patronGradeSelected': gId
-
-                                });
-                                this.event.publish('patron-released', { 'patronDetails': null });
-                            } else {
-                                if (!this.isDynamicMenuSelected) {
-                                    if (AppStateService.get('servingLine')) {
-                                        // console.log('inservingline')
-                                        const previousServingline = JSON.parse(AppStateService.get('servingLine'));
-                                        this.selectedServingLine = previousServingline.servingLine;
-                                        this.selectedServingLineName = previousServingline.servingLineDescription;
-                                        this.isDynamicMenuSelected = true;
-                                    } else {
-                                        // console.log('inhere')
-                                        this.getMenuCalendars();
-                                    }
-                                } else {
-                                    if (AppStateService.get('menuType')) {
-                                        // console.log('menuType')
-                                        const menuType = JSON.parse(AppStateService.get('menuType'));
-                                        this.selectedServingLine = menuType.menuTypeId;
-                                        this.selectedServingLineName = menuType.menuTypeName;
-                                        this.isDynamicMenuSelected = false;
+                                if (paymentData && paymentDoc) {
+                                    if (paymentData.DeviceTransactionId) {
+                                        PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then((result) => {
+                                            if (!(result && result.id)) {
+                                                if (this.isIOS || this.isAndroid) {
+                                                    this.ShowTransactionConflictPopover();
+                                                }
+                                                else {
+                                                    this.ShowTransactionConflictWindowsPopover();
+                                                }
+                                            }
+                                        });
                                     }
                                 }
-                                this.event.publish('patronLookup:ready', {});
-                                this.event.publish('patron-released', { 'patronDetails': null });
+                                this.signalRService.sendDataToServer(personSaledetails, this.schoolId
+                                );
+                                if (this.reviewReasonDoc) {
+                                    PouchDBService.UpsertSingleDoc(this.reviewReasonDoc, EXP_TRANSACTIONS).then(() => { this.reviewType = 0; });
+                                }
                                 this.utilService.setLoader(false);
-                            }
+                                this.transactionInProgress = false;
+                                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                                this.isMarked = false;
+                                this.deviceTransactionId = null;
+                                this.utilService.setLoader(false);
+
+                                if (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) {
+
+                                    const accBal = this.selectedAccountDetails.Balance;
+
+                                    if (Number(this.cashTendAmount) != 0 && (Number(this.cashTendAmount) > Number(this.orderData.totalAmount))) {
+                                        this.selectedAccountDetails.Balance = accBal + Number(this.amountTowardsBalance);
+                                    }
+                                    else {
+                                        this.selectedAccountDetails.Balance = accBal - this.orderData.totalAmount;;
+                                    }
+
+                                    PouchDBService.UpsertSingleDoc(this.selectedAccountDetails, EXP_PERSON);
+                                }
+
+                                this.initCashVariables();
+                                if (transactionType === 1 || transactionType === 3) {
+                                    this.event.publish('menu-order-popup:close', {});
+                                }
+
+                                if (this.orderData.IsCheck) {
+                                    this.transactionService.SaveSessionCheck(sessionCheckDoc).then(() => { });
+                                }
+
+                                if (this.orderData.IsCard) {
+                                    this.transactionService.SaveSessionCard(sessionCardDoc).then(() => { });
+                                }
+
+                                if (updatedPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId ||
+                                    !updatedPatronDetails.IsFromServer) {
+                                    PouchDBService.UpsertSingleDoc(updatedPatronDetails, EXP_PERSON);
+                                }
+                                // this.voidOrder();
+                                this.transactionInProgress = false;
+                                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                            })
+                                .then(() => {
+                                    this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
+                                    const spId = AppStateService.get('SpecialRosterId');
+                                    // let hmId = AppStateService.get('HomeroomId');
+                                    const hmId = this.patronDetails.HomeRoomId;
+
+                                    // let gId = AppStateService.get('SelectedHomeroomGrade')
+                                    const gId = this.patronDetails.GradeId;
+
+                                    this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(
+                                        this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
+                                    this.restrictedAlacarteCount = 0;
+                                    this.alacarteTotal = 0.00;
+                                    this.patronDetails = {};
+                                    this.patronId = null;
+                                    this.patronImage = null;
+                                    this.patronDetails = {};
+                                    this.mealCount = 0;
+                                    this.orderData = {
+                                        accountBalance: 0.00,
+                                        subTotal: 0.00,
+                                        tax: 0.00,
+                                        totalAmount: 0.00,
+                                        items: [],
+                                        IsDeposit: false,
+                                        IsCheck: false,
+                                        CheckNumber: '',
+                                        IsCard: false,
+                                        CardNumber: ''
+                                    };
+                                    this.bonusAmount = 0;
+                                    AppStateService.remove('patron_details');
+                                    if (this.lookUpService.getQ().length !== 0) {
+                                        this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+                                    } else {
+                                        // console.clear()
+                                        this.displayDetails = false;
+                                        this.utilService.selectAccountClick = false;
+                                        this.lookUpService.menuPayselectAccountClick = false;
+                                        this.selectedAccountDetails = {};
+                                        if (this.returnToWhatPage === 'SpecialRoster') {
+                                            this.event.publish('patronLookup:ready', {
+                                                'patronIdSelected': JSON.stringify(this.patronId),
+                                                'returnToWhatPage': this.returnToWhatPage,
+                                                'patronRoomSelected': spId
+                                            });
+                                            this.event.publish('patron-released', { 'patronDetails': null });
+                                        } else if (this.returnToWhatPage === 'HomeRoom') {
+                                            this.event.publish('patronLookup:ready', {
+                                                'patronIdSelected': JSON.stringify(this.patronId), // Ron ASked
+                                                'returnToWhatPage': this.returnToWhatPage,
+                                                'patronRoomSelected': hmId,
+                                                'patronGradeSelected': gId
+
+                                            });
+                                            this.event.publish('patron-released', { 'patronDetails': null });
+                                        } else {
+                                            if (!this.isDynamicMenuSelected) {
+                                                if (AppStateService.get('servingLine')) {
+                                                    // console.log('inservingline')
+                                                    const previousServingline = JSON.parse(AppStateService.get('servingLine'));
+                                                    this.selectedServingLine = previousServingline.servingLine;
+                                                    this.selectedServingLineName = previousServingline.servingLineDescription;
+                                                    this.isDynamicMenuSelected = true;
+                                                } else {
+                                                    // console.log('inhere')
+                                                    this.getMenuCalendars();
+                                                }
+                                            } else {
+                                                if (AppStateService.get('menuType')) {
+                                                    // console.log('menuType')
+                                                    const menuType = JSON.parse(AppStateService.get('menuType'));
+                                                    this.selectedServingLine = menuType.menuTypeId;
+                                                    this.selectedServingLineName = menuType.menuTypeName;
+                                                    this.isDynamicMenuSelected = false;
+                                                }
+                                            }
+                                            this.event.publish('patronLookup:ready', {});
+                                            this.event.publish('patron-released', { 'patronDetails': null });
+                                            this.utilService.setLoader(false);
+                                        }
+                                    }
+                                })
+                                .catch(err => {
+                                    this.transactionInProgress = false;
+                                    //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                                    console.log(err);
+                                });
+                        } else {
+                            this.transactionInProgress = false;
+                            //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                         }
-                    })
-                    .catch(err => {
-                        this.transactionInProgress = false;
-                        //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                        console.log(err);
-                    });
-            } else {
-                this.transactionInProgress = false;
-                //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-            }
+                    }
+                });
         });
+
     }
 
 
     toggleMenus() {
-        if(this.selectedMealTypeName !== 'Meal Type' && this.selectedServingLineName !== 'Serving Line') {
+        if (this.selectedMealTypeName !== 'Meal Type' && this.selectedServingLineName !== 'Serving Line') {
             if (this.isDynamicMenuSelected) {
                 // set serving line
-                if(this.servingLineId!= null) {
+                if (this.servingLineId != null) {
                     const servingLine = {
                         'servingLine': this.selectedServingLine,
                         'servingLineDescription': this.selectedServingLineName,
@@ -3810,33 +3761,33 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     AppStateService.set('servingLine', JSON.stringify(servingLine));
                 }
                 //this.is to change serving line to standard menu when dynamic menu is selected while switching to static.
-                if(this.selectedServingLineName.includes('Dynamic')) {
+                if (this.selectedServingLineName.includes('Dynamic')) {
                     let menuCalendars = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
                     this.selectedServingLine = menuCalendars[0].MenuId;
                     this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
                     this.servingLineId = menuCalendars[0].ServingLineId;
                 }
-               
+
                 // get menu type
-                if(AppStateService.get('menuType')!= undefined) {
+                if (AppStateService.get('menuType') != undefined) {
                     let data = JSON.parse(AppStateService.get('menuType'));
                     this.selectedMenuType = data.menuTypeId;
                     this.selectedMenuTypeName = data.menuTypeName;
                     this.selectedMealType = data.selectedMealType;
                 }
                 //this is required otherwise change menu type check will not pass if selectedMenuType === -1
-                if(this.selectedMenuType === -1) {
+                if (this.selectedMenuType === -1) {
                     this.selectedMenuType = this.selectedServingLine;
                     this.selectedMenuTypeName = this.selectedServingLineName;
                 }
                 // switch to static menu 
                 this.changeMenuType();
                 this.toggleName = 'Alacarte';
-               
+
             } else {
                 //set static menu
                 let menuType
-                if(this.selectedMenuTypeName !== 'Menu Type' && this.selectedMealType !== -1) {
+                if (this.selectedMenuTypeName !== 'Menu Type' && this.selectedMealType !== -1) {
                     menuType = {
                         'menuTypeId': this.selectedMenuType,
                         'menuTypeName': this.selectedMenuTypeName,
@@ -3845,7 +3796,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     AppStateService.set('menuType', JSON.stringify(menuType));
                 }
                 //load serving line
-                if(AppStateService.get('servingLine')!= undefined) {
+                if (AppStateService.get('servingLine') != undefined) {
                     let data = JSON.parse(AppStateService.get('servingLine'));
                     this.selectedServingLine = data.servingLine;
                     this.selectedServingLineName = data.servingLineDescription;
@@ -3857,10 +3808,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.toggleName = 'Meal Service';
             }
         } else {
-            if(this.selectedServingLineName == 'Serving Line') {
+            if (this.selectedServingLineName == 'Serving Line') {
                 this.showPopup('servingLine');
             }
-            if(this.selectedMealTypeName == 'Meal Type') {
+            if (this.selectedMealTypeName == 'Meal Type') {
                 this.showPopup('mealType');
             }
         }
@@ -5316,11 +5267,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         if (!isSecondMeal) {
-                priceTypeId = this.stateEigSetting ?
-                    (this.patronDetails.StatePriceTypeId == null
-                        || this.patronDetails.StatePriceTypeId == undefined) ?
-                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                    : this.patronDetails.PriceTypeId;
+            priceTypeId = this.stateEigSetting ?
+                (this.patronDetails.StatePriceTypeId == null
+                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                : this.patronDetails.PriceTypeId;
         }
         let menuItemNo = 0;
         if (menuItem.RefId) {
@@ -5356,7 +5307,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                if ( this.patronDetails.IsStudent === true
+                if (this.patronDetails.IsStudent === true
                     && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
 
                     if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
@@ -5558,13 +5509,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 // this.utilService.showToast('The selected item is restricted for this patron.');
                 return;
             }
-            let priceTypeId =  this.patronDetails.PriceTypeId;
+            let priceTypeId = this.patronDetails.PriceTypeId;
             if (this.patronDetails['IsSecondMeal'] !== true) {
-                    priceTypeId = this.stateEigSetting ?
-                        (this.patronDetails.StatePriceTypeId == null
-                            || this.patronDetails.StatePriceTypeId == undefined) ?
-                            this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                        : this.patronDetails.PriceTypeId;
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
             }
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {

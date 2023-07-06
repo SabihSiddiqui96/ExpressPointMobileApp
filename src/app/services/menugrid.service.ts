@@ -51,7 +51,7 @@ export class MenugridService {
     });
 
   }
-  public getNonCEPMealTypes(mealTypes) :any{
+  public getNonCEPMealTypes(mealTypes): any {
     return new Promise((resolve) => {
       let nonCEPMealTypes = new Set();
       mealTypes.forEach(m => {
@@ -349,7 +349,6 @@ export class MenugridService {
     return count;
   }
 
-
   public CheckMealTypeByTime(mealTypes, mealTypeId) {
     return new Promise((resolve) => {
 
@@ -366,6 +365,22 @@ export class MenugridService {
 
     });
 
+  }
+  public hasDifferentPriceType(transactionType, items, priceTypeId, statePriceTypeId, secondMealPriceType, stateEligibilitySetting) {
+    return new Promise((resolve, reject) => {
+      if (transactionType == 0) resolve(false);
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].price_type_id !== priceTypeId
+          && items[i].price_type_id !== secondMealPriceType
+        ) {
+          resolve(true);
+        }
+        if (stateEligibilitySetting && statePriceTypeId && items[i].price_type_id !== statePriceTypeId) {
+          resolve(true)
+        }
+      }
+      resolve(false);
+    })
   }
 
 
