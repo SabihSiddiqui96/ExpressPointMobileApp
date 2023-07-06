@@ -394,9 +394,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.PARTIALPAY = Boolean(parseInt(SettingService.getSettingValue('PARTIALPAY')));
         const sellerDetails = AppStateService.get('SellerDetails');
         if (sellerDetails) {
-          this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
+            this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
         }
-        
+
 
         if (this.SquareSetting) {
             this.ShowRetrySubscription =
@@ -1088,8 +1088,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
         if (this.cashpaymentOption === 'card') {
             this.cashtendAmount = this.cardAmount;
-            this.cashCardNum = this.SquareSetting === true ? '' : this.cashCardNum;
-            this.SquareTransactionStarted = this.SquareSetting === true ? true : false;
+            this.cashCardNum = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined)? '' : this.cashCardNum;
+            this.SquareTransactionStarted =  this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
             if (this.cardAmount.indexOf('$') !== -1) {
                 this.cashtendAmount = this.cardAmount.replace('$', '');
             }
@@ -1268,14 +1268,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             // /**
                             //  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
                             //  */
-                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
-                            //     this.paymentAmnt = this.cashtendAmount - this.changeDue;
-
-                            // } else {
-                            //     this.paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            // }
-
-
                             /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
                                 * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
                                 */
@@ -1285,9 +1277,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 } else {
                     this.paymentAmnt = this.cashtendAmount - this.changeDue;
                     if (this.cashtendAmount > this.orderData.totalAmount) {
-                        // if (this.orderData.IsDeposit === false) {
-                        //     this.paymentAmnt = this.orderData.totalAmount;
-                        // }
                         if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
                             this.paymentAmnt = this.orderData.totalAmount;
                         }
