@@ -831,6 +831,16 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     }
   }
 
+  public moreInfoClick() {    
+    var infoText = "The maximum allowed total opening balance is $9999.99.";
+    infoText += "<br/><br/>Each denomination allows a maximum of five digits.";
+    infoText += "<br/><br/>The opening balance is the sum of all denominations.";
+    infoText += "<br/>If it reaches or is about to reach $9999.99, no digit is allowed to enter.";
+    infoText += "<br/><br/>Pressing the delete button inside the textbox will delete the entire value.";
+    infoText += "<br/><br/>Backspace will delete the last digit from the textbox, even if we select any text.";
+    this.utilService.showToast(infoText, 60000); 
+  }
+
   public numberClick(key: any) {
     if (this.customKeys === '0') {
       this.customKeys = '';
