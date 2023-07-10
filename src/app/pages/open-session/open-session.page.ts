@@ -838,6 +838,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     infoText += "<br/>If it reaches or is about to reach $9999.99, no digit is allowed to enter.";
     infoText += "<br/><br/>Pressing the delete button inside the textbox will delete the entire value.";
     infoText += "<br/><br/>Backspace will delete the last digit from the textbox, even if we select any text.";
+    infoText += "<br/><br/>If we select any value and type it, it will append at the end and not overwrite the old value.";
+    infoText += "<br/>If we want to replace or change the old value, simply delete it and enter the new value.";
     this.utilService.showToast(infoText, 60000); 
   }
 
