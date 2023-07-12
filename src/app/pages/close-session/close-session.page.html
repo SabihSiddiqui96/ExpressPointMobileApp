@@ -29,7 +29,7 @@
               </ion-col>
               <ion-col size="2" class="ion-align-self-center">
                 <input id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='COINS'"
-                  (click)="setActiveField(denomination.DenominationId, denomination.Quantity )"
+                  (focus)="setActiveField(denomination.DenominationId, denomination.Quantity)"
                   [ngClass]="{'active-input-label-opencloseBalance': denomination.DenominationId == activeField, 'input-label-opencloseBalance': denomination.DenominationId != activeField}"
                   [(ngModel)]="denomination.Quantity">
               </ion-col>
@@ -61,7 +61,7 @@
               </ion-col>
               <ion-col size="2" class="ion-align-self-center">
                 <input id="{{denomination.DenominationId}}" *ngIf="denomination.Type=='BILLS'"
-                  (click)="setActiveField(denomination.DenominationId, denomination.Quantity )"
+                  (focus)="setActiveField(denomination.DenominationId, denomination.Quantity)"
                   [ngClass]="{'active-input-label-opencloseBalance': denomination.DenominationId == activeField, 'input-label-opencloseBalance': denomination.DenominationId != activeField}"
                   [(ngModel)]="denomination.Quantity">
               </ion-col>
