@@ -24,7 +24,7 @@ export class UtilService {
       { 'url': 'https://stagingapis.schoolcafe.com/api/', 'Name': 'Training', 'DisplayName': '', 'Id': UrlsId.TRAINING, 'loginUrl': '' },
       { 'url': 'https://demoapis.schoolcafe.com/api/', 'Name': 'Demo', 'DisplayName': '', 'Id': UrlsId.DEMO, 'loginUrl': '' },
       { 'url': '', 'Name': 'Custom', 'DisplayName': '', 'Id': UrlsId.CUSTOM, 'loginUrl': '' },
-      { 'url': 'https://apitest.schoolcafe.com/api/', 'Name': 'Internal', 'DisplayName': 'QA', 'Id': UrlsId.INTERNAL, 'loginUrl': '' }
+      { 'url': 'https://apitests.schoolcafe.com/api/', 'Name': 'Internal', 'DisplayName': 'QA', 'Id': UrlsId.INTERNAL, 'loginUrl': '' }
 
     ];
   public loader;
