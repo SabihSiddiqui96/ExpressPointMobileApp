@@ -734,6 +734,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
     }
 
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
+
     public advancePatronClick() {
         AppStateService.set('currentTab', 'advanced');
         this.inputBuffer=[];

@@ -15,11 +15,11 @@
       Transactions
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button expand="block" fill="clear" color="primary" (click)="showSearch()">
+      <ion-button expand="block" fill="clear" color="primary" (click)="blurInputElement();showSearch()">
         <ion-icon slot="icon-only" name="search"></ion-icon>
       </ion-button>
       <!-- *ngIf="!navIsFromservice"  (click)="totalMealTypeSales()" -->
-      <ion-button expand="block" *ngIf="!navIsFromservice" (click)="totalMealTypeSales()">
+      <ion-button expand="block" *ngIf="!navIsFromservice" (click)="blurInputElement();totalMealTypeSales()">
         <ion-icon name="ios-paper" slot="icon-only"></ion-icon>
       </ion-button>
       <ion-button expand="block" fill="clear" color="primary" *ngIf="navIsFromservice" (click)="close()">
@@ -36,7 +36,7 @@
             placeholder="Enter Name" [(ngModel)]="patronSearch.PersonName"></ion-searchbar>
         </ion-col>
         <ion-col size="3" class="ion-align-items-end">
-          <ion-checkbox title="UnSynced" [(ngModel)]="patronSearch.Synced" (click)='showNotSyncedTransactions()'>
+          <ion-checkbox title="UnSynced" [(ngModel)]="patronSearch.Synced" (click)='blurInputElement();showNotSyncedTransactions()'>
           </ion-checkbox>
           <ion-label style="color:floralwhite !important">&ensp; Not Sent</ion-label>
         </ion-col>
@@ -153,13 +153,13 @@
 
         <ion-col size="1">
           <ion-button expand="block" size="small" [disabled]="SaleData.IsClassroomSale"
-            (click)="selectTransaction('ReviewTypes',SaleData.DeviceTransactionId)">
+            (click)="blurInputElement();selectTransaction('ReviewTypes',SaleData.DeviceTransactionId)">
             <ion-icon slot="icon-only" name="flag" *ngIf="SaleData.IsMarked==false"></ion-icon>
             <ion-icon slot="icon-only" name="flag" color="danger" *ngIf="SaleData.IsMarked==true"></ion-icon>
           </ion-button>
         </ion-col>
         <ion-col size="1">
-          <ion-button expand="block" size="small" (click)="getMenuItemsInTransaction(SaleData)">
+          <ion-button expand="block" size="small" (click)="blurInputElement();getMenuItemsInTransaction(SaleData)">
             <ion-icon slot="icon-only" name="list"></ion-icon>
           </ion-button>
         </ion-col>
@@ -182,13 +182,13 @@
         </ion-col>
         <ion-col size="2">
           <ion-button expand="block" size="small" [disabled]="SaleData.IsClassroomSale"
-            (click)="selectTransaction('ReviewTypes',SaleData.DeviceTransactionId)">
+            (click)="blurInputElement();selectTransaction('ReviewTypes',SaleData.DeviceTransactionId)">
             <ion-icon slot="icon-only" name="flag" *ngIf="SaleData.IsMarked==false"></ion-icon>
             <ion-icon slot="icon-only" name="flag" color="danger" *ngIf="SaleData.IsMarked==true"></ion-icon>
           </ion-button>
         </ion-col>
         <ion-col size="2">
-          <ion-button expand="block" size="small" (click)="getMenuItemsInTransaction(SaleData.MenuItems)">
+          <ion-button expand="block" size="small" (click)="blurInputElement();getMenuItemsInTransaction(SaleData.MenuItems)">
             <ion-icon slot="icon-only" name="list"></ion-icon>
           </ion-button>
         </ion-col>

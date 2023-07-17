@@ -134,6 +134,10 @@ export class IonDigitKeyboardCmp {
      */
     public btnClick(event, key: any): void {
 
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+        
         // Prevent click on keyboard swip
         if (this.swipeToHide && this._isSwiping) return;
 

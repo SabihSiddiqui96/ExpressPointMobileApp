@@ -27,21 +27,21 @@
                     </ion-menu-toggle>
                     <ion-row>
                         <ion-col size="3">
-                            <ion-button class="btn-full-size-icon" default expand="block" (click)="makeSale(0)">
+                            <ion-button class="btn-full-size-icon" default expand="block" (click)="blurInputElement(); makeSale(0)">
                                 <ion-icon slot="icon-only" name="backspace">
                                 </ion-icon>
                                 Void
                             </ion-button>
                         </ion-col>
                         <ion-col size="4">
-                            <ion-button class="btn-full-size-icon" default expand="block" (click)="goToLookUp()">
+                            <ion-button class="btn-full-size-icon" default expand="block" (click)="blurInputElement(); goToLookUp()">
                                 <ion-icon slot="icon-only" name="search">
                                 </ion-icon>
                                 Search
                             </ion-button>
                         </ion-col>
                         <ion-col size="5">
-                            <ion-button class="btn-full-size-icon" default expand="block" (click)="showQ()">
+                            <ion-button class="btn-full-size-icon" default expand="block" (click)="blurInputElement(); showQ()">
                                 <ion-icon slot="icon-only" name="people">
                                 </ion-icon>
                                 Queue <span class="queue_count">{{countQ}}</span>
@@ -93,14 +93,14 @@
                                     <img *ngIf="isBirthDay" src="assets/img/confetti_right.png">
                                 </ion-col>
                                 <ion-col size="4" size-md="4" size-sm="4" *ngIf="isStaffNVisitor && showSelectAccount">
-                                    <ion-button expand="block" (click)="selectAccount()" class="previous_patron_btn"
+                                    <ion-button expand="block" (click)="blurInputElement(); selectAccount()" class="previous_patron_btn"
                                         style="height:3.6rem;font-size: 65%;"
                                         [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}">
                                         Select Account
                                     </ion-button>
                                 </ion-col>
                                 <ion-col size="3" size-md="3" size-sm="3">
-                                    <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                                    <ion-button expand="block" (click)="blurInputElement(); loadPrevPatron()" class="previous_patron_btn"
                                         *ngIf="canLoadPrevPatron"
                                         [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
                                         style="height:3.6rem; font-size: 65%;" [disabled]="!canLoadPrevPatron">
@@ -227,7 +227,7 @@
                                     </ion-avatar>
                                     <div *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true)" style="position: absolute;top: 8.5rem;right:1rem;">
                                         <ion-button
-                                                        (click)="ShowsolditemsPopover($event)"
+                                                        (click)="blurInputElement(); ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
                                                         [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) ? ' ': 'none'">
                                                         Previous
@@ -320,7 +320,7 @@
                                                 <ion-col size="5" style="align-self: flex-end;"
                                                     *ngIf="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true)">
                                                     <ion-button default expand="block"
-                                                        (click)="ShowsolditemsPopover($event)"
+                                                        (click)="blurInputElement(); ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(selectedAccountDetails.IsSecondMeal!=true), 'btn_previous_meals':(selectedAccountDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
                                                         [style.display]="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) ? ' ': 'none'">
                                                         Previous
@@ -366,14 +366,14 @@
                     <ion-grid class="ion-no-padding ion-no-margin">
                         <ion-row>
                             <ion-col size="4" *ngIf="!hideAddFunds" style="padding-left:0px">
-                                <ion-button default expand="block" (click)="ShowAddDollarPopover($event)"
+                                <ion-button default expand="block" (click)="blurInputElement(); ShowAddDollarPopover($event)"
                                     *ngIf="patronDetails.isSpecialAccount==false"
                                     [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'">
                                     Add Funds
                                 </ion-button>
                             </ion-col>
                             <ion-col size="4">
-                                <ion-button default expand="block" (click)="ShowallergyPopover(patronDetails)"
+                                <ion-button default expand="block" (click)="blurInputElement(); ShowallergyPopover(patronDetails)"
                                     [style.border]="(this.allergenCount > 0  || this.patronDetails.SpecialInstruction_count > 0
 || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
 this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
@@ -388,7 +388,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                 </ion-button>
                             </ion-col>
                             <ion-col size="4" style="padding-right:0px">
-                                <ion-button default expand="block" (click)="getReviews()"
+                                <ion-button default expand="block" (click)="blurInputElement(); getReviews()"
                                     [style.border]="isMarked ? '4px solid #27FA58':''"
                                     [disabled]='isMarkForReviewClicked'>
                                     Mark for Review
@@ -442,7 +442,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                             <ion-row>
                                 <ion-col size="6" class="ion-no-padding ion-no-margin align-content-center">
                                     <ion-button class="btn-full-size-icon" float-left size="small" fill="clear"
-                                        color="danger" (click)="deleteMenuFromCart(i)">
+                                        color="danger" (click)="blurInputElement(); deleteMenuFromCart(i)">
                                         <ion-icon slot="icon-only" name="md-close-circle"></ion-icon>
                                     </ion-button>
                                     <ion-label align-left class="ion-no-padding ion-no-margin">
@@ -503,14 +503,14 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     </ion-row>
                     <ion-row>
                         <ion-col size="4">
-                            <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
+                            <ion-button expand="block" size="large" class="color-theme" (click)="blurInputElement(); showChargePopup()"
                                 [disabled]="disablePay">
                                 <!-- (patronDetails.isSpecialAccount==true && orderData.items.length === 0) || transactionInProgress -->
                                 Pay
                             </ion-button>
                         </ion-col>
                         <ion-col size="8">
-                            <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)"
+                            <ion-button expand="block" size="large" color="mint" (click)="blurInputElement(); makeSale(2)"
                                 [disabled]="disableCharge || transactionInProgress">
                                 Charge
                             </ion-button>
@@ -542,7 +542,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     </ion-row>
                     <ion-row>
                         <ion-col size="4">
-                            <ion-button expand="block" size="large" class="color-theme" (click)="showChargePopup()"
+                            <ion-button expand="block" size="large" class="color-theme" (click)="blurInputElement(); showChargePopup()"
                                 [disabled]="transactionInProgress">
                                 Pay
                                 <span *ngIf="patronDetails.isSpecialAccount==false"
@@ -552,7 +552,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                             </ion-button>
                         </ion-col>
                         <ion-col size="8">
-                            <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)"
+                            <ion-button expand="block" size="large" color="mint" (click)="blurInputElement(); makeSale(2)"
                                 [disabled]="(patronDetails.isSpecialAccount==true && orderData.totalAmount>0) || transactionInProgress">
                                 Charge
                                 <div class="spinLogin" *ngIf="transactionInProgress">

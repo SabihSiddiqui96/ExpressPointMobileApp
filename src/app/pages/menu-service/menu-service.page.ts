@@ -2209,10 +2209,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public ShowAddDollarPopover(myEvent) {
 
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
-
         const modal = this.modalCtrl.create({
             component: MenuPaymentPopupPage,
             componentProps: {
@@ -2615,6 +2611,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.popupMessageService.showMessage(PopupMessageCode.E05367);
             // this.utilService.showToast('No sale exists.');
         }
+    }
+
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
     }
 
     public postSaleTransaction(transactionType) {

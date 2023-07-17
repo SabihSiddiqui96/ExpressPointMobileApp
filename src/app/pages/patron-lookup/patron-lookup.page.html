@@ -44,7 +44,7 @@
               </ion-segment>
             </ion-col>
             <ion-col size="4" size-md="4" size-sm="4" *ngIf="!hideQueue">
-              <ion-button class="btn-full-size-icon" expand="block" (click)="lookUpService.populatePersonsFromQ()">
+              <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement(); lookUpService.populatePersonsFromQ()">
                 <ion-icon slot="start" name="people"></ion-icon>
                 Queue <span class="queue_count">{{countQ}}</span>
               </ion-button>
@@ -107,7 +107,7 @@
                   <ion-item class="ion-text-center" lines="none" class="search-btn">
                     <ion-label>
                       <ion-button class="ion-no-padding ion-no-margin" expand="block" size="large"
-                        (click)="showPopup('patronSpecialRosterPersonList')" [disabled]="selectedSpecialRosterId=== -1">
+                        (click)="blurInputElement(); showPopup('patronSpecialRosterPersonList')" [disabled]="selectedSpecialRosterId=== -1">
                         Load
                         <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
                       </ion-button>
@@ -168,7 +168,7 @@
                       <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                      (click)="openOnScreenKeyboard()">
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
 
@@ -195,7 +195,7 @@
                       <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                      (click)="openOnScreenKeyboard()">
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
@@ -222,7 +222,7 @@
                       <!-- (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                      (click)="openOnScreenKeyboard()">
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
@@ -251,7 +251,7 @@
                     <ion-label>
                       <ion-button expand="block" size="large" class="ion-no-padding ion-no-margin"
                         [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname || patronSearch.externalId))"
-                        (click)="AdvancedPatronLookup()">
+                        (click)="blurInputElement(); AdvancedPatronLookup()">
                         Search
                         <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
                       </ion-button>
@@ -315,7 +315,7 @@
                 <ion-list *ngSwitchCase="'by_homeroom'" class="margin-top10 ion-no-padding">
                   <ion-item class="ion-text-center" lines="none" class="search-btn">
                     <ion-label>
-                      <ion-button class="ion-no-padding ion-no-margin" expand="block" (click)="selectHomeroomPatron()"
+                      <ion-button class="ion-no-padding ion-no-margin" expand="block" (click)="blurInputElement(); selectHomeroomPatron()"
                         size="large"
                         [disabled]="selectedGrade==-1 || selectedHomeroom==-1 || selectedHomeroomPatronId==-1">
                         Load
@@ -344,7 +344,7 @@
                       [(ngModel)]="patronSearch.keyword" class="ion-text-center" (keyup)="checkNumeric($event)">
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" class="openOSKbutton"
-                      style="font-size: 12px !important;padding-right:20px;" (click)="openOnScreenKeyboard()">
+                      style="font-size: 12px !important;padding-right:20px;" (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                     <!-- non iOS -->
@@ -411,7 +411,7 @@
                 <ion-item class="ion-text-center" lines="none" class="lookup-button">
                   <ion-label>
                     <ion-button class="ion-no-padding ion-no-margin" expand="block"
-                      (click)="showPopup('patronSpecialRosterPersonList')" size="large"
+                      (click)="blurInputElement(); showPopup('patronSpecialRosterPersonList')" size="large"
                       [disabled]="selectedSpecialRosterId=== -1">
                       Load
                       <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
@@ -447,7 +447,7 @@
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                    (click)="openOnScreenKeyboard()">
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
                   </ion-button>
 
@@ -472,7 +472,7 @@
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                    (click)="openOnScreenKeyboard()">
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
                   </ion-button>
                 </ion-item>
@@ -494,7 +494,7 @@
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
                     (keyup)="checkNumeric($event);"></ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                    (click)="openOnScreenKeyboard()">
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
                   </ion-button>
                 </ion-item>
@@ -570,7 +570,7 @@
                 </ion-item>
                 <ion-item class="ion-text-center" lines="none" class="lookup-button">
                   <ion-label>
-                    <ion-button class="ion-no-padding ion-no-margin" expand="block" (click)="selectHomeroomPatron()"
+                    <ion-button class="ion-no-padding ion-no-margin" expand="block" (click)="blurInputElement(); selectHomeroomPatron()"
                       size="large"
                       [disabled]="selectedGrade==-1 || selectedHomeroom==-1 || selectedHomeroomPatronId==-1">
                       Load
@@ -592,7 +592,7 @@
                       class="ion-text-center">
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK"
-                      style="font-size: 12px !important;" (click)="openOnScreenKeyboard()">
+                      style="font-size: 12px !important;" (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
@@ -619,7 +619,7 @@
         <ion-toolbar class="ion-no-border" bg-transparent>
           <ion-row *ngFor="let special_account of specialAccountsArray" class="btn-patron-special-account">
             <ion-col size="6" *ngFor="let account of special_account">
-              <ion-button expand="block" (click)="selectPatron(account,true)">
+              <ion-button expand="block" (click)="blurInputElement(); selectPatron(account,true)">
                 {{account.Description}}
               </ion-button>
             </ion-col>
@@ -687,7 +687,7 @@
                       <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                      (click)="openOnScreenKeyboard()">
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
@@ -700,7 +700,7 @@
                       <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
                     </ion-input>
                     <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                      (click)="openOnScreenKeyboard()">
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
@@ -724,7 +724,7 @@
                     <ion-label>
                       <ion-button expand="block" size="large" class="ion-no-padding ion-no-margin"
                         [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname || patronSearch.externalId))"
-                        (click)="AdvancedPatronLookup()">
+                        (click)="blurInputElement(); AdvancedPatronLookup()">
                         Search
                         <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
                       </ion-button>
@@ -761,7 +761,7 @@
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                    (click)="openOnScreenKeyboard()">
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
                   </ion-button>
                 </ion-item>
@@ -782,7 +782,7 @@
                     <!-- (keyup)=""> -->
                   </ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                    (click)="openOnScreenKeyboard()">
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
                   </ion-button>
                 </ion-item>
@@ -800,7 +800,7 @@
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
                     (keyup)="checkNumeric($event)"></ion-input>
                   <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
-                    (click)="openOnScreenKeyboard()">
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad"></ion-icon>
                   </ion-button>
                 </ion-item>
@@ -815,7 +815,7 @@
                 <ion-item class="lookup-button">
                   <ion-button expand="block" size="large" class="ion-no-padding ion-no-margin"
                     [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname ))"
-                    (click)="AdvancedPatronLookup()">
+                    (click)="blurInputElement(); AdvancedPatronLookup()">
                     Search
 
                     <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
