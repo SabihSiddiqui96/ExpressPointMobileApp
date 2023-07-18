@@ -17,6 +17,8 @@ import { Events } from './events.service';
 // import { resolveDefinition } from '@angular/core/src/view/util';
 import { Status } from './enums/device-status';
 import { HashingService } from './hashing.service';
+import { PouchQueriesService } from './Database/pouch-queries.service';
+import { PouchDBService, EXP_SYSTEM, EXP_COMMON } from './pouch-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -600,6 +602,51 @@ export class DeviceService {
       });
     }
   }
+
+  public SaveVersionUpdateStatus(id, terminalId, CodeVersion, isSynced) {
+    return new Promise((resolve) => {
+      const versionupdatedoc: VersionUpdateDoc = {
+        '_id': id,           
+        'TerminalId': terminalId,
+        'CodeVersion': CodeVersion,
+        'IsSynced': isSynced
+      };
+        //PouchDBService.UpsertSingleDoc(versionupdatedoc, EXP_SYSTEM).then(() => { resolve(null); });
+        PouchQueriesService.GetVersionUpdateRecord().then((res) => {
+          const versionStatus = res.rows.map(row => row.doc);
+          if (versionStatus.length > 0) {
+            versionStatus.map((doc) => {
+              if(doc.CodeVersion != versionupdatedoc.CodeVersion){
+              doc.IsSynced = false;
+              doc.CodeVersion = versionupdatedoc.CodeVersion;
+              PouchDBService.UpsertSingleDoc(doc, EXP_SYSTEM).then(() => { resolve(null); });             
+              }
+            });
+          }
+          else{
+            PouchDBService.UpsertSingleDoc(versionupdatedoc, EXP_SYSTEM).then(() => { resolve(null); });
+          }  
+        });
+    });
+  }
+
+  public SaveDeviceSettingToPouchDB(code, value) {
+    return new Promise((resolve) => {      
+        PouchQueriesService.GetDeviceSettingByCode(code).then((res) => {
+          const patronDisplay = res.rows.map(row => row.doc);
+          if (patronDisplay.length > 0) {
+            patronDisplay.map((doc) => {
+              if(doc.DeviceSettingValue != value){
+              doc.IsSynced = false;
+              doc.DeviceSettingValue = value;
+              PouchDBService.UpsertSingleDoc(doc, EXP_COMMON).then(() => { resolve(null); });             
+              }
+            });
+          }
+        });
+    });
+  }
+
 }
 
 export class DeviceInfo {
@@ -617,4 +664,11 @@ export class DeviceInfo {
   public TerminalId?: number;
   public DeviceName?: string;
   public rawSystemUUID?: string;
+}
+
+export class VersionUpdateDoc {
+    public _id: string;
+    public TerminalId: number;
+    public CodeVersion: string;
+    public IsSynced: boolean;
 }

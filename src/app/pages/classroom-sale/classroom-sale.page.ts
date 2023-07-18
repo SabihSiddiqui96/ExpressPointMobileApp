@@ -62,7 +62,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public gradeList: any = [{ 'GradeId': -1, 'GradeDescription': 'Please Select' }];
     public menuItems: any = [{ 'MenuItemId': -1, 'MenuItemDescription': 'Please Select' }];
     public mealTypes: any = [{ 'MealTypeId': -1, 'MealTypeDescription': 'Please Select' }];
-    isGridView: boolean = true;
+   
+    gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
+    isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
+    isGridView = (this.gridViewPatronIsPic != null && this.gridViewPatronIsPic != undefined) ? Boolean(this.gridViewPatronIsPic) : this.isGridViewParent;
+
 
     public filter = {
         'selected_grade': -1, 'selected_grade_name': '',
@@ -368,6 +372,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     toggleView() {
         this.isGridView = !this.isGridView;
+        AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
 
     public getSpecialRostersList() {
@@ -1348,7 +1353,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = LocalTimerService.getTime('time');
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

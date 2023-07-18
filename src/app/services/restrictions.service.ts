@@ -576,7 +576,15 @@ export class RestrictionsService {
 
                     if ((saleHasOnlyOneReimbursableMeal && this.settingChargeReimbursableMealsOnly && reimProjBal < creditLimit) ||
                         saleTotalOfJustALaCarteItems <= (accountBalance + paymentAmount) ||
-                        !this.settingChargeReimbursableMealsOnly) {
+                         // Previously, there were no conditions when setting "settingChargeReimbursableMealsOnly" false; 
+                        //now there are conditions to check both types.
+                        (
+                            !this.settingChargeReimbursableMealsOnly && 
+                            (
+                                (this.mealCount > 0 && reimProjBal < creditLimit) ||
+                                (this.alacarteCount > 0 && alaProjBal < creditLimitAlaCarte)                                    
+                            )
+                        )) {
                         this.showPrompt = true;
                         return false;
                     } else if (this.settingChargeReimbursableMealsOnly && this.mealCount > 1 && this.patronDetails['IsStudent']) {

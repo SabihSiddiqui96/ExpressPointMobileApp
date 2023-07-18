@@ -16,7 +16,9 @@ import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { LookupService } from '../../services/lookup.service';
 import { HttpService } from '../../services/HTTP/http.service';
-import { threadId } from 'worker_threads';
+import { Subscription, timer } from "rxjs";
+import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
+import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -37,7 +39,17 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() orderData;
     @Input() isSpecialAccount;
     @Input() isMealFormed;
+    @Input() squareReferenceId;
+
     isEnterKey: boolean = false;
+    public SquareSetting: boolean
+    private SquareTransactionStarted: boolean = false
+    public countDown: Subscription;
+    public interval = 3000;
+    public counter = 300;
+    public tick = 1000;
+    private ApiInterval;
+    // public ShowRetrySubscription: Subscription;
 
     ngOnInit() {
         this.navPatronDetails = this.patronDetails;
@@ -50,6 +62,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
         this.setDefaultAmount();
+
+
 
         if (AppStateService.get('SwapAction') === 'left') {
             this.swapLeft = false;
@@ -66,7 +80,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         } else if (SettingService.getSettingValue('POSCHKBUT') === '0') {
             this.hideCheckOption = true;
         }
-
         if (SettingService.getSettingValue('CREDCADPAY') === '1') {
             this.hideCardOption = false;
         } else if (SettingService.getSettingValue('CREDCADPAY') === '0') {
@@ -360,21 +373,46 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public showPatron: boolean = false;
     public isStaffNVisitor: boolean = false;
     public selectedPatronDetails;
+    public ShowSquareRetry: boolean = false
+    public ShowRetrySubscription: Subscription;
     public paymentAmnt: number = 0.00
     public PARTIALPAY: boolean = false;
+    public squareDeviceId: string = undefined;
 
     constructor(public navCtrl: NavController, public event: Events, public navParams: NavParams,
         private alertCtrl: AlertController, private utilService: UtilService,
         public lookUpService: LookupService, private modalCtrl: ModalController,
         private http: HttpService, private renderer: Renderer,
         public popupMessageService: PopupMessageService, public transactionService: TransactionService,
-        public router: Router, public appStateService: AppStateService, public settingService: SettingService) {
+        public router: Router, public appStateService: AppStateService, public settingService: SettingService, public creditCardTransactionService: CreditCardTransactionService) {
 
         this.lastPatron = this.navParams.get('lastPatronDetails');
         this.canLoadPrevPatron = this.navParams.get('canLoadPrevPatron');
         this.selectedPatronDetails = this.navParams.get('selectedPatronDetails');
         this.showPatron = this.navParams.get('showPatron');
+        this.SquareSetting = Boolean(parseInt(SettingService.getSettingValue('ENBLCCTR')));
         this.PARTIALPAY = Boolean(parseInt(SettingService.getSettingValue('PARTIALPAY')));
+        const sellerDetails = AppStateService.get('SellerDetails');
+        if (sellerDetails) {
+            this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
+        }
+
+
+        if (this.SquareSetting) {
+            this.ShowRetrySubscription =
+                this.creditCardTransactionService.ShowRetryButton.subscribe((val) => {
+
+                    if (val) {
+                        this.ShowSquareRetry = val;
+                        this.isCompleteTransactionProcessing = false;
+                        this.saveInProgress = false;
+                        clearInterval(this.ApiInterval)
+                        this.countDown.unsubscribe();
+                    }
+
+                })
+        }
+
 
 
     }
@@ -382,6 +420,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     public ngOnDestroy() {
         this.event.destroy('numberInput');
+        if (this.SquareSetting) {
+            this.ShowRetrySubscription.unsubscribe();
+            this.creditCardTransactionService.ShowRetryButton.complete();
+        }
+
     }
     public numberInput(key: any, isKeyInput: boolean = false) {
         //key.preventDefault();
@@ -530,6 +573,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.activeInputField = field;
             }
         } else if (field === 'card') {
+
             this.amountClass = 'input_label';
             this.depositClass = 'input_label';
             this.checkNoClass = 'input_label';
@@ -542,28 +586,52 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             //     this.saveInProgress = true;
             // }
         }
+    }
 
 
+    public startTimer() {
 
+        return new Promise((resolve, reject) => {
+            if (this.SquareSetting === true) {
+                this.countDown = timer(0, this.tick).subscribe(() => this.counter > 0 ? --this.counter : 0);
+                resolve(true)
+            }
+            else {
+                resolve(true)
+            }
+        })
+
+    }
+
+    public CancelSquareTransaction() {
+
+        if (this.cashpaymentOption === 'card' && this.SquareTransactionStarted) {
+            if (this.SquareSetting) {
+
+                if (this.creditCardTransactionService.SquareTransactionObject && this.creditCardTransactionService.SquareTransactionObject.CheckoutId) {
+                    this.creditCardTransactionService.CancelSquareTransaction(this.creditCardTransactionService.SquareTransactionObject.CheckoutId)
+                    this.SquareTransactionStarted = false
+                } else {
+                    this.utilService.showToast('Please wait for a couple of seconds and try again.')
+                    return
+                }
+            }
+        }
     }
 
     public close(isClosed: boolean = false) {
 
-
-
+        if (isClosed) {
+            this.CancelSquareTransaction();
+        }
         const items = [];
-
         for (let i = 0; i < this.navOrderData.items.length; i++) {
-
             for (let qty = 0; qty < this.navOrderData.items[i]['Quantity']; qty++) {
-
                 items.push({
                     'Price': this.navOrderData.items[i]['CurrentPrice'],
                     'MenuItemId': this.navOrderData.items[i]['RefId'],
                 });
-
             }
-
         }
 
         if (AppStateService.get('session_id')) {
@@ -573,19 +641,13 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isClosed) {
             let suspiciousComment;
-
             let suspiciousActType: number;
-
             if (this.cashpaymentOption == 'cash') {
-
                 suspiciousComment = 'Cancel Cash Payment on the POS transaction window.'
                 suspiciousActType = SuspiciousActivityTypes.CANCELCASHPAY;
-
             } else if (this.cashpaymentOption == 'check') {
-
                 suspiciousComment = 'Cancel Check Payment on the POS transaction window.'
                 suspiciousActType = SuspiciousActivityTypes.CANCELCHECKPAY;
-
             }
             let suspiciousId = this.utilService.generateUUID();
             const suspiciousTransactionDoc: SuspiciousTransactionDoc = {
@@ -611,6 +673,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     async dismissPopup() {
+        if (this.navOrderData.IsCard === true && this.SquareSetting) {
+            clearInterval(this.ApiInterval);
+        }
         const element = await this.modalCtrl.getTop();
         if (element) {
             element.dismiss();
@@ -1014,11 +1079,17 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.utilService.showToast(message);
     }
 
-    public makeSale() {
+    public makeSale(retrySquareTransaction = false) {
+
+        if (retrySquareTransaction) {
+            this.ShowSquareRetry = false;
+            this.retrySquareTransaction(retrySquareTransaction);
+        }
 
         if (this.cashpaymentOption === 'card') {
             this.cashtendAmount = this.cardAmount;
-
+            this.cashCardNum = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined)? '' : this.cashCardNum;
+            this.SquareTransactionStarted =  this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
             if (this.cardAmount.indexOf('$') !== -1) {
                 this.cashtendAmount = this.cardAmount.replace('$', '');
             }
@@ -1028,6 +1099,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
 
         if (this.navIsSpecialAccount && this.showPatron && this.showSelectAccount) {
+            // this.navOrderData.IsCard = false;
+            // this.navOrderData.IsCheck = false;
+            // this.cashtendAmount = 0.00;
             this.eventPublish();
             return;
         }
@@ -1074,14 +1148,14 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 }
             } else if (this.cashpaymentOption === 'card') {
                 this.navOrderData.CardNumber = this.cashCardNum;
-                if (!this.navOrderData.CardNumber && !this.isPrincipleAccountClicked) {
+                if (!this.navOrderData.CardNumber && !this.isPrincipleAccountClicked && !this.SquareSetting) {
 
                     this.saveInProgress = false;
                     this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07494);
                     // this.utilService.showToast('Please enter the card number');
                     return;
-                } else if (this.navOrderData.CardNumber != null && (this.navOrderData.CardNumber.length < 4)) {
+                } else if (this.navOrderData.CardNumber != null && (this.navOrderData.CardNumber.length < 4 && !this.SquareSetting)) {
                     this.saveInProgress = false;
                     this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07495);
@@ -1112,10 +1186,29 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 }
 
             }
+            if (!retrySquareTransaction) {
+                this.startTimer().then((res) => {
+                })
 
-            this.eventPublish();
-
+                this.eventPublish(retrySquareTransaction);
+            }
         }
+    }
+
+    retrySquareTransaction(retrySquareTransaction = false) {
+
+        clearInterval(this.ApiInterval)
+        this.interval = 3000;
+        this.counter = 300;
+        this.tick = 1000;
+        this.startTimer().then(() => {
+
+            this.isCompleteTransactionProcessing = true
+            this.CancelSquareTransaction()
+            // this.makeSale(true)
+            this.eventPublish(retrySquareTransaction)
+        })
+
 
 
     }
@@ -1157,6 +1250,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public finalCheckOrderData() {
         return new Promise((resolve) => {
             if (!this.navOrderData.IsCheck && !this.navOrderData.IsCard && !(this.isPrincipleAccountClicked)) {
+
                 this.navOrderData.IsDeposit = this.depositChangeDue;
                 this.paymentAmnt = this.orderData.totalAmount;
                 if (this.EXNEGBAL) {
@@ -1174,14 +1268,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                             // /**
                             //  * if Cash tendered is less than the Total sale cost, then payment amount shouwl be cashtendered
                             //  */
-                            // if (this.cashtendAmount <= this.orderData.totalAmount) {
-                            //     this.paymentAmnt = this.cashtendAmount - this.changeDue;
-
-                            // } else {
-                            //     this.paymentAmnt = parseFloat(this.orderData.totalAmount);
-                            // }
-
-
                             /** The above Code is not Valid anymore as balance can be used as well  - Partial Pay changes 
                                 * As Cash Due is calculated accurately, Payment Mount is cashtendered - cashdue 
                                 */
@@ -1191,23 +1277,15 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 } else {
                     this.paymentAmnt = this.cashtendAmount - this.changeDue;
                     if (this.cashtendAmount > this.orderData.totalAmount) {
-                        // if (this.orderData.IsDeposit === false) {
-                        //     this.paymentAmnt = this.orderData.totalAmount;
-                        // }
                         if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
                             this.paymentAmnt = this.orderData.totalAmount;
                         }
                     }
                 }
-                /* not sure if to add this or not */
-                if (this.patronDetails.isSpecialAccount === true && this.orderData.IsCheck === true) {
-                    this.paymentAmnt = this.orderData.totalAmount;
-                }
 
                 if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
                     this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
                 }
-                /* not sure if to add this or not */
             }
             /* not sure if to add this or not */
             if (this.navOrderData.IsCheck === true) {
@@ -1219,7 +1297,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                     this.isDepositByEXNEGBAL = false
                 } else {
                     this.paymentAmnt = this.navOrderData.totalAmount;
-                    this.navOrderData.IsDeposit = true;
+                    this.navOrderData.IsDeposit = false;
                     this.depositAmount = '$0.00';
                     this.changeDue = 0.00;
                 }
@@ -1228,16 +1306,17 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.paymentAmnt = this.navOrderData.totalAmount;
                 this.navOrderData.CardNumber = this.cashCardNum
                 this.navOrderData.IsCard = true
-                this.navOrderData.IsDeposit = true;
+                this.navOrderData.IsDeposit = false;
                 this.depositAmount = '$0.00';
                 this.changeDue = 0.00;
             }
+            /* not sure if to add this or not */
             resolve(null);
         })
     }
 
 
-    public eventPublish() {
+    public eventPublish(retrySquareTransaction = false) {
         this.finalCheckOrderData().then(() => {
             this.event.publish('menu-order:pay', {
                 'orderData': this.navOrderData,
@@ -1246,6 +1325,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 'amountTowardsBalance': Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)),
                 'cashDue': this.changeDue,
                 'selectedAccountDetails': this.showPatron == true ? this.accountDetails : null,
+                'squareRetry': retrySquareTransaction,
                 'PaymentAmount': this.paymentAmnt
             });
 
@@ -1256,7 +1336,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.close();
             });
         })
-
 
     }
 
@@ -1270,6 +1349,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         if (cashtendered.indexOf('$') !== -1) {
             cashtendered = cashtendered.replace('$', '');
         }
+
 
         cashtendered = parseFloat(cashtendered);
 

@@ -21,9 +21,9 @@ export class PatronListModalPage implements OnInit {
     @Input() isFromQueue;
     @Input() isFromAdvPatronSearch;
     @Input() allowVisitingPatron;
-    isGridView: boolean;
+    isGridView:boolean;
 
-    ngOnInit() {
+    ngOnInit() {    
         this.navPatronList = this.patron_list;
         this.searchResultCount = this.navPatronList.length;
         if(this.navPatronList && this.navPatronList.length > 0) {
@@ -49,7 +49,7 @@ export class PatronListModalPage implements OnInit {
                 this.updateAdvLookupSortOrder();
             this.event.publish('patronLargeImagehide', null);
         }
-    }
+    }    
     public navPatronList = [];
     public isFromServer: boolean;
     public navIsFromQueue: boolean;
@@ -127,9 +127,9 @@ export class PatronListModalPage implements OnInit {
 
     }
 
-    toggleView(){
+    toggleView(){    
         this.isGridView = !this.isGridView;
-        AppStateService.set("GridViewPatronIsPic", this.isGridView);
+        AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
 
     public updateAdvLookupSortOrder() {

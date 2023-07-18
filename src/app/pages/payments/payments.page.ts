@@ -531,7 +531,7 @@ export class DoPayment {
 
             if (amnt <= maxpymtamt) {
                 if (amnt >= warnamount) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E17456, ['$' + amnt + '']).then((bool) => {
+                    this.popupMessageService.showMessage(PopupMessageCode.E17456, ['$' + amnt.toFixed(2) + '']).then((bool) => {
                         if (bool) {
                             this.startPayment(IsFromAddFunds);
                         }
@@ -704,7 +704,7 @@ export class DoPayment {
             };
 
             const transactionDoc = {
-                '_id': 'Transaction--' + new Date().getTime(),
+                '_id': 'Transaction--' + LocalTimerService.getTime('time'),
                 'saleData': saleData
             };
 
@@ -852,7 +852,7 @@ export class DoPayment {
 
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = LocalTimerService.getTime('time');
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

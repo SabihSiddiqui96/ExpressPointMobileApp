@@ -27,7 +27,7 @@ const TIMEOUT_HEARTBEAT = 5 * 1000;
 })
 export class HttpInterceptorService {
 
-  constructor(private utilService: UtilService, public network: NetworkService, public logDBService:LogsDBService,
+  constructor(private utilService: UtilService, public network: NetworkService, public logDBService: LogsDBService,
     public event: Events, public navCtrl: NavController, public router: Router, public appStateService: AppStateService) { }
 
   public intercept(request: HttpRequest<any>, httpHandler: HttpHandler): Observable<HttpProgressEvent | HttpEvent<any>> {
@@ -39,13 +39,25 @@ export class HttpInterceptorService {
     //  return this.forwardRequest(httpHandler, request);
     // }
     if (!request.url.endsWith('token')) {
-      const clonedReq = request.clone({
-        headers: new HttpHeaders({
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + AppStateService.get('access_token')
-        })
-      });
+      let clonedReq
+      if (request.url.includes('squareup')) {
+        clonedReq = request.clone({
+          headers: new HttpHeaders({
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + JSON.parse(AppStateService.get("SellerDetails")).AuthorizationToken
+          })
+        });
+      } else {
+        clonedReq = request.clone({
+          headers: new HttpHeaders({
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + AppStateService.get('access_token')
+          })
+        });
+      }
+
       return this.forwardRequest(httpHandler, clonedReq);
     } else {
       /** Don't add headers for Token request */

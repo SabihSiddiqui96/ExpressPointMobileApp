@@ -154,7 +154,7 @@ export class QuickClassroomSalePage {
         const sessionDenominations = [];
         const sessionCheck = [];
         const closeSessionDoc = {
-            '_id': 'CloseSession--' + new Date().getTime(),
+            '_id': 'CloseSession--' + LocalTimerService.getTime('time'),
             'SessionId': AppStateService.get('session_id'),
             'SessionDenominations': sessionDenominations,
             'SessionCheck': sessionCheck,

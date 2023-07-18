@@ -172,6 +172,7 @@ export class AppComponent {
     public appStateService: AppStateService,
     public settingService: SettingService,
     public authService: AuthService,
+    public timerService: LocalTimerService,
     public keyboard: Keyboard, public signalRService: SignalRService, public setupDbService: SetupDbService
   ) {
     if (AppStateService.get("login_details")) {
@@ -194,12 +195,10 @@ export class AppComponent {
       .subscribe((value) => {
         let evenType;
         if (value == true) {
-          const date = new Date();
-          AppStateService.set("HeartBeatLastOfflineDate", date.getTime());
+          AppStateService.set("HeartBeatLastOfflineDate", LocalTimerService.getTime('time'));
           evenType = "disconnect";
         } else {
-          const date = new Date();
-          AppStateService.set("LastOnlineDate", date.getTime());
+          AppStateService.set("LastOnlineDate", LocalTimerService.getTime('time'));
           evenType = "connect";
         }
 
@@ -512,7 +511,7 @@ export class AppComponent {
           _thisRef.platform.pause.subscribe(() => {
             console.log("App paused");
             UtilService.isAppForeground = false;
-            UtilService.appBackgroundTime = new Date().getTime();
+            UtilService.appBackgroundTime = LocalTimerService.getTime('time');
           });
 
           _thisRef.platform.resume.subscribe(() => {
@@ -848,7 +847,7 @@ export class AppComponent {
 
   public checkForInactivityTimeout(_thisRef) {
     const lastBgTime = UtilService.appBackgroundTime;
-    const currTime = new Date().getTime();
+    const currTime = LocalTimerService.getTime('time');
     UtilService.appBackgroundTime = undefined;
     if (lastBgTime && typeof lastBgTime === "number" && lastBgTime > 0) {
       const value = SettingService.getSettingValue("TEROFFA");
@@ -1235,6 +1234,8 @@ export class AppComponent {
               this.pouchQuery.PostTransactions().then(() => {
                 this.pouchQuery.PostReviewReason().then(() => { });
                 this.pouchQuery.PostTerminalStatus().then(() => { });
+                this.pouchQuery.PostVersionUpdateStatus().then(() => { });
+                this.pouchQuery.PostDeviceSettings().then(() => { });
                 this.pouchQuery.PostSessionCheck().then(() => { });
                 this.pouchQuery.PostSessionCard().then(() => { });
                 this.pouchQuery.PostClassRoomSales().then(() => {
@@ -1368,7 +1369,7 @@ export class AppComponent {
     const sessionDenominations = [];
     const sessionCheck = [];
     const closeSessionDoc = {
-      '_id': 'CloseSession--' + new Date().getTime(),
+      '_id': 'CloseSession--' + LocalTimerService.getTime('time'),
       'SessionId': AppStateService.get('session_id'),
       'SessionDenominations': sessionDenominations,
       'SessionCheck': sessionCheck,
@@ -1536,7 +1537,7 @@ export class AppComponent {
                 type: type,
               },
             },
-            queryParams: { refresh: new Date().getTime() }
+            queryParams: { refresh: LocalTimerService.getTime('time') }
           };
           this.navCtrl.navigateRoot("open-session", navigationExtras);
         }
@@ -1548,7 +1549,7 @@ export class AppComponent {
               type: type,
             },
           },
-          queryParams: { refresh: new Date().getTime() }
+          queryParams: { refresh: LocalTimerService.getTime('time') }
         };
         this.navCtrl.navigateRoot("open-session", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
@@ -1560,7 +1561,7 @@ export class AppComponent {
               type: type,
             },
           },
-          queryParams: { refresh: new Date().getTime() }
+          queryParams: { refresh: LocalTimerService.getTime('time') }
         };
         this.navCtrl.navigateRoot("open-session", navigationExtras);
       }
@@ -1962,7 +1963,7 @@ export class AppComponent {
       }
 
       const heartBeatDetailsDoc = {
-        _id: "HeartBeatDetails--" + new Date().getTime(),
+        _id: "HeartBeatDetails--" + LocalTimerService.getTime('time'),
         TerminalId: this.terminalId,
         LogErrorDescription: this.errDescription,
         AppOnlineLogTime: this.lastOnlineDate,

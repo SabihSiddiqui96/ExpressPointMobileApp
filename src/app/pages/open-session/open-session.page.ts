@@ -772,7 +772,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   }
 
   public generateUUID() {
-    let d = new Date().getTime();
+    let d = LocalTimerService.getTime('time');
     if (window.performance && typeof window.performance.now === 'function') {
       d += performance.now(); // use high-precision timer if available
     }
@@ -829,6 +829,18 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         // this.showConfrim(message, this.balanceMode);
       }
     }
+  }
+
+  public moreInfoClick() {    
+    var infoText = "The maximum allowed total opening balance is $9999.99.";
+    infoText += "<br/><br/>Each denomination allows a maximum of five digits.";
+    infoText += "<br/><br/>The opening balance is the sum of all denominations.";
+    infoText += "<br/>If it reaches or is about to reach $9999.99, no digit is allowed to enter.";
+    infoText += "<br/><br/>Pressing the delete button inside the textbox will delete the entire value.";
+    infoText += "<br/><br/>Backspace will delete the last digit from the textbox, even if we select any text.";
+    infoText += "<br/><br/>If we select any value and type it, it will append at the end and not overwrite the old value.";
+    infoText += "<br/>If we want to replace or change the old value, simply delete it and enter the new value.";
+    this.utilService.showToast(infoText, 60000); 
   }
 
   public numberClick(key: any) {

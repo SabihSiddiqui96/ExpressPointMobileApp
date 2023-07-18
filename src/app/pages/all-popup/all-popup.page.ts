@@ -34,8 +34,8 @@ export class AllPopupPage implements OnInit {
     @Input() data;
     @Input() page;
     @Input() selectedValue;
-    isGridView: boolean;
-    navOptionList = ['patronPatron', 'patronSpecialRosterPersonList', 'patronlist'];
+    isGridView : boolean;
+    navOptionList = ['patronPatron','patronSpecialRosterPersonList','patronlist'];
 
     ngOnInit() {
         const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
@@ -378,7 +378,7 @@ export class AllPopupPage implements OnInit {
 
     toggleView() {
         this.isGridView = !this.isGridView;
-        AppStateService.set("GridViewPatronIsPic", this.isGridView);
+        AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
 
     public ionViewDidLeave() {
@@ -749,7 +749,7 @@ export class AllPopupPage implements OnInit {
     // @HostListener('document:keydown', ['$event'])
     public handleKeyboardEvent() {
         this.domEvent = fromEvent(document, "keydown").subscribe((event) => {
-
+            
         });
 
     }

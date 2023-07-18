@@ -99,7 +99,7 @@ export class SettingService {
         return '0';
       }
     }
-    else {
+    else{
       return '0';
     }
   }

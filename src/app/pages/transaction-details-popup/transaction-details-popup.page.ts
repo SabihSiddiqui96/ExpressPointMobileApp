@@ -185,7 +185,11 @@ export class TransactionDetailsPopupPage implements OnInit {
         }
     }
 
-
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
 
     public showNotSyncedTransactions() {
         if (this.patronSearch.Synced === false) {
@@ -239,6 +243,9 @@ export class TransactionDetailsPopupPage implements OnInit {
                         } else {
                             doc.saleData['PersonName'] = "" + doc.saleData.LastName + ", " + doc.saleData.FirstName + "";
                         }
+                        doc.saleData.MenuItems.map(mitem => {
+                            mitem.Date = parseInt(mitem.Date) + localOffset;
+                        });
                         this.saleDataList.push(doc.saleData);
                     }
 
@@ -316,7 +323,7 @@ export class TransactionDetailsPopupPage implements OnInit {
                                 }
                             }
                         });
-                        if (item['SecondMeal'] === undefined || item['SecondMeal'] === NaN) {
+                        if (item['SecondMeal'] === undefined || Number.isNaN(item['SecondMeal'])) {
                             item['SecondMeal'] = 0;
                         }
                         item['ReimTotal'] = item['Free'] + item['Reduced'] + item['Paid'];

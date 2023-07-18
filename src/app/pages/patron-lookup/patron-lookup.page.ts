@@ -468,7 +468,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.customKeys += key;
             this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
-
+            this.inputBuffer=[];
             this.lookupByPIN();
             this.customKeys = '';
         } else if (key === 'X') {
@@ -727,14 +727,22 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.GetHomeRoomsByGrade();
         this.patronSelectList = [];
         this.personlist = [];
+        this.inputBuffer=[];
         this.patronSearch.keyword = null;
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
     }
 
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
+
     public advancePatronClick() {
         AppStateService.set('currentTab', 'advanced');
+        this.inputBuffer=[];
         // this.returnToWhatPage
         this.patronSearch.keyword = null;
         this.patronSearch.externalId = null;
@@ -744,6 +752,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.setActiveField('externalId');
         setTimeout(() => {
             if (!this.utilService.isElectronApp()) {
+                if(this.patronPinId != null && this.patronPinId != undefined)
                 this.patronPinId.setFocus();
             }
         }, 500);
@@ -1140,9 +1149,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 //     'SchoolId': doc.SchoolId,
                 //     'Identifier': doc.Identifier
                 // };
-            });
-            console.log('Special Roaster List' + JSON.stringify(this.specialRosterPersonList));
-
+            });            
             const canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
 
             /*if (!canServeVisitingPatrons && this.setting.CanServeVisitingAdults === true) {
@@ -1315,8 +1322,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public showGradePopup(patron) {
             this.GetGradesBySchool().then(()=>{
-                const postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
-
+                let postData = { };
+                if(patron.isSpecialAccount == true){
+                    const gradesData = this.gradeList.filter(item => item.GradeId !== 0);
+                    postData = { 'type': 'patronGrade', 'data': gradesData, 'selectedValue': this.selectedGrade };
+                }
+                else{
+                    postData = { 'type': 'patronGrade', 'data': this.gradeList, 'selectedValue': this.selectedGrade };
+                }
                 if (postData['data'].length > 0) {
                     const popover = this.popoverCtrl.create({
                         component: AllPopupPage,
@@ -1361,7 +1374,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.lookupByPIN();
             }
         }
-    }
+    }   
+
     public onPeripheralKey(event) {
         if (!this.router.url.includes('payments')) {
             this.logDBService.logData({
@@ -1396,7 +1410,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput);
+                            this.lookUpService.setQ(queueInput);                                                      
                             this.utilService.showModalPopup = false;
                         }
                         incomingID = '';
@@ -1443,7 +1457,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput);
+                            this.lookUpService.setQ(queueInput);                             
                             this.utilService.showModalPopup = false;
                         }
                         incomingID = '';

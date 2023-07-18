@@ -436,6 +436,14 @@ export class HttpService {
             return this.http.get(API_URL + 'GetAllSiteSettings/' + schoolId).pipe(map(res => res));
         }
     }
+
+    public GetAllDeviceSettings(): any {
+        const terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;        
+        if (terminalId) {
+            return this.http.get(API_URL + 'GetAllDeviceSettings/' + terminalId).pipe(map(res => res));
+        }
+    }
+
     public GetAllUsers(): any {
         const schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
 
@@ -447,6 +455,14 @@ export class HttpService {
         return this.http.get(API_URL + 'GetBalanceByAccountId/' + accountId);
     }
 
+
+    public GetSellerRelatedData(terminalId): any {
+        return this.http.get(API_URL + 'GetSellerRelatedData/' + terminalId).pipe(map(res => res));
+    }
+
+    public GetCCTransactionStatusFromPrimero(referenceId): any {
+        return this.http.get(API_URL + 'GetCCTransactionStatusFromSquare/' + referenceId).pipe(map(res => res));
+    }
 
     //#endregion: GETs
 
@@ -571,6 +587,16 @@ export class HttpService {
         ).pipe(map(res => res));
     }
 
+    public SaveAppVersion(versionData) {
+        return this.http.post(API_URL + 'SaveVersionUpdateLog', versionData
+        ).pipe(map(res => res));
+    }
+
+    public SaveDeviceSetting(deviceSetting) {
+        return this.http.post(API_URL + 'SaveDeviceSetting', deviceSetting
+        ).pipe(map(res => res));
+    }
+
     public SaveTerminalStatus(terminalStatusModel): any {
         return this.http.post(API_URL + 'SaveTerminalStatusModel', terminalStatusModel
         ).pipe(map(res => res));
@@ -602,6 +628,23 @@ export class HttpService {
             JSON.stringify(passwordData),
         ).pipe(map(res => res));
     }
+
+    public SendSquareTransaction(TransactionData): any {
+        const ApiURL = JSON.parse(AppStateService.get("SellerDetails")).ApiURL
+        return this.http.post(ApiURL,
+            JSON.stringify(TransactionData),
+        ).pipe(map(res => res));
+    }
+    public CancelSquareTransaction(checkoutId): any {
+        const ApiURL = JSON.parse(AppStateService.get("SellerDetails")).ApiURL
+        return this.http.post(ApiURL + '/' + checkoutId + '/cancel', {}).pipe(map(res => res));
+    }
+    public GetSquareTransactionStatusFromSquare(checkoutId): any {
+        const ApiURL = JSON.parse(AppStateService.get("SellerDetails")).ApiURL
+        return this.http.get(ApiURL + '/' + checkoutId).pipe(map(res => res));
+    }
+
+
 
     //#endregion: POSTs
 }
