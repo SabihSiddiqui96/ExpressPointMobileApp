@@ -73,8 +73,8 @@
     </ion-menu>
     <img class="PatronLargeImage" (click)="onPatronLargeImageClick()">
     <ion-router-outlet id="mainmenu"></ion-router-outlet>
-    <ion-footer style="width: 66% !important;">
-        <div class="network-disconnect-bar ion-text-center" *ngIf="networkDown">
+    <ion-footer style="width: 100% !important;">
+        <div class="network-disconnect-bar ion-text-center" *ngIf="networkDown" style="width: 66% !important;">
             <div class="center_text_content" style="height: 100%;">
                 <b style="margin: 0 auto">{{variableOfflineMessage}}</b>
                 <ion-button style="margin-right:10px;width: 60px;height: 24px;" color="slate"

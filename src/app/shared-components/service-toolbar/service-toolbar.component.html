@@ -14,14 +14,14 @@
 
             <!-- Day of week -->
             <ion-col size="2">
-                <ion-button default expand="block" (click)="showDayOfWeekPopup()">
+                <ion-button default expand="block" (click)="blurInputElement();showDayOfWeekPopup()">
                     <span>{{days[dayOfWeek].label}}</span>
                 </ion-button>
             </ion-col>
 
             <!-- Meal Type -->
             <ion-col size="2">
-                <ion-button default expand="block" (click)="showMealTypePopup()">
+                <ion-button default expand="block" (click)="blurInputElement();showMealTypePopup()">
                     <span *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</span>
                     <span *ngIf="selectedMealType == -1">Meal
                         Type</span>
@@ -30,7 +30,7 @@
 
             <!-- Menu Type -->
             <ion-col size="5">
-                <ion-button default expand="block" (click)="showMenuTypePopup()">
+                <ion-button default expand="block" (click)="blurInputElement();showMenuTypePopup()">
                     <span *ngIf="selectedMenuType != -1">{{selectedMenuTypeName}}</span>
                     <span *ngIf="selectedMenuType == -1">Menu</span>
                 </ion-button>
@@ -39,14 +39,14 @@
             <!-- Categories -->
             <ion-col size="1">
                 <ion-button class="btn-full-size-icon" default expand="block" fill="clear"
-                    (click)="showAllCategories()">
+                    (click)="blurInputElement();showAllCategories()">
                     <ion-icon slot="icon-only" name="apps"></ion-icon>
                 </ion-button>
             </ion-col>
 
             <!-- Transaction viewer -->
             <ion-col size="1">
-                <ion-button class="btn-full-size-icon" expand="block" (click)="openTransactionViewer()">
+                <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement();openTransactionViewer()">
                     <ion-icon slot="icon-only" name="ios-paper">
                     </ion-icon>
                 </ion-button>

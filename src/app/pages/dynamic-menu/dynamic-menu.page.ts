@@ -1593,7 +1593,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     }
 
-
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
 
     public confirmChangeMealType(data) {
         const mealType = data.meal_type;
@@ -2773,10 +2777,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public ShowAddDollarPopover(myEvent) {
-
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
 
         const modal = this.modalCtrl.create({
             component: MenuPaymentPopupPage,

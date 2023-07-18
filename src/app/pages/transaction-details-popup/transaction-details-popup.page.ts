@@ -185,7 +185,11 @@ export class TransactionDetailsPopupPage implements OnInit {
         }
     }
 
-
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
 
     public showNotSyncedTransactions() {
         if (this.patronSearch.Synced === false) {

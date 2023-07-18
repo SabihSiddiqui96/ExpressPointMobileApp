@@ -89,6 +89,12 @@ export class ServiceToolbarComponent implements OnInit {
         });
     }
 
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
+
     public showDayOfWeekPopup() {
         if (this.isPersonIdValid()) {
             this.displayPersonSelectedPopup();
