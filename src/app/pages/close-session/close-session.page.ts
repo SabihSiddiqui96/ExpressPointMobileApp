@@ -720,7 +720,6 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         PouchQueriesService.GetAllOpenSessions().then(data => {
 
             let sessionDocs = data.rows.map(row => row.doc);
-            let openingBalance = 0;
             let sid;
 
             sessionDocs = sessionDocs.filter(s => {
@@ -733,7 +732,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             
             sessionDocs.map(doc => {
                 doc.isStillOpen = false;
-                openingBalance = doc.OpeningBalance
+                this.openingBalance = doc.OpeningBalance
                 PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => {
                 });
             });
@@ -742,7 +741,6 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             this.pouchQuery.PostSessionCard().then(() => { });
 
             PouchDBService.UpsertSingleDoc(closeSessionDoc, EXP_TRANSACTIONS).then(() => {
-                this.PrintCloseSessionReport();
                 AppStateService.set('removedSessionId', sid);
                 AppStateService.remove('openingBalance');
                 if (closeSessionDoc.SessionType === SessionType.EXPRESSPOINT) {
@@ -793,52 +791,32 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
 
             const now = new Date();
-
-            PouchQueriesService.GetAllOpenSessions().then(data => {
-
-                let sessionDocs = data.rows.map(row => row.doc);
-
-                let openingBalance = 0;
-
-                sessionDocs = sessionDocs.filter(s => {
-                    return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
-                        Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
-                        && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-                });
-
-                if (sessionDocs.length > 0) {
-
-                    sessionDocs.map(doc => {
-                        openingBalance = doc.OpeningBalance
-                    });
-                    const CloseSessionPrintFormat: CloseSessionPrintFormat = {
-                        'TerminalName': JSON.parse(AppStateService.get('DeviceInfo')).TerminalName,
-                        'UserName': JSON.parse(AppStateService.get('login_details')).Name,
-                        'SiteName': JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode,
-                        'DenominationsCoins': this.denominationDetailsCoins,
-                        'DenominationsBills': this.denominationDetailsBills,
-                        'Checks': this.checkList,
-                        'Cards': this.cardList,
-                        'OpeningBalance': Number(openingBalance).toFixed(2),
-                        'ClosingBalance': this.total,
-                        'TotalCash': this.denominationTotalBills + this.denominationTotalCoins,
-                        'TotalChecks': this.checkTotal,
-                        'TotalCard': this.cardTotal,
-                        'TotalClosing': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal,
-                        'NetBalance': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal - openingBalance,
-                        'Date': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
-                            { hour: 'numeric', minute: 'numeric', hour12: true })
-                    };
+            const CloseSessionPrintFormat: CloseSessionPrintFormat = {
+                'TerminalName': JSON.parse(AppStateService.get('DeviceInfo')).TerminalName,
+                'UserName': JSON.parse(AppStateService.get('login_details')).Name,
+                'SiteName': JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode,
+                'DenominationsCoins': this.denominationDetailsCoins,
+                'DenominationsBills': this.denominationDetailsBills,
+                'Checks': this.checkList,
+                'Cards': this.cardList,
+                'OpeningBalance': Number(this.openingBalance).toFixed(2),
+                'ClosingBalance': this.total,
+                'TotalCash': this.denominationTotalBills + this.denominationTotalCoins,
+                'TotalChecks': this.checkTotal,
+                'TotalCard': this.cardTotal,
+                'TotalClosing': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal,
+                'NetBalance': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal - this.openingBalance,
+                'Date': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
+                    { hour: 'numeric', minute: 'numeric', hour12: true })
+            };
 
                     const receiptFormat = this.printService.getCloseSessionReportFormat(CloseSessionPrintFormat);
 
-                    this.utilService.publishIpcEvent('print', {
-                        data: [{ html: receiptFormat }],
-                        preview: false, copies: 1
-                    });
-                }
-                // this.esrr === 1 ? 2 :
+            this.utilService.publishIpcEvent('print', {
+                data: [{ html: receiptFormat }],
+                preview: false, copies: 1
             });
+            // this.esrr === 1 ? 2 :
         }
     }
 
