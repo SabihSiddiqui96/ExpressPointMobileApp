@@ -191,5 +191,20 @@ ion-button {
     }
 }
 
+.autoServeOn {
+  --background: #3AC191 !important;
+  --background-hover: #3AC191 !important;
+  --background-activated: #3AC191 !important;
+  --background-focused: #3AC191 !important;
+  --color: #FFFFFF;
+}
+
+.autoServeOFF {
+  --opacity: 0.5 !important;
+  --background-activated-opacity: 0.5 !important;
+  --background-focused-opacity: 0.5 !important;
+  --background-hover-opacity: 0.5 !important;
+}
+
 
 

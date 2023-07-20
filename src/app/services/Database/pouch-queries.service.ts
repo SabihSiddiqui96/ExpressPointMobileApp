@@ -372,6 +372,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetAutoServeSetting() {
+    return EXP_SYSTEM.allDocs({
+      startkey: 'AutoServeSetting',
+      endkey: 'AutoServeSetting' + '\uffff',
+      include_docs: true
+    });
+  }
+
   public static GetStudentInfo(personId) {
 
     const args = {

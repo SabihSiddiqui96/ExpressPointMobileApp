@@ -55,6 +55,7 @@ import { EventType } from '../../services/enums/event-type';
 import { TimerComponent } from './components/timer-modal/timer-modal.component';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service'
+import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
 enum SuspiciousActivityTypes {
     VOID = 1,
     CLEARLAST,
@@ -81,8 +82,35 @@ export class MenuServicePage implements OnInit, OnDestroy {
     tick = 1000;
     private ApiInterval;
     private squareDeviceId: null;
+    public autoServeEnabled: boolean = false;
+    public impermanentAutoServePause: boolean = false;
+    public canAutoServeDefaultItem: boolean = false;
+    public settingAutoServe: boolean = false;
+    public settingAutoPause: PauseOptions;
+    public toastAlert;
     // public squareRetry: boolean = false;
     public ngOnInit() {
+        PouchQueriesService.GetAutoServeSetting().then((res) => {
+            const autoServeDoc = res.rows.map(row => row.doc);
+            if (autoServeDoc.length > 0) {
+                this.settingAutoServe = autoServeDoc[0].autoServeEnabled;
+                this.settingAutoPause = autoServeDoc[0].autoPauseOptions;
+                AppStateService.set('autoServeEnabled', this.settingAutoServe);
+                AppStateService.set('autoPauseEnabled', autoServeDoc[0].autoPauseEnabled);
+                AppStateService.set('autoPauseOptions', this.settingAutoPause);
+                AppStateService.set('autoServeDelay', autoServeDoc[0].autoServeDelay);
+            }
+            else {
+                this.settingAutoServe = AppStateService.get('autoServeEnabled') ? true : false;
+                this.settingAutoPause = AppStateService.get('autoPauseOptions') ? AppStateService.get('autoPauseOptions') : {
+                    secondMeal: false,
+                    restrictions: false,
+                    visitingStudents: false,
+                    allergensAndNotes: false
+                }
+            }
+        });
+
         this.personQSubscription = this.lookUpService.personsQSubject.subscribe(
             value => {
                 if (value) {
@@ -1414,7 +1442,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 AppStateService.set('mealType', mealTypeByTime[0].MealTypeId);
                 this.defaultMealTypeId = mealTypeByTime[0].MealTypeId;
                 this.selectedMealTypeName = this.defaultmealTypeName = mealTypeByTime[0].MealTypeDescription;
-
+                this.autoServeEnabled = false;
+                this.impermanentAutoServePause = false;
                 this.loadMenuTypes(mealTypeId, this.schoolId, this.dayOfWeek, mealTypeName);
             }
             else {
@@ -1428,7 +1457,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E05490, [mealTypeName, this.defaultmealTypeName])
                         .then((bool) => {
                             if (bool) {
-
+                                this.autoServeEnabled = false;
+                                this.impermanentAutoServePause = false;
                                 this.loadMenuTypes(this.tempMealTypeId, this.schoolId, this.dayOfWeek, this.tempMealTypeName);
                             } else {
 
@@ -1438,7 +1468,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         });
 
                 } else {
-
+                    this.autoServeEnabled = false;
+                    this.impermanentAutoServePause = false;
                     this.loadMenuTypes(mealTypeId, this.schoolId, this.dayOfWeek, mealTypeName);
                 }
             }
@@ -1512,6 +1543,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public loadMenuGrid(menuGridId, schoolId) {
+        this.autoServeEnabled = false;
+        this.impermanentAutoServePause = false;
         if (this.patronDetails.PersonId) {
             this.popupMessageService.showMessage(PopupMessageCode.E05437);
             // this.utilService.showToast('Please complete this transaction before changing the menu.');
@@ -4011,11 +4044,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             case ServiceToolbarEvent.ShowAllCategories:
                 this.showAllCategories();
-                break
+                break;
+            
+            case ServiceToolbarEvent.SwapAutoServeEnabled:
+                this.SwapAutoServeEnabled();
+                break;
 
             default:
                 console.error("unknown toolbar event");
-                break
+                break;
         }
     }
 
@@ -4112,4 +4149,103 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
+    public SwapAutoServeEnabled() {
+        const currentAutoServeSetting = AppStateService.get('autoServeEnabled');
+        if (currentAutoServeSetting) {
+            if (this.menuGridCount === 0) {
+                this.popupMessageService.showMessage(PopupMessageCode.E05363);
+            } else {
+                if (this.checkIfCanAutoServe()) {
+                    this.autoServeEnabled = !this.autoServeEnabled;
+                    this.dismissToastMsg();
+                    if (this.autoServeEnabled && this.patronDetails && this.patronDetails.PersonId) {
+                        this.initiateAutoServe();
+                    }
+                } else {
+                    this.showCannotAutoServeMsg();
+                }
+                this.impermanentAutoServePause = false;
+            }
+        } else {
+            this.showAutoServeSettingDisabledMsg();
+        }
+    }
+
+    public checkIfCanAutoServe() {
+        if (this.defaultMenuItemId !== 0) {
+            if (AppStateService.get('autoServeEnabled')) {
+                this.canAutoServeDefaultItem = true;
+                return true;
+            } else {
+                this.canAutoServeDefaultItem = false;
+                return false;
+            }
+        } else {
+            this.canAutoServeDefaultItem = false;
+            return false;
+        }
+    }
+
+    public dismissToastMsg() {
+        try {
+            if (this.toastAlert) {
+                this.toastAlert.dismiss();
+            }
+        } catch (e) {
+
+        }
+    }
+
+    public showAutoServeSettingDisabledMsg() {
+        this.dismissToastMsg();
+        this.toastAlert = this.utilService.showToast('Please enable Auto-Serve in Device Information - Admin settings');
+        this.autoServeEnabled = false;
+        this.impermanentAutoServePause = false;
+    }
+
+    public showCannotAutoServeMsg() {
+        if (this.menuGridCount === 0) {
+            this.popupMessageService.showMessage(PopupMessageCode.E05363);
+        } else {
+            this.dismissToastMsg();
+            this.toastAlert = this.utilService.showToast('This menu does not have a default meal item. Auto-Serve cannot be used. Please select a different menu grid or configure the default meal & reload POS.');
+            this.autoServeEnabled = false;
+            this.impermanentAutoServePause = false;
+        }
+    }
+
+    public initiateAutoServe() {
+        const autoServeDelay = AppStateService.get('autoServeDelay');
+        setTimeout(() => {
+            this.dismissAllOpenPopups(this.popoverCtrl, this.modalCtrl, this.alertCtrl);
+            this.doAutoServe();
+        }, autoServeDelay * 1000);
+    }
+
+    public async dismissAllOpenPopups(popoverCtrl?, modalCtrl?, alertCtrl?) {
+        const popOver = document.getElementsByTagName('ion-popover');
+        const alertBox = document.getElementsByTagName('ion-alert');
+        const modal = document.getElementsByTagName('ion-modal');
+
+        if (Object.keys(popOver).length !== 0 && popoverCtrl) {
+            const element = await popoverCtrl.getTop();
+            if (element) {
+                element.dismiss();
+            }
+        } else if (Object.keys(modal).length !== 0 && modalCtrl) {
+            const element = await modalCtrl.getTop();
+            if (element) {
+                element.dismiss();
+            }
+        } else if (Object.keys(alertBox).length !== 0 && alertCtrl) {
+            const element = await alertCtrl.getTop();
+            if (element) {
+                element.dismiss();
+            }
+        }
+    }
+
+    public doAutoServe() {
+        
+    }
 }

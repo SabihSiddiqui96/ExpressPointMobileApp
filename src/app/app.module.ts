@@ -104,6 +104,7 @@ import { TimerComponent } from './pages/menu-service/components/timer-modal/time
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { CreditCardTransactionService } from './services/Credit-Card-Transaction.service';
 import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
+import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -154,7 +155,8 @@ import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-ala
         HasPropPipe,
         FormatTimePipe,
         TimerComponent,
-        StudentWiseAlacarteComponent
+        StudentWiseAlacarteComponent,
+        AutoServePauseOptionsPopUpComponent
     ],
     entryComponents: [
 
@@ -206,7 +208,8 @@ import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-ala
         TabsPage,
         CloseSessionPage,
         QuickClassroomSalePage,
-        TimerComponent
+        TimerComponent,
+        AutoServePauseOptionsPopUpComponent
         /** Components */
     ],
     imports: [

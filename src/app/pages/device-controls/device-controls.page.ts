@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { NgZone } from '@angular/core';
-import { NavController, ModalController, AlertController } from '@ionic/angular';
+import { NavController, ModalController, AlertController, PopoverController } from '@ionic/angular';
 import { PouchDBService, EXP_TRANSACTIONS } from '../../services/pouch-db.service';
 import { UtilService } from '../../services/util.service';
 import { AppStateService } from '../../services/app-state.service';
@@ -18,6 +18,7 @@ import { Router } from '@angular/router';
 import { DeviceConfigurationPage } from '../device-configuration/device-configuration.page';
 import { SetupDbService } from '../../services/setup-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
+import { AutoServePauseOptionsPopUpComponent } from '../auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
 
 @Component({
   selector: 'app-device-controls',
@@ -71,7 +72,8 @@ export class DeviceControlsPage implements OnInit {
     public popupMessageService: PopupMessageService,
     private zone: NgZone,
     public router: Router, public appStateService: AppStateService,
-    public settingService: SettingService, private setupDbService: SetupDbService
+    public settingService: SettingService, private setupDbService: SetupDbService,
+    private popoverCtrl: PopoverController
   ) {
     this.syncedPersonData = false;
     this.syncedMenusData = false;
@@ -401,6 +403,18 @@ export class DeviceControlsPage implements OnInit {
       AppStateService.set('IsDeviceSettingsChanged', 1);
     }
     this.deviceService.SaveDeviceSettingToPouchDB('PATDISLP', deviceSetting).then(() => { });
+  }
+
+  public openAutoServePopup(event) {
+    this.popoverCtrl.create({
+      component: AutoServePauseOptionsPopUpComponent,
+      event: event,
+      componentProps: {},
+      backdropDismiss: false,
+      cssClass: this.utilService.popupCenter.cssClass
+    }).then(async (res) => {
+      await res.present();
+    });
   }
 
 }
