@@ -374,7 +374,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
-                                    this.patronPinId.setFocus();
+                                    if (this.patronPinId != undefined)
+                                        this.patronPinId.setFocus();
                                 }
                             }, 500);
 
