@@ -15,7 +15,8 @@ enum PopupType {
 
 export enum ServiceToolbarEvent {
     ShowAllCategories,
-    OpenTransactionViewer
+    OpenTransactionViewer,
+    SwapAutoServeEnabled
 }
 
 @Component({
@@ -47,6 +48,10 @@ export class ServiceToolbarComponent implements OnInit {
     // TODO: Usage of the following can be cleaned up
     @Input() swapRight: any;
     @Output() changes: EventEmitter<ServiceToolbarEvent> = new EventEmitter();
+
+    //Auto Serve
+    @Input() settingAutoServe: boolean;
+    @Input() autoServeEnabled: boolean;
 
     public days = [
         { 'value': 0, 'label': 'Sunday' },
@@ -170,5 +175,9 @@ export class ServiceToolbarComponent implements OnInit {
 
     private isPersonIdValid() {
         return (this.personId !== null && this.personId !== undefined);
+    }
+
+    public SwapAutoServeEnabled() {
+        this.changes.emit(ServiceToolbarEvent.SwapAutoServeEnabled);
     }
 }

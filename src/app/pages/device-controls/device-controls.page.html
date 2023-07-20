@@ -2,6 +2,10 @@
   <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
     <ion-col size="12" size-md="8" size-xl="6" class="ion-align-self-center">
       <div box-list-white class="ion-margin-horizontal">
+        <ion-button default expand="block" icon-only color="primary" *ngIf='isUserLoggedIn'
+          (click)="openAutoServePopup($event)">
+          <ion-label text-large>Auto Serve</ion-label>
+        </ion-button>
         <ion-button default expand="block" color="primary" slot="icon-only" [disabled]="disableButtons"
           (click)="SyncPersonData()">
           <ion-label text-large>Sync latest Person info</ion-label>

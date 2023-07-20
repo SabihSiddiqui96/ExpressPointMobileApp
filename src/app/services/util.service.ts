@@ -42,7 +42,8 @@ export class UtilService {
   public popOption = { cssClass: 'user_ppup' };
   public isMenuSoldPopupOpen:boolean = false;
   showModalPopup: boolean = true;
-
+  public static defaultAutoServeDelay: number = 2;
+  
   constructor(private loadingCtrl: LoadingController, private alertCtrl: AlertController,
     public toastCtrl: ToastController,
     private electron: ElectronService, private platform: Platform) {
