@@ -3485,7 +3485,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
         if (this.orderData.items.length === 0) {
             //checking for special account doesnot have any items
-            if (this.patronDetails.isSpecialAccount == true || this.patronDetails.IsStudent) {
+            if (this.patronDetails.isSpecialAccount == true || (this.patronDetails.IsStudent && this.autoServeEnabled)) {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }
@@ -3531,7 +3531,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public showQ() {
         if (this.orderData.items.length === 0) {
             //checking for special account doesnot have any items
-            if (this.patronDetails.isSpecialAccount == true || this.patronDetails.IsStudent) {
+            if (this.patronDetails.isSpecialAccount == true || (this.patronDetails.IsStudent && this.autoServeEnabled)) {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }
