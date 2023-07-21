@@ -408,7 +408,7 @@ export class RestrictionsService {
 
 
     /// Check for menu service page
-    public checkOrderRestriction(ordDetails: any) {
+    public checkOrderRestriction(ordDetails: any, autoServeEnabled: boolean = false, autoPauseRestrictions: boolean = false) {
         let transactionType: any;
         this.orderData = ordDetails.orderData;
         this.alacarteCount = ordDetails.alaCount;
@@ -421,27 +421,28 @@ export class RestrictionsService {
         this.settingChargeReimbursableMealsOnly = Boolean(parseInt(SettingService.getSettingValue('RMUTCHARLT')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
 
-
-        // principal Account Change Here Saketh  call the managePrincipal Account
-        if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
-            if (!this.patronDetails.IsAlaCateByDebitAllowed) {
-                this.popupMessageService.showMessage(PopupMessageCode.E12400);
-                // this.utilService.showToast('A La Carte debit sales are restricted for this student today.');
-                return false;
-            }
-        }
-
-        if (!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge) { // && this.patronDetails.Balance <= 0
-            if (Math.round(this.orderData.totalAmount * 100) / 100 === 0) {
-                return true; // If total item cost is 0.00 debit of 0.00 is allowed even CannotCharge is true.
-            } else if (this.patronDetails.Balance > this.orderData.totalAmount) {
-                this.showNoChargePrompt = true;
-                return false;
-            } else {
-                this.popupMessageService.showMessage(PopupMessageCode.E12480);
-                return false;
+        if (!autoServeEnabled || (autoServeEnabled && autoPauseRestrictions)) {
+            // principal Account Change Here Saketh  call the managePrincipal Account
+            if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
+                if (!this.patronDetails.IsAlaCateByDebitAllowed) {
+                    this.popupMessageService.showMessage(PopupMessageCode.E12400);
+                    // this.utilService.showToast('A La Carte debit sales are restricted for this student today.');
+                    return false;
+                }
             }
 
+            if (!this.patronDetails.isSpecialAccount && this.patronDetails.CannotCharge) { // && this.patronDetails.Balance <= 0
+                if (Math.round(this.orderData.totalAmount * 100) / 100 === 0) {
+                    return true; // If total item cost is 0.00 debit of 0.00 is allowed even CannotCharge is true.
+                } else if (this.patronDetails.Balance > this.orderData.totalAmount) {
+                    this.showNoChargePrompt = true;
+                    return false;
+                } else {
+                    this.popupMessageService.showMessage(PopupMessageCode.E12480);
+                    return false;
+                }
+
+            }
         }
 
         if (this.patronDetails.isSpecialAccount || (this.patronDetails.Balance - this.orderData.accountBalance) < 0) {

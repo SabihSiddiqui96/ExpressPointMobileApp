@@ -52,6 +52,7 @@ export class ServiceToolbarComponent implements OnInit {
     //Auto Serve
     @Input() settingAutoServe: boolean;
     @Input() autoServeEnabled: boolean;
+    @Input() impermanentAutoServePause: boolean = false;
 
     public days = [
         { 'value': 0, 'label': 'Sunday' },
