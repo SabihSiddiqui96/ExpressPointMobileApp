@@ -55,8 +55,8 @@
             <ion-col [size]="settingAutoServe ? '2' : '0'" *ngIf="settingAutoServe" [ngClass]="impermanentAutoServePause ? 'blinkAutoServe' : ''">
                 <ion-button [ngClass]="autoServeEnabled ? 'autoServeOn' : 'autoServeOFF'" class="btn-full-size-icon" expand="block"
                     (click)="blurInputElement();SwapAutoServeEnabled()">
-                    <img style="margin-right: 1px;" slot="start" src="assets/img/autoserve.png">
-                    <span>AUTO-SERVE {{autoServeEnabled ? "ON" : "OFF"}}</span>
+                    <img style="margin-right: 0px;" slot="start" src="assets/img/autoserve.png">
+                    <span>AutoServe {{autoServeEnabled ? (impermanentAutoServePause ? "PAUSE" :"ON") : "OFF"}}</span>
                 </ion-button>
             </ion-col>
         </ion-row>
