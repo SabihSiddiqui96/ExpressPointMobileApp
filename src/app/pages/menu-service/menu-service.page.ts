@@ -2556,6 +2556,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
                 if (this.transactionInProgress) {
                     this.postSaleTransaction(this.orderData.TransactionType);
+                    this.impermanentAutoServePause = false;
                 } else {
                     const showPrompt = this.restrictService.showConfirm();
                     const partPayPrompt = this.restrictService.showPartPayPopup();
@@ -2566,6 +2567,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             if (bool) {
                                 this.postSaleTransaction(this.orderData.TransactionType);
                                 this.event.publish('patron-released', { 'patronDetails': null });
+                                this.impermanentAutoServePause = false;
                             }
                             //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                         });
@@ -4786,6 +4788,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             if (bool) {
                                 this.postSaleTransaction(TransactionTypes.CHARGE);
                                 this.event.publish('patron-released', { 'patronDetails': null });
+                                this.impermanentAutoServePause = false;
                             }
                         });
                     }
