@@ -1795,3 +1795,13 @@ ion-progress-bar{
   height: 125px !important; 
   border-radius: 0%;
 }
+
+@media (max-width: 1280px),
+(min-width: 1300px) and (max-width: 1380px),
+(min-width: 1600px) and (max-width: 1680px) {
+  .patronImgLarge {
+    width: 94px !important;
+    height: 125px !important;
+    border-radius: 0%;
+  }
+}
