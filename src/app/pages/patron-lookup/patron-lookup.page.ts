@@ -1012,8 +1012,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         let localTimerSearchPatron_Keyboard: number = new Date().getTime();
         if (event.keyCode === 13) {
             setTimeout(() => {
+                /* code for checking the characters from periperal */
                 var localTimerSearchPatron_Device = AppStateService.get('localTimerSearchPatron_Device');             
-                if (localTimerSearchPatron_Device != undefined && (localTimerSearchPatron_Keyboard - localTimerSearchPatron_Device) <= 100) {
+                if (localTimerSearchPatron_Device != undefined && (localTimerSearchPatron_Keyboard - localTimerSearchPatron_Device) <= 60) {
                     AppStateService.set("localTimerSearchPatron_Device", 200);                   
                 }
                 else {
