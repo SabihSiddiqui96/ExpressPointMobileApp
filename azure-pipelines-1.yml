@@ -6,8 +6,8 @@ variables:
 
 pool:
   name: PrimeroEdge
-  agent:
-    name: Agent
+  demands:
+    - Agent.Name -equals Agent-2
 
 steps:
 - checkout: self
