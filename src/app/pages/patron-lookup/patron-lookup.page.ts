@@ -374,7 +374,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             }
                             setTimeout(() => {
                                 if (!this.utilService.isElectronApp()) {
-                                    this.patronPinId.setFocus();
+                                    if (this.patronPinId != undefined)
+                                        this.patronPinId.setFocus();
                                 }
                             }, 500);
 
@@ -1008,9 +1009,19 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
 
     public handleKeyDown(event) {
+        let localTimerSearchPatron_Keyboard: number = new Date().getTime();
         if (event.keyCode === 13) {
-            this.isEnterKeyHandled = true;
-            this.AdvancedPatronLookup();
+            setTimeout(() => {
+                /* code for checking the characters from periperal */
+                var localTimerSearchPatron_Device = AppStateService.get('localTimerSearchPatron_Device');             
+                if (localTimerSearchPatron_Device != undefined && (localTimerSearchPatron_Keyboard - localTimerSearchPatron_Device) <= 60) {
+                    AppStateService.set("localTimerSearchPatron_Device", 200);                   
+                }
+                else {
+                    this.isEnterKeyHandled = true;
+                    this.AdvancedPatronLookup();
+                }
+            }, 100);
         } else if (event['keyCode'] === 9) {
             setTimeout(() => {
                 console.log('handleKeyDown ---- Stop Propagation')

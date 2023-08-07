@@ -55,6 +55,7 @@ import { EventType } from '../../services/enums/event-type';
 import { TimerComponent } from './components/timer-modal/timer-modal.component';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service'
+import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
 enum SuspiciousActivityTypes {
     VOID = 1,
     CLEARLAST,
@@ -81,8 +82,36 @@ export class MenuServicePage implements OnInit, OnDestroy {
     tick = 1000;
     private ApiInterval;
     private squareDeviceId: null;
+    public autoServeEnabled: boolean = false;
+    public impermanentAutoServePause: boolean = false;
+    public canAutoServeDefaultItem: boolean = false;
+    public settingAutoServe: boolean = false;
+    public settingAutoPause: PauseOptions;
+    public itemsWithAlergies: any[] = [];
+    public toastAlert;
     // public squareRetry: boolean = false;
     public ngOnInit() {
+        PouchQueriesService.GetAutoServeSetting().then((res) => {
+            const autoServeDoc = res.rows.map(row => row.doc);
+            if (autoServeDoc.length > 0) {
+                this.settingAutoServe = autoServeDoc[0].autoServeEnabled;
+                this.settingAutoPause = autoServeDoc[0].autoPauseOptions;
+                AppStateService.set('autoServeEnabled', this.settingAutoServe);
+                AppStateService.set('autoPauseEnabled', autoServeDoc[0].autoPauseEnabled);
+                AppStateService.set('autoPauseOptions', this.settingAutoPause);
+                AppStateService.set('autoServeDelay', autoServeDoc[0].autoServeDelay);
+            }
+            else {
+                this.settingAutoServe = AppStateService.get('autoServeEnabled') ? true : false;
+                this.settingAutoPause = AppStateService.get('autoPauseOptions') ? AppStateService.get('autoPauseOptions') : {
+                    secondMeal: false,
+                    restrictions: false,
+                    visitingStudents: false,
+                    allergensAndNotes: false
+                }
+            }
+        });
+
         this.personQSubscription = this.lookUpService.personsQSubject.subscribe(
             value => {
                 if (value) {
@@ -715,7 +744,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.hideAddFunds = true;
             }
 
-
+            if (this.autoServeEnabled) {
+                this.initiateAutoServe();
+            }
         });
     }
 
@@ -941,13 +972,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         if (this.patronDetails['SchoolId'] !== this.schoolId) {
             if (this.patronDetails['SiteCode']) {
-
-
-                if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) && (this.schoolId !== this.patronDetails['ServingSchoolId'])) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E05364);
-                    this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.visitingStudents)) {
+                    if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) && (this.schoolId !== this.patronDetails['ServingSchoolId'])) {
+                        if (this.autoServeEnabled == true) {
+                            this.impermanentAutoServePause = true;
+                        }
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    }
                 }
-
                 // console.log('--patronDetails---');
                 // console.log(JSON.stringify(this.patronDetails));
                 // this.utilService.showToast('Patron does not belong to this school.');
@@ -1239,7 +1272,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 pDetails.DailyALCRestriction || pDetails.WeeklyALCRestriction
                 || pDetails.MonthlyALCRestriction || this.alaCarteCash[this.currentDay - 1] === '1' ||
                 this.alaCarteCharge[this.currentDay - 1] === '1' || (pDetails['NoOfAlaCarteAllowedForPerson']))) {
-            this.ShowallergyPopover(pDetails);
+            if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.allergensAndNotes)) {
+                if (this.autoServeEnabled == true) {
+                    this.impermanentAutoServePause = true;
+                }
+                if (this.allergenCount > 0 && this.itemsWithAlergies.length > 0 && this.menuGrid['Buttons_Array'].length > 0) {
+                    this.menuGrid['Buttons_Array'].forEach(button => {
+                        this.setAllergyMatched(button)
+                    });
+                }
+                this.ShowallergyPopover(pDetails);
+            }
         }
     }
 
@@ -1414,7 +1457,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 AppStateService.set('mealType', mealTypeByTime[0].MealTypeId);
                 this.defaultMealTypeId = mealTypeByTime[0].MealTypeId;
                 this.selectedMealTypeName = this.defaultmealTypeName = mealTypeByTime[0].MealTypeDescription;
-
+                this.autoServeEnabled = false;
+                this.impermanentAutoServePause = false;
                 this.loadMenuTypes(mealTypeId, this.schoolId, this.dayOfWeek, mealTypeName);
             }
             else {
@@ -1428,7 +1472,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E05490, [mealTypeName, this.defaultmealTypeName])
                         .then((bool) => {
                             if (bool) {
-
+                                this.autoServeEnabled = false;
+                                this.impermanentAutoServePause = false;
                                 this.loadMenuTypes(this.tempMealTypeId, this.schoolId, this.dayOfWeek, this.tempMealTypeName);
                             } else {
 
@@ -1438,7 +1483,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         });
 
                 } else {
-
+                    this.autoServeEnabled = false;
+                    this.impermanentAutoServePause = false;
                     this.loadMenuTypes(mealTypeId, this.schoolId, this.dayOfWeek, mealTypeName);
                 }
             }
@@ -1512,6 +1558,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public loadMenuGrid(menuGridId, schoolId) {
+        this.autoServeEnabled = false;
+        this.impermanentAutoServePause = false;
         if (this.patronDetails.PersonId) {
             this.popupMessageService.showMessage(PopupMessageCode.E05437);
             // this.utilService.showToast('Please complete this transaction before changing the menu.');
@@ -1535,7 +1583,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let i = 0;
                     let diff = 1;
                     if (menuGridDetails.Buttons) {
+                        this.itemsWithAlergies = [];
                         while (i < menuGridDetails.Buttons.length) {
+                            this.getItemAllergies(menuGridDetails.Buttons[i].RefId);
                             if (i === 0) {
                                 if (menuGridDetails.Buttons[i].Position !== 1) {
                                     for (let k = 1; k < menuGridDetails.Buttons[i].Position; k++) {
@@ -2350,7 +2400,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (this.orderData.items.length === 0) {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             if (transactionType !== 0) {
-
+                this.impermanentAutoServePause = false;
                 this.transactionInProgress = false;
                 this.popupMessageService.showMessage(PopupMessageCode.E05367);
                 // this.utilService.showToast('No sale exists.');
@@ -2388,11 +2438,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     if (this.orderData.totalAmount === 0) {
                         this.transactionInProgress = true;
                     } else {
-                        this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails);
+                        this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails, this.autoServeEnabled, this.settingAutoPause.restrictions);
                     }
                     if (this.transactionInProgress) {
                         this.postSaleTransaction(transactionType);
+                        this.impermanentAutoServePause = false;
                     } else {
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
                         const showPrompt = this.restrictService.showConfirm();
                         const partPayPrompt = this.restrictService.showPartPayPopup();
                         if (showPrompt) {
@@ -2401,6 +2454,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
                                 if (bool) {
                                     this.postSaleTransaction(transactionType);
+                                    this.impermanentAutoServePause = false;
                                     this.event.publish('patron-released', { 'patronDetails': null });
                                 }
                             });
@@ -2411,6 +2465,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     this.restrictService.showNoChargePrompt = false;
                                     if (bool) {
                                         this.postSaleTransaction(transactionType);
+                                        this.impermanentAutoServePause = false;
                                     }
                                 });
                         }
@@ -2442,6 +2497,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.popupMessageService.showMessage(PopupMessageCode.E12513).then(bool => {
                             if (bool) {
                                 this.postSaleTransaction(transactionType);
+                                this.impermanentAutoServePause = false;
                             }
                         });
                     }
@@ -2454,6 +2510,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.popupMessageService.showMessage(PopupMessageCode.E05304).then((bool) => {
                     if (bool) {
                         this.postSaleTransaction(transactionType);
+                        this.impermanentAutoServePause = false;
                         this.event.publish('patron-released', { 'patronDetails': null });
                     }
                 });
@@ -2478,6 +2535,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
                 this.transactionInProgress = false;
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
+                this.autoServeEnabled = true;
+                this.impermanentAutoServePause = true;
                 this.popupMessageService.showMessage(PopupMessageCode.E05368);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                 return;
@@ -2497,6 +2556,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
                 if (this.transactionInProgress) {
                     this.postSaleTransaction(this.orderData.TransactionType);
+                    this.impermanentAutoServePause = false;
                 } else {
                     const showPrompt = this.restrictService.showConfirm();
                     const partPayPrompt = this.restrictService.showPartPayPopup();
@@ -2507,6 +2567,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             if (bool) {
                                 this.postSaleTransaction(this.orderData.TransactionType);
                                 this.event.publish('patron-released', { 'patronDetails': null });
+                                this.impermanentAutoServePause = false;
                             }
                             //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                         });
@@ -3379,6 +3440,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.selectedAccountDetails = {};
         // this.utilService.setLoader(false);
         this.event.publish('patron-released', { 'patronDetails': null });
+        this.impermanentAutoServePause = false;
     }
 
     public generateUUID() {
@@ -3425,7 +3487,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
         if (this.orderData.items.length === 0) {
             //checking for special account doesnot have any items
-            if (this.patronDetails.isSpecialAccount == true) {
+            if (this.patronDetails.isSpecialAccount == true || (this.patronDetails.IsStudent && this.autoServeEnabled)) {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }
@@ -3471,7 +3533,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public showQ() {
         if (this.orderData.items.length === 0) {
             //checking for special account doesnot have any items
-            if (this.patronDetails.isSpecialAccount == true) {
+            if (this.patronDetails.isSpecialAccount == true || (this.patronDetails.IsStudent && this.autoServeEnabled)) {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }
@@ -3951,8 +4013,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
                     (this.schoolId !== this.selectedAccountDetails['ServingSchoolId'])) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E05364);
-                    this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.visitingStudents)) {
+                        if (this.autoServeEnabled == true) {
+                            this.impermanentAutoServePause = true;
+                        }
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    }
                 }
 
                 // console.log('--patronDetails---');
@@ -4011,11 +4078,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
             case ServiceToolbarEvent.ShowAllCategories:
                 this.showAllCategories();
-                break
+                break;
+            
+            case ServiceToolbarEvent.SwapAutoServeEnabled:
+                this.SwapAutoServeEnabled();
+                break;
 
             default:
                 console.error("unknown toolbar event");
-                break
+                break;
         }
     }
 
@@ -4112,4 +4183,683 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
+    public SwapAutoServeEnabled() {
+        const currentAutoServeSetting = AppStateService.get('autoServeEnabled');
+        if (currentAutoServeSetting) {
+            if (this.menuGridCount === 0) {
+                this.popupMessageService.showMessage(PopupMessageCode.E05363);
+            } else {
+                if (this.checkIfCanAutoServe()) {
+                    this.autoServeEnabled = !this.autoServeEnabled;
+                    this.dismissToastMsg();
+                    if (this.autoServeEnabled && this.patronDetails && this.patronDetails.PersonId) {
+                        this.initiateAutoServe();
+                    }
+                } else {
+                    this.showCannotAutoServeMsg();
+                }
+                this.impermanentAutoServePause = false;
+            }
+        } else {
+            this.showAutoServeSettingDisabledMsg();
+        }
+    }
+
+    public checkIfCanAutoServe() {
+        if (this.defaultMenuItemId !== 0) {
+            if (AppStateService.get('autoServeEnabled')) {
+                this.canAutoServeDefaultItem = true;
+                return true;
+            } else {
+                this.canAutoServeDefaultItem = false;
+                return false;
+            }
+        } else {
+            this.canAutoServeDefaultItem = false;
+            return false;
+        }
+    }
+
+    public dismissToastMsg() {
+        try {
+            if (this.toastAlert) {
+                this.toastAlert.dismiss();
+            }
+        } catch (e) {
+
+        }
+    }
+
+    public showAutoServeSettingDisabledMsg() {
+        this.dismissToastMsg();
+        this.toastAlert = this.utilService.showToast('Please enable Auto-Serve in Device Information - Admin settings');
+        this.autoServeEnabled = false;
+        this.impermanentAutoServePause = false;
+    }
+
+    public showCannotAutoServeMsg() {
+        if (this.menuGridCount === 0) {
+            this.popupMessageService.showMessage(PopupMessageCode.E05363);
+        } else {
+            this.dismissToastMsg();
+            this.toastAlert = this.utilService.showToast('This menu does not have a default meal item. Auto-Serve cannot be used. Please select a different menu grid or configure the default meal & reload POS.');
+            this.autoServeEnabled = false;
+            this.impermanentAutoServePause = false;
+        }
+    }
+
+    public initiateAutoServe() {
+        const autoServeDelay = AppStateService.get('autoServeDelay');
+        setTimeout(() => {
+            this.dismissAllOpenPopups(this.popoverCtrl, this.modalCtrl, this.alertCtrl);
+            this.doAutoServe();
+        }, autoServeDelay * 1000);
+    }
+
+    public async dismissAllOpenPopups(popoverCtrl?, modalCtrl?, alertCtrl?) {
+        const popOver = document.getElementsByTagName('ion-popover');
+        const alertBox = document.getElementsByTagName('ion-alert');
+        const modal = document.getElementsByTagName('ion-modal');
+
+        if (Object.keys(popOver).length !== 0 && popoverCtrl) {
+            const element = await popoverCtrl.getTop();
+            if (element) {
+                element.dismiss();
+            }
+        } else if (Object.keys(modal).length !== 0 && modalCtrl) {
+            const element = await modalCtrl.getTop();
+            if (element) {
+                element.dismiss();
+            }
+        } else if (Object.keys(alertBox).length !== 0 && alertCtrl) {
+            const element = await alertCtrl.getTop();
+            if (element) {
+                element.dismiss();
+            }
+        }
+    }
+
+    public doAutoServe() {
+        if (AppStateService.get('autoServeEnabled')) {
+            if (this.transactionInProgress) {
+                setTimeout(() => {
+                    this.doAutoServe();
+                }, 500);
+            } else {
+                if (this.autoServeEnabled && this.impermanentAutoServePause == false) {
+                    if (this.enableCharge()) {
+                        //Charge is not allowed, inform user.
+                        this.utilService.showToast('Charge is not allowed');
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                    } else {
+                        const itemLen = this.orderData.items.length;
+                        if (itemLen === 0) {
+                            this.forceAddDefaultItemForAutoServe().then((result: boolean) => {
+                                if (result) {
+                                    this.forceAutoServeCharge();
+                                }
+                            });
+                        } else {
+                            //Check if default menu item is in the list
+                            let isDefaultMenuItemAdded = false;
+                            this.orderData.items.forEach(item => {
+                                if (item.RefId === this.defaultMenuItemId) {
+                                    isDefaultMenuItemAdded = true;
+                                }
+                            });
+                            if (isDefaultMenuItemAdded) {
+                                this.forceAutoServeCharge();
+                            } else {
+                                this.forceAddDefaultItemForAutoServe().then((result: boolean) => {
+                                    if (result) {
+                                        this.forceAutoServeCharge();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Force add default menu item irrespective of any restrictions to the orderData
+     */
+    public forceAddDefaultItemForAutoServe() {
+        return new Promise((resolve) => {
+            if (this.patronDetails.PersonId) {
+                if (this.settingAutoPause.visitingStudents) {
+                    if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
+                        (this.schoolId !== this.patronDetails.ServingSchoolId)) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364)
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481)
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false);
+                    }
+                }
+                if (this.settingAutoPause.restrictions && this.defaultMenuItemDetails.restrictedItem === true) {
+                    this.popupMessageService.showMessage(PopupMessageCode.E05366);
+                    this.autoServeEnabled = true;
+                    this.impermanentAutoServePause = true;
+                    resolve(false);
+                    return;
+                }
+
+                /*Need to check*/
+                if (this.settingAutoPause.allergensAndNotes && this.patronDetails.Allergies.length > 0) {
+                    this.setAllergyMatched(this.defaultMenuItemDetails)
+                    if (this.defaultMenuItemDetails.IsAllergyMatched) {
+                        this.popupMessageService.showMessage("This item contains allergens matching this account");
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false);
+                        return;
+                    }
+                }
+                /*Need to check*/
+
+                let priceTypeId = this.patronDetails['PriceTypeId'];
+
+                if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
+                    this.mealCount = 1;
+                    this.isSecondMeal = true;
+                }
+
+                if (this.defaultMenuItemDetails.IsReimbursable === true) {
+                    if (this.mealCount >= 1) {
+                        if ((this.patronDetails.IsStudent === true || this.patronDetails.IsStudent === 1) ||
+                            ((this.patronDetails.isSpecialAccount === true || this.patronDetails.isSpecialAccount === 1) &&
+                                AppStateService.get('patron_details').FullName === 'Student')
+                        ) {
+
+                            priceTypeId = this.secondMealPriceType;
+                            if (this.settingAutoPause.secondMeal) {
+                                this.autoServeEnabled = true;
+                                this.impermanentAutoServePause = true;
+                                this.popupMessageService.showMessage(PopupMessageCode.E05491).then((bool) => {
+                                    if (bool) {
+                                        this.confirmSecondMeal({ 'menu_item': this.defaultMenuItemDetails, 'price_type_id': priceTypeId });
+                                    }
+                                });
+                                resolve(false);
+                                return;
+                            }
+                            else {
+                                this.mealCount = this.mealCount + 1;
+                                this.isSecondMeal = true;
+                                this.forceCheckALCRestrictions(this.defaultMenuItemDetails, priceTypeId).then((result) => {
+                                    resolve(result);
+                                });
+                            }
+                        } else { // adult
+                            priceTypeId = this.patronDetails['PriceTypeId'];
+                            this.mealCount = this.mealCount + 1;
+                            this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
+                                resolve(result);
+                            });
+                        }
+                    } else {
+                        this.mealCount = this.mealCount + 1;
+                        this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
+                            resolve(result);
+                        });;
+                    }
+                } else {
+                    this.forceCheckALCRestrictions(this.defaultMenuItemDetails, priceTypeId).then((result) => {
+                        resolve(result);
+                    });
+                }
+            } else {
+                this.popupMessageService.showMessage(PopupMessageCode.E05410);
+                this.autoServeEnabled = true;
+                this.impermanentAutoServePause = true;
+                resolve(false);
+            }
+        });
+    }
+
+    public setAllergyMatched(menuItem) {
+        this.itemsWithAlergies.forEach(item => {
+            if (menuItem.RefId === item.itemId) {
+                this.patronDetails.Allergies.forEach(patron => {
+                    item.itemAllergen.forEach(itemAllergen => {
+                        if (itemAllergen.allergenId === patron.allergenId) {
+                            menuItem['IsAllergyMatched'] = true
+                        }
+                    });
+                })
+            }
+        })
+    }
+
+    public resetAllergyMatched() {
+        this.menuGrid['Buttons_Array'].forEach(button => {
+            if (button.IsAllergyMatched !== undefined) {
+                delete button.IsAllergyMatched
+            }
+        });
+    }
+
+    public forceConfirmed_CartMenuItem(menuItem, priceTypeId) {
+        return new Promise((resolve) => {
+            let menuItemNo = 0;
+            this.showPaidPrice = false;
+
+            if (menuItem.RefId) {
+                menuItemNo = menuItem.RefId;
+            } else if (menuItem.itemId) {
+                menuItemNo = menuItem.itemId;
+            }
+
+            if (this.menuItemsArr.length > 0) {
+                this.transactionInProgress = true;
+            } else if (this.menuItemsArr.length === 0) {
+                this.transactionInProgress = false;
+            }
+
+            PouchQueriesService.GetPrice(menuItemNo, this.paidMealPriceType, this.patronDetails.RDAGroupId,
+                this.patronDetails.IsStudent, this.priceMode).then((paidPrice) => {
+                    if (paidPrice != null && paidPrice.length > 0) {
+                        this.paidMealPrice = paidPrice[0].Price;
+                        this.currPaidMealPrice = paidPrice[0].Price;
+                    }
+                });
+
+            PouchQueriesService.GetPrice(menuItemNo, priceTypeId, this.patronDetails.RDAGroupId,
+                this.patronDetails.IsStudent, this.priceMode).then((price) => {
+                    if (price.length > 0 && price[0].isSaleAllowed !== undefined && !price[0].isSaleAllowed) {
+                        this.popupMessageService.showMessage("Selected item is not allowed for sale")
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false)
+                        return
+                    }
+                    this.menuItemsArr.push(menuItemNo);
+                    let secondmeal = false;
+                    let currPrice = 0;
+                    let cepPriceApply = false;
+                    let canAdd = false;
+                    let quantity = 1;
+                    let itemPrice = 0;
+
+                    let appendArray = true;
+                    let currPaidMealPrice = 0;
+
+                    (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+                    let paidMealPrice = this.paidMealPrice;
+                    currPaidMealPrice = this.paidMealPrice;
+
+                    if (this.mealCount === 1 && menuItem.IsReimbursable) {
+                        if (this.patronDetails.IsStudent
+                            && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
+
+                            if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
+                                cepPriceApply = true;
+                            } else { // student is not CEP => Check CHRGNCEP setting to charge or not
+                                if (this.isSiteCEP === true) {
+                                    if (this.setting.CHRGNCEP === false) {
+                                        cepPriceApply = true;
+                                    } else if (this.setting.CHRGNCEP === true) {
+                                        cepPriceApply = false;
+                                    }
+                                } else {
+                                    cepPriceApply = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if (cepPriceApply) {
+                        currPrice = 0;
+                        canAdd = true;
+                    } else {
+                        if (price.rows.length > 0) {
+                            itemPrice = price.rows[0].doc.Price;
+                            currPrice = price.rows[0].doc.Price;
+                            canAdd = true;
+
+                        }
+                    }
+
+                    let refId = 0;
+                    if (menuItem.RefId) {
+                        refId = menuItem.RefId;
+                    } else if (menuItem.itemId) {
+                        refId = menuItem.itemId;
+                    }
+                    if (canAdd === true) { // when menu item price is found
+                        if (menuItem.IsReimbursable === false || (menuItem.IsReimbursable && secondmeal)) {
+                            if (menuItem.IsReimbursable === false) {
+                                secondmeal = false;
+                            }
+                            if (
+                                this.patronDetails.isSpecialAccount === false &&
+                                this.patronDetails.IsStudent === true) { // IsStudent Check
+                                if (this.settingAutoPause.restrictions) {
+                                    if (((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
+                                        this.patronDetails['AvailableAmountForALCPurchases'] != null) && this.ALACASREST) {
+                                        this.restrictedAlacarteCount--;
+                                        this.popupMessageService.showMessage(PopupMessageCode.E05429);
+                                        this.alacarteCount = this.alacarteCount - 1;
+                                        const menuItemIndex = this.menuItemsArr.indexOf(menuItemNo);
+                                        if (menuItemIndex >= 0) {
+                                            this.menuItemsArr.splice(menuItemIndex, 1);
+                                        }
+                                        if (this.menuItemsArr.length === 0) {
+                                            this.transactionInProgress = false;
+                                        }
+                                        resolve(false);
+                                        return;
+                                    } else {
+                                        this.alacarteTotal = this.alacarteTotal + currPrice;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (secondmeal === false) {
+                            if (this.setting.HIDELGBLTY === 1 && this.patronDetails.IsStudent === true) {
+                                this.showPaidPrice = true;
+                            } else {
+                                this.showPaidPrice = false;
+                            }
+                        }
+
+                        for (let i = 0; i < this.orderData.items.length; i++) {
+
+                            const itemData = this.orderData.items[i];
+
+                            if (priceTypeId === itemData.price_type_id && itemData.Name === menuItem.ButtonDescription) {
+                                if (parseInt(itemData.Quantity) < 999) {
+                                    quantity = parseInt(itemData.Quantity) + 1;
+                                    itemPrice = currPrice + itemData.Price;
+                                    paidMealPrice = currPaidMealPrice + itemData.PaidPrice;
+                                    this.orderData.items[i].Quantity = quantity;
+                                    this.orderData.items[i].Price = itemPrice;
+                                    this.orderData.items[i].IniTotalPrice = itemPrice;
+                                    this.orderData.items[i].PaidPrice = paidMealPrice;
+                                    this.orderData.items[i].ShowPaidPrice = itemData.ShowPaidPrice;
+                                    this.itemCount = this.itemCount + 1; // itemCount
+                                    appendArray = false;
+                                } else {
+                                    this.autoServeEnabled = true;
+                                    this.impermanentAutoServePause = true;
+                                    this.utilService.showToast('Maximum quantity is 999');
+                                    const menuItemIndex = this.menuItemsArr.indexOf(menuItemNo);
+                                    if (menuItemIndex >= 0) {
+                                        this.menuItemsArr.splice(menuItemIndex, 1);
+                                    }
+                                    resolve(false);
+                                    return;
+                                }
+                            }
+                        }
+                        let processOrderItem = true;
+                        if (appendArray) {
+                            if (this.checkOrderItems(menuItem.ButtonDescription ? menuItem.ButtonDescription : menuItem.englishButtonName)) {
+                                if (this.orderData.items.length >= 1) {
+                                    this.orderData.items = [];
+                                    this.itemCount = 0;
+                                    currPrice = itemPrice;
+                                    this.orderData.totalAmount = 0;
+                                    this.orderData.subTotal = 0;
+                                    this.mealCount = 0;
+                                }
+                            } else {
+                                // check if already ** single sale item exist in OrderData
+                                for (let i = 0; i < this.orderData.items.length; i++) {
+                                    const itemData = this.orderData.items[i];
+                                    const description = itemData.Name;
+                                    if (this.checkOrderItems(description)) {
+                                        processOrderItem = false;
+                                        currPrice = itemData.Price;
+                                        this.orderData.totalAmount = 0;
+                                        this.orderData.subTotal = 0;
+                                        itemData.isSecondMeal = false;
+                                        this.mealCount = 0;
+                                        this.popupMessageService.showMessage(PopupMessageCode.E05508);
+                                        this.autoServeEnabled = true;
+                                        this.impermanentAutoServePause = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (processOrderItem) {
+                                this.itemCount = this.itemCount + 1; // ItemCount
+
+                                this.orderData.items.push({
+                                    'Name': menuItem.ButtonDescription ? menuItem.ButtonDescription : menuItem.englishButtonName,
+                                    'Price': itemPrice,
+                                    'RefId': refId,
+                                    'price_type_id': priceTypeId,
+                                    'IsReimbursable': menuItem.IsReimbursable,
+                                    'IsDefaultReimbursableMeal': menuItem.IsDefaultReimbursableMeal,
+                                    'isSecondMeal': secondmeal,
+                                    'Quantity': quantity,
+                                    'CurrentPrice': currPrice,
+                                    'IniTotalPrice': itemPrice,
+                                    'IsStudent': this.patronDetails.IsStudent,
+                                    'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
+                                    'ItemAddedAt': LocalTimerService.getTime('time'),  // epoch timestamp at the time of adding item to the sale
+                                    'IsTaxable': menuItem.IsTaxable,
+                                    'PaidPrice': paidMealPrice,
+                                    'ShowPaidPrice': this.showPaidPrice,
+                                    'CurrentPaidMealPrice': this.currPaidMealPrice
+                                });
+                            } else {
+                                resolve(false);
+                                return;
+                            }
+                        } else {
+                            resolve(false);
+                            return;
+                        }
+                    }
+                    else {
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        if (menuItem.IsReimbursable && this.mealCount > 0) {
+                            this.mealCount = this.mealCount - 1;
+                        } else {
+                            this.alacarteCount = this.alacarteCount - 1;
+                        }
+                        this.restrictedAlacarteCount = this.restrictedAlacarteCount > 0 ? this.restrictedAlacarteCount - 1 : 0;
+
+                        if (secondmeal) {
+                            this.popupMessageService.showMessage(PopupMessageCode.E05477);
+                        } else {
+                            this.popupMessageService.showMessage(PopupMessageCode.E05471,
+                                [menuItem.ButtonDescription ? menuItem.ButtonDescription : menuItem.englishButtonName,
+                                this.patronDetails.PersonName]);
+                        }
+
+                        const menuItemIndex = this.menuItemsArr.indexOf(menuItemNo);
+                        if (menuItemIndex >= 0) {
+                            this.menuItemsArr.splice(menuItemIndex, 1);
+                        }
+
+                        if (this.menuItemsArr.length === 0) {
+                            this.transactionInProgress = false;
+                        }
+                        resolve(false);
+                        return;
+                    }
+
+                    this.calculateTotals(currPrice, true);
+                    const menuIndex = this.menuItemsArr.indexOf(menuItemNo);
+                    if (menuIndex >= 0) {
+                        this.menuItemsArr.splice(menuIndex, 1);
+                    }
+
+                    if (this.menuItemsArr.length === 0) {
+                        this.transactionInProgress = false;
+                    }
+                    resolve(true);
+                });
+        });
+    }
+
+    public forceCheckALCRestrictions(menuItem, priceTypeId) {
+        return new Promise((resolve) => {
+            if (this.patronDetails.isSpecialAccount === false &&
+                this.patronDetails.IsStudent === true) { // IsStudent Check
+                this.restrictedAlacarteCount = this.restrictedAlacarteCount + 1;
+                this.alacarteCount = this.alacarteCount + 1;
+                if (this.settingAutoPause.restrictions) {
+                    if (this.maxAlaCarteCountBySite === 0) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E12469,
+                            ['' + this.patronDetails['NoOfAlaCarteAllowedForPerson'] + '']);
+                        this.alacarteCount--;
+                        return;
+                    } else if (this.alacarteCount > this.maxAlaCarteCountBySite && this.maxAlaCarteCountBySite !== 0 && this.maxAlaCarteCountBySite !== -1) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E12469, ['' + this.maxAlaCarteCountBySite + '']);
+                        this.alacarteCount--;
+                        return;
+                    } else {
+                        if (this.alacarteCount > this.availableALCCt
+                            && (this.availableALCCt != null && this.availableALCCt !== -1)) {
+                            this.popupMessageService.showMessage(PopupMessageCode.E12470,
+                                ['' + this.patronDetails['NoOfAlaCarteAllowedForPerson'] + '']);
+                            this.restrictedAlacarteCount--;
+                            this.alacarteCount--;
+                            return;
+                        } else {
+                            this.forceConfirmed_CartMenuItem(menuItem, priceTypeId).then((result) => {
+                                resolve(result);
+                            });
+                        }
+                    }
+                }
+                else {
+                    this.forceConfirmed_CartMenuItem(menuItem, priceTypeId).then((result) => {
+                        resolve(result);
+                    });
+                }
+            } else {
+                this.alacarteCount = this.alacarteCount + 1;
+                this.forceConfirmed_CartMenuItem(menuItem, priceTypeId).then((result) => {
+                    resolve(result);
+                });;
+            }
+        });
+    }
+
+    /**
+     * Force Charge irrespective of any restrictions
+     */
+    public forceAutoServeCharge() {
+        setTimeout(() => {            
+            this.event.publish('patronLargeImagehide', null);
+            this.transactionInProgress = true;
+
+            this.orderData.IsDeposit = false;
+            this.orderData.IsCheck = false;
+            this.orderData.CheckNumber = '';
+
+            this.orderData.IsCard = false;
+            this.orderData.CardNumber = '';
+
+            const ordDetails = {};
+            ordDetails['orderData'] = this.orderData;
+            ordDetails['alaCount'] = this.alacarteCount;
+            ordDetails['mealCount'] = this.mealCount;
+            ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']);
+            ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+            ordDetails['patronDetails'] = this.patronDetails;
+            ordDetails['transactionType'] = TransactionTypes.CHARGE;
+            ordDetails['cashTendAmt'] = this.cashtendAmount;
+            if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
+                this.postSaleTransaction(TransactionTypes.CHARGE);
+            } else {
+                this.transactionInProgress = this.restrictService.checkOrderRestriction(ordDetails, this.autoServeEnabled, this.settingAutoPause.restrictions);
+                if (this.transactionInProgress) {
+                    this.postSaleTransaction(TransactionTypes.CHARGE);
+                } else {
+                    if (this.autoServeEnabled) {
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                    }
+
+                    const showPrompt = this.restrictService.showConfirm();
+                    const partPayPrompt = this.restrictService.showPartPayPopup();
+                    if (showPrompt) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
+                            if (bool) {
+                                this.postSaleTransaction(TransactionTypes.CHARGE);
+                                this.event.publish('patron-released', { 'patronDetails': null });
+                                this.impermanentAutoServePause = false;
+                            }
+                        });
+                    }
+                    if (partPayPrompt) {
+                        this.alertCtrl.create({
+                            header: 'Alert',
+                            message: 'Please enter a partial payment',
+                            cssClass: 'customAlertCss',
+                            buttons: [
+                                {
+                                    text: 'Pay',
+                                    handler: () => {
+                                        this.showChargePopup();
+                                    }
+                                },
+                                {
+                                    text: 'Cancel',
+                                    handler: () => {
+                                        console.log('Cancel clicked');
+                                    }
+                                }
+                            ]
+                        }).then(async (res) => {
+                            await res.present();
+                        });
+                    }
+                    return;
+                }
+            }
+        }, 500);
+    }
+
+    public getItemAllergies(itemId) {
+        return new Promise((resolve) => {
+            const duplicate = this.itemsWithAlergies.find(i => i.itemId === itemId)
+            if (!duplicate) {
+                PouchQueriesService.GetMenuItemInfo(itemId).then((gridItem) => {
+                    if (gridItem['rows'] && gridItem['rows'].length > 0 && gridItem['rows'][0].doc.itemAllergen.length > 0) {
+                        this.itemsWithAlergies.push(gridItem['rows'][0].doc);
+                    }
+                    resolve(null);
+                })
+            }
+            else {
+                resolve(null);
+            }
+        });
+    }
+
+    public checkOrderItems(menuItemDescription) {
+        console.log('menuItemDescription', menuItemDescription);
+        const checkStart = menuItemDescription.startsWith('**');
+        const checkEnd = menuItemDescription.endsWith('**');
+        if (checkStart && checkEnd) {
+            // check further if description contains more ** into it
+            const testString = menuItemDescription.substring(2, menuItemDescription.length - 2);
+            if (this.checkOrderItems(testString)) {
+                return false;
+            } else {
+                // check if menu item starts with only *
+                const checkStart2 = testString.startsWith('*');
+                const checkEnd2 = testString.endsWith('*');
+                if (checkStart2 || checkEnd2) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

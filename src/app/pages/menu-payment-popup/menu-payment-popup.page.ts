@@ -480,8 +480,10 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
         this.bonusAmount = (total * bonusPercentage) / 100;
         return this.bonusAmount;
       } else {
-        const factor = Math.floor(total / thresholdAmount);
-        this.bonusAmount = factor * bonusAmount;
+        // const factor = Math.floor(total / thresholdAmount);
+        // this.bonusAmount = factor * bonusAmount;
+        /*Flat bonus for any amount*/
+        this.bonusAmount = bonusAmount;
         return this.bonusAmount;
       }
     } else {

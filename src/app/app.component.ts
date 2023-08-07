@@ -480,7 +480,12 @@ export class AppComponent {
               AppStateService.set("AppVersionCode", vCode);
             });
           });
-
+          if (_thisRef.utilService.isPlatformAndroid()) {
+            try {
+              (window as any).cordova.plugins.backgroundMode.setDefaults({ silent: true });
+              (window as any).cordova.plugins.backgroundMode.enable();
+            } catch (e) {}            
+          }
           _thisRef.backgroundMode.enable();
           if (_thisRef.utilService.isPlatformIos()) {
             _thisRef.backgroundMode.on("activate").subscribe(() => {

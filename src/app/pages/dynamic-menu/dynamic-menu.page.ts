@@ -3207,7 +3207,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.transactionService.CheckSessionInAppState().then(() => {
             if (AppStateService.get('session_id')) {
                 this.sessionId = AppStateService.get('session_id');
-            } `1`
+            }
             const date = new Date();
 
 

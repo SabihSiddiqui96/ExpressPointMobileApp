@@ -38,7 +38,7 @@ export class LookupService {
     public personDetails: any;
     public studentPin;
     // showModalPopup: boolean = true;
-
+    public localtimer_device: number = 0;
     public CanServeVisitingAdults = null;
 
     public menuPayselectAccountClick: boolean = false;
@@ -85,6 +85,8 @@ export class LookupService {
 
         if (this.utilService.isElectronApp() && this.utilService.showModalPopup) {
             this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+                this.localtimer_device = new Date().getTime();
+                AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);
                 this.setQ(queueInput);
                 this.utilService.showModalPopup = false;
             });

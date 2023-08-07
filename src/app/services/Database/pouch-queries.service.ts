@@ -372,6 +372,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetAutoServeSetting() {
+    return EXP_SYSTEM.allDocs({
+      startkey: 'AutoServeSetting',
+      endkey: 'AutoServeSetting' + '\uffff',
+      include_docs: true
+    });
+  }
+
   public static GetStudentInfo(personId) {
 
     const args = {
@@ -607,6 +615,39 @@ export class PouchQueriesService {
       endkey: 'SpecialRosters\uffff',
       include_docs: true
     });
+  }
+
+  public static GetMenuItemInfo(menuItemId) {    
+    return new Promise<MenuItemDocs>((resolve, reject) => {
+      //Need to change temporary 
+      EXP_STANDARD_MENUS.allDocs({
+        keys: ['Item_' + menuItemId],//SearchKeys,
+        include_docs: true
+      }).then(res => {
+        const searchResult = JSON.parse('{ "docs": [] }');
+        _.filter(res.rows, function (o) {
+          if (!(o && o.doc && o.doc.type === 'Item')) {
+            return;
+          }
+          if (o.doc.type === 'Item' && o.doc.itemId === undefined) {
+            return false;
+          }
+          if (o.doc.itemId === menuItemId) {
+            searchResult.docs.push(o);
+            return true;
+          } else {
+            return false;
+          }
+        });
+
+        resolve({
+          offset: 0,
+          rows: searchResult.docs,
+          total_rows: searchResult.docs && searchResult.docs.length,
+        });
+      });
+    });
+  //#endregion: Sync
   }
 
   public static GetRDAGradeGroupByGrade(gradeId) {
@@ -1659,16 +1700,18 @@ export class PouchQueriesService {
               }
               if (deviceInfo) {
                 doc.TerminalId = deviceInfo.TerminalId;
-                this.http.SaveAppVersion(doc).subscribe(
-                  data => {
-                    console.log('Posted Version Update Status' + JSON.stringify(data));
-                    doc.IsSynced = true;
-                    PouchDBService.UpsertSingleDoc(doc, EXP_SYSTEM).then(() => { resolve(null); });
-                  },
-                  error => { console.log(error); },
-                  () => {
-                    resolve(null);
-                  });
+                if (doc.TerminalId != null) {
+                  this.http.SaveAppVersion(doc).subscribe(
+                    data => {
+                      console.log('Posted Version Update Status' + JSON.stringify(data));
+                      doc.IsSynced = true;
+                      PouchDBService.UpsertSingleDoc(doc, EXP_SYSTEM).then(() => { resolve(null); });
+                    },
+                    error => { console.log(error); },
+                    () => {
+                      resolve(null);
+                    });
+                }
               }
             }
           });
@@ -2142,4 +2185,10 @@ export class PouchQueriesService {
 
 export interface FilteredDocs {
   docs: Array<any>;
+}
+
+export interface MenuItemDocs {
+  offset: number;
+  rows: Array<any>;
+  total_rows: number;
 }

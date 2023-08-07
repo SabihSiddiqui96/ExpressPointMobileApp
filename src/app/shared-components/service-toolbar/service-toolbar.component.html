@@ -29,7 +29,7 @@
             </ion-col>
 
             <!-- Menu Type -->
-            <ion-col size="5">
+            <ion-col [size]="settingAutoServe ? '3' : '5'">
                 <ion-button default expand="block" (click)="blurInputElement();showMenuTypePopup()">
                     <span *ngIf="selectedMenuType != -1">{{selectedMenuTypeName}}</span>
                     <span *ngIf="selectedMenuType == -1">Menu</span>
@@ -49,6 +49,14 @@
                 <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement();openTransactionViewer()">
                     <ion-icon slot="icon-only" name="ios-paper">
                     </ion-icon>
+                </ion-button>
+            </ion-col>
+            <!-- Auto Serve -->
+            <ion-col [size]="settingAutoServe ? '2' : '0'" *ngIf="settingAutoServe" [ngClass]="impermanentAutoServePause ? 'blinkAutoServe' : ''">
+                <ion-button [ngClass]="autoServeEnabled ? 'autoServeOn' : 'autoServeOFF'" class="btn-full-size-icon" expand="block"
+                    (click)="blurInputElement();SwapAutoServeEnabled()">
+                    <img style="margin-right: 0px;" slot="start" src="assets/img/autoserve.png">
+                    <span>AutoServe {{autoServeEnabled ? (impermanentAutoServePause ? "PAUSE" :"ON") : "OFF"}}</span>
                 </ion-button>
             </ion-col>
         </ion-row>
