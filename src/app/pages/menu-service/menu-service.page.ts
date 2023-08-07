@@ -4280,41 +4280,43 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public doAutoServe() {
-        if (this.transactionInProgress) {
-            setTimeout(() => {
-                this.doAutoServe();
-            }, 500);
-        } else {
-            if (this.autoServeEnabled && this.impermanentAutoServePause == false) {
-                if (this.enableCharge()) {
-                    //Charge is not allowed, inform user.
-                    this.utilService.showToast('Charge is not allowed');
-                    this.autoServeEnabled = true;
-                    this.impermanentAutoServePause = true;
-                } else {
-                    const itemLen = this.orderData.items.length;
-                    if (itemLen === 0) {
-                        this.forceAddDefaultItemForAutoServe().then((result: boolean) => {
-                            if (result) {
-                                this.forceAutoServeCharge();
-                            }
-                        });
+        if (AppStateService.get('autoServeEnabled')) {
+            if (this.transactionInProgress) {
+                setTimeout(() => {
+                    this.doAutoServe();
+                }, 500);
+            } else {
+                if (this.autoServeEnabled && this.impermanentAutoServePause == false) {
+                    if (this.enableCharge()) {
+                        //Charge is not allowed, inform user.
+                        this.utilService.showToast('Charge is not allowed');
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
                     } else {
-                        //Check if default menu item is in the list
-                        let isDefaultMenuItemAdded = false;
-                        this.orderData.items.forEach(item => {
-                            if (item.RefId === this.defaultMenuItemId) {
-                                isDefaultMenuItemAdded = true;
-                            }
-                        });
-                        if (isDefaultMenuItemAdded) {
-                            this.forceAutoServeCharge();
-                        } else {
+                        const itemLen = this.orderData.items.length;
+                        if (itemLen === 0) {
                             this.forceAddDefaultItemForAutoServe().then((result: boolean) => {
                                 if (result) {
                                     this.forceAutoServeCharge();
                                 }
                             });
+                        } else {
+                            //Check if default menu item is in the list
+                            let isDefaultMenuItemAdded = false;
+                            this.orderData.items.forEach(item => {
+                                if (item.RefId === this.defaultMenuItemId) {
+                                    isDefaultMenuItemAdded = true;
+                                }
+                            });
+                            if (isDefaultMenuItemAdded) {
+                                this.forceAutoServeCharge();
+                            } else {
+                                this.forceAddDefaultItemForAutoServe().then((result: boolean) => {
+                                    if (result) {
+                                        this.forceAutoServeCharge();
+                                    }
+                                });
+                            }
                         }
                     }
                 }
