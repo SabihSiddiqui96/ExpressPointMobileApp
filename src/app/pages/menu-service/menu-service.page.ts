@@ -2444,8 +2444,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.postSaleTransaction(transactionType);
                         this.impermanentAutoServePause = false;
                     } else {
-                        this.autoServeEnabled = true;
-                        this.impermanentAutoServePause = true;
+                        if (this.autoServeEnabled) {
+                            this.impermanentAutoServePause = true;
+                        }
                         const showPrompt = this.restrictService.showConfirm();
                         const partPayPrompt = this.restrictService.showPartPayPopup();
                         if (showPrompt) {
@@ -2535,8 +2536,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
                 this.transactionInProgress = false;
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
-                this.autoServeEnabled = true;
-                this.impermanentAutoServePause = true;
+                if (this.autoServeEnabled) {
+                    this.impermanentAutoServePause = true;
+                }
                 this.popupMessageService.showMessage(PopupMessageCode.E05368);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                 return;
