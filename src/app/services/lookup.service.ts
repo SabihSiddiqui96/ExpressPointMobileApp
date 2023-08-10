@@ -329,7 +329,8 @@ export class LookupService {
                     patron.InputDirection = input;
                 }
             })
-            this.personsQ = this.personsQ.filter(f => f.FirstName !== "");
+            //commented due to visiting student not pulled from lookup
+            //this.personsQ = this.personsQ.filter(f => f.FirstName !== "");            
             this.showPatronModel(this.personsQ, true, false);
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E24396);
