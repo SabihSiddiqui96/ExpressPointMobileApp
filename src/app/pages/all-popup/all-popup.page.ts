@@ -255,6 +255,9 @@ export class AllPopupPage implements OnInit {
                     "ServingLineId"
                 );
                 this.title = "Serving Lines";
+                filteredData.sort(function (a, b) {
+                    return a["sortKey"].toString().localeCompare(b["sortKey"].toString()) || a["label"].localeCompare(b["label"]);
+                });
                 this.displayData(filteredData);
                 break;
             case "patronlist":
@@ -493,6 +496,7 @@ export class AllPopupPage implements OnInit {
                         Homeroom: item["HomeRoom"],
                         Status: item["IsStudent"] ? "S" : "A",
                         key: item[key1],
+                        sortKey: item[key1] ? "A" : "B",
                         Image: item[key2],
                         Gender: item["Gender"],
                     });
@@ -505,6 +509,7 @@ export class AllPopupPage implements OnInit {
                         Homeroom: item["HomeRoom"],
                         Status: item["IsStudent"] ? "S" : "A",
                         key: item[key1],
+                        sortKey: item[key1] ? "A" : "B",
                         Image: item[key2],
                         Gender: item["Gender"],
                     });
@@ -514,6 +519,7 @@ export class AllPopupPage implements OnInit {
                     value: item[value],
                     label: item[label], // label === 'PersonName' ? item[label] = item[label].split(" ").join(", ") :
                     key: item[key1],
+                    sortKey: item[key1] ? "A" : "B",
                     Image: item[key2],
                     servingLineId: item[key3],
                     Gender: item["Gender"],

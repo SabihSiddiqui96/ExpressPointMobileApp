@@ -408,6 +408,7 @@ export class LookupService {
 
     public pouchDBLookup(pin) {
         return new Promise((resolve) => {
+            this.lookupPatronIdResults = [];
             let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
             if (SearchByPin === '-1') {
                 PouchQueriesService.PatronSearchByName('', '', pin).
@@ -421,34 +422,54 @@ export class LookupService {
                             }
                         });
                         this.lookupPatronIdResults = docs;
+                        //Method added due to Promise is returned before executing this step and 
+                        //previously it was called after search by pin - 1 if condition 
+                        this.pouchDBLookup_PINLookup(pin, SearchByPin, resolve);
                     });
             }
+            else {
+                //Method added due to Promise is returned before executing this step and
+                //previously it was called after search by pin - 1 if condition now moved to else part
+                this.pouchDBLookup_PINLookup(pin, SearchByPin, resolve);
+            }
+        });
+    }
 
-            // fetching all partial PIN results and filtering here is 'useExactPIN' is set to true
-            PouchQueriesService.PINLookup(pin).then((data) => {
-                this.lookupResults = data.rows.map(row => row.doc);
-                if (SearchByPin == null || SearchByPin == undefined) {
-                    SearchByPin = '1'
+    private pouchDBLookup_PINLookup(pin: any, SearchByPin: any, resolve: (value: unknown) => void) {
+        // fetching all partial PIN results and filtering here is 'useExactPIN' is set to true
+        PouchQueriesService.PINLookup(pin).then((data) => {
+            this.lookupResults = data.rows.map(row => row.doc);
+            if (SearchByPin == null || SearchByPin == undefined) {
+                SearchByPin = '1';
+            }
+            if (this.useExactPIN === 1) {
+                if (SearchByPin === '1') {
+                    this.lookupResults = this.lookupResults.filter(r => r.Identifier === pin);
+
+                } else {
+                    this.lookupResults = this.lookupResults.filter(r => r.PersonIdentifier === pin);
                 }
-                if (this.useExactPIN === 1) {
-                    if (SearchByPin === '1') {
-                        this.lookupResults = this.lookupResults.filter(r => r.Identifier === pin);
+            }
 
-                    } else {
-                        this.lookupResults = this.lookupResults.filter(r => r.PersonIdentifier === pin);
-                    }
+            if (SearchByPin === '-1') {
+                if (this.lookupResults.length === 0) {
+                    this.lookupResults = (this.lookupPatronIdResults);
                 }
-
-                if (SearchByPin === '-1' && this.lookupResults.length === 0) {
+                else if (this.lookupResults.length > 0 && this.lookupPatronIdResults.length > 0) {
                     this.lookupResults = this.lookupResults.concat(this.lookupPatronIdResults);
+                    const keys = ['Identifier', 'PersonIdentifier'];
+                    const filteredData = this.lookupResults.filter((value, index, self) =>
+                        self.findIndex(v => keys.every(k => v[k] === value[k])) === index
+                    );
+                    this.lookupResults = filteredData;
                 }
+            }
 
-                if (this.serveInactiveStudents === 0) {
-                    this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
-                }
-                // this.localResultSet = this.lookupResults
-                resolve(this.lookupResults);
-            });
+            if (this.serveInactiveStudents === 0) {
+                this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
+            }
+            // this.localResultSet = this.lookupResults
+            resolve(this.lookupResults);
         });
     }
 

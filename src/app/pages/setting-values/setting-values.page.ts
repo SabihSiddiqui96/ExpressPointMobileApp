@@ -97,6 +97,11 @@ export class SettingValuesPage implements OnInit {
                 const setting = {};
                 setting['SettingDescription'] = siteSetting.SiteSettingDescription;
                 setting['SettingValue'] = parseInt(siteSetting.SiteSettingValue) === 1 ? 'Yes' : 'No';
+                if (siteSetting.SiteSettingCode.trim() == "SRCHBYPIN") {
+                    let setVal = parseInt(siteSetting.SiteSettingValue);
+                    let setText = setVal == 1 ? "Yes" : (setVal == 0 ? "No" : "Both")
+                    setting['SettingValue'] = setText;
+                }
                 this.siteSettings.push(setting);
             });
             this.getDefaultRestrictions();
