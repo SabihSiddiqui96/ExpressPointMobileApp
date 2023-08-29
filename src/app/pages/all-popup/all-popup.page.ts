@@ -519,7 +519,7 @@ export class AllPopupPage implements OnInit {
                     value: item[value],
                     label: item[label], // label === 'PersonName' ? item[label] = item[label].split(" ").join(", ") :
                     key: item[key1],
-                    sortKey: item[key1] ? "A" : "B",
+                    sortKey: item[key1] ? "A" : "B", //Added for serving line sort functionality
                     Image: item[key2],
                     servingLineId: item[key3],
                     Gender: item["Gender"],
