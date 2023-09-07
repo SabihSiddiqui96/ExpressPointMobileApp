@@ -323,11 +323,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
-                if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
-                    setTimeout(() => {
+                setTimeout(() => {
+                    if (this.patronSearchId != null && this.patronSearchId != undefined) {
                         this.patronSearchId.setFocus();
-                    }, 500);
-                }
+                    }
+                }, 600);
 
             } else {
                 //  this.resetPatronData()
@@ -373,11 +373,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 this.patronAccount = 'patron_pin';
                             }
                             setTimeout(() => {
-                                if (!this.utilService.isElectronApp()) {
-                                    if (this.patronPinId != undefined)
-                                        this.patronPinId.setFocus();
-                                }
-                            }, 500);
+                                if (this.patronPinId != undefined)
+                                    this.patronPinId.setFocus();
+                            }, 600);
 
                         }
                     }
@@ -610,6 +608,76 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }
 
+    public checkNumericLookUp(event) {
+        if (event['keyCode'] === 9) {
+            // event.stopPropagation();
+            // setTimeout(() => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // });
+            return false;
+        }
+        let inputChar = (<HTMLInputElement>event.target).value;
+        let pattern;
+        if (this.isCharAllowedInPin) {
+            pattern = /^[a-zA-Z0-9]*$/;
+        } else {
+            pattern = /^[0-9]+$/;
+        }
+        let newInputChar = '';
+
+        // divide input char into char array
+        // and then check each char against regex
+        let chars = inputChar.split('');
+        chars.map(char => {
+            if (char.match(pattern)) {
+                if (newInputChar !== '') {
+                    newInputChar = newInputChar + char;
+                } else {
+                    newInputChar = char;
+                }
+            }
+        });
+        inputChar = newInputChar;
+        (<HTMLInputElement>event.target).value = inputChar;
+        let code = inputChar.charCodeAt((inputChar.length) - 1);
+        code = (isNaN(code)) ? 58 : code;
+        if (event['keyCode'] == 13 && this.isElectronApp == true) {
+            if (AppStateService.get('pnpPeripherals') == false) {
+                let localTimerSearchPatron_Keyboard: number = new Date().getTime();
+                if (event.target.parentElement.id == "keyword" && event.target.value != this.patronSearch.keyword) {
+                    if (event.target.value.length > this.patronSearch.keyword.length)
+                        event.target.value = this.patronSearch.keyword;
+                    else if (this.patronSearch.keyword.length > event.target.value.length)
+                        this.patronSearch.keyword = event.target.value;                   
+                }
+                setTimeout(() => {
+                    /* code for checking the characters from periperal */
+                    var localTimerSearchPatron_Device = AppStateService.get('localTimerSearchPatron_Device');
+                    if (localTimerSearchPatron_Device != undefined && (localTimerSearchPatron_Keyboard - localTimerSearchPatron_Device) <= 60) {
+                        AppStateService.set("localTimerSearchPatron_Device", 200);
+                    }
+                    else {
+                        this.inputBuffer = [];
+                        this.lookupByPIN();
+                        this.customKeys = '';
+                    }
+                }, 100);
+            }
+        }
+        if (code >= 48 && code <= 57) {
+            return true;
+        } else {            
+            // setTimeout(() => {
+            console.log('Check Numeric ---- Stop Propagation')
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // });
+            // event.stopPropagation();
+            return false;
+        }
+    }
+
     public checkNumeric(event) {
         if (event['keyCode'] === 9) {
             // event.stopPropagation();
@@ -733,6 +801,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
+        setTimeout(() => {
+            if (this.patronSearchId != null && this.patronSearchId != undefined) {
+                this.patronSearchId.setFocus();
+            }
+        }, 500);  
     }
 
     public blurInputElement() {
@@ -752,11 +825,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
         setTimeout(() => {
-            if (!this.utilService.isElectronApp()) {
-                if(this.patronPinId != null && this.patronPinId != undefined)
-                this.patronPinId.setFocus();
-            }
-        }, 500);
+            if(this.patronPinId != null && this.patronPinId != undefined)
+            this.patronPinId.setFocus();
+        }, 600);
         if (this.gradeList.length === 0) {
             this.GetGradesBySchool();
         }
@@ -1002,13 +1073,16 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             });
 
         } else {
+            this.patronSearch.lastname = '';
+            this.patronSearch.firstname = '';
+            this.patronSearch.externalId = '';
             this.popupMessageService.showMessage(PopupMessageCode.E18373);
             // this.utilService.showToast('Some fields are missing');
         }
     }
 
 
-    public handleKeyDown(event) {
+    public handleKeyDown(event) {        
         let localTimerSearchPatron_Keyboard: number = new Date().getTime();
         if (event.keyCode === 13) {
             setTimeout(() => {
@@ -1387,7 +1461,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
     }   
 
-    public onPeripheralKey(event) {
+    public delay = ms => new Promise(res => setTimeout(res, ms));
+
+    public async onPeripheralKey(event) {        
+        if (event.keyCode === 13) {
+            await this.delay(300);
+        }
         if (!this.router.url.includes('payments')) {
             this.logDBService.logData({
                 event: EventType.LOOKUP,
@@ -1398,6 +1477,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             var charCode = event.which || event.charCode || event.keyCode || 0;
             if (this.isEnterKeyHandled === true) {
                 this.isEnterKeyHandled = false;
+                this.inputBuffer = [];
                 return;
             }
 
@@ -1690,6 +1770,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public keyUpPIN(event) {
+        AppStateService.set("searchtextPreviousVal", event.target.value);  
         var key = (event.which) ? event.which : event.keyCode;
         let isKeyAllowed = false;
         if (this.isIOS) {
