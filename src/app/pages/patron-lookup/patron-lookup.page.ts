@@ -1082,39 +1082,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
 
-    public handleKeyDown(event) {
-        //Start - code added to stop adding extra characters to lookup textboxes
-        var searchtextPreviousVal = AppStateService.get("searchtextPreviousVal");       
-        if (event.target.parentElement.id == "externalId" && event.target.value != this.patronSearch.externalId) {
-            if (event.target.value.length > this.patronSearch.externalId.length)
-                event.target.value = this.patronSearch.externalId;
-            else if (this.patronSearch.externalId.length > event.target.value.length)
-                this.patronSearch.externalId = event.target.value;
-            else if (event.target.value.length == this.patronSearch.externalId.length)
-                event.target.value = this.patronSearch.externalId = searchtextPreviousVal;
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            return;
-        }
-        if (event.target.parentElement.id == "lastname" && event.target.value != this.patronSearch.lastname) {
-            if (event.target.value.length > this.patronSearch.lastname.length)
-                event.target.value = this.patronSearch.lastname;
-            else
-                this.patronSearch.lastname = event.target.value;
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            return;
-        }
-        if (event.target.parentElement.id == "firstname" && event.target.value != this.patronSearch.firstname) {
-            if (event.target.value.length > this.patronSearch.firstname.length)
-                event.target.value = this.patronSearch.firstname;
-            else
-                this.patronSearch.firstname = event.target.value;
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            return;
-        }
-        //End - code added to stop adding extra characters to lookup textboxes
+    public handleKeyDown(event) {        
         let localTimerSearchPatron_Keyboard: number = new Date().getTime();
         if (event.keyCode === 13) {
             setTimeout(() => {
