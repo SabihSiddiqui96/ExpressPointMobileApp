@@ -6,8 +6,8 @@ variables:
 
 pool:
   name: PrimeroEdge
-  agent:
-    name: Agent
+  demands:
+  - agent.name -equals Agent
 
 steps:
 - checkout: self
