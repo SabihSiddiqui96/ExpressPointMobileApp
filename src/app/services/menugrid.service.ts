@@ -370,12 +370,14 @@ export class MenugridService {
     return new Promise((resolve, reject) => {
       if (transactionType == 0) resolve(false);
       for (let i = 0; i < items.length; i++) {
-        if (items[i].price_type_id !== priceTypeId
+        if (!stateEligibilitySetting && items[i].price_type_id !== priceTypeId
           && items[i].price_type_id !== secondMealPriceType
         ) {
           resolve(true);
         }
-        if (stateEligibilitySetting && statePriceTypeId && items[i].price_type_id !== statePriceTypeId) {
+        if (stateEligibilitySetting && statePriceTypeId && items[i].price_type_id !== statePriceTypeId
+          && items[i].price_type_id !== priceTypeId
+          && items[i].price_type_id !== secondMealPriceType) {
           resolve(true)
         }
       }
