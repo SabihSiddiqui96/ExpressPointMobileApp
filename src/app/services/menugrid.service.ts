@@ -366,6 +366,7 @@ export class MenugridService {
     });
 
   }
+
   public hasDifferentPriceType(transactionType, items, priceTypeId, statePriceTypeId, secondMealPriceType, stateEligibilitySetting) {
     return new Promise((resolve, reject) => {
       if (transactionType == 0) resolve(false);
