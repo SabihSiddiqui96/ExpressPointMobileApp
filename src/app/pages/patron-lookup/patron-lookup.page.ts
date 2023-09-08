@@ -645,7 +645,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if (event['keyCode'] == 13 && this.isElectronApp == true) {
             if (AppStateService.get('pnpPeripherals') == false) {
                 let localTimerSearchPatron_Keyboard: number = new Date().getTime();
-                if (event.target.parentElement.id == "keyword" && event.target.value != this.patronSearch.keyword) {
+                if (event.target.parentElement.id == "pinInput" && event.target.value != this.patronSearch.keyword) {
                     if (event.target.value.length > this.patronSearch.keyword.length)
                         event.target.value = this.patronSearch.keyword;
                     else if (this.patronSearch.keyword.length > event.target.value.length)
