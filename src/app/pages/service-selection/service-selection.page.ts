@@ -26,6 +26,7 @@ import { NavigationExtras, Router } from "@angular/router";
 import { LoadingService } from "../../services/loading.service";
 import { LocalTimerService } from "../../services/local-timer.service";
 import { SessionType } from "../../services/enums/session-types";
+import { GeneralDBService } from "../../services/Database/general-db.service";
 
 @Component({
   selector: "app-service-selection",
@@ -62,6 +63,7 @@ export class ServiceSelectionPage implements OnInit {
     public event: Events,
     public loading: LoadingController,
     public lookUpService: LookupService,
+    public generalDBService: GeneralDBService,
     public deviceService: DeviceService,
     public sessionTimeOut: SessionTimeoutService,
     public alertCtrl: AlertController,
@@ -201,6 +203,9 @@ export class ServiceSelectionPage implements OnInit {
       type: "Service",
       ORDMEALS: this.ORDMEALS,
     });
+    
+    //Added this to load seller releated and device setting, missing data from the sync
+    this.loadMissingSyncedData();
   }
 
   ngOnInit() {
@@ -241,6 +246,17 @@ export class ServiceSelectionPage implements OnInit {
       this.initializeServiceSelection(true);
     }
 
+  }
+
+  private loadMissingSyncedData() {
+    let isSellerRelatedDataSynced = AppStateService.get('SellerRelatedDataSynced');
+    let isDeviceSettingsDataSynced = AppStateService.get('DeviceSettingsDataSynced');
+    if ((isSellerRelatedDataSynced == null || isSellerRelatedDataSynced == undefined) || isSellerRelatedDataSynced == 0) {
+      this.generalDBService.GetSellerRelatedData();
+    }
+    if ((isDeviceSettingsDataSynced == null || isDeviceSettingsDataSynced == undefined) || isDeviceSettingsDataSynced == 0) {
+      this.generalDBService.SyncAllDeviceSettings();
+    }
   }
 
   public ionViewWillEnter() {

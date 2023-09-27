@@ -19,6 +19,7 @@ import { Status } from './enums/device-status';
 import { HashingService } from './hashing.service';
 import { PouchQueriesService } from './Database/pouch-queries.service';
 import { PouchDBService, EXP_SYSTEM, EXP_COMMON } from './pouch-db.service';
+import { GeneralDBService } from './Database/general-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +40,8 @@ export class DeviceService {
     private utilService: UtilService, private http: HttpService,
     private device: Device, private urlHandler: UrlsService,
     private electronService: ElectronService, private systemService: SystemService,
-    private appStateService: AppStateService, private event: Events
+    private appStateService: AppStateService, private event: Events,
+    public generalDBService: GeneralDBService,
   ) {
   }
 
@@ -185,7 +187,9 @@ export class DeviceService {
                 this.getDeviceName().then(() => {
                   const siteCode = _.split(JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode, '-', 2);
                   this.deviceInfo.TerminalName = this.deviceInfo.DeviceName + '-' + siteCode[0];
-                  AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo)); resolve(null);
+                  AppStateService.set('DeviceInfo', JSON.stringify(this.deviceInfo));
+                  //Added this to load seller releated and device setting, missing data from the sync
+                  this.loadMissingSyncedData();
                   resolve(null);
                 });
               } else {
@@ -271,6 +275,17 @@ export class DeviceService {
     });
   }
 
+  private loadMissingSyncedData() {
+    let isSellerRelatedDataSynced = AppStateService.get('SellerRelatedDataSynced');
+    let isDeviceSettingsDataSynced = AppStateService.get('DeviceSettingsDataSynced');
+    if ((isSellerRelatedDataSynced == null || isSellerRelatedDataSynced == undefined) || isSellerRelatedDataSynced == 0) {
+      this.generalDBService.GetSellerRelatedData();
+    }
+    if ((isDeviceSettingsDataSynced == null || isDeviceSettingsDataSynced == undefined) || isDeviceSettingsDataSynced == 0) {
+      this.generalDBService.SyncAllDeviceSettings();
+    }
+  }
+
   public Save() {
     // this.alertDismiss = false;
     return new Promise((resolve, reject) => {
@@ -286,7 +301,8 @@ export class DeviceService {
           // // console.clear()
           // this.systemService.setDataForOfflineUse('DeviceInfo', JSON.stringify(this.deviceInfo)).then(() => { resolve(null); });
           this.systemService.setupSystemDb().then(() => { resolve(null); });
-
+          //Added this to load seller releated and device setting, missing data from the sync
+          this.loadMissingSyncedData();
         } else {
           const message = 'You already have a device named ' +
             this.deviceInfo.DeviceName + ' in the district, Please pick another.';
