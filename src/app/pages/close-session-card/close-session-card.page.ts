@@ -164,7 +164,7 @@ export class CloseSessionCardPage implements OnInit {
     let cardTotalAmount = this.cardTotal;
 
     cardListObj.forEach(function (card, index) {
-      cardTotalAmount = cardTotalAmount + cardListObj[index]['Amount'];
+      cardTotalAmount = cardTotalAmount + parseFloat(cardListObj[index]['Amount']);
     });
 
     this.cardTotal = cardTotalAmount;

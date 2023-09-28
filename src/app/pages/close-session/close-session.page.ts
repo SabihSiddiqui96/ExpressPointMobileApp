@@ -620,7 +620,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         let checkTot = this.checkTotal;
         ckList.forEach((value, index) => {
             if (!ckList[index]['IsDeleted']) {
-                checkTot = checkTot + ckList[index]['Amount'];
+                checkTot = checkTot + parseFloat(ckList[index]['Amount']);                
             }
         });
         this.checkTotal = checkTot;
@@ -630,7 +630,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         let cardTot = this.cardTotal;
         cardList.forEach((value, index) => {
             if (!cardList[index]['IsDeleted']) {
-                cardTot = cardTot + cardList[index]['Amount'];
+                cardTot = cardTot + parseFloat(cardList[index]['Amount']);
             }
         });
         this.cardTotal = cardTot;
