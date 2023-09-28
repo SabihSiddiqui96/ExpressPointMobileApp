@@ -968,7 +968,9 @@ export class PaymentsPage extends DoPayment implements OnInit {
             } else if (userEventData.number === 13) { // Enter key is pressed
                 console.log('Enter key');
                 if (userEventData.elementId === 'cash') {
-                    document.getElementById('check').focus();
+                    if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                        document.getElementById('check').focus();
+                    }
                     this.changeActiveInput('check');
                 }
             }

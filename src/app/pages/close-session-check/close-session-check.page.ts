@@ -85,7 +85,7 @@ export class CloseSessionCheckPage implements OnInit {
         '_id': 'SessionCheck--' + createdDate,
         'SessionId': AppStateService.get('session_id'),
         'CheckNumber': this.checkNumber,
-        'Amount': amnt,
+        'Amount': parseFloat(amnt),
         'IsDeleted': false,
         'SessionCheckId': this.utilService.generateUUID(),
         'IsSynced': false,
@@ -159,7 +159,7 @@ export class CloseSessionCheckPage implements OnInit {
     let checkTotalAmount = this.checkTotal;
 
     checkListObj.forEach(function (check, index) {
-      checkTotalAmount = checkTotalAmount + checkListObj[index]['Amount'];
+      checkTotalAmount = checkTotalAmount + parseFloat(checkListObj[index]['Amount']);
     });
 
     this.checkTotal = checkTotalAmount;
