@@ -1119,6 +1119,18 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         return amnt;
     }
 
+    public filterCurrency_DollarAndScale(amnt) {
+        if (amnt.indexOf('$') !== -1) {
+            amnt = amnt.replace('$', '');
+        }
+        try {
+            amnt = parseFloat(amnt).toFixed(2);
+        } catch (error) {
+            amnt = amnt;
+        }
+        return amnt;
+    }
+
     public showMessage(message) {
         this.utilService.showToast(message);
     }
@@ -1261,8 +1273,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         let amnt = this.cashtendered;
         this.depositAmount = this.depositAmount.length !== 0 ? this.depositAmount : '$0.00';
         let depositAmnt = this.depositAmount;
-        depositAmnt = this.filterCurrency(depositAmnt);
-        amnt = this.filterCurrency(amnt);
+        depositAmnt = this.filterCurrency_DollarAndScale(depositAmnt);
+        amnt = this.filterCurrency_DollarAndScale(amnt);
         if (!isNaN(depositAmnt)) {
             const amountToZero = 0 - this.navPatronDetails['Balance'];
             const depAmnt = this.utilService.roundToDecimal(depositAmnt, 2);
@@ -1302,7 +1314,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         if (this.orderData.IsDeposit === true) {
                             this.paymentAmnt = this.cashtendAmount;
                         } else {
-                            this.paymentAmnt = parseFloat(Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) + this.orderData.totalAmount);
+                            this.paymentAmnt = parseFloat(Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)) + this.orderData.totalAmount);
                             this.orderData.IsDeposit = true;
                         }
                     } else {
@@ -1327,8 +1339,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                     }
                 }
 
-                if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
-                    this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
+                if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
+                    this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2));
                 }
             }
             /* not sure if to add this or not */
@@ -1366,7 +1378,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 'orderData': this.navOrderData,
                 'cashtend_amount': this.cashtendAmount,
                 'isDepositByEXNEGBAL': this.isDepositByEXNEGBAL,
-                'amountTowardsBalance': Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)),
+                'amountTowardsBalance': Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)),
                 'cashDue': this.changeDue,
                 'selectedAccountDetails': this.showPatron == true ? this.accountDetails : null,
                 'squareRetry': retrySquareTransaction,
