@@ -129,7 +129,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         setTimeout(() => { document.getElementById('deposit').focus() }, 100);
                         this.changeActiveInput('deposit');
                     } else if (this.cashpaymentOption === 'check' && this.activeInputField === 'amount') {
-                        setTimeout(() => { document.getElementById('check').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                                document.getElementById('check').focus();
+                            }
+                        }, 100);
                         this.changeActiveInput('check');
                     } else {
                         event.preventDefault();
@@ -146,7 +150,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         setTimeout(() => { document.getElementById('deposit').focus() }, 100);
                         this.changeActiveInput('deposit');
                     } else if (this.cashpaymentOption === 'check' && this.activeInputField === 'amount') {
-                        setTimeout(() => { document.getElementById('check').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                                document.getElementById('check').focus();
+                            }
+                        }, 100);
                         this.changeActiveInput('check');
                     } else {
                         event.preventDefault();
@@ -562,7 +570,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.depositClass = 'input_label';
             this.cardNoClass = 'input_label';
             this.checkNoClass = 'active_input_label';
-            setTimeout(() => { document.getElementById('check').focus() }, 500);
+            setTimeout(() => {
+                if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                    document.getElementById('check').focus();
+                }
+            }, 500);
         } else if (field === 'deposit') {
             this.activeInputField = 'amount';
             if (this.depositChangeDue) {
