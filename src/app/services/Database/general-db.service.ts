@@ -100,7 +100,9 @@ export class GeneralDBService {
                 'AuthorizationToken': data.AuthorizationToken,
                 'ApiURL': data.ApiURL,
                 'RegionId': data.RegionId,
-                'DeviceId': data.DeviceId
+                'DeviceId': data.DeviceId,
+                'ExpiredAt': data.ExpiredAt,
+                'MerchantId': data.MerchantId
               };
 
               AppStateService.set("SellerDetails", JSON.stringify(sellerDetailsDoc))

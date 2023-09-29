@@ -10,9 +10,7 @@ import { UserDetailsPopupPage } from "../../pages/user-details-popup/user-detail
 import { AllPopupPage } from "../../pages/all-popup/all-popup.page";
 import { LoadingController } from "@ionic/angular";
 import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
-
 import { LookupService } from "../../services/lookup.service";
-
 import { PouchQueriesService } from "../../services/Database/pouch-queries.service";
 import { UtilService } from "../../services/util.service";
 import { HttpService } from "../../services/HTTP/http.service";
@@ -209,36 +207,58 @@ export class ServiceSelectionPage implements OnInit {
     const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
     const value = SettingService.getSettingValue('DTTIMEZONE');
     const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
+    const SquareSetting = Boolean(parseInt(SettingService.getSettingValue('ENBLCCTR')));
+    const sellerDetails = AppStateService.get('SellerDetails');
     // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
     // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
-    if (IGTIMZONE === 0) {
-      if (diffTime >= diffThreshold) {
+    if (IGTIMZONE === 0 && diffTime >= diffThreshold) {
 
-        const alert = this.alertCtrl.create({
-          header: 'Warning',
-          message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
-          backdropDismiss: false,
-          buttons: [
-            {
-              text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
-              handler: () => {
-                console.log('Clicked');
-                const openSettings = new OpenNativeSettings();
-                openSettings.open('date');
+      const alert = this.alertCtrl.create({
+        header: 'Warning',
+        message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+            handler: () => {
+              console.log('Clicked');
+              const openSettings = new OpenNativeSettings();
+              openSettings.open('date');
 
-                this._nav.navigateRoot("logout");
-              }
+              this._nav.navigateRoot("logout");
             }
-          ]
-        }).then(async (res) => {
-          await res.present();
-        });
+          }
+        ]
+      }).then(async (res) => {
+        await res.present();
+      });
+    } else {
+      if (SquareSetting && sellerDetails) {
+        const expiredAt = JSON.parse(sellerDetails).ExpiredAt;
+        let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(expiredAt), 'DAY', false)
+        if (expiresInDays < 5 && expiresInDays > 0) {
+          let message = 'Square Authorization token expires in ' + expiresInDays + ' days, Please contact your administration to get a new authorization token';
+          const alert = this.alertCtrl.create({
+            header: 'Warning',
+            message: message,
+            backdropDismiss: false,
+            buttons: [
+              {
+                text: 'Ok',
+                handler: () => {
+                }
+              }
+            ]
+          }).then(async (res) => {
+            await res.present();
+          });
+        } else {
+          this.initializeServiceSelection(true);
+        }
+
       } else {
         this.initializeServiceSelection(true);
-
       }
-    } else {
-      this.initializeServiceSelection(true);
     }
 
   }
