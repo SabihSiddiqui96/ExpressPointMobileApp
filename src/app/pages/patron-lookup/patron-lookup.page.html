@@ -163,7 +163,7 @@
                   <ion-item lines="none">
                     <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
                     <ion-input type="text" [(ngModel)]="patronSearch.firstname" placeholder="First Name"
-                      (click)="setActiveField('firstName')" [ngClass]="firstNameClass" id="firstname"
+                      (ionFocus)="setActiveField('firstName')" [ngClass]="firstNameClass" id="firstname"
                       (keyup)="checkAlphaNumericFN($event); handleKeyDown($event)">
                       <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
                     </ion-input>
@@ -190,7 +190,7 @@
                     <!-- <ion-label slot="start" fixed>Last Name</ion-label> -->
 
                     <ion-input type="text" [(ngModel)]="patronSearch.lastname" placeholder="Last Name"
-                      (click)="setActiveField('lastName')" [ngClass]="lastNameClass" id="lastname"
+                      (ionFocus)="setActiveField('lastName')" [ngClass]="lastNameClass" id="lastname"
                       (keyup)="checkAlphaNumericLN($event); handleKeyDown($event)">
                       <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
                     </ion-input>
@@ -216,7 +216,7 @@
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
                     <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" id="externalId"
-                      placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
+                      placeholder="{{AdvancedPinLookupLabel}}" (ionFocus)="setActiveField('externalId')"
                       [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event); handleKeyDown($event)">
                       <!-- (keyup)=""> -->
@@ -682,7 +682,7 @@
                     <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
 
                     <ion-input type="text" [(ngModel)]="patronSearch.firstname" placeholder="First Name"
-                      (click)="setActiveField('firstName')" [ngClass]="firstNameClass" id="firstname"
+                      (ionFocus)="setActiveField('firstName')" [ngClass]="firstNameClass" id="firstname"
                       (keyup)="checkAlphaNumericFN($event); handleKeyDown($event)">
                       <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
                     </ion-input>
@@ -695,7 +695,7 @@
                     <!-- <ion-label slot="start" fixed>Last Name</ion-label> -->
 
                     <ion-input type="text" [(ngModel)]="patronSearch.lastname" placeholder="Last Name"
-                      (click)="setActiveField('lastName')" [ngClass]="lastNameClass" id="lastname"
+                      (ionFocus)="setActiveField('lastName')" [ngClass]="lastNameClass" id="lastname"
                       (keyup)="checkAlphaNumericLN($event); handleKeyDown($event)">
                       <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
                     </ion-input>
@@ -708,7 +708,7 @@
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
                     <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" id="externalId"
-                      placeholder="{{AdvancedPinLookupLabel}}" (click)="setActiveField('externalId')"
+                      placeholder="{{AdvancedPinLookupLabel}}" (ionFocus)="setActiveField('externalId')"
                       [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
                       (keyup)="checkNumeric($event); handleKeyDown($event)">
                       <!-- (keyup)=""> -->
