@@ -229,7 +229,7 @@ export class PrintService {
             closeSessionFormat.Checks.forEach(check => {
                 receiptFormat = receiptFormat.trim() + `   <tr>
         <td>`+ check['CheckNumber'] + `:</td><td style="word-wrap: break-word;width:100px">`
-                    + '$ ' + check['Amount'] + `</td>`;
+                    + '$ ' + parseFloat(check['Amount']).toFixed(2) + `</td>`;
             });
         }
         receiptFormat = receiptFormat.trim() +

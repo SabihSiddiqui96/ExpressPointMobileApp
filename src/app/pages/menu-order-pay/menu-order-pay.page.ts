@@ -108,10 +108,18 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             } else if (userEventData.number === 9 && event.shiftKey) {
                 if (this.cashpaymentOption === 'cash' || this.cashpaymentOption === 'check') {
                     if (this.cashpaymentOption === 'cash' && this.activeInputField === 'deposit' && this.depositChangeDue) {
-                        setTimeout(() => { document.getElementById('cash').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('cash') != null && document.getElementById('cash') != undefined) {
+                                document.getElementById('cash').focus()
+                            }
+                        }, 100);
                         this.changeActiveInput('amount');
                     } else if (this.cashpaymentOption === 'check' && this.activeInputField === 'check') {
-                        setTimeout(() => { document.getElementById('cashCheck').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('cashCheck') != null && document.getElementById('cashCheck') != undefined) {
+                                document.getElementById('cashCheck').focus()
+                            }
+                        }, 100);
                         this.changeActiveInput('amount');
                     } else {
                         event.preventDefault();
@@ -126,10 +134,18 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
                 if (this.cashpaymentOption === 'cash' || this.cashpaymentOption === 'check') {
                     if (this.cashpaymentOption === 'cash' && this.activeInputField === 'amount' && this.depositChangeDue) {
-                        setTimeout(() => { document.getElementById('deposit').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('deposit') != null && document.getElementById('deposit') != undefined) {
+                                document.getElementById('deposit').focus()
+                            }
+                        }, 100);
                         this.changeActiveInput('deposit');
                     } else if (this.cashpaymentOption === 'check' && this.activeInputField === 'amount') {
-                        setTimeout(() => { document.getElementById('check').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                                document.getElementById('check').focus();
+                            }
+                        }, 100);
                         this.changeActiveInput('check');
                     } else {
                         event.preventDefault();
@@ -143,10 +159,18 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 console.log('Enter key');
                 if (this.cashpaymentOption === 'cash' || this.cashpaymentOption === 'check') {
                     if (this.cashpaymentOption === 'cash' && this.activeInputField === 'amount' && this.depositChangeDue) {
-                        setTimeout(() => { document.getElementById('deposit').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('deposit') != null && document.getElementById('deposit') != undefined) {
+                                document.getElementById('deposit').focus()
+                            }
+                        }, 100);
                         this.changeActiveInput('deposit');
                     } else if (this.cashpaymentOption === 'check' && this.activeInputField === 'amount') {
-                        setTimeout(() => { document.getElementById('check').focus() }, 100);
+                        setTimeout(() => {
+                            if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                                document.getElementById('check').focus();
+                            }
+                        }, 100);
                         this.changeActiveInput('check');
                     } else {
                         event.preventDefault();
@@ -539,7 +563,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
 
     public ionViewDidEnter() {
-        setTimeout(() => { document.getElementById('cash').focus() }, 500);
+        setTimeout(() => {
+            if (document.getElementById('cash') != null && document.getElementById('cash') != undefined) {
+                document.getElementById('cash').focus()
+            }
+        }, 500);
     }
 
     public changeActiveInput(field) {
@@ -555,14 +583,26 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.checkNoClass = 'input_label';
             this.depositClass = 'input_label';
             this.cardNoClass = 'input_label';
-            setTimeout(() => { document.getElementById('cash').focus() }, 500);
-            setTimeout(() => { document.getElementById('cashCheck').focus() }, 500);
+            setTimeout(() => {
+                if (document.getElementById('cash') != null && document.getElementById('cash') != undefined) {
+                    document.getElementById('cash').focus()
+                }
+            }, 500);
+            setTimeout(() => {
+                if (document.getElementById('cashCheck') != null && document.getElementById('cashCheck') != undefined) {
+                    document.getElementById('cashCheck').focus()
+                }
+            }, 500);
         } else if (field === 'check') {
             this.amountClass = 'input_label';
             this.depositClass = 'input_label';
             this.cardNoClass = 'input_label';
             this.checkNoClass = 'active_input_label';
-            setTimeout(() => { document.getElementById('check').focus() }, 500);
+            setTimeout(() => {
+                if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                    document.getElementById('check').focus();
+                }
+            }, 500);
         } else if (field === 'deposit') {
             this.activeInputField = 'amount';
             if (this.depositChangeDue) {
@@ -578,7 +618,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.depositClass = 'input_label';
             this.checkNoClass = 'input_label';
             this.cardNoClass = 'active_input_label';
-            setTimeout(() => { document.getElementById('card').focus() }, 500);
+            setTimeout(() => {
+                if (document.getElementById('card') != null && document.getElementById('card') != undefined) {
+                    document.getElementById('card').focus()
+                }
+            }, 500);
             // this.saveInProgress = false;
             this.cardAmount = '$' + this.navOrderData.totalAmount.toFixed(2);
             // this.cashtendAmount = this.navOrderData.totalAmount.toFixed(2);
@@ -1075,6 +1119,18 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         return amnt;
     }
 
+    public filterCurrency_DollarAndScale(amnt) {
+        if (amnt.indexOf('$') !== -1) {
+            amnt = amnt.replace('$', '');
+        }
+        try {
+            amnt = parseFloat(amnt).toFixed(2);
+        } catch (error) {
+            amnt = amnt;
+        }
+        return amnt;
+    }
+
     public showMessage(message) {
         this.utilService.showToast(message);
     }
@@ -1217,8 +1273,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         let amnt = this.cashtendered;
         this.depositAmount = this.depositAmount.length !== 0 ? this.depositAmount : '$0.00';
         let depositAmnt = this.depositAmount;
-        depositAmnt = this.filterCurrency(depositAmnt);
-        amnt = this.filterCurrency(amnt);
+        depositAmnt = this.filterCurrency_DollarAndScale(depositAmnt);
+        amnt = this.filterCurrency_DollarAndScale(amnt);
         if (!isNaN(depositAmnt)) {
             const amountToZero = 0 - this.navPatronDetails['Balance'];
             const depAmnt = this.utilService.roundToDecimal(depositAmnt, 2);
@@ -1258,7 +1314,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         if (this.orderData.IsDeposit === true) {
                             this.paymentAmnt = this.cashtendAmount;
                         } else {
-                            this.paymentAmnt = parseFloat(Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) + this.orderData.totalAmount);
+                            this.paymentAmnt = parseFloat(Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)) + this.orderData.totalAmount);
                             this.orderData.IsDeposit = true;
                         }
                     } else {
@@ -1283,8 +1339,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                     }
                 }
 
-                if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
-                    this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2));
+                if (this.cashtendAmount > this.orderData.totalAmount && Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)) > 0 && this.isDepositByEXNEGBAL) {
+                    this.paymentAmnt = this.orderData.totalAmount + Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2));
                 }
             }
             /* not sure if to add this or not */
@@ -1322,7 +1378,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 'orderData': this.navOrderData,
                 'cashtend_amount': this.cashtendAmount,
                 'isDepositByEXNEGBAL': this.isDepositByEXNEGBAL,
-                'amountTowardsBalance': Number(parseFloat(this.filterCurrency(this.depositAmount)).toFixed(2)),
+                'amountTowardsBalance': Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)),
                 'cashDue': this.changeDue,
                 'selectedAccountDetails': this.showPatron == true ? this.accountDetails : null,
                 'squareRetry': retrySquareTransaction,

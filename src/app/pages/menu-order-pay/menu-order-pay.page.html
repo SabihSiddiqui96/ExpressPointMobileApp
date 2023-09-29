@@ -118,7 +118,7 @@
           </ion-item>
           <ion-item *ngIf="cashpaymentOption=='card' && !hideCardOption">
             <ion-label>Amount Tendered</ion-label>
-            <ion-label class="ion-text-right" [ngClass]="amountClass == 'active_input_label' ">
+            <ion-label class="ion-text-right" [ngClass]="amountClass == 'active_input_label' ? 'active-input-label': 'inactive-input-label'">
               {{cardAmount}}</ion-label>
           </ion-item>
           <ion-item *ngIf="cashpaymentOption=='card' && !hideCardOption">
