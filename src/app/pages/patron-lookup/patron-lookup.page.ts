@@ -323,11 +323,13 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
                 this.patronAccount = 'patron_pin';
                 this.patronPinClick();
-                setTimeout(() => {
-                    if (this.patronSearchId != null && this.patronSearchId != undefined) {
-                        this.patronSearchId.setFocus();
-                    }
-                }, 600);
+                if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
+                    setTimeout(() => {
+                        if (this.patronSearchId != null && this.patronSearchId != undefined) {
+                            this.patronSearchId.setFocus();
+                        }
+                    }, 500);
+                }
 
             } else {
                 //  this.resetPatronData()
@@ -372,10 +374,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             } else {
                                 this.patronAccount = 'patron_pin';
                             }
-                            setTimeout(() => {
-                                if (this.patronPinId != undefined)
-                                    this.patronPinId.setFocus();
-                            }, 600);
+                            if (!this.utilService.isElectronApp()) {
+                                setTimeout(() => {
+                                    if (this.patronPinId != undefined)
+                                        this.patronPinId.setFocus();
+                                }, 500);
+                            }
 
                         }
                     }
@@ -801,11 +805,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
-        setTimeout(() => {
-            if (this.patronSearchId != null && this.patronSearchId != undefined) {
-                this.patronSearchId.setFocus();
-            }
-        }, 500);  
     }
 
     public blurInputElement() {
@@ -824,10 +823,13 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
-        setTimeout(() => {
-            if(this.patronPinId != null && this.patronPinId != undefined)
-            this.patronPinId.setFocus();
-        }, 600);
+        if (!this.utilService.isElectronApp()) {
+            setTimeout(() => {
+                if(this.patronPinId != null && this.patronPinId != undefined) {
+                    this.patronPinId.setFocus();
+                }
+            }, 500);
+        }
         if (this.gradeList.length === 0) {
             this.GetGradesBySchool();
         }
@@ -1467,7 +1469,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if (event.keyCode === 13) {
             await this.delay(300);
         }
-        if (!this.router.url.includes('payments')) {
+        let urlSubstringsArray = ["open-session", "payments", "login", "logout", "close-session", "classroom-sale"];
+        let routeToAvoidPeripheralKey = urlSubstringsArray.some(substring => this.router.url.toUpperCase().includes(substring.toUpperCase()))
+        if (!routeToAvoidPeripheralKey) {
             this.logDBService.logData({
                 event: EventType.LOOKUP,
                 type: LogType.INFO,
