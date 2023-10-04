@@ -318,7 +318,7 @@ export class PersonDBService {
           } else {
             if (isAccountObject === true) {
               if (newDoc.Balance) {
-                updatedDoc.Balance = newDoc.Balance;
+                updatedDoc.Balance = (newDoc.Balance != null && newDoc.Balance != undefined) ? Number(Number(newDoc.Balance).toFixed(2)) : newDoc.Balance;
               }
               // updatedDoc.ALCWeekly = newDoc.ALCWeekly;
               // updatedDoc.ALCMonthly = newDoc.ALCMonthly;
