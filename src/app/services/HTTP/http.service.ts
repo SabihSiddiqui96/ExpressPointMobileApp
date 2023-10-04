@@ -16,7 +16,7 @@ import { from } from 'rxjs';
 export class HttpService {
 
     public schoolCafeURL: string;
-
+    public currentExpressPointVersion = "3.4.2";
 
     constructor(public http: HttpClient, public httpNative: HTTP, public appStateService: AppStateService, public utilService: UtilService) { }
 
@@ -500,6 +500,11 @@ export class HttpService {
         const selectedsite = JSON.parse(AppStateService.get('SelectedSite'));
         deviceinfo.SchoolId = selectedsite.SchoolId;
         deviceinfo.Appversion = this.utilService.versionNumber;
+        if (this.currentExpressPointVersion != null && deviceinfo.Appversion != null) {
+            if (Number(this.currentExpressPointVersion.replace('.', '')) > Number(deviceinfo.Appversion.replace('.', ''))) {
+                deviceinfo.Appversion = this.currentExpressPointVersion;
+            }
+        }
         AppStateService.set('DeviceInfo', JSON.stringify(deviceinfo));
 
 
@@ -546,6 +551,11 @@ export class HttpService {
     }
 
     public postHeartBeat(terminalId, pending, sent, heartBeatTime, appVersion): any {
+        if (this.currentExpressPointVersion != null && appVersion != null) {
+            if (Number(this.currentExpressPointVersion.replace('.', '')) > Number(appVersion.replace('.', ''))) {
+                appVersion = this.currentExpressPointVersion;
+            }
+        }
         return this.http.post(API_URL + 'SaveDeviceHeartbeat',
             {
                 'TerminalId': terminalId,

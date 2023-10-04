@@ -43,7 +43,9 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     this.navPatronDetails = this.patronDetails;
     this.navPatronSelectedData = this.patronSelectedData;
     this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
-
+    if (isNaN(this.transactionNumber)) {
+      this.transactionNumber = 1;
+    }
     this.patronId = this.navPatronSelectedData.PersonId;
     this.newBalance = this.navPatronDetails['Balance'];
     this.paymentOption = 'cash';

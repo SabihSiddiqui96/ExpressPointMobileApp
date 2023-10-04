@@ -59,7 +59,7 @@ ngOnInit() {
       const lastSyncDateAccount = AppStateService.get('LastSyncDate_Account');
       const lastSyncDatePerson = AppStateService.get('LastSyncDate_Person');
       const setupComplete = AppStateService.get('SetupComplete');
-      const transactionNumber = AppStateService.get('TransactionNumber');
+      let transactionNumber = AppStateService.get('TransactionNumber');
       const selectedEnvironment = AppStateService.get('SelectedURL');
       const districtId = AppStateService.get('districtId');
       const loginApiUrl = AppStateService.get('LOGIN_URL');
@@ -116,6 +116,9 @@ ngOnInit() {
       AppStateService.set('LastSyncDate_Account', lastSyncDateAccount);
       AppStateService.set('LastSyncDate_Person', lastSyncDatePerson);
       AppStateService.set('SetupComplete', setupComplete);
+      if (isNaN(transactionNumber)) {
+        transactionNumber = 0;
+      }
       AppStateService.set('TransactionNumber', transactionNumber);
       AppStateService.set('districtId', districtId);
       AppStateService.set('LOGIN_URL', loginApiUrl);

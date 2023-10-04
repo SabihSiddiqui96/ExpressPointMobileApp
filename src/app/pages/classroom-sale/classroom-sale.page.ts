@@ -194,7 +194,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         }
 
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
         if (AppStateService.get('session_id')) {
             this.sessionId = AppStateService.get('session_id');
         } else {
@@ -1018,6 +1020,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             //     var date=new Date();
             //    var day = (date.getMonth()+1) +"/"+date.getDate()+"/"+date.getFullYear();
             this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
+            if (isNaN(this.transactionNumber)) {
+                this.transactionNumber = 0;
+            }
             const date = new Date();
             const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
                 + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
@@ -1116,8 +1121,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     let studentTotalTax = 0.00;
                     studentTotalTax = this.menuGridService.calculateTax(items, student.IsSaleTaxable);
                     orderdata = {
-                        'Balance': student.Balance,
-                        'PaymentAmount': Math.round((student.Price + studentTotalTax) * 100) / 100,
+                        'Balance': student.Balance != null && student.Balance != undefined ? Number(Number(student.Balance).toFixed(2)) : student.Balance,
+                        'PaymentAmount': Number(Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2)),
                         'AccountId': student.AccountId,
                         'ServingSchoolId': this.schoolId,
                         'BuyerSchoolId': student.PersonSchoolId,
@@ -1150,10 +1155,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'IsSent': false,
                         'IsfromSameDay': false,
                         'IsProcessed': false,
-                        'SalesTax': studentTotalTax,
+                        'SalesTax': studentTotalTax != null && studentTotalTax != undefined ? Number(Number(studentTotalTax).toFixed(2)) : studentTotalTax,
                         'IsCard': false,
                         'CardNumber': '',
-                        'OldBalance': student.Balance,
+                        'OldBalance': student.Balance != null && student.Balance != undefined ? Number(Number(student.Balance).toFixed(2)) : student.Balance,
                         'DepositAmount': '0',
                         'NewBalance': (student.Balance - Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2),
                         'BonusAmount': '0',
@@ -1163,7 +1168,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'Grade': student.GradeDescription,
                         'Teacher': student.Teacher,
                         'ChangeReturned': '0',
-                        'TotalAmount': Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toString(),
+                        'TotalAmount': Number(Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2)).toString(),
                         'ServingSiteId': this.siteName,
                         'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                         'UserId': this.userId,
@@ -2256,6 +2261,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             this.patronId = person.PersonId;
             this.setPatrondata().then(() => {
                 const transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+                if (isNaN(this.transactionNumber)) {
+                    this.transactionNumber = Number(AppStateService.get('TransactionNumber')) + 1;
+                }
                 const modal = this.modalCtrl.create({
                     component: MenuPaymentPopupPage,
                     componentProps: {

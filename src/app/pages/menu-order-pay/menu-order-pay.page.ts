@@ -480,7 +480,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         if (this.cashtendered.length > 6) {
                             // this.numberClick('X');
                             do {
-                                this.numberInput('X');
+                                this.numberInput('X', true);
                             } while (this.cashtendered.length == 7);
                         }
                     }
@@ -501,7 +501,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         }
                         if (this.depositAmount.length > 6) {
                             do {
-                                this.numberInput('X');
+                                this.numberInput('X', true);
                             } while (this.depositAmount.length == 7);
                         }
                     }
@@ -512,7 +512,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                         if (this.cashCardNum.length > 10) {
 
                             do {
-                                this.numberInput('X');
+                                this.numberInput('X', true);
                             } while (this.cashCardNum.length == 11);
 
                             this.utilService.showToast('Card Number cannot be longer than 10 digits.')
@@ -683,6 +683,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
         if (isClosed) {
             let suspiciousComment;
             let suspiciousActType: number;
@@ -1376,7 +1379,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.finalCheckOrderData().then(() => {
             this.event.publish('menu-order:pay', {
                 'orderData': this.navOrderData,
-                'cashtend_amount': this.cashtendAmount,
+                'cashtend_amount': (this.cashtendAmount == null || this.cashtendAmount == undefined) ? this.cashtendAmount : Number(this.cashtendAmount).toFixed(2),
                 'isDepositByEXNEGBAL': this.isDepositByEXNEGBAL,
                 'amountTowardsBalance': Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)),
                 'cashDue': this.changeDue,

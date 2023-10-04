@@ -129,7 +129,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     // public milkCount: number = 0
 
-
+    public isToggleNeedSwitchToDynamic = 1;
     /**********Static menus in Dynamic Menu START ********************** */
     public menuGrid: any = {};
     public menuGridCount = 0;
@@ -347,7 +347,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         AppStateService.remove('patron_details');
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             this.siteName = JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode;
@@ -929,6 +931,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // this.transactionNumber = this.transactionService.getCurrentTransactionNo(); // Transaction Number Changed here
         // this.transactionNumber += 1;
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 1;
+        }
         // Reset Order Data 
         this.refreshHideStudentSetting();
         this.orderData = {
@@ -2789,6 +2794,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             res.onDidDismiss().then((data) => {
                 // this.transactionNumber = data;
                 this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+                if (isNaN(this.transactionNumber)) {
+                    this.transactionNumber = 1;
+                }
                 const bonusAmt = AppStateService.get('BonusAmount');
                 if (bonusAmt) {
                     this.bonusAmount = parseFloat(bonusAmt);
@@ -3029,6 +3037,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.popupMessageService.showMessage(PopupMessageCode.E05304).then((bool) => {
                     if (bool) {
                         this.postSaleTransaction(transactionType);
+                        this.isToggleNeedSwitchToDynamic = 0;
                         this.event.publish('patron-released', { 'patronDetails': null });
                         if (this.isDynamicMenuSelected) {
                             this.getMenuDetails();
@@ -3318,16 +3327,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         const balance = this.patronDetails.Balance;
                         const saleToatal = this.orderData.totalAmount;
                         if (transactionType === 1) {
-                            updatedPatronDetails.Balance = balance - (saleToatal - paymentAmnt);
+                            updatedPatronDetails.Balance = Number(Number(balance - (saleToatal - paymentAmnt)).toFixed(2));
                         } else if (transactionType === 2) {
-                            updatedPatronDetails.Balance = balance - saleToatal;
+                            updatedPatronDetails.Balance = Number(Number(balance - saleToatal).toFixed(2));
                         }
                         let paymentData: TransactionDoc, paymentDoc;
                         if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
                             && this.orderData.IsDeposit) {
                             paymentData = {
-                                'PaymentAmount': Math.round(parseFloat(this.cashTendAmount) * 100) / 100,
-                                'Balance': parseFloat(this.selectedAccountDetails.Balance),
+                                'PaymentAmount': Number(Number(Math.round(parseFloat(this.cashTendAmount) * 100) / 100).toFixed(2)),
+                                'Balance': Number(Number(this.selectedAccountDetails.Balance).toFixed(2)),
                                 'AccountId': this.selectedAccountDetails.AccountId,
                                 'ServingSchoolId': siteSchool,
                                 'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -3358,8 +3367,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 'IsProcessed': false,
                                 'SalesTax': 0,
                                 'TerminalName': this.terminalName,
-                                'IsCard': false,
-                                'CardNumber': '',
+                                'IsCard': this.orderData.IsCard,
+                                'CardNumber': this.orderData.CardNumber,
                                 'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toFixed(2).toString(),
                                 'DepositAmount': Number(this.cashTendAmount).toFixed(2).toString(),
                                 'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString()).toFixed(2).toString(),
@@ -3397,8 +3406,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             AppStateService.set('TransactionNumber', this.transactionNumber);
                         }
                         this.saleData = {
-                            'PaymentAmount': Math.round(paymentAmnt * 100) / 100,
-                            'Balance': this.patronDetails.Balance,
+                            'PaymentAmount': Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)),
+                            'Balance': this.patronDetails.Balance != null && this.patronDetails.Balance != undefined ? Number(Number(this.patronDetails.Balance).toFixed(2)) : this.patronDetails.Balance,
                             'AccountId': this.patronDetails.AccountId,
                             'ServingSchoolId': this.schoolId,
                             'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -3428,7 +3437,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'IsSent': false,
                             'IsfromSameDay': false,
                             'IsProcessed': false,
-                            'SalesTax': Math.round(this.orderData.tax * 100) / 100,
+                            'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                             'IsCard': this.orderData.IsCard,
                             'CardNumber': this.orderData.CardNumber,
                             'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
@@ -3482,7 +3491,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             '_id': 'SessionCheck--' + date.getTime(),
                             'SessionId': this.sessionId,
                             'CheckNumber': this.orderData.CheckNumber,
-                            'Amount': parseFloat(paymentAmnt),
+                            'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
                             'IsDeleted': false,
                             'SessionCheckId': this.utilService.generateUUID(),
                             'IsSynced': false,
@@ -3494,7 +3503,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             '_id': 'SessionCard--' + date.getTime(),
                             'SessionId': this.sessionId,
                             'CardNumber': this.orderData.CardNumber,
-                            'Amount': parseFloat(paymentAmnt),
+                            'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
                             'IsDeleted': false,
                             'SessionCardId': this.utilService.generateUUID(),
                             'IsSynced': false,
@@ -3618,10 +3627,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     const accBal = this.selectedAccountDetails.Balance;
 
                                     if (Number(this.cashTendAmount) != 0 && (Number(this.cashTendAmount) > Number(this.orderData.totalAmount))) {
-                                        this.selectedAccountDetails.Balance = accBal + Number(this.amountTowardsBalance);
+                                        this.selectedAccountDetails.Balance = Number(Number(accBal + Number(this.amountTowardsBalance)).toFixed(2));
                                     }
                                     else {
-                                        this.selectedAccountDetails.Balance = accBal - this.orderData.totalAmount;;
+                                        this.selectedAccountDetails.Balance = Number(Number(accBal - this.orderData.totalAmount).toFixed(2));
                                     }
 
                                     PouchDBService.UpsertSingleDoc(this.selectedAccountDetails, EXP_PERSON);
@@ -3705,26 +3714,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                             });
                                             this.event.publish('patron-released', { 'patronDetails': null });
                                         } else {
-                                            if (!this.isDynamicMenuSelected) {
-                                                if (AppStateService.get('servingLine')) {
-                                                    // console.log('inservingline')
-                                                    const previousServingline = JSON.parse(AppStateService.get('servingLine'));
-                                                    this.selectedServingLine = previousServingline.servingLine;
-                                                    this.selectedServingLineName = previousServingline.servingLineDescription;
-                                                    this.isDynamicMenuSelected = true;
-                                                } else {
-                                                    // console.log('inhere')
-                                                    this.getMenuCalendars();
-                                                }
-                                            } else {
-                                                if (AppStateService.get('menuType')) {
-                                                    // console.log('menuType')
-                                                    const menuType = JSON.parse(AppStateService.get('menuType'));
-                                                    this.selectedServingLine = menuType.menuTypeId;
-                                                    this.selectedServingLineName = menuType.menuTypeName;
-                                                    this.isDynamicMenuSelected = false;
-                                                }
-                                            }
+                                            this.isToggleNeedSwitchToDynamic = 0;
+                                            this.checkMenuConditionsAfterTransactionDone();
                                             this.event.publish('patronLookup:ready', {});
                                             this.event.publish('patron-released', { 'patronDetails': null });
                                             this.utilService.setLoader(false);
@@ -3746,6 +3737,67 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     }
 
+    private checkMenuConditionsAfterTransactionDone() {
+        let isStaticDefaultSelected = false;
+        let isdynamicDefaultSelected = false;
+        if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+            if (this.terminalDefaultMenu[0]["_id"].includes('TerminalDefaultMenu')) {
+                isStaticDefaultSelected = true;
+            }
+            if (this.terminalDefaultMenu[0]["_id"].includes('TerminalDynamicDefaultMenu')) {
+                isdynamicDefaultSelected = true;
+            }
+        }
+        if (!this.isDynamicMenuSelected) {
+            if (AppStateService.get('servingLine') && isStaticDefaultSelected == false) {
+                // console.log('inservingline')
+                const previousServingline = JSON.parse(AppStateService.get('servingLine'));
+                this.selectedServingLine = previousServingline.servingLine;
+                this.selectedServingLineName = previousServingline.servingLineDescription;
+                this.isDynamicMenuSelected = true;
+            } else {
+                // console.log('inhere')
+                if (isStaticDefaultSelected == false) {
+                    this.getMenuCalendars();
+                }
+                else {
+                    if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                        if (this.selectedServingLine != this.terminalDefaultMenu[0]["MenuGridId"]) {
+                            this.selectedServingLine = this.terminalDefaultMenu[0]["MenuGridId"];
+                            this.selectedServingLineName = this.terminalDefaultMenu[0]["MenuGridName"];
+                            this.isServingLineSelected = false;
+                            let menuType = {
+                                'menuTypeId': this.selectedServingLine,
+                                'menuTypeName': this.selectedServingLineName,
+                                'selectedMealType': this.terminalDefaultMenu[0]["MealTypeId"]
+                            };
+                            AppStateService.set('menuType', JSON.stringify(menuType));
+                            this.getMenuDetails();
+                        }
+                    }
+                }
+            }
+        } else {
+            if (AppStateService.get('menuType') && isdynamicDefaultSelected == false) {
+                // console.log('menuType')
+                if (isStaticDefaultSelected) {
+                    const menuType = JSON.parse(AppStateService.get('menuType'));
+                    this.selectedServingLine = menuType.menuTypeId;
+                    this.selectedServingLineName = menuType.menuTypeName;
+                    this.isToggleNeedSwitchToDynamic = 0;
+                }
+                if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                    this.isDynamicMenuSelected = false;
+                }
+                else {
+                    this.isDynamicMenuSelected = true;
+                }
+            }
+            if (AppStateService.get('servingLine') == undefined || AppStateService.get('servingLine') == null) {
+                this.getMenuCalendars();
+            }
+        }
+    }
 
     toggleMenus() {
         if (this.selectedMealTypeName !== 'Meal Type' && this.selectedServingLineName !== 'Serving Line') {
@@ -3766,34 +3818,55 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.selectedServingLine = menuCalendars[0].MenuId;
                     this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
                     this.servingLineId = menuCalendars[0].ServingLineId;
-                }
 
+                    if (AppStateService.get('menuType') == undefined || AppStateService.get('menuType') == null) {
+                        this.selectedMenuType = -1;
+                    }
+                }
                 // get menu type
                 if (AppStateService.get('menuType') != undefined) {
                     let data = JSON.parse(AppStateService.get('menuType'));
                     this.selectedMenuType = data.menuTypeId;
                     this.selectedMenuTypeName = data.menuTypeName;
                     this.selectedMealType = data.selectedMealType;
+
+                    this.selectedServingLine = this.selectedMenuType;
+                    this.selectedServingLineName = this.selectedMenuTypeName;
                 }
                 //this is required otherwise change menu type check will not pass if selectedMenuType === -1
                 if (this.selectedMenuType === -1) {
                     this.selectedMenuType = this.selectedServingLine;
                     this.selectedMenuTypeName = this.selectedServingLineName;
                 }
+                this.isToggleNeedSwitchToDynamic = 0;
                 // switch to static menu 
                 this.changeMenuType();
                 this.toggleName = 'Alacarte';
-
             } else {
                 //set static menu
-                let menuType
+                let menuType;
                 if (this.selectedMenuTypeName !== 'Menu Type' && this.selectedMealType !== -1) {
-                    menuType = {
-                        'menuTypeId': this.selectedMenuType,
-                        'menuTypeName': this.selectedMenuTypeName,
-                        'selectedMealType': this.selectedMealType
-                    };
-                    AppStateService.set('menuType', JSON.stringify(menuType));
+                    if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                        let data: any;
+                        if (AppStateService.get('menuType')) {
+                            data = JSON.parse(AppStateService.get('menuType'));
+                        }
+                        else {
+                            data = {
+                                'menuTypeId': 0,
+                                'menuTypeName': "",
+                                'selectedMealType': 0
+                            }
+                        }
+                        if (data.menuTypeId != this.terminalDefaultMenu[0]["MenuGridId"]) {
+                            menuType = {
+                                'menuTypeId': this.selectedMenuType,
+                                'menuTypeName': this.selectedMenuTypeName,
+                                'selectedMealType': this.selectedMealType
+                            };
+                            AppStateService.set('menuType', JSON.stringify(menuType));
+                        }
+                    }
                 }
                 //load serving line
                 if (AppStateService.get('servingLine') != undefined) {
@@ -3803,6 +3876,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.selectedMealType = data.selectedMealType;
                     this.servingLineId = data.servingLineId;
                 }
+                this.isToggleNeedSwitchToDynamic = 1;
                 //load dyanmic menu
                 this.getMenuDetails();
                 this.toggleName = 'Meal Service';
@@ -4195,6 +4269,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.isMarked = false;
         this.reviewType = 0;
         this.menuItemsArr = [];
+        this.checkMenuConditionsAfterTransactionDone();
         if (!this.isDynamicMenuSelected) {
             if (this.menuGrid['Buttons'].length) {
                 for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
@@ -4318,8 +4393,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 }
 
+                this.event.destroy('menu-service-popup');
                 this.event.subscribe('menu-service-popup', (userEventData) => {
-                    this.event.destroy('menu-service-popup');
                     if (userEventData.selectedData) {
                         const selectedData = userEventData.selectedData;
 
@@ -4346,7 +4421,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         'selectedMealType': this.selectedMealType,
                                         'servingLineId': this.servingLineId
                                     };
-                                    this.isDynamicMenuSelected = false;
+                                    this.isDynamicMenuSelected = true;
                                     AppStateService.set('servingLine', JSON.stringify(servingLine));
                                     this.getMenuDetails();
                                     // this.checkMenuItemRestrictions();
@@ -4698,45 +4773,82 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         }
 
 
-
-                        if (servingLineId != 0 && !this.isStaticDefaultMenu) {
-
-                            PouchQueriesService.GetDynamicMenuCalendars().
-                                then((res) => {
-
-                                    var menuCalendars = res.rows.map(row => row.doc);
-                                    menuCalendars = menuCalendars.filter(m => {
-                                        return (
-                                            m.ServingLineId === servingLineId && m.SchoolId === this.schoolId);
+                        let isStaticDefaultSelected = false;
+                        if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                            if (this.terminalDefaultMenu[0]["_id"].includes('TerminalDefaultMenu')) {
+                                isStaticDefaultSelected = true;
+                            }
+                        }
+                        let isExecutedStatic = 0;
+                        if (servingLineId != 0) {
+                            let tog = this.isToggleNeedSwitchToDynamic;
+                            if (isStaticDefaultSelected == false || (tog == 1 && isStaticDefaultSelected == true)) {
+                                PouchQueriesService.GetDynamicMenuCalendars().
+                                    then((res) => {
+                                        var menuCalendars = res.rows.map(row => row.doc);
+                                        menuCalendars = menuCalendars.filter(m => {
+                                            return (
+                                                m.ServingLineId === servingLineId && m.SchoolId === this.schoolId);
+                                        });
+                                        if (menuCalendars.length > 0) {
+                                            this.selectedServingLine = menuCalendars[0].MenuId;
+                                            this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
+                                            this.servingLineId = menuCalendars[0].ServingLineId;
+                                        }
                                     });
-
-                                    this.selectedServingLine = menuCalendars[0].MenuId;
-                                    this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
-                                    this.servingLineId = menuCalendars[0].ServingLineId;
-
-                                });
-
+                                isExecutedStatic = 1;
+                                this.isToggleNeedSwitchToDynamic == 0;
+                            }
+                            else {
+                                this.isStaticDefaultMenu = true;
+                            }
                         }
 
-                        if (this.isStaticDefaultMenu) {
-
-                            this.selectedServingLine = -1;
-                            this.isDynamicMenuSelected = false;
-                            this.selectedServingLine = menuId;
-                            this.selectedServingLineName = menuGridName || '';
-
-                            this.loadMenuGridForStaticmenus(menuId, this.schoolId);
-
+                        if (this.isStaticDefaultMenu && isExecutedStatic == 0 && this.isToggleNeedSwitchToDynamic == 0) {
+                            if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                                let data: any;
+                                if (AppStateService.get('menuType')) {
+                                    data = JSON.parse(AppStateService.get('menuType'));
+                                }
+                                else {
+                                    data = {
+                                        'menuTypeId': 0,
+                                        'menuTypeName': "",
+                                        'selectedMealType': 0
+                                    }
+                                }
+                                if (data.menuTypeId != this.terminalDefaultMenu[0]["MenuGridId"]) {
+                                    data = {
+                                        'menuTypeId': this.selectedMenuType,
+                                        'menuTypeName': this.selectedMenuTypeName,
+                                        'selectedMealType': this.selectedMealType
+                                    };
+                                    menuId = this.selectedMenuType;
+                                    AppStateService.set('menuType', JSON.stringify(data));
+                                }
+                                else {
+                                    menuId = data.menuTypeId;
+                                }
+                                this.loadMenuGridForStaticmenus(menuId, this.schoolId);
+                            }
+                            else {
+                                this.selectedServingLine = -1;
+                                this.isDynamicMenuSelected = false;
+                                this.selectedServingLine = menuId;
+                                this.selectedServingLineName = menuGridName || '';
+                                this.loadMenuGridForStaticmenus(menuId, this.schoolId);
+                            }
                         }
                         else {
-
+                            let toggleNeedSwitchToDynamic = this.isToggleNeedSwitchToDynamic;
                             this.isDynamicMenuSelected = true;
                             this.GetCarryOverDetails().then(() => {
+                                //if (isStaticDefaultSelected == false || toggleNeedSwitchToDynamic == 1) {
                                 this.GetMenuDetailForDynamicMenu();
-
+                                //}
                             });
                         }
-
+                        this.isToggleNeedSwitchToDynamic == 0;
                     })
 
                 );
