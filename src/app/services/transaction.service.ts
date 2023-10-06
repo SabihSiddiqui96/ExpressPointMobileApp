@@ -584,7 +584,8 @@ export interface TransactionDoc {
     OrderNumber: string,
     IsServed: boolean,
     AppVersion: string,
-    StatePriceTypeId: number | null
+    StatePriceTypeId: number | null,
+    StateEligibilityId: number | null
     _id: string;
 
 }

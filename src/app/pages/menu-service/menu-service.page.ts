@@ -2094,7 +2094,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
                         'CurrentPaidMealPrice': this.currPaidMealPrice,
-                        'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+                        'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                     });
                 }
             } else {
@@ -2724,7 +2724,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'MenuItemDescription': this.orderData.items[i]['Name'],
                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
-                            'StatePriceTypeId': this.orderData.items[i]['StatePriceTypeId'],
+                            'StatePriceTypeId': this.orderData.items[i]['StateEligibilityId'] ? this.orderData.items[i]['StateEligibilityId'] : this.orderData.items[i]['StatePriceTypeId'], //Intentially Added
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
                             'TerminalName': this.terminalName,
@@ -2826,7 +2826,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         'OrderNumber': '',
                                         'IsServed': false,
                                         'AppVersion': this.utilService.versionNumber,
-                                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
+                                        'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                                         '_id': this.selectedAccountDetails._id
                                     };
 
@@ -2897,7 +2898,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'OrderNumber': '',
                                     'IsServed': false,
                                     'AppVersion': this.utilService.versionNumber,
-                                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
+                                    'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                                     '_id': this.patronDetails._id
                                 };
 

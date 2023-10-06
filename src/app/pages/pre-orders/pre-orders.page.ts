@@ -495,7 +495,8 @@ export class PreOrdersPage implements OnInit {
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                     'AppVersion': this.utilService.versionNumber,
-                    'StatePriceTypeId': student["StatePriceTypeId"],
+                    'StatePriceTypeId': student["StatePriceTypeId"], //Intentially Added
+                    'StateEligibilityId': student["StateEligibilityId"] ? student["StateEligibilityId"] : null,
                 };
                 const onlineOrderTransactionDoc = {
                     '_id': 'Transaction--' + deviceTransactionId,
