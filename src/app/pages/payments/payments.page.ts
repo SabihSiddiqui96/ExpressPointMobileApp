@@ -700,7 +700,8 @@ export class DoPayment {
                 'OrderNumber': '',
                 'IsServed': false,
                 'AppVersion': this.utilService.versionNumber,
-                'StatePriceTypeId': this.navPatronDetails["StatePriceTypeId"],
+                'StatePriceTypeId': this.navPatronDetails["StatePriceTypeId"], //Intentially Added
+                'StateEligibilityId': this.navPatronDetails["StateEligibilityId"] ? this.navPatronDetails["StateEligibilityId"] : null,
                 '_id': this.navPatronDetails._id
 
             };

@@ -2562,7 +2562,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ShowPaidPrice': false,
                     'NoContributions': menuItem.NoContributions ? true : false,
                     'isChecked': menuItem.IsPartOfMeal === false ? false : null,
-                    'StatePriceTypeId': this.patronDetails.StatePriceTypeId,
+                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                 };
 
                 this.orderData.items.push(item);
@@ -3260,7 +3260,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TransactionNo': this.transactionNumber,
                     'TerminalName': this.terminalName,
                     'MenuId': !this.orderData.items[i]['NoContributions'] ? this.selectedServingLine : null,
-                    'StatePriceTypeId': this.orderData.items[i]['StatePriceTypeId']
+                    'StatePriceTypeId': this.orderData.items[i]['StateEligibilityId'] ? this.orderData.items[i]['StateEligibilityId'] : this.orderData.items[i]['StatePriceTypeId'] //Intentially Added
                 });
             }
 
@@ -3285,7 +3285,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'IsPartOfMeal': false, // **verify
                     'Date': (new Date).getTime().toString(),
                     'TransactionNo': this.transactionNumber,
-                    'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
 
                 });
                 items.push({
@@ -3300,7 +3300,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TerminalName': this.terminalName,
                     'IsTaxable': this.systemMenuItem.IsTaxable,
                     'MenuId': null,
-                    'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                 });
             }
 
@@ -3388,7 +3388,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 'OrderNumber': '',
                                 'IsServed': false,
                                 'AppVersion': this.utilService.versionNumber,
-                                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                                'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],//Intentially Added
+                                'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                                 '_id': this.selectedAccountDetails._id
                             };
 
@@ -3459,7 +3460,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'OrderNumber': '',
                             'IsServed': false,
                             'AppVersion': this.utilService.versionNumber,
-                            'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                            'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],//Intentially Added
+                            'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                             '_id': this.patronDetails._id
                         };
 
@@ -5570,7 +5572,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,
                         'NoContributions': true,
-                        'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+                        'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
 
                     });
                     this.isStaticMenuItemSelected = true;
