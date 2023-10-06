@@ -581,11 +581,11 @@ export interface TransactionDoc {
     PersonIdentifier: string;
     TerminalName: string;
     OrderId: number | null;
-    OrderNumber: string,
-    IsServed: boolean,
-    AppVersion: string,
-    StatePriceTypeId: number | null,
-    StateEligibilityId: number | null
+    OrderNumber: string;
+    IsServed: boolean;
+    AppVersion: string;
+    StatePriceTypeId: number | null;
+    StateEligibilityId: number | null;
     _id: string;
 
 }
