@@ -6,7 +6,7 @@ import { AppStateService } from "./app-state.service";
 })
 export class LocalTimerService {
 
-    public static getNumberOfUnitsFromDate(date, units): number {
+    public static getNumberOfUnitsFromDate(date, units, toDate = true): number {
         let value: number = 0;
         const now = new Date();
         const epochTime = now.getTime() - date;
@@ -15,10 +15,10 @@ export class LocalTimerService {
         } else if (units = 'MINUTES') {
             value = Math.floor(epochTime / (60 * 1000));
         }
-        return value;
+        return toDate ? value : -1 * value;
     }
 
-    public  static getTime = ((unit) => {
+    public static getTime = ((unit) => {
         const currentTime = LocalTimerService.getCurrentTime();
         if (unit === 'time') {
             return currentTime;

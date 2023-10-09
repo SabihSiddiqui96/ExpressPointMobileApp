@@ -700,7 +700,8 @@ export class DoPayment {
                 'OrderNumber': '',
                 'IsServed': false,
                 'AppVersion': this.utilService.versionNumber,
-                'StatePriceTypeId': this.navPatronDetails["StatePriceTypeId"],
+                'StatePriceTypeId': this.navPatronDetails["StatePriceTypeId"], //Intentially Added
+                'StateEligibilityId': this.navPatronDetails["StateEligibilityId"] ? this.navPatronDetails["StateEligibilityId"] : null,
                 '_id': this.navPatronDetails._id
 
             };
@@ -779,9 +780,9 @@ export class DoPayment {
                 this.signalRService.sendDataToServer(personSaledetails, this.schoolId
                 );
                 this.hideBalSetting = parseInt(SettingService.getSettingValue('HIDEBAL'));
-                this.navPatronDetails['Balance'] = this.newBalance;
+                this.navPatronDetails['Balance'] = (this.newBalance != null && this.newBalance != undefined) ? Number(Number(this.newBalance).toFixed(2)) : this.newBalance;
                 const updatedPatronDetails = this.navPatronDetails;
-                updatedPatronDetails.Balance = this.newBalance;
+                updatedPatronDetails.Balance = (this.newBalance != null && this.newBalance != undefined) ? Number(Number(this.newBalance).toFixed(2)) : this.newBalance;
 
                 if (isCash !== true) {
                     this.transactionService.SaveSessionCheck(sessionCheckDoc).then(() => { });
@@ -792,7 +793,7 @@ export class DoPayment {
                     !updatedPatronDetails.IsFromServer) {
                     PouchDBService.UpsertSingleDoc(updatedPatronDetails, EXP_PERSON);
                 } else {
-                    this.oldBalance = this.newBalance;
+                    this.oldBalance = (this.newBalance != null && this.newBalance != undefined) ? Number(Number(this.newBalance).toFixed(2)) : this.newBalance;
                     this.oldPatronId = this.patronId;
                     this.isMakeMayment = true;
                 }
@@ -934,7 +935,9 @@ export class PaymentsPage extends DoPayment implements OnInit {
         super(navCtrl, alertCtrl, event, lookUpService, utilService, transactionService, popupMessageService, modalCtrl, router,
             appStateService, pouchDBService, settingService, pouchQuery, printService, signalRService, platform);
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
 
         this.event.subscribe('popover:open', (userEventData) => {
             if (userEventData.myEvent) {
@@ -968,7 +971,9 @@ export class PaymentsPage extends DoPayment implements OnInit {
             } else if (userEventData.number === 13) { // Enter key is pressed
                 console.log('Enter key');
                 if (userEventData.elementId === 'cash') {
-                    document.getElementById('check').focus();
+                    if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+                        document.getElementById('check').focus();
+                    }
                     this.changeActiveInput('check');
                 }
             }
@@ -1049,14 +1054,14 @@ export class PaymentsPage extends DoPayment implements OnInit {
         super.initVariables();
 
         if (this.navPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId) {
-            this.newBalance = this.navPatronDetails.Balance;
+            this.newBalance = (this.navPatronDetails.Balance != null && this.navPatronDetails.Balance != undefined) ? Number(Number(this.navPatronDetails.Balance).toFixed(2)) : this.navPatronDetails.Balance;
         } else {
 
             if (this.isMakeMayment === true && this.patronId === this.oldPatronId) {
-                this.newBalance = this.oldBalance;
-                this.navPatronDetails.Balance = this.oldBalance;
+                this.newBalance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(this.oldBalance).toFixed(2)) : this.oldBalance;
+                this.navPatronDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(this.oldBalance).toFixed(2)) : this.oldBalance;
             } else {
-                this.newBalance = this.navPatronDetails.Balance;
+                this.newBalance = (this.navPatronDetails.Balance != null && this.navPatronDetails.Balance != undefined) ? Number(Number(this.navPatronDetails.Balance).toFixed(2)) : this.navPatronDetails.Balance;
             }
 
         }

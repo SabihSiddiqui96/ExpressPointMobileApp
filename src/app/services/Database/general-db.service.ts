@@ -87,36 +87,54 @@ export class GeneralDBService {
 
   public GetSellerRelatedData() {
     let sellerDetailsDoc = {}
-    this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "S" } });
-    const terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId
+    this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "S" } });    
     return new Promise((resolve, reject) => {
+      let terminalIdExists = 0;
+      let devInfo = AppStateService.get('DeviceInfo');
+      let terminalId: any = 0;
+      if (devInfo) {
+        let devInfo_JSNO = JSON.parse(AppStateService.get('DeviceInfo'));
+        if (devInfo_JSNO.TerminalId) {
+          terminalIdExists = 1;
+          terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
+        }
+      }
+      if (terminalIdExists == 1) {        
+        this.http.GetSellerRelatedData(terminalId).
+          subscribe
+          (
+            data => {
+              if (data != null) {
+                sellerDetailsDoc = {
+                  'AuthorizationToken': data.AuthorizationToken,
+                  'ApiURL': data.ApiURL,
+                  'RegionId': data.RegionId,
+                  'DeviceId': data.DeviceId,
+                'ExpiredAt': data.ExpiredAt,
+                'MerchantId': data.MerchantId
+                };
+                AppStateService.set("SellerRelatedDataSynced", 1);
+                AppStateService.set("SellerDetails", JSON.stringify(sellerDetailsDoc))
+              }
 
-      this.http.GetSellerRelatedData(terminalId).
-        subscribe
-        (
-          data => {
-            if (data != null) {
-              sellerDetailsDoc = {
-                'AuthorizationToken': data.AuthorizationToken,
-                'ApiURL': data.ApiURL,
-                'RegionId': data.RegionId,
-                'DeviceId': data.DeviceId
-              };
+              this.syncStatus = 'Success';
+              this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "D" } });
+              resolve(null);
 
-              AppStateService.set("SellerDetails", JSON.stringify(sellerDetailsDoc))
-            }
-
-            this.syncStatus = 'Success';
-            this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "D" } });
-            resolve(null);
-
-          },
-          error => {
-            this.syncStatus = 'Failed';
-            this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "F" } });
-            console.log(error);
-            resolve(null);
-          });
+            },
+            error => {
+              this.syncStatus = 'Failed';
+              this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "F" } });
+              console.log(error);
+              resolve(null);
+            });
+      }
+      else {
+        this.syncStatus = 'Failed';
+        AppStateService.set("SellerRelatedDataSynced", 0);
+        this.events.publish('data:syncDetails', { SiteSettings: { GetSellerRelatedData: "F" } });
+        resolve(null);
+      }
     });
   }
 
@@ -669,8 +687,17 @@ export class GeneralDBService {
     const settings = [];
     this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "S" } });
     return new Promise((resolve, reject) => {
-
-      if (AppStateService.get('DeviceInfo')) {
+      let terminalIdExists = 0;
+      let devInfo = AppStateService.get('DeviceInfo');
+      let terminalId: any = 0;
+      if (devInfo) {
+        let devInfo_JSNO = JSON.parse(AppStateService.get('DeviceInfo'));
+        if (devInfo_JSNO.TerminalId) {
+          terminalIdExists = 1;
+          terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
+        }
+      }
+      if (terminalIdExists == 1) {
         this.http.GetAllDeviceSettings().subscribe(allDeviceSettings => {        
           if (allDeviceSettings != null) {
             let deviceInfo;
@@ -702,6 +729,7 @@ export class GeneralDBService {
             this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "D" } });
             resolve(null);
           }
+          AppStateService.set("DeviceSettingsDataSynced", 1);
         },
           error => {
             this.syncStatus = 'Failed';
@@ -711,6 +739,7 @@ export class GeneralDBService {
           });
       } else {
         this.syncStatus = 'Failed';
+        AppStateService.set("DeviceSettingsDataSynced", 0);
         this.events.publish('data:syncDetails', { DeviceSettings: { SyncAllDeviceSettings: "F" } });
         resolve(null);
 

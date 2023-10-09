@@ -10,9 +10,7 @@ import { UserDetailsPopupPage } from "../../pages/user-details-popup/user-detail
 import { AllPopupPage } from "../../pages/all-popup/all-popup.page";
 import { LoadingController } from "@ionic/angular";
 import { OpenNativeSettings } from '@ionic-native/open-native-settings/ngx';
-
 import { LookupService } from "../../services/lookup.service";
-
 import { PouchQueriesService } from "../../services/Database/pouch-queries.service";
 import { UtilService } from "../../services/util.service";
 import { HttpService } from "../../services/HTTP/http.service";
@@ -26,6 +24,7 @@ import { NavigationExtras, Router } from "@angular/router";
 import { LoadingService } from "../../services/loading.service";
 import { LocalTimerService } from "../../services/local-timer.service";
 import { SessionType } from "../../services/enums/session-types";
+import { GeneralDBService } from "../../services/Database/general-db.service";
 
 @Component({
   selector: "app-service-selection",
@@ -62,6 +61,7 @@ export class ServiceSelectionPage implements OnInit {
     public event: Events,
     public loading: LoadingController,
     public lookUpService: LookupService,
+    public generalDBService: GeneralDBService,
     public deviceService: DeviceService,
     public sessionTimeOut: SessionTimeoutService,
     public alertCtrl: AlertController,
@@ -201,46 +201,98 @@ export class ServiceSelectionPage implements OnInit {
       type: "Service",
       ORDMEALS: this.ORDMEALS,
     });
+    
+    //Added this to load seller releated and device setting, missing data from the sync
+    this.loadMissingSyncedData();
   }
 
-  ngOnInit() {
-    const IGTIMZONE = parseInt(SettingService.getSiteSettingValue('IGTIMZONE'));
-    const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
-    const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
-    const value = SettingService.getSettingValue('DTTIMEZONE');
-    const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
-    // const selectedURL = JSON.parse(AppStateService.get('SelectedURL')); && selectedURL.Id !== UrlsId.DEMO
-    // Avoid checking Daylight when Demo environment is selected. Please refer enum created for Environment URL's ID's
-    if (IGTIMZONE === 0) {
-      if (diffTime >= diffThreshold) {
+ async ngOnInit() {
+   const IGTIMZONE = parseInt(SettingService.getSiteSettingValue('IGTIMZONE'));
+   const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
+   const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
+   const value = SettingService.getSettingValue('DTTIMEZONE');
+   const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
+   const SquareSetting = Boolean(parseInt(SettingService.getSettingValue('ENBLCCTR')));
+   const sellerDetails = AppStateService.get('SellerDetails');
+ 
+   if (IGTIMZONE === 0 && diffTime >= diffThreshold) {
+     const alert = await this.alertCtrl.create({
+       header: 'Warning',
+       message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
+       backdropDismiss: false,
+       buttons: [
+         {
+           text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+           handler: () => {
+             console.log('Clicked');
+             const openSettings = new OpenNativeSettings();
+             openSettings.open('date');
+ 
+             this._nav.navigateRoot("logout");
+           }
+         }
+       ]
+     });
+ 
+     await alert.present();
+   } else {
+     if (SquareSetting && sellerDetails) {
+       const expiredAt = JSON.parse(sellerDetails).ExpiredAt;
+       let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(expiredAt), 'DAY', false);
+ 
+       if (expiresInDays > 0) {
+         if (expiresInDays < 6) {
+           let message = `Square Authorization token expires in <b>${expiresInDays}</b> days, Please contact your administration to get a new authorization token`;
+ 
+           const alert = await this.alertCtrl.create({
+             header: 'Warning',
+             message: message,
+             backdropDismiss: false,
+             buttons: [
+               {
+                 text: 'Ok',
+                 handler: () => {}
+               }
+             ]
+           });
+ 
+           await alert.present();
+         } else {
+           this.initializeServiceSelection(true);
+         }
+       } else {
+         let message = 'The Authorization token has expired. Please contact your Admin to get a new authorization token. You will not be able to use the Square terminal with ExpressPoint unless the token is reauthorized.';
+ 
+         const alert = await this.alertCtrl.create({
+           header: 'Warning',
+           message: message,
+           backdropDismiss: false,
+           buttons: [
+             {
+               text: 'Ok',
+               handler: () => {}
+             }
+           ]
+         });
+ 
+         await alert.present();
+       }
+     } else {
+       this.initializeServiceSelection(true);
+     }
+   }
+ }
+ 
 
-        const alert = this.alertCtrl.create({
-          header: 'Warning',
-          message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
-          backdropDismiss: false,
-          buttons: [
-            {
-              text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
-              handler: () => {
-                console.log('Clicked');
-                const openSettings = new OpenNativeSettings();
-                openSettings.open('date');
-
-                this._nav.navigateRoot("logout");
-              }
-            }
-          ]
-        }).then(async (res) => {
-          await res.present();
-        });
-      } else {
-        this.initializeServiceSelection(true);
-
-      }
-    } else {
-      this.initializeServiceSelection(true);
+  private loadMissingSyncedData() {
+    let isSellerRelatedDataSynced = AppStateService.get('SellerRelatedDataSynced');
+    let isDeviceSettingsDataSynced = AppStateService.get('DeviceSettingsDataSynced');
+    if ((isSellerRelatedDataSynced == null || isSellerRelatedDataSynced == undefined) || isSellerRelatedDataSynced == 0) {
+      this.generalDBService.GetSellerRelatedData();
     }
-
+    if ((isDeviceSettingsDataSynced == null || isDeviceSettingsDataSynced == undefined) || isDeviceSettingsDataSynced == 0) {
+      this.generalDBService.SyncAllDeviceSettings();
+    }
   }
 
   public ionViewWillEnter() {

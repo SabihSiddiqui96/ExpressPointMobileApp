@@ -339,7 +339,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
         }
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
         if (AppStateService.get('session_id')) {
             this.sessionId = AppStateService.get('session_id');
         }
@@ -840,6 +842,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.deviceTransactionId = this.utilService.generateUUID();
 
             this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+            if (isNaN(this.transactionNumber)) {
+                this.transactionNumber = 1;
+            }
             // Reset Order Data 
             this.ResetForNewStudent();
 
@@ -986,7 +991,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 // this.utilService.showToast('Patron does not belong to this school.');
             }
             if (this.isMakeCharge === true && this.patronDetails.PersonId === this.oldPatronId) {
-                this.patronDetails.Balance = this.oldBalance;
+                this.patronDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(this.oldBalance).toFixed(2)) : this.oldBalance;
             }
         }
 
@@ -2089,7 +2094,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
                         'CurrentPaidMealPrice': this.currPaidMealPrice,
-                        'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+                        'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                     });
                 }
             } else {
@@ -2270,6 +2275,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }).then(async (res) => {
             res.onDidDismiss().then((data) => {
                 this.transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+                if (isNaN(this.transactionNumber)) {
+                    this.transactionNumber = 1;
+                }
                 const bonusAmt = AppStateService.get('BonusAmount');
                 if (bonusAmt) {
                     this.bonusAmount = parseFloat(bonusAmt);
@@ -2716,7 +2724,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'MenuItemDescription': this.orderData.items[i]['Name'],
                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
-                            'StatePriceTypeId': this.orderData.items[i]['StatePriceTypeId'],
+                            'StatePriceTypeId': this.orderData.items[i]['StateEligibilityId'] ? this.orderData.items[i]['StateEligibilityId'] : this.orderData.items[i]['StatePriceTypeId'], //Intentially Added
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
                             'TerminalName': this.terminalName,
@@ -2748,9 +2756,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         const payment = Math.round(paymentAmnt * 100) / 100;
                         const saleTotal = this.orderData.totalAmount;
                         if (transactionType === 1) {
-                            updatedPatronDetails.Balance = balance - (saleTotal - payment);
+                            updatedPatronDetails.Balance = Number(Number(balance - (saleTotal - payment)).toFixed(2));
                         } else if (transactionType === 2) {
-                            updatedPatronDetails.Balance = balance - saleTotal;
+                            updatedPatronDetails.Balance = Number(Number(balance - saleTotal).toFixed(2));
                         }
 
                         const sortedItems = this.sortMenuItems(items);
@@ -2765,8 +2773,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     && this.orderData.IsDeposit) {
                                     squarePaymentAmount = parseFloat(this.cashtendAmount) * 100
                                     paymentData = {
-                                        'PaymentAmount': Math.round(parseFloat(this.cashtendAmount) * 100) / 100,
-                                        'Balance': parseFloat(this.selectedAccountDetails.Balance),
+                                        'PaymentAmount': Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2)),
+                                        'Balance': Number(Number(this.selectedAccountDetails.Balance).toFixed(2)),
                                         'AccountId': this.selectedAccountDetails.AccountId,
                                         'ServingSchoolId': siteSchool,
                                         'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -2799,7 +2807,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         'IsCard': this.orderData.IsCard,
                                         'CardNumber': this.orderData.CardNumber,
                                         'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toFixed(2),
-                                        'DepositAmount': this.cashtendAmount,
+                                        'DepositAmount': (this.cashtendAmount === undefined || this.cashtendAmount === null) ? this.cashtendAmount : parseFloat(this.cashtendAmount).toFixed(2),
                                         'NewBalance': (parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString())).toFixed(2),
                                         'BonusAmount': this.bonusAmount.toFixed(2),
                                         'AmountTendered': '0',
@@ -2818,7 +2826,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         'OrderNumber': '',
                                         'IsServed': false,
                                         'AppVersion': this.utilService.versionNumber,
-                                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
+                                        'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                                         '_id': this.selectedAccountDetails._id
                                     };
 
@@ -2836,8 +2845,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 }
 
                                 this.saleData = {
-                                    'PaymentAmount': Math.round(paymentAmnt * 100) / 100, // parseFloat(paymentAmnt.toFixed(2))
-                                    'Balance': this.patronDetails.Balance,
+                                    'PaymentAmount': Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)), // parseFloat(paymentAmnt.toFixed(2))
+                                    'Balance': this.patronDetails.Balance != null && this.patronDetails.Balance != undefined ? Number(Number(this.patronDetails.Balance).toFixed(2)) : this.patronDetails.Balance,
                                     'AccountId': this.patronDetails.AccountId,
                                     'ServingSchoolId': this.schoolId,
                                     'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -2867,20 +2876,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'IsSent': false,
                                     'IsfromSameDay': false,
                                     'IsProcessed': false,
-                                    'SalesTax': Math.round(this.orderData.tax * 100) / 100,
+                                    'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                                     'IsCard': this.orderData.IsCard,
                                     'CardNumber': this.orderData.CardNumber,
-                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toString() : '0',
-                                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toString(),
-                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toString() : '0',
+                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2).toString() : '0',
+                                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toFixed(2).toString(),
+                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2).toString() : '0',
                                     'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                                    'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(this.cashtendAmount).toString(),
-                                    'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() !== 'NaN' ? Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() : '0',
+                                    'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(this.cashtendAmount).toFixed(2).toString(),
+                                    'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() !== 'NaN' ? Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString() : '0',
                                     'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                                     'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                                     'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
                                     'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                                    'TotalAmount': Number(this.orderData.totalAmount).toString(),
+                                    'TotalAmount': Number(this.orderData.totalAmount).toFixed(2).toString(),
                                     'ServingSiteId': this.siteName,
                                     'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                                     'UserId': this.userId,
@@ -2889,7 +2898,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'OrderNumber': '',
                                     'IsServed': false,
                                     'AppVersion': this.utilService.versionNumber,
-                                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                                    'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
+                                    'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                                     '_id': this.patronDetails._id
                                 };
 
@@ -3032,11 +3042,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                             const accBal = this.selectedAccountDetails.Balance;
 
                                             if (Number(this.cashtendAmount) !== 0 && (Number(this.cashtendAmount) > Number(saleTotal))) {
-                                                this.selectedAccountDetails.Balance = accBal + Number(this.amountTowardsBalance);
+                                                this.selectedAccountDetails.Balance = Number(Number(accBal + Number(this.amountTowardsBalance)).toFixed(2));
 
                                             } else {
 
-                                                this.selectedAccountDetails.Balance = accBal - saleTotal;
+                                                this.selectedAccountDetails.Balance = Number(Number(accBal - saleTotal).toFixed(2));
 
                                             }
 
@@ -3056,7 +3066,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                                 '_id': 'SessionCheck--' + UTC,
                                                 'SessionId': this.sessionId,
                                                 'CheckNumber': this.orderData.CheckNumber,
-                                                'Amount': paymentAmnt,
+                                                'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
                                                 'IsDeleted': false,
                                                 'SessionCheckId': this.utilService.generateUUID(),
                                                 'IsSynced': false,
@@ -3073,7 +3083,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                                 '_id': 'SessionCard--' + UTC,
                                                 'SessionId': this.sessionId,
                                                 'CardNumber': this.orderData.CardNumber,
-                                                'Amount': paymentAmnt,
+                                                'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
                                                 'IsDeleted': false,
                                                 'SessionCardId': this.utilService.generateUUID(),
                                                 'IsSynced': false,
@@ -4029,7 +4039,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 // this.utilService.showToast('Patron does not belong to this school.');
             }
             if (this.isMakeCharge === true && this.selectedAccountDetails.PersonId === this.oldPatronId) {
-                this.selectedAccountDetails.Balance = this.oldBalance;
+                this.selectedAccountDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(this.oldBalance).toFixed(2)) : this.oldBalance;
             }
         }
         if (this.largeImageToShow) {

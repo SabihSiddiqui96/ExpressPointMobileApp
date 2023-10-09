@@ -194,7 +194,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         }
 
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
-
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
         if (AppStateService.get('session_id')) {
             this.sessionId = AppStateService.get('session_id');
         } else {
@@ -1018,6 +1020,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             //     var date=new Date();
             //    var day = (date.getMonth()+1) +"/"+date.getDate()+"/"+date.getFullYear();
             this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
+            if (isNaN(this.transactionNumber)) {
+                this.transactionNumber = 0;
+            }
             const date = new Date();
             const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
                 + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
@@ -1116,8 +1121,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     let studentTotalTax = 0.00;
                     studentTotalTax = this.menuGridService.calculateTax(items, student.IsSaleTaxable);
                     orderdata = {
-                        'Balance': student.Balance,
-                        'PaymentAmount': Math.round((student.Price + studentTotalTax) * 100) / 100,
+                        'Balance': student.Balance != null && student.Balance != undefined ? Number(Number(student.Balance).toFixed(2)) : student.Balance,
+                        'PaymentAmount': Number(Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2)),
                         'AccountId': student.AccountId,
                         'ServingSchoolId': this.schoolId,
                         'BuyerSchoolId': student.PersonSchoolId,
@@ -1150,10 +1155,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'IsSent': false,
                         'IsfromSameDay': false,
                         'IsProcessed': false,
-                        'SalesTax': studentTotalTax,
+                        'SalesTax': studentTotalTax != null && studentTotalTax != undefined ? Number(Number(studentTotalTax).toFixed(2)) : studentTotalTax,
                         'IsCard': false,
                         'CardNumber': '',
-                        'OldBalance': student.Balance,
+                        'OldBalance': student.Balance != null && student.Balance != undefined ? Number(Number(student.Balance).toFixed(2)) : student.Balance,
                         'DepositAmount': '0',
                         'NewBalance': (student.Balance - Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2),
                         'BonusAmount': '0',
@@ -1163,7 +1168,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'Grade': student.GradeDescription,
                         'Teacher': student.Teacher,
                         'ChangeReturned': '0',
-                        'TotalAmount': Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toString(),
+                        'TotalAmount': Number(Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2)).toString(),
                         'ServingSiteId': this.siteName,
                         'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                         'UserId': this.userId,
@@ -1172,7 +1177,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'OrderNumber': '',
                         'IsServed': false,
                         'AppVersion': this.utilService.versionNumber,
-                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"],
+                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
+                        'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                         '_id': student._id
                     };
 
@@ -1218,7 +1224,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                     'TerminalName': this.terminalName,
                                     'TransactionNo': this.transactionNumber,
                                     'IsTaxable': this.filter.selected_menuItem_isTaxable,
-                                    'StatePriceTypeId': student.StatePriceTypeId
+                                    'StatePriceTypeId': student.StateEligibilityId ? student.StateEligibilityId : student.StatePriceTypeId //Intentially Added
                                 });
                             }
 
@@ -1997,7 +2003,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         this.patronDetails['Items'] = [];
                         const restriction = this.restrictService.checkChargeRestriction(menuItem, null, this.patronDetails, details);
                         if (!restriction.ChargeRestriction) {
-                            this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, this.patronDetails.StatePriceTypeId);
+                            let stateEligibilityId = this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : null;
+                            this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, this.patronDetails.StatePriceTypeId, stateEligibilityId);
                         } else {
 
                             this.addRestrictedAlaCarteItemsInCart(restriction, menuItem, studentAlaCarteDoc, currPrice,
@@ -2070,7 +2077,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         text: 'Pay',
                         handler: () => {
                             this.showAddPaymentPopover(this.patronDetails, currPrice).then((data) => {
-                                this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, this.patronDetails.StatePriceTypeId);
+                                let stateEligibilityId = this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : null;
+                                this.addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, this.patronDetails.StatePriceTypeId, stateEligibilityId);
                             });
                         }
                     },
@@ -2256,6 +2264,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             this.patronId = person.PersonId;
             this.setPatrondata().then(() => {
                 const transactionNumber = parseInt(AppStateService.get('TransactionNumber')) + 1;
+                if (isNaN(this.transactionNumber)) {
+                    this.transactionNumber = Number(AppStateService.get('TransactionNumber')) + 1;
+                }
                 const modal = this.modalCtrl.create({
                     component: MenuPaymentPopupPage,
                     componentProps: {
@@ -2285,7 +2296,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     // Student Ala Carte items list is empty
-    public addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, statePriceTypeId) {
+    public addAlaCarteItemsInCart(menuItem, studentAlaCarteDoc, currPrice, refId, priceTypeId, day, statePriceTypeId, stateEligibilityId) {
         this.alaCartItems = [];
         let isRestrictedItem;
         if (this.restrictableAlaCarteItems.indexOf(menuItem.RefId) !== -1 ||
@@ -2305,7 +2316,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
             'IsTaxable': menuItem.IsTaxable,
-            'StatePriceTypeId': statePriceTypeId
+            'StatePriceTypeId': stateEligibilityId ? stateEligibilityId : statePriceTypeId //Intentially Added
         });
         const tax = this.menuGridService.calculateTax(this.alaCartItems, this.patronDetails.IsSaleTaxable);
         studentAlaCarteDoc = {
@@ -2344,7 +2355,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
             'IsTaxable': menuItem.IsTaxable,
-            'StatePriceTypeId': this.patronDetails.StatePriceTypeId
+            'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
         });
         studentAlaCarte['alaCartTotalTax'] = this.menuGridService.calculateTax(items, this.patronDetails.IsSaleTaxable);
 

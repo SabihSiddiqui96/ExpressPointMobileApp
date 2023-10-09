@@ -86,6 +86,9 @@ export class PreOrdersPage implements OnInit {
             this.sessionId = AppStateService.get('session_id');
         }
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
+        if (isNaN(this.transactionNumber)) {
+            this.transactionNumber = 0;
+        }
         /**
         * Use the site Terminal if the Device Terminal is not set.
         */
@@ -492,7 +495,8 @@ export class PreOrdersPage implements OnInit {
                     'ServingSiteId': this.siteName,
                     'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                     'AppVersion': this.utilService.versionNumber,
-                    'StatePriceTypeId': student["StatePriceTypeId"],
+                    'StatePriceTypeId': student["StatePriceTypeId"], //Intentially Added
+                    'StateEligibilityId': student["StateEligibilityId"] ? student["StateEligibilityId"] : null,
                 };
                 const onlineOrderTransactionDoc = {
                     '_id': 'Transaction--' + deviceTransactionId,
@@ -510,7 +514,7 @@ export class PreOrdersPage implements OnInit {
                 });
                 if (person.length > 0) {
                     const personInfo = person[0];
-                    personInfo.Balance = personInfo.Balance - student.Price;
+                    personInfo.Balance = Number(Number(personInfo.Balance - student.Price).toFixed(2));
                     if (personInfo.PreviousSales) {
                         personInfo.PreviousSales.map(s => {
                             if (s.MealTypeId === this.selectedMealType) {
