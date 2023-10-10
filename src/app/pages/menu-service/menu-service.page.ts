@@ -609,9 +609,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 'IsSynced': false
             };
 
-            this.terminalDefaultMenu.push(defaultMenuDoc);
+            //this.terminalDefaultMenu.push(defaultMenuDoc);
 
-            this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType);
+            this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType, defaultMenuDoc);
 
         });
 
@@ -658,16 +658,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
 
-    public saveDefaltTerminalMenu() {
+    public saveDefaltTerminalMenu(defaultMenuDoc) {
 
-        PouchDBService.UpsertDocs(this.terminalDefaultMenu, EXP_STANDARD_MENUS).then(() => {
+        PouchDBService.UpsertSingleDoc(defaultMenuDoc, EXP_STANDARD_MENUS).then(() => {
             this.popupMessageService.showMessage(PopupMessageCode.E05502);
             // this.utilService.showToast('Default terminal menu saved successfully.');
+            this.terminalDefaultMenu.push(defaultMenuDoc);
         });
 
     }
 
-    public checkDefaultTerminalMenuExists(terminalId, mealId) {
+    public checkDefaultTerminalMenuExists(terminalId, mealId, defaultMenuDoc) {
 
         terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
 
@@ -709,16 +710,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         // this.showConfrim(defaultMessage, 'default_terminal_menu', '');
                         this.popupMessageService.showMessage(PopupMessageCode.E05489).then(bool => {
                             if (bool) {
-                                this.saveDefaltTerminalMenu();
+                                this.saveDefaltTerminalMenu(defaultMenuDoc);
                             }
                         })
                     } else {
-                        this.saveDefaltTerminalMenu();
+                        this.saveDefaltTerminalMenu(defaultMenuDoc);
                     }
 
 
                 } else {
-                    this.saveDefaltTerminalMenu();
+                    this.saveDefaltTerminalMenu(defaultMenuDoc);
                 }
 
             })
