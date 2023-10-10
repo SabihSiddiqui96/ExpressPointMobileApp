@@ -110,11 +110,13 @@ export class GeneralDBService {
                   'ApiURL': data.ApiURL,
                   'RegionId': data.RegionId,
                   'DeviceId': data.DeviceId,
-                'ExpiredAt': data.ExpiredAt,
-                'MerchantId': data.MerchantId
+                  'ExpiredAt': data.ExpiredAt,
+                  'MerchantId': data.MerchantId
                 };
                 AppStateService.set("SellerRelatedDataSynced", 1);
-                AppStateService.set("SellerDetails", JSON.stringify(sellerDetailsDoc))
+                if (data.RegionId > 0) { // Getting default values from the API event when no records for Region
+                  AppStateService.set("SellerDetails", JSON.stringify(sellerDetailsDoc))
+                }
               }
 
               this.syncStatus = 'Success';
