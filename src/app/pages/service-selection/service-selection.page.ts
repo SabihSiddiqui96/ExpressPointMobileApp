@@ -201,89 +201,100 @@ export class ServiceSelectionPage implements OnInit {
       type: "Service",
       ORDMEALS: this.ORDMEALS,
     });
-    
+
     //Added this to load seller releated and device setting, missing data from the sync
     this.loadMissingSyncedData();
   }
 
- async ngOnInit() {
-   const IGTIMZONE = parseInt(SettingService.getSiteSettingValue('IGTIMZONE'));
-   const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
-   const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
-   const value = SettingService.getSettingValue('DTTIMEZONE');
-   const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
-   const SquareSetting = Boolean(parseInt(SettingService.getSettingValue('ENBLCCTR')));
-   const sellerDetails = AppStateService.get('SellerDetails');
- 
-   if (IGTIMZONE === 0 && diffTime >= diffThreshold) {
-     const alert = await this.alertCtrl.create({
-       header: 'Warning',
-       message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
-       backdropDismiss: false,
-       buttons: [
-         {
-           text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
-           handler: () => {
-             console.log('Clicked');
-             const openSettings = new OpenNativeSettings();
-             openSettings.open('date');
- 
-             this._nav.navigateRoot("logout");
-           }
-         }
-       ]
-     });
- 
-     await alert.present();
-   } else {
-     if (SquareSetting && sellerDetails) {
-       const expiredAt = JSON.parse(sellerDetails).ExpiredAt;
-       let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(expiredAt), 'DAY', false);
- 
-       if (expiresInDays > 0) {
-         if (expiresInDays < 6) {
-           let message = `Square Authorization token expires in <b>${expiresInDays}</b> days, Please contact your administration to get a new authorization token`;
- 
-           const alert = await this.alertCtrl.create({
-             header: 'Warning',
-             message: message,
-             backdropDismiss: false,
-             buttons: [
-               {
-                 text: 'Ok',
-                 handler: () => {}
-               }
-             ]
-           });
- 
-           await alert.present();
-         } else {
-           this.initializeServiceSelection(true);
-         }
-       } else {
-         let message = 'The Authorization token has expired. Please contact your Admin to get a new authorization token. You will not be able to use the Square terminal with ExpressPoint unless the token is reauthorized.';
- 
-         const alert = await this.alertCtrl.create({
-           header: 'Warning',
-           message: message,
-           backdropDismiss: false,
-           buttons: [
-             {
-               text: 'Ok',
-               handler: () => {}
-             }
-           ]
-         });
- 
-         await alert.present();
-       }
-     } else {
-       this.initializeServiceSelection(true);
-     }
-   }
- }
- 
+  async ngOnInit() {
+    const IGTIMZONE = parseInt(SettingService.getSiteSettingValue('IGTIMZONE'));
+    const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
+    const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));
+    const value = SettingService.getSettingValue('DTTIMEZONE');
+    const diffTime = DeviceService.getCorrectTimeDiff(value, dst);
 
+    if (IGTIMZONE === 0 && diffTime >= diffThreshold) {
+      const alert = await this.alertCtrl.create({
+        header: 'Warning',
+        message: 'The device time and system time are not the same. Please update the device time if incorrect and check the time on the server and the time zone in system settings. Please use Ignore time zone site setting if you wish to ignore this timezone check',
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: this.utilService.isElectronApp() ? 'Ok' : 'Go To Settings',
+            handler: () => {
+              console.log('Clicked');
+              const openSettings = new OpenNativeSettings();
+              openSettings.open('date');
+
+              this._nav.navigateRoot("logout");
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    } else {
+      this.initializeServiceSelection(true);
+    }
+  }
+
+  public async SquareTokenExpirationCheck() {
+    return new Promise(async (resolve, reject) => {
+      const SquareSetting = Boolean(parseInt(SettingService.getSettingValue('ENBLCCTR')));
+      const sellerDetails = AppStateService.get('SellerDetails');
+
+      if (SquareSetting && sellerDetails) {
+        const expiredAt = JSON.parse(sellerDetails).ExpiredAt;
+        let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(expiredAt), 'DAY', false);
+
+        if (expiresInDays > 0) {
+          if (expiresInDays < 6) {
+            let message = `Square Authorization token expires in <b>${expiresInDays}</b> days, Please contact your administration to get a new authorization token`;
+
+            const alert = await this.alertCtrl.create({
+              header: 'Warning',
+              message: message,
+              backdropDismiss: false,
+              buttons: [
+                {
+                  text: 'Ok',
+                  handler: () => {
+                    resolve(null);
+                  }
+                }
+              ]
+            });
+
+            await alert.present();
+          } else {
+            resolve(null);
+          }
+        } else {
+          let message = 'The Authorization token has expired. Please contact your Admin to get a new authorization token. You will not be able to use the Square terminal with ExpressPoint unless the token is reauthorized.';
+
+          const alert = await this.alertCtrl.create({
+            header: 'Warning',
+            message: message,
+            backdropDismiss: false,
+            buttons: [
+              {
+                text: 'Ok',
+                handler: () => {
+                  resolve(null);
+
+                }
+              }
+            ]
+          });
+
+          await alert.present();
+        }
+      } else {
+        resolve(null);
+
+      }
+    });
+  }
   private loadMissingSyncedData() {
     let isSellerRelatedDataSynced = AppStateService.get('SellerRelatedDataSynced');
     let isDeviceSettingsDataSynced = AppStateService.get('DeviceSettingsDataSynced');
@@ -294,7 +305,9 @@ export class ServiceSelectionPage implements OnInit {
       this.generalDBService.SyncAllDeviceSettings();
     }
   }
-
+  public ionViewDidEnter() {
+    this.SquareTokenExpirationCheck().then(() => { });
+  }
   public ionViewWillEnter() {
     this.event.subscribe("device-name-changed", (data) => {
       this.event.destroy("device-name-changed");
