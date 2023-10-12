@@ -706,6 +706,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     });
 
                     if (filteredDefaultGrids.length > 0) {
+                        defaultMenuDoc.ServingDays = filteredDefaultGrids[0]["ServingDays"];
                         // const defaultMessage = 'A default menu has been previously set. Do you want to change it?';
                         // this.showConfrim(defaultMessage, 'default_terminal_menu', '');
                         this.popupMessageService.showMessage(PopupMessageCode.E05489).then(bool => {
