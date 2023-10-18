@@ -305,7 +305,7 @@ export class ServiceSelectionPage implements OnInit {
       this.generalDBService.SyncAllDeviceSettings();
     }
   }
-  public ionViewDidEnter() {
+  public ionViewDidLeave() { // ionViewDidEnter is replaced ... terminalid is not getting when IonViewEnter
     this.SquareTokenExpirationCheck().then(() => { });
   }
   public ionViewWillEnter() {
