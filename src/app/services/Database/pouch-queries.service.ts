@@ -740,6 +740,34 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetSessionChecks_PostNotSynced() {
+    var current_Date = new Date();
+    var numberOfDayToSubtract = 3;
+    current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
+    var sessionChecksGrThan = current_Date.getTime();
+
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SessionCheck--",
+          $lt: "SessionCheck--\uffff"
+        },
+        CreatedDate: {
+          $gt: sessionChecksGrThan
+        },
+        IsSynced: {
+          $eq: false
+        }
+        // ,IsDeleted: {
+        //   $eq: false
+        // }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
   public static GetSessionChecks() {
     const sessionId = AppStateService.get('session_id');
 
@@ -802,6 +830,33 @@ export class PouchQueriesService {
   }
 
 
+  public static GetSessionCards_PostNotSynced() {
+    var current_Date = new Date();
+    var numberOfDayToSubtract = 3;
+    current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
+    var sessionCardsGrThan = current_Date.getTime();
+
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SessionCard--",
+          $lt: "SessionCard--\uffff"
+        },
+        CreatedDate: {
+          $gt: sessionCardsGrThan
+        },
+        IsSynced: {
+          $eq: false
+        }
+        // ,IsDeleted: {
+        //   $eq: false
+        // }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
 
   public static GetAllCloseSessionDocs() {
     return EXP_TRANSACTIONS.allDocs({
@@ -1462,7 +1517,7 @@ export class PouchQueriesService {
   public PostSessionCheck() {
     console.log('--------------------Sending SessionChecks -------------------------');
     return new Promise((resolve, reject) => {
-      PouchQueriesService.GetSessionChecks().then((res) => {
+      PouchQueriesService.GetSessionChecks_PostNotSynced().then((res) => {
         const checks = res.docs;
         if (checks.length > 0) {
           checks.map(doc => {
@@ -1494,7 +1549,7 @@ export class PouchQueriesService {
   public PostSessionCard() {
     console.log('--------------------Sending SessionCards -------------------------');
     return new Promise((resolve, reject) => {
-      PouchQueriesService.GetSessionCards().then((res) => {
+      PouchQueriesService.GetSessionCards_PostNotSynced().then((res) => {
         const cards = res.docs;
         if (cards.length > 0) {
           cards.map(doc => {

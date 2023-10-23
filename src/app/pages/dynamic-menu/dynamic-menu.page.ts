@@ -454,6 +454,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.subscribeForLeavingPatron();
         this.subscribeForLoadingPatron();
         this.enablePay();
+        this.terminalDefaultMenu = [];
 
         this.event.destroy('default-terminal-menu:save');
         this.event.subscribe('default-terminal-menu:save', () => {
@@ -463,30 +464,33 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 terminalId = 0;
             }
 
-
             this.GetDaySelection();
 
-            this.terminalDefaultMenu = [];
             const now = new Date();
             const UTC = LocalTimerService.getTime('time');
             const localOffset = (-1) * now.getTimezoneOffset() * 60000;
             const currentDate = new Date(UTC + localOffset);
-
-
 
             if (this.servingLineId !== undefined) {
 
                 const defaultMenuDoc = {
                     '_id': 'TerminalDynamicDefaultMenu--' + terminalId + '--' + this.selectedMealType,
                     'TerminalId': terminalId,
-                    'MenuGridId': this.servingLineId,
+                    'MenuGridId': this.selectedServingLine,
                     'MealTypeId': this.selectedMealType,
                     'ServingDays': this.daySelected,
                     'DefaultMenuItem': 0,
-                    'MenuGridName': this.selectedMenuTypeName,
+                    'MenuGridName': this.selectedServingLineName,
                     'UpdateDate': currentDate,
                     'IsSynced': false
                 };
+
+                if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                    let tdFilterDyncMenus = this.terminalDefaultMenu.filter(f => f._id.includes('TerminalDynamicDefaultMenu') && f.MealTypeId === this.selectedMealType);
+                    if (tdFilterDyncMenus && tdFilterDyncMenus.length > 0) {
+                        this.terminalDefaultMenu = this.terminalDefaultMenu.filter(f => f._id != tdFilterDyncMenus[0]._id);
+                    }
+                }
 
                 this.terminalDefaultMenu.push(defaultMenuDoc);
 
@@ -504,6 +508,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'UpdateDate': currentDate,
                     'IsSynced': false
                 };
+
+                if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                    let tdFilterStcMenus = this.terminalDefaultMenu.filter(f => f._id.includes('TerminalDefaultMenu') && f.MealTypeId === this.selectedMealType);
+                    if (tdFilterStcMenus && tdFilterStcMenus.length > 0) {
+                        this.terminalDefaultMenu = this.terminalDefaultMenu.filter(f => f._id != tdFilterStcMenus[0]._id);
+                    }
+                }
 
                 this.terminalDefaultMenu.push(defaultMenuDoc);
 
@@ -1612,10 +1623,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public gridClick(event, menuItem) {
         if (event.clientX > 0 || event.clientY > 0 || event.layerX > 0 || event.layerY > 0 || event.offsetX > 0 || event.offsetY > 0) {
-
-            setTimeout(() => {
-                (document.activeElement as HTMLElement).blur();
-            }, 0);
 
             if (!this.isDynamicMenuSelected) {
                 if (menuItem.emptygrid === true) {
@@ -3740,64 +3747,124 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     private checkMenuConditionsAfterTransactionDone() {
+        let menuCalendars_static = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
+        let menuCalendars_dynamic = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Dynamic'));
+        let tdfm = this.terminalDefaultMenu.filter(f => f.MealTypeId == this.selectedMealType && f.ServingDays == this.daySelected);
+        let loadStaticMenu = false;
+        let loadDynamicMenu = false;
         let isStaticDefaultSelected = false;
         let isdynamicDefaultSelected = false;
+
         if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-            if (this.terminalDefaultMenu[0]["_id"].includes('TerminalDefaultMenu')) {
-                isStaticDefaultSelected = true;
-            }
-            if (this.terminalDefaultMenu[0]["_id"].includes('TerminalDynamicDefaultMenu')) {
-                isdynamicDefaultSelected = true;
+            if (tdfm.length > 0) {
+                let ordStcMenus = [];
+                let ordDynamicMenus = [];
+                let tdFilterStcMenus = tdfm.filter(f => f.MenuGridName.includes('Standard') && f._id.includes('TerminalDefaultMenu'));
+                if (tdFilterStcMenus != undefined && tdFilterStcMenus.length > 0) {
+                    ordStcMenus = _.orderBy(tdFilterStcMenus, ['UpdateDate'], ['desc']);
+                    isStaticDefaultSelected = true;
+                }
+                let tdFilterDynamicMenus = tdfm.filter(f => f.MenuGridName.includes('Dynamic') && f._id.includes('TerminalDynamicDefaultMenu'));
+                if (tdFilterDynamicMenus != undefined && tdFilterDynamicMenus.length > 0) {
+                    ordDynamicMenus = _.orderBy(tdFilterDynamicMenus, ['UpdateDate'], ['desc']);
+                    isdynamicDefaultSelected = true;
+                }
+                if (isStaticDefaultSelected == true && isdynamicDefaultSelected == true) {
+                    const dateStc = new Date(ordStcMenus[0].UpdateDate);
+                    const dateDymc = new Date(ordDynamicMenus[0].UpdateDate);
+                    if (dateStc > dateDymc) {
+                        isStaticDefaultSelected = true;
+                        isdynamicDefaultSelected = false;
+                    }
+                    else {
+                        isdynamicDefaultSelected = true;
+                        isStaticDefaultSelected = false;
+                    }
+                }
+                if (isStaticDefaultSelected) {
+                    this.selectedMenuType = ordStcMenus[0].MenuGridId;
+                    this.selectedMenuTypeName = ordStcMenus[0].MenuGridName;
+                    this.selectedServingLine = this.selectedMenuType;
+                    this.selectedServingLineName = this.selectedMenuTypeName;
+                    loadStaticMenu = true;
+                    this.isDynamicMenuSelected = false;
+                    this.changeMenuType();
+                } else if (isdynamicDefaultSelected) {
+                    this.selectedMenuType = ordDynamicMenus[0].MenuGridId;
+                    this.selectedMenuTypeName = ordDynamicMenus[0].MenuGridName;
+                    this.selectedServingLine = this.selectedMenuType;
+                    this.selectedServingLineName = this.selectedMenuTypeName;
+                    loadDynamicMenu = true;
+
+                    this.isDynamicMenuSelected = true;
+                    this.GetCarryOverDetails().then(() => {
+                        this.GetMenuDetailForDynamicMenu();
+                    });
+                }
             }
         }
-        if (!this.isDynamicMenuSelected) {
-            if (AppStateService.get('servingLine') && isStaticDefaultSelected == false) {
-                // console.log('inservingline')
-                const previousServingline = JSON.parse(AppStateService.get('servingLine'));
+        if (AppStateService.get('servingLine') && isStaticDefaultSelected == false && isdynamicDefaultSelected == false) {
+            const previousServingline = JSON.parse(AppStateService.get('servingLine'));
+            if (menuCalendars_dynamic != undefined && menuCalendars_dynamic.length > 0) {
+                let menuCalendars_dynamic_filter = menuCalendars_dynamic.filter(f => f.ServingLineDescription.includes(previousServingline.servingLineDescription));
+                if (menuCalendars_dynamic_filter != undefined && menuCalendars_dynamic_filter.length > 0) {
+                    loadDynamicMenu = true;
+                }
+            }
+            if (loadDynamicMenu) {
                 this.selectedServingLine = previousServingline.servingLine;
                 this.selectedServingLineName = previousServingline.servingLineDescription;
                 this.isDynamicMenuSelected = true;
-            } else {
-                // console.log('inhere')
-                if (isStaticDefaultSelected == false) {
-                    this.getMenuCalendars();
-                }
-                else {
-                    if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-                        if (this.selectedServingLine != this.terminalDefaultMenu[0]["MenuGridId"]) {
-                            this.selectedServingLine = this.terminalDefaultMenu[0]["MenuGridId"];
-                            this.selectedServingLineName = this.terminalDefaultMenu[0]["MenuGridName"];
-                            this.isServingLineSelected = false;
-                            let menuType = {
-                                'menuTypeId': this.selectedServingLine,
-                                'menuTypeName': this.selectedServingLineName,
-                                'selectedMealType': this.terminalDefaultMenu[0]["MealTypeId"]
-                            };
-                            AppStateService.set('menuType', JSON.stringify(menuType));
-                            this.getMenuDetails();
-                        }
-                    }
+
+                this.GetCarryOverDetails().then(() => {
+                    this.GetMenuDetailForDynamicMenu();
+                });
+            }
+        }
+        if (isStaticDefaultSelected == false && loadDynamicMenu == false && AppStateService.get('menuType')) {
+            const menuType = JSON.parse(AppStateService.get('menuType'));
+            if (menuCalendars_static != undefined && menuCalendars_static.length > 0) {
+                let menuCalendars_static_filter = menuCalendars_static.filter(f => f.ServingLineDescription.includes(menuType.menuTypeName));
+                if (menuCalendars_static_filter != undefined && menuCalendars_static_filter.length > 0) {
+                    loadStaticMenu = true;
                 }
             }
-        } else {
-            if (AppStateService.get('menuType') && isdynamicDefaultSelected == false) {
-                // console.log('menuType')
-                if (isStaticDefaultSelected) {
-                    const menuType = JSON.parse(AppStateService.get('menuType'));
-                    this.selectedServingLine = menuType.menuTypeId;
-                    this.selectedServingLineName = menuType.menuTypeName;
-                    this.isToggleNeedSwitchToDynamic = 0;
-                }
-                if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+            if (loadStaticMenu) {
+                this.selectedServingLine = menuType.menuTypeId;
+                this.selectedServingLineName = menuType.menuTypeName;
+                this.isDynamicMenuSelected = false;
+
+                this.changeMenuType();
+            }
+        }
+        if (loadStaticMenu == false && loadDynamicMenu == false) {
+            let tdDynamic = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Dynamic'));
+            if (tdDynamic != undefined && tdDynamic.length > 0) {
+                this.selectedServingLine = tdDynamic[0].MenuId;
+                this.selectedServingLineName = tdDynamic[0].ServingLineDescription;
+                this.servingLineId = tdDynamic[0].ServingLineId;
+                loadDynamicMenu = true;
+                this.isDynamicMenuSelected = true;
+
+                this.GetCarryOverDetails().then(() => {
+                    this.GetMenuDetailForDynamicMenu();
+                });
+            }
+            if (loadDynamicMenu == false) {
+                let tdStatic = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Static'));
+                if (tdStatic != undefined && tdStatic.length > 0) {
+                    this.selectedServingLine = tdStatic[0].MenuId;
+                    this.selectedServingLineName = tdStatic[0].ServingLineDescription;
+                    this.isServingLineSelected = false;
+                    loadStaticMenu = false;
                     this.isDynamicMenuSelected = false;
-                }
-                else {
-                    this.isDynamicMenuSelected = true;
+
+                    this.changeMenuType();
                 }
             }
-            if (AppStateService.get('servingLine') == undefined || AppStateService.get('servingLine') == null) {
-                this.getMenuCalendars();
-            }
+        }
+        if (loadStaticMenu == false && loadDynamicMenu == false) {
+            this.getMenuCalendars();
         }
     }
 
@@ -3805,82 +3872,174 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.selectedMealTypeName !== 'Meal Type' && this.selectedServingLineName !== 'Serving Line') {
             if (this.isDynamicMenuSelected) {
                 // set serving line
-                if (this.servingLineId != null) {
-                    const servingLine = {
-                        'servingLine': this.selectedServingLine,
-                        'servingLineDescription': this.selectedServingLineName,
-                        'selectedMealType': this.selectedMealType,
-                        'servingLineId': this.servingLineId
-                    };
-                    AppStateService.set('servingLine', JSON.stringify(servingLine));
+                if (this.servingLineId != null && this.selectedServingLineName.includes('Dynamic')) {
+                    let servingLineLocal;
+                    if (AppStateService.get('servingLine')) {
+                        servingLineLocal = JSON.parse(AppStateService.get('servingLine'));
+                    }
+                    servingLineLocal.servingLine = this.selectedServingLine;
+                    servingLineLocal.servingLineDescription = this.selectedServingLineName;
+                    if (servingLineLocal.selectedMealType == undefined)
+                        servingLineLocal.selectedMealType = this.selectedMealType;
+                    servingLineLocal.servingLineId = this.servingLineId;
+                    AppStateService.set('servingLine', JSON.stringify(servingLineLocal));
                 }
                 //this.is to change serving line to standard menu when dynamic menu is selected while switching to static.
-                if (this.selectedServingLineName.includes('Dynamic')) {
-                    let menuCalendars = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
-                    this.selectedServingLine = menuCalendars[0].MenuId;
-                    this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
-                    this.servingLineId = menuCalendars[0].ServingLineId;
-
+                let menuCalendars = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
+                if (this.selectedServingLineName != undefined && this.selectedServingLineName.includes('Dynamic')) {
                     if (AppStateService.get('menuType') == undefined || AppStateService.get('menuType') == null) {
-                        this.selectedMenuType = -1;
+                        //this.selectedMenuType = -1;
+                        if (menuCalendars.length > 0) {
+                            this.selectedServingLine = menuCalendars[0].MenuId;
+                            this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
+                            this.servingLineId = menuCalendars[0].ServingLineId;
+                        }
                     }
                 }
                 // get menu type
                 if (AppStateService.get('menuType') != undefined) {
                     let data = JSON.parse(AppStateService.get('menuType'));
-                    this.selectedMenuType = data.menuTypeId;
-                    this.selectedMenuTypeName = data.menuTypeName;
-                    this.selectedMealType = data.selectedMealType;
+                    let ismenuTypeBelongsToCurrentMealType = false;
+                    if (menuCalendars.length == 0) {
+                        this.selectedMenuType = data.menuTypeId;
+                        this.selectedMenuTypeName = data.menuTypeName;
+                        //this.selectedMealType = data.selectedMealType;
 
-                    this.selectedServingLine = this.selectedMenuType;
-                    this.selectedServingLineName = this.selectedMenuTypeName;
+                        this.selectedServingLine = this.selectedMenuType;
+                        this.selectedServingLineName = this.selectedMenuTypeName;
+
+                        let menuTypeLocal: any = {};
+                        if (AppStateService.get('menuType')) {
+                            menuTypeLocal = JSON.parse(AppStateService.get('menuType'));
+                        }
+                        menuTypeLocal.menuTypeId = this.selectedMenuType;
+                        menuTypeLocal.menuTypeName = this.selectedMenuTypeName;
+                        if (menuTypeLocal.selectedMealType == undefined)
+                            menuTypeLocal.selectedMealType = this.selectedMealType;
+                        AppStateService.set('menuType', JSON.stringify(menuTypeLocal));
+                    }
+                    else {
+                        if (AppStateService.get('menuType')) {
+                            const menuTypeLocal = JSON.parse(AppStateService.get('menuType'));
+                            let menuCalendars = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
+                            let menuCalendars_static_filter = menuCalendars.filter(f => f.ServingLineDescription.includes(menuTypeLocal.menuTypeName));
+                            if (menuCalendars_static_filter != undefined && menuCalendars_static_filter.length > 0) {
+                                this.selectedServingLine = menuTypeLocal.menuTypeId;
+                                this.selectedServingLineName = menuTypeLocal.menuTypeName;
+                                ismenuTypeBelongsToCurrentMealType = true;
+                            }
+                        }
+                    }
+
+                    let isStaticDefaultSelected = false;
+                    let isdynamicDefaultSelected = false;
+                    if (ismenuTypeBelongsToCurrentMealType == false && menuCalendars.length > 0 && menuCalendars[0].MealTypeId == data.selectedMealType && this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                        let tdfm = this.terminalDefaultMenu.filter(f => f.MealTypeId == this.selectedMealType && f.ServingDays == this.daySelected);
+                        if (tdfm.length > 0) {
+                            if (tdfm[0]["_id"].includes('TerminalDefaultMenu')) {
+                                isStaticDefaultSelected = true;
+                            }
+                            if (tdfm[0]["_id"].includes('TerminalDynamicDefaultMenu')) {
+                                isdynamicDefaultSelected = true;
+                            }
+                            if (isStaticDefaultSelected) {
+                                this.selectedMenuType = tdfm[0].MenuGridId;
+                                this.selectedMenuTypeName = tdfm[0].MenuGridName;
+                                //this.selectedMealType = tdfm[0].MealTypeId;
+
+                                this.selectedServingLine = this.selectedMenuType;
+                                this.selectedServingLineName = this.selectedMenuTypeName;
+
+                                let menuTypeLocal: any = {};
+                                if (AppStateService.get('menuType')) {
+                                    menuTypeLocal = JSON.parse(AppStateService.get('menuType'));
+                                }
+                                menuTypeLocal.menuTypeId = this.selectedMenuType;
+                                menuTypeLocal.menuTypeName = this.selectedMenuTypeName;
+                                if (menuTypeLocal.selectedMealType == undefined)
+                                    menuTypeLocal.selectedMealType = this.selectedMealType;
+                                AppStateService.set('menuType', JSON.stringify(menuTypeLocal));
+
+                                ismenuTypeBelongsToCurrentMealType = true;
+                            }
+                        }
+                    }
+                    if (ismenuTypeBelongsToCurrentMealType == false && menuCalendars.length > 0) {
+                        // if (menuCalendars[0].MealTypeId != data.selectedMealType) {
+                        this.selectedServingLine = menuCalendars[0].MenuId;
+                        this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
+                        this.servingLineId = menuCalendars[0].ServingLineId;
+
+
+                        let menuTypeLocal: any = {};
+                        if (AppStateService.get('menuType')) {
+                            menuTypeLocal = JSON.parse(AppStateService.get('menuType'));
+                        }
+                        menuTypeLocal.menuTypeId = this.selectedServingLine;
+                        menuTypeLocal.menuTypeName = this.selectedServingLineName;
+                        if (menuTypeLocal.selectedMealType == undefined)
+                            menuTypeLocal.selectedMealType = this.selectedMealType;
+
+                        this.selectedMenuType = menuTypeLocal.menuTypeId;
+                        this.selectedMenuTypeName = menuTypeLocal.menuTypeName;
+                        AppStateService.set('menuType', JSON.stringify(menuTypeLocal));
+                        //}
+                    }
+
+                    if (this.selectedMenuType === -1 && this.selectedServingLine === -1) {
+                        let menuCalendars = this.menuCalendars.filter(f => f.ServingLineDescription.includes('Standard'));
+                        if (menuCalendars.length > 0) {
+                            this.selectedServingLine = menuCalendars[0].MenuId;
+                            this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
+                            this.servingLineId = menuCalendars[0].ServingLineId;
+                        }
+                    }
                 }
                 //this is required otherwise change menu type check will not pass if selectedMenuType === -1
                 if (this.selectedMenuType === -1) {
                     this.selectedMenuType = this.selectedServingLine;
                     this.selectedMenuTypeName = this.selectedServingLineName;
                 }
-                this.isToggleNeedSwitchToDynamic = 0;
+                else {
+                    if (this.selectedMenuTypeName.includes('(Static)')) {
+                        this.selectedServingLine = this.selectedMenuType;
+                        this.selectedServingLineName = this.selectedMenuTypeName;
+                    }
+                }
                 // switch to static menu 
-                this.changeMenuType();
-                this.toggleName = 'Alacarte';
+                if (this.selectedServingLineName != undefined && this.selectedServingLineName.includes('(Dynamic)') == false) {
+                    this.changeMenuType();
+                    this.toggleName = 'Alacarte';
+                }
+                else {
+                    this.utilService.showToast('There are no static menus for this meal type! Please choose from other meal types!');
+                }
             } else {
                 //set static menu
                 let menuType;
                 if (this.selectedMenuTypeName !== 'Menu Type' && this.selectedMealType !== -1) {
-                    if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-                        let data: any;
-                        if (AppStateService.get('menuType')) {
-                            data = JSON.parse(AppStateService.get('menuType'));
-                        }
-                        else {
-                            data = {
-                                'menuTypeId': 0,
-                                'menuTypeName': "",
-                                'selectedMealType': 0
-                            }
-                        }
-                        if (data.menuTypeId != this.terminalDefaultMenu[0]["MenuGridId"]) {
-                            menuType = {
-                                'menuTypeId': this.selectedMenuType,
-                                'menuTypeName': this.selectedMenuTypeName,
-                                'selectedMealType': this.selectedMealType
-                            };
-                            AppStateService.set('menuType', JSON.stringify(menuType));
-                        }
-                    }
+                    menuType = {
+                        'menuTypeId': this.selectedMenuType,
+                        'menuTypeName': this.selectedMenuTypeName,
+                        'selectedMealType': this.selectedMealType
+                    };
+                    AppStateService.set('menuType', JSON.stringify(menuType));
                 }
                 //load serving line
                 if (AppStateService.get('servingLine') != undefined) {
                     let data = JSON.parse(AppStateService.get('servingLine'));
                     this.selectedServingLine = data.servingLine;
                     this.selectedServingLineName = data.servingLineDescription;
-                    this.selectedMealType = data.selectedMealType;
+                    //this.selectedMealType = data.selectedMealType;
                     this.servingLineId = data.servingLineId;
+                    this.GetCarryOverDetails().then(() => {
+                        this.GetMenuDetailForDynamicMenu();
+                    });
                 }
-                this.isToggleNeedSwitchToDynamic = 1;
-                //load dyanmic menu
-                this.getMenuDetails();
+                else {
+                    //load dyanmic menu
+                    this.getMenuDetails();
+                }
                 this.toggleName = 'Meal Service';
             }
         } else {
@@ -4403,7 +4562,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         const data = userEventData.type;
 
                         switch (data) {
-                            case 'mealType': this.selectedMealType = selectedData.value;
+                            case 'mealType':
+                                this.selectedMealType = selectedData.value;
                                 this.selectedMealTypeName = selectedData.label;
                                 AppStateService.set('mealType', this.selectedMealType);
                                 this.getMealTypeName(this.selectedMealType);
@@ -4703,7 +4863,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             }
                         });
 
-                        if (filteredDefaultGrids.length > 0) {
+                        const filteredDefaultGridsByMealType = filteredDefaultGrids.filter(m => {
+                            return (
+                                m.MealTypeId === this.selectedMealType);
+                        });
+
+                        if (filteredDefaultGridsByMealType.length == 0 && filteredDefaultGrids.length > 0) {
                             menuId = filteredDefaultGrids[0].MenuGridId;
                             menuGridName = filteredDefaultGrids[0].MenuGridName;
 
@@ -4711,8 +4876,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                             return staticTime;
 
-                        } else {
+                        } else if (filteredDefaultGridsByMealType.length > 0) {
+                            menuId = filteredDefaultGridsByMealType[0].MenuGridId;
+                            menuGridName = filteredDefaultGridsByMealType[0].MenuGridName;
+                            staticTime = new Date(filteredDefaultGridsByMealType[0].UpdateDate).getTime();
 
+                            return staticTime;
+                        }
+                        else {
                             menuId = 0;
                         }
 
@@ -4737,28 +4908,29 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 dayOfWeekCopy = Number(dayOfWeekCopy) - 1;
                             }
 
-
                             const filteredDefaultGrids = _.remove(menuGrids, function (m) {
-
                                 let binary = Number(m.ServingDays).toString(2);
-
                                 while (binary.length < 7) {
                                     binary = '0' + binary;
                                 }
-
                                 if (binary.charAt(dayOfWeekCopy) === '1') {
                                     return m;
                                 }
-
+                            });
+                            const filteredDefaultGridsByMealType = filteredDefaultGrids.filter(m => {
+                                return (
+                                    m.MealTypeId === this.selectedMealType);
                             });
 
-
-                            if (filteredDefaultGrids.length > 0) {
+                            if (filteredDefaultGridsByMealType.length == 0 && filteredDefaultGrids.length > 0) {
                                 servingLineId = filteredDefaultGrids[0].MenuGridId;
                                 dynamicTime = new Date(filteredDefaultGrids[0].UpdateDate).getTime();
-
-                            } else {
-
+                            }
+                            else if (filteredDefaultGridsByMealType.length > 0) {
+                                servingLineId = filteredDefaultGridsByMealType[0].MenuGridId;
+                                dynamicTime = new Date(filteredDefaultGridsByMealType[0].UpdateDate).getTime();
+                            }
+                            else {
                                 servingLineId = 0;
                             }
 
@@ -4766,91 +4938,51 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             servingLineId = 0;
                         }
 
-
-                        if (dynamicTime < staticTimeVal) {
+                        if (servingLineId == 0 && dynamicTime < staticTimeVal) {
                             this.isStaticDefaultMenu = true;
                         }
                         else {
                             this.isStaticDefaultMenu = false;
                         }
 
+                        if (servingLineId != 0 && !this.isStaticDefaultMenu) {
 
-                        let isStaticDefaultSelected = false;
-                        if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-                            if (this.terminalDefaultMenu[0]["_id"].includes('TerminalDefaultMenu')) {
-                                isStaticDefaultSelected = true;
-                            }
-                        }
-                        let isExecutedStatic = 0;
-                        if (servingLineId != 0) {
-                            let tog = this.isToggleNeedSwitchToDynamic;
-                            if (isStaticDefaultSelected == false || (tog == 1 && isStaticDefaultSelected == true)) {
-                                PouchQueriesService.GetDynamicMenuCalendars().
-                                    then((res) => {
-                                        var menuCalendars = res.rows.map(row => row.doc);
-                                        menuCalendars = menuCalendars.filter(m => {
-                                            return (
-                                                m.ServingLineId === servingLineId && m.SchoolId === this.schoolId);
-                                        });
-                                        if (menuCalendars.length > 0) {
-                                            this.selectedServingLine = menuCalendars[0].MenuId;
-                                            this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
-                                            this.servingLineId = menuCalendars[0].ServingLineId;
-                                        }
+                            PouchQueriesService.GetDynamicMenuCalendars().
+                                then((res) => {
+
+                                    var menuCalendars = res.rows.map(row => row.doc);
+                                    menuCalendars = menuCalendars.filter(m => {
+                                        return (
+                                            m.MealTypeId === this.selectedMealType && m.ServingLineId === servingLineId && m.SchoolId === this.schoolId);
                                     });
-                                isExecutedStatic = 1;
-                                this.isToggleNeedSwitchToDynamic == 0;
-                            }
-                            else {
-                                this.isStaticDefaultMenu = true;
-                            }
+                                    if (menuCalendars.length > 0) {
+                                        this.selectedServingLine = menuCalendars[0].MenuId;
+                                        this.selectedServingLineName = menuCalendars[0].ServingLineDescription;
+                                        this.servingLineId = menuCalendars[0].ServingLineId;
+                                    }
+                                });
+
                         }
 
-                        if (this.isStaticDefaultMenu && isExecutedStatic == 0 && this.isToggleNeedSwitchToDynamic == 0) {
-                            if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-                                let data: any;
-                                if (AppStateService.get('menuType')) {
-                                    data = JSON.parse(AppStateService.get('menuType'));
-                                }
-                                else {
-                                    data = {
-                                        'menuTypeId': 0,
-                                        'menuTypeName': "",
-                                        'selectedMealType': 0
-                                    }
-                                }
-                                if (data.menuTypeId != this.terminalDefaultMenu[0]["MenuGridId"]) {
-                                    data = {
-                                        'menuTypeId': this.selectedMenuType,
-                                        'menuTypeName': this.selectedMenuTypeName,
-                                        'selectedMealType': this.selectedMealType
-                                    };
-                                    menuId = this.selectedMenuType;
-                                    AppStateService.set('menuType', JSON.stringify(data));
-                                }
-                                else {
-                                    menuId = data.menuTypeId;
-                                }
-                                this.loadMenuGridForStaticmenus(menuId, this.schoolId);
-                            }
-                            else {
-                                this.selectedServingLine = -1;
-                                this.isDynamicMenuSelected = false;
-                                this.selectedServingLine = menuId;
-                                this.selectedServingLineName = menuGridName || '';
-                                this.loadMenuGridForStaticmenus(menuId, this.schoolId);
-                            }
+                        if (this.isStaticDefaultMenu) {
+
+                            this.selectedServingLine = -1;
+                            this.isDynamicMenuSelected = false;
+                            this.selectedServingLine = menuId;
+                            this.selectedServingLineName = menuGridName || '';
+
+                            this.loadMenuGridForStaticmenus(menuId, this.schoolId);
+
                         }
                         else {
-                            let toggleNeedSwitchToDynamic = this.isToggleNeedSwitchToDynamic;
+
                             this.isDynamicMenuSelected = true;
                             this.GetCarryOverDetails().then(() => {
-                                //if (isStaticDefaultSelected == false || toggleNeedSwitchToDynamic == 1) {
                                 this.GetMenuDetailForDynamicMenu();
-                                //}
+
                             });
                         }
-                        this.isToggleNeedSwitchToDynamic == 0;
+
                     })
 
                 );
@@ -4962,7 +5094,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 priceTypeId = this.secondMealPriceType;
 
             }
-            if (!this.nonCEPMealTypes.has(this.systemMenuItem.MealTypeId)) {
+            if (!this.nonCEPMealTypes.has(this.systemMenuItem != undefined ? this.systemMenuItem.MealTypeId : '')) {
                 if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                     cepPriceApply = true;
                 } else { // student is not CEP => Check CHRGNCEP setting to charge or not
@@ -5889,6 +6021,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     filteredMenuGrids.map(m => {
                         this.menuCalendars.push({
                             'MenuId': m.MenuGridId,
+                            'MealTypeId': m.MealTypeId,
                             'ServingLineDescription': m.MenuGridName + ' (Standard)',
                             'IsDynamicMenu': false
                         });

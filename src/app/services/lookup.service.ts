@@ -676,6 +676,13 @@ export class LookupService {
         });
     }
 
+    public dismissLoader() {
+        this.loader.getTop().then(v => v ? this.doStopLoader() : null);
+    }
+    public doStopLoader() {
+        this.loader.dismiss();
+    }
+
     public patronFromServer(firstname, lastname, externalId, selectedsite) {
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (!isNetworkOnline) {
@@ -698,7 +705,7 @@ export class LookupService {
                     subscribe
                     (
                         data => {
-                            this.loader.dismiss();
+                            this.dismissLoader();
 
                             this.lookupResults = data.patrons;
                             if (selectedsite.toString() !== '00000000-0000-0000-0000-000000000000') {
