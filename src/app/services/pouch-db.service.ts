@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 // import PouchDB from 'pouchdb';
 import pouchdbUpsert from 'pouchdb-upsert';
+import pouchdbFind from 'pouchdb-find';
 // import * as worker from 'worker-pouch'
 
 import PouchDB from 'pouchdb-browser';
@@ -34,6 +35,7 @@ declare var sqlitePlugin: any;
 // PouchDB.plugin(worker)
 
 PouchDB.plugin(pouchdbUpsert);
+PouchDB.plugin(pouchdbFind);
 
 (<any>PouchDB).adapter('worker', WorkerPouch);
 
