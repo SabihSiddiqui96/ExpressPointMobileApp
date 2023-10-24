@@ -28,6 +28,7 @@ export enum DefaultSettingValue {
     SSABICS = '1',
     STRWLEPASS = '0',
     BABECL = '3',
+    MEALFIRST = '0',
     SEPCHGLMT = '0',
     CNTREUPASS = 0,
     DIFPREPASS = 0,
