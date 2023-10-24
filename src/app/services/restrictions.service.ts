@@ -9,6 +9,7 @@ import { PopupMessageService } from '../services/popup-message.service';
 import { EventType } from './enums/event-type';
 import { LogType } from './enums/log-type';
 import { LogsDBService } from './Database/logs-db.service';
+import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -22,7 +23,8 @@ export class RestrictionsService {
     public terminalId;
     public settingActionWhenBelowChargeLimit;
     public settingChargeReimbursableMealsOnly;
-
+    public settingMealFirst;
+    
     /*---AlaCarte in Classroom Sale---*/
     public mealCount: number = 0;
     public alacarteCount: number = 0;
@@ -54,7 +56,8 @@ export class RestrictionsService {
     public useDynamicMenus: boolean = false;
     constructor(
         private popupMessageService: PopupMessageService,
-        private logDBService:LogsDBService) {
+        private logDBService: LogsDBService,
+        public router: Router) {
         
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -89,7 +92,7 @@ export class RestrictionsService {
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
         this.sepChargeLimit = Boolean(parseInt(SettingService.getSettingValue('SEPCHGLMT')));
         this.ALACASREST = Boolean(parseInt(SettingService.getSettingValue('ALACASREST')));
-
+        this.settingMealFirst = Boolean(parseInt(SettingService.getSettingValue('MEALFIRST')));
         this.setRestrictableItems();
         this.setRestrictableCategories();
         this.setSiteSettings();
@@ -469,13 +472,14 @@ export class RestrictionsService {
 
     public verifyChargeLimits(ordDetails: any) { // edited on Jan-25-2019
         console.log('Verify Charge Limits');
+        const routeURL = this.router.url.includes('dynamic-menu');
         let transactionType: any;
         this.orderData = ordDetails.orderData;
         this.partPayPopup = false;
         this.showPrompt = false;
         this.alacarteCount = ordDetails.alaCount;
         // this.mealCount = ordDetails.mealCount;
-        this.mealCount = this.useDynamicMenus ? ordDetails.mealCount : this.calculateMealCount(this.orderData['items']);
+        this.mealCount = (this.useDynamicMenus && routeURL == true) ? ordDetails.mealCount : this.calculateMealCount(this.orderData['items']);
         this.alacarteTotal = ordDetails.alaTotal;
         this.restrictedAlacarteCount = ordDetails.restAlCcount;
         this.patronDetails = ordDetails.patronDetails;
@@ -503,7 +507,7 @@ export class RestrictionsService {
         // this.Setting_ActionWhenBelowChargeLimit = 1;
         // 1=user decsion, 2=sale with some cash, 3=no sale
 
-        const projectedBalance = accountBalance - saleTotal + paymentAmount;
+        const projectedBalance = Number(Number(accountBalance - saleTotal + paymentAmount).toFixed(2));
 
         creditLimit = -creditLimit;
         creditLimitAlaCarte = -creditLimitAlaCarte;
@@ -553,13 +557,19 @@ export class RestrictionsService {
                 return false;
             }
         } else if (this.sepChargeLimit) { // Work in Progress for US 156550
-            this.alacarteTotal = this.useDynamicMenus ? ordDetails.alaTotal : this.calcAlaTotal(this.orderData["items"]);
-            const alaProjBal = accountBalance - this.alacarteTotal;
-            const reimProjBal = accountBalance - (saleTotal - this.alacarteTotal);
+            this.alacarteTotal = (this.useDynamicMenus && routeURL == true) ? ordDetails.alaTotal : this.calcAlaTotal(this.orderData["items"]);
+            
+            if (this.alacarteTotal == null || this.alacarteTotal == undefined) {
+                this.alacarteTotal = 0;
+            }
+            //If the setting MelaFirst is turned on... Calculating the Alacarte Bal after the meal price is deducted.
+            const alaProjBal = Number(Number(accountBalance - (this.settingMealFirst == true ? saleTotal :this.alacarteTotal)).toFixed(2));
+            const reimProjBal = Number(Number(accountBalance - (saleTotal - this.alacarteTotal)).toFixed(2));
+            const mealItemPriceForThisOrder = Number(Number(saleTotal - this.alacarteTotal).toFixed(2));
 
-            const saleHasOnlyOneReimbursableMeal = (this.mealCount === 1) ? this.alacarteCount > 0 ? false : true : false;
-            const saleHasBothReimbursableMealsAndAlacarteItems = (this.mealCount > 0 && this.alacarteCount > 0) ? true : false;
-            const saleHasOnlyAlaCarteItems = (this.mealCount === 0 && this.alacarteCount > 0) ? true : false;
+            const saleHasOnlyOneReimbursableMeal = (this.mealCount === 1) ? this.alacarteTotal > 0 ? false : true : false;
+            const saleHasBothReimbursableMealsAndAlacarteItems = (this.mealCount > 0 && this.alacarteTotal > 0) ? true : false;
+            const saleHasOnlyAlaCarteItems = (this.mealCount === 0 && this.alacarteTotal > 0) ? true : false;
             const saleTotalOfJustALaCarteItems = this.alacarteTotal;
 
             if (reimProjBal >= creditLimit && alaProjBal >= creditLimitAlaCarte) {
@@ -580,10 +590,10 @@ export class RestrictionsService {
                          // Previously, there were no conditions when setting "settingChargeReimbursableMealsOnly" false; 
                         //now there are conditions to check both types.
                         (
-                            !this.settingChargeReimbursableMealsOnly && 
+                            !this.settingChargeReimbursableMealsOnly &&
                             (
-                                (this.mealCount > 0 && reimProjBal < creditLimit) ||
-                                (this.alacarteCount > 0 && alaProjBal < creditLimitAlaCarte)                                    
+                                (mealItemPriceForThisOrder > 0 && reimProjBal < creditLimit) ||
+                                (this.alacarteTotal > 0 && alaProjBal < creditLimitAlaCarte)
                             )
                         )) {
                         this.showPrompt = true;
@@ -641,14 +651,20 @@ export class RestrictionsService {
                     // }
 
                 } else if (this.settingActionWhenBelowChargeLimit === 2) {
-                    this.partPayPopup = true;
-                    // this.utilService.showToast('Please enter a partial payment');
-                    return false;
+                    if ((mealItemPriceForThisOrder > 0 && reimProjBal < creditLimit) || (this.alacarteTotal > 0 && alaProjBal < creditLimitAlaCarte)) {
+                        this.partPayPopup = true;
+                        // this.utilService.showToast('Please enter a partial payment');
+                        return false;
+                    }
+                    else {
+                        this.partPayPopup = false;
+                        return true;
+                    }
                 } else if (this.settingActionWhenBelowChargeLimit === 3) {
-                    if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems) && alaProjBal < creditLimitAlaCarte) {
+                    if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyAlaCarteItems || this.alacarteTotal > 0) && alaProjBal < creditLimitAlaCarte) {
                         this.popupMessageService.showMessage(PopupMessageCode.E12510);
                         return false;
-                    } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal) && reimProjBal < creditLimit) {
+                    } else if ((saleHasBothReimbursableMealsAndAlacarteItems || saleHasOnlyOneReimbursableMeal || mealItemPriceForThisOrder > 0) && reimProjBal < creditLimit) {
                         this.popupMessageService.showMessage(PopupMessageCode.E12511);
                         return false;
                     }
