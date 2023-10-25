@@ -336,6 +336,7 @@ export class RestrictionsService {
         const settings = JSON.parse(AppStateService.get('Settings'));
         this.settingChargeReimbursableMealsOnly = settings.Setting_ChargeReimbursableMealsOnly;
         this.settingActionWhenBelowChargeLimit = settings.Setting_ActionWhenBelowChargeLimit;
+        this.settingMealFirst = Boolean(parseInt(SettingService.getSettingValue('MEALFIRST')));
         if (alaItems.length !== 0) {
             const restrictedItems = _.filter(alaItems, { 'IsRestricted': true });
             this.restrictedAlacarteCount += restrictedItems.length;
@@ -423,6 +424,7 @@ export class RestrictionsService {
         // const settings = JSON.parse(AppStateService.get('Settings'));;
         this.settingChargeReimbursableMealsOnly = Boolean(parseInt(SettingService.getSettingValue('RMUTCHARLT')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
+        this.settingMealFirst = Boolean(parseInt(SettingService.getSettingValue('MEALFIRST')));
 
         if (!autoServeEnabled || (autoServeEnabled && autoPauseRestrictions)) {
             // principal Account Change Here Saketh  call the managePrincipal Account
