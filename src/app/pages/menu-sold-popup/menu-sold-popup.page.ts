@@ -35,7 +35,13 @@ export class MenuSoldPopupPage implements OnInit {
       new Promise((resolve, reject) => {
         this.navPatronDetails = this.patronDetails;
 
-        /////////////////////////////////
+        const now = new Date();
+        const localOffset = (+1) * now.getTimezoneOffset() * 60000;
+        if (this.navPatronDetails != null && this.navPatronDetails.SoldItems) {
+          this.navPatronDetails.SoldItems.map(doc => {
+            doc.SoldDateTime = Number(doc.Date) + localOffset;
+          });
+        }
 
         console.log('Hello MenuSoldPopup Page');
 
