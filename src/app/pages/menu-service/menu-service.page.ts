@@ -4354,7 +4354,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         resolve(false);
                     }
                 }
-                if (this.settingAutoPause.restrictions && this.defaultMenuItemDetails.restrictedItem === true) {
+                var isDefaultItemIsRestricted = false;
+                if (this.defaultMenuItemDetails && this.patronDetails.RestrictedMenuItems && this.patronDetails.RestrictedMenuItems.length > 0) {
+                    isDefaultItemIsRestricted = this.patronDetails.RestrictedMenuItems.indexOf(this.defaultMenuItemDetails.RefId) !== -1;
+                }
+                if (this.settingAutoPause.restrictions && (isDefaultItemIsRestricted == true || (this.defaultMenuItemDetails.restrictedItem && this.defaultMenuItemDetails.restrictedItem === true))) {
                     this.popupMessageService.showMessage(PopupMessageCode.E05366);
                     this.autoServeEnabled = true;
                     this.impermanentAutoServePause = true;
