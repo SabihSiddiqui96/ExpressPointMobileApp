@@ -1891,8 +1891,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        let priceTypeId_State = priceTypeId;
         if (!isSecondMeal) {
-            priceTypeId = this.stateEigSetting ?
+            priceTypeId_State = this.stateEigSetting ?
                 (this.patronDetails.StatePriceTypeId == null
                     || this.patronDetails.StatePriceTypeId == undefined) ?
                     this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
@@ -1927,7 +1928,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             });
 
 
-        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
 
 
             let secondmeal = false;
@@ -4485,8 +4486,21 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.currPaidMealPrice = paidPrice[0].Price;
                     }
                 });
+            
+            let secondmeal = false;
+            (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
-            PouchQueriesService.GetPrice(menuItemNo, priceTypeId, this.patronDetails.RDAGroupId,
+            // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+            let priceTypeId_State = priceTypeId;
+            if (!secondmeal) {
+                priceTypeId_State = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+            }
+
+            PouchQueriesService.GetPrice(menuItemNo, priceTypeId_State, this.patronDetails.RDAGroupId,
                 this.patronDetails.IsStudent, this.priceMode).then((price) => {
                     if (price.length > 0 && price[0].isSaleAllowed !== undefined && !price[0].isSaleAllowed) {
                         this.popupMessageService.showMessage("Selected item is not allowed for sale")
@@ -4496,7 +4510,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         return
                     }
                     this.menuItemsArr.push(menuItemNo);
-                    let secondmeal = false;
+                    
                     let currPrice = 0;
                     let cepPriceApply = false;
                     let canAdd = false;
@@ -4506,7 +4520,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let appendArray = true;
                     let currPaidMealPrice = 0;
 
-                    (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+                    
                     let paidMealPrice = this.paidMealPrice;
                     currPaidMealPrice = this.paidMealPrice;
 
@@ -4665,7 +4679,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'IsTaxable': menuItem.IsTaxable,
                                     'PaidPrice': paidMealPrice,
                                     'ShowPaidPrice': this.showPaidPrice,
-                                    'CurrentPaidMealPrice': this.currPaidMealPrice
+                                    'CurrentPaidMealPrice': this.currPaidMealPrice,
+                                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                                 });
                             } else {
                                 resolve(false);
