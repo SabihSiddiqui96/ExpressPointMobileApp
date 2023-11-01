@@ -56,7 +56,7 @@
         <ion-row *ngSwitchCase="'advanced'" vh-100-dyn class="ion-justify-content-center patron-advanced-search"
           bg-theme>
           <ion-col size="12" size-md="12" size-sm="12">
-            <div padding>
+            <div class="ion-padding">
               <ion-segment color="slate" [(ngModel)]="advancedPatron">
                 <ion-segment-button value="by_patron" (click)="advancePatronClick()">
                   <ion-label>Name</ion-label>
