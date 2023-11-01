@@ -153,9 +153,9 @@ export class PouchQueriesService {
           }
           if ((RegExp(firstNameRegex, 'igm').test(obj.FirstName))
             && (RegExp(lastNameRegex, 'igm').test(obj.LastName))
-            && ((RegExp(externalIdRegex, 'i').test(obj.PersonIdentifier) && (SearchByPin === '1' || SearchByPin === '-1')
-              || (RegExp(externalIdRegex, 'i').test(obj.Identifier) && (SearchByPin === '0' || SearchByPin === '-1')
-                && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId))))) {
+            && ((RegExp(externalIdRegex, 'i').test(obj.PersonIdentifier) && (SearchByPin === '1' || SearchByPin === '-1'))
+              || (RegExp(externalIdRegex, 'i').test(obj.Identifier) && (SearchByPin === '0' || SearchByPin === '-1')))
+            && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === obj.SchoolId)) {
             SearchKeys.push(obj.id);
             return true;
           } else {
@@ -202,9 +202,8 @@ export class PouchQueriesService {
 
             if ((RegExp(firstNameRegex, 'igm').test(o.doc.FirstName))
               && (RegExp(lastNameRegex, 'igm').test(o.doc.LastName))
-              && ((RegExp(externalIdRegex, 'i').test(o.doc.PersonIdentifier) && SearchByPin === '1')
-                || (RegExp(externalIdRegex, 'i').test(o.doc.Identifier) && SearchByPin === '0'))
-
+              && ((RegExp(externalIdRegex, 'i').test(o.doc.PersonIdentifier) && (SearchByPin === '1' || SearchByPin === '-1'))
+                  || (RegExp(externalIdRegex, 'i').test(o.doc.Identifier) && (SearchByPin === '0' || SearchByPin === '-1')))
               && (args.selectedSchoolId === undefined ? true : args.selectedSchoolId === o.doc.SchoolId)) {
               searchResult.docs.push(o.doc);
               return true;
