@@ -1891,8 +1891,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        let priceTypeId_State = priceTypeId;
         if (!isSecondMeal) {
-            priceTypeId = this.stateEigSetting ?
+            priceTypeId_State = this.stateEigSetting ?
                 (this.patronDetails.StatePriceTypeId == null
                     || this.patronDetails.StatePriceTypeId == undefined) ?
                     this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
@@ -1927,7 +1928,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             });
 
 
-        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
 
 
             let secondmeal = false;
@@ -2720,7 +2721,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'Price': this.orderData.items[i]['CurrentPrice'],
                             'CategoryId': this.orderData.items[i]['CategoryId'],
                             'MenuItemId': this.orderData.items[i]['RefId'],
-                            'priceTypeId': this.patronDetails.PriceTypeId,
+                            'priceTypeId': this.orderData.items[i]['price_type_id'],
                             'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
                             'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
                             'MenuItemDescription': this.orderData.items[i]['Name'],
@@ -4490,15 +4491,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
             (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
             // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+            let priceTypeId_State = priceTypeId;
             if (!secondmeal) {
-                priceTypeId = this.stateEigSetting ?
+                priceTypeId_State = this.stateEigSetting ?
                     (this.patronDetails.StatePriceTypeId == null
                         || this.patronDetails.StatePriceTypeId == undefined) ?
                         this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
                     : this.patronDetails.PriceTypeId;
             }
 
-            PouchQueriesService.GetPrice(menuItemNo, priceTypeId, this.patronDetails.RDAGroupId,
+            PouchQueriesService.GetPrice(menuItemNo, priceTypeId_State, this.patronDetails.RDAGroupId,
                 this.patronDetails.IsStudent, this.priceMode).then((price) => {
                     if (price.length > 0 && price[0].isSaleAllowed !== undefined && !price[0].isSaleAllowed) {
                         this.popupMessageService.showMessage("Selected item is not allowed for sale")
