@@ -2720,7 +2720,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'Price': this.orderData.items[i]['CurrentPrice'],
                             'CategoryId': this.orderData.items[i]['CategoryId'],
                             'MenuItemId': this.orderData.items[i]['RefId'],
-                            'priceTypeId': this.orderData.items[i]['price_type_id'],
+                            'priceTypeId': this.patronDetails.PriceTypeId,
                             'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
                             'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
                             'MenuItemDescription': this.orderData.items[i]['Name'],
@@ -4485,6 +4485,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.currPaidMealPrice = paidPrice[0].Price;
                     }
                 });
+            
+            let secondmeal = false;
+            (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+
+            // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+            if (!secondmeal) {
+                priceTypeId = this.stateEigSetting ?
+                    (this.patronDetails.StatePriceTypeId == null
+                        || this.patronDetails.StatePriceTypeId == undefined) ?
+                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                    : this.patronDetails.PriceTypeId;
+            }
 
             PouchQueriesService.GetPrice(menuItemNo, priceTypeId, this.patronDetails.RDAGroupId,
                 this.patronDetails.IsStudent, this.priceMode).then((price) => {
@@ -4496,7 +4508,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         return
                     }
                     this.menuItemsArr.push(menuItemNo);
-                    let secondmeal = false;
+                    
                     let currPrice = 0;
                     let cepPriceApply = false;
                     let canAdd = false;
@@ -4506,7 +4518,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let appendArray = true;
                     let currPaidMealPrice = 0;
 
-                    (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+                    
                     let paidMealPrice = this.paidMealPrice;
                     currPaidMealPrice = this.paidMealPrice;
 
@@ -4665,7 +4677,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'IsTaxable': menuItem.IsTaxable,
                                     'PaidPrice': paidMealPrice,
                                     'ShowPaidPrice': this.showPaidPrice,
-                                    'CurrentPaidMealPrice': this.currPaidMealPrice
+                                    'CurrentPaidMealPrice': this.currPaidMealPrice,
+                                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                                 });
                             } else {
                                 resolve(false);
