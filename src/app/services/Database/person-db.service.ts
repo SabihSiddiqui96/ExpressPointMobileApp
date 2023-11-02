@@ -359,6 +359,10 @@ export class PersonDBService {
               updatedDoc.CannotCharge = newDoc.CannotCharge;
               updatedDoc.AcceptCheck = newDoc.AcceptCheck;
               updatedDoc.PriceTypeId = newDoc.PriceTypeId;
+              /*Start State Price Type Added */
+              updatedDoc.StatePriceTypeId = (newDoc.StatePriceTypeId != null && newDoc.StatePriceTypeId != undefined) ? newDoc.StatePriceTypeId : null;
+              updatedDoc.StateEligibilityId = (newDoc.StateEligibilityId != null && newDoc.StateEligibilityId != undefined) ? newDoc.StateEligibilityId : null;
+              /*End State Price Type Added */
               updatedDoc.GradeId = newDoc.GradeId;
               updatedDoc.Allergies = newDoc.Allergies;
               updatedDoc.RestrictedMenuItems = newDoc.RestrictedMenuItems;
