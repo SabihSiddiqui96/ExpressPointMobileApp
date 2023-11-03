@@ -1732,7 +1732,9 @@ export class PouchQueriesService {
                   resolve(null);
                 });
             }
-
+            else {
+              resolve(null);
+            }
           });
         } else {
           resolve(null);
