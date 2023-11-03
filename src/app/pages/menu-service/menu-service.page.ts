@@ -2727,7 +2727,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'MenuItemDescription': this.orderData.items[i]['Name'],
                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
-                            'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
+                            'StatePriceTypeId': this.patronDetails['StateEligibilityId'] ? this.patronDetails['StateEligibilityId'] : this.patronDetails['StatePriceTypeId'], //Intentially Added
                             'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
