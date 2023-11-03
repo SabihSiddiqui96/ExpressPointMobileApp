@@ -311,11 +311,11 @@ export class PersonDBService {
 
       return EXP_PERSON.allDocs({ include_docs: true })
         .then(res => personDocs.map(newDoc => {
-          const oldDoc = res.rows.find(row => row.id === newDoc._id);
-          const updatedDoc = oldDoc.doc;
+          const oldDoc = res.rows.find(row => row.id === newDoc._id);          
           if (oldDoc === undefined && isAccountObject === false) {
             return newDoc;
           } else {
+            const updatedDoc = oldDoc.doc;
             if (isAccountObject === true) {
               if (newDoc.Balance) {
                 updatedDoc.Balance = (newDoc.Balance != null && newDoc.Balance != undefined) ? Number(Number(newDoc.Balance).toFixed(2)) : newDoc.Balance;
@@ -392,8 +392,8 @@ export class PersonDBService {
               updatedDoc.Gender = newDoc.Gender;
               updatedDoc.ServingSchoolId = newDoc.ServingSchoolId;
             }
-          }
-          return updatedDoc;
+            return updatedDoc;
+          }          
         })).then(docs =>
           EXP_PERSON.bulkDocs(docs).then(() => {
             EXP_PERSON_IN_MEMORY.upsert(docs);
