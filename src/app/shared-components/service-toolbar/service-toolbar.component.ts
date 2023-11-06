@@ -178,7 +178,7 @@ export class ServiceToolbarComponent implements OnInit {
         return (this.personId !== null && this.personId !== undefined);
     }
 
-    public SwapAutoServeEnabled() {
+    public swapAutoServeEnabled() {
         this.changes.emit(ServiceToolbarEvent.SwapAutoServeEnabled);
     }
 }
