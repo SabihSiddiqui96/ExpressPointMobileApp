@@ -168,7 +168,7 @@
                                                         [ngClass]="{'color-green': patronDetails.Balance > 0, 'color-red': patronDetails.Balance < 0 }"
                                                         [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'"
                                                         (click)="showBalance()">{{patronDetails.Balance |
-                                                        currency:'USD':true:'1.2-2'}}
+                                                        currency:'USD':'symbol':'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
                                                                 <ion-icon name="arrow-round-forward">
                                                                 </ion-icon>
@@ -177,7 +177,7 @@
                                                     orderData.totalAmount) ) < 0, 'color-black': ((patronDetails.Balance -
                                                     orderData.totalAmount) ) == 0 }">{{patronDetails.Balance -
                                                             orderData.totalAmount |
-                                                            currency:'USD':true:'1.2-2'}}</span></label>
+                                                            currency:'USD':'symbol':'1.2-2'}}</span></label>
                                                     <p>Transaction :
                                                         <b>{{transactionNumber}}</b>
                                                     </p>
@@ -209,7 +209,7 @@
                                     </ion-icon>
                                 </ion-col>
                                 <ion-col>
-                                    <ion-avatar float-right style="width: auto !important;">
+                                    <ion-avatar class="ion-float-right" style="width: auto !important;">
                                         <img src="{{patronImage}}" *ngIf="patronImage" (click)="showLargeImage(10)"
                                             style="padding-right:3px!important;">
 
@@ -303,7 +303,7 @@
                                                         [ngClass]="{'color-green': selectedAccountDetails.Balance > 0, 'color-red': selectedAccountDetails.Balance < 0 }"
                                                         [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? ' ': 'none'"
                                                         (click)="showBalance()">{{selectedAccountDetails.Balance |
-                                                        currency:'USD':true:'1.2-2'}}
+                                                        currency:'USD':'symbol':'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
                                                                 <ion-icon name="arrow-round-forward"
                                                                     style="vertical-align: text-top;">
@@ -313,7 +313,7 @@
                                         orderData.totalAmount) ) < 0, 'color-black': ((selectedAccountDetails.Balance -
                                         orderData.totalAmount) ) == 0 }">{{selectedAccountDetails.Balance -
                                                             orderData.totalAmount |
-                                                            currency:'USD':true:'1.2-2'}}</span></label>
+                                                            currency:'USD':'symbol':'1.2-2'}}</span></label>
                                                     <p>Transaction :
                                                         <b>{{transactionNumber}}</b>
                                                     </p>
@@ -339,7 +339,7 @@
                                     </ion-label>
                                 </ion-col>
                                 <ion-col>
-                                    <ion-avatar float-right style="width: auto !important;">
+                                    <ion-avatar class="ion-float-right" style="width: auto !important;">
                                         <a (click)="showLargeImage(10)">
                                             <img src="{{patronImage}}" *ngIf="patronImage"
                                                 style="padding-right:3px!important;">
@@ -442,7 +442,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                         <ion-grid class="ion-no-padding ion-no-margin">
                             <ion-row>
                                 <ion-col size="6" class="ion-no-padding ion-no-margin align-content-center">
-                                    <ion-button class="btn-full-size-icon" float-left size="small" fill="clear"
+                                    <ion-button class="ion-float-left btn-full-size-icon" size="small" fill="clear"
                                         color="danger" (click)="blurInputElement(); deleteMenuFromCart(i)">
                                         <ion-icon slot="icon-only" name="md-close-circle"></ion-icon>
                                     </ion-button>
@@ -467,11 +467,11 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                 <ion-col size="3" style="align-self: center;">
                                     <ion-label class="ion-text-right" style="padding-right: 10px!important"
                                         *ngIf="!(item.IsPartOfMeal == true) && item.ShowPaidPrice == false">
-                                        {{item.Price | currency:'USD':true:'1.2-2'}}
+                                        {{item.Price | currency:'USD':'symbol':'1.2-2'}}
                                     </ion-label>
                                     <ion-label class="ion-text-right" style="padding-right: 10px!important"
                                         *ngIf="!(item.IsPartOfMeal == true ) && item.ShowPaidPrice == true">
-                                        {{item.PaidPrice | currency:'USD':true:'1.2-2'}}
+                                        {{item.PaidPrice | currency:'USD':'symbol':'1.2-2'}}
                                     </ion-label>
                                 </ion-col>
                             </ion-row>
@@ -486,19 +486,19 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     <ion-row *ngIf="taxMeal == 1 && taxPercent && this.patronDetails.IsSaleTaxable == true">
                         <ion-col class="ion-text-center label-margin-v3">
                             <ion-label text-bold>Item Total :
-                                {{this.orderData.subTotal | currency:'USD':true:'1.2-2'}}
+                                {{this.orderData.subTotal | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                         </ion-col>
                         <ion-col class="ion-text-center label-margin-v3">
                             <ion-label text-bold> Tax @ {{taxPercent}} % :
-                                {{this.orderData.tax | currency:'USD':true:'1.2-2'}}
+                                {{this.orderData.tax | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                         </ion-col>
                     </ion-row>
                     <ion-row>
                         <ion-col class="ion-text-center label-margin-v3">
                             <ion-label text-bold>
-                                Total Amount Due: {{orderData.totalAmount | currency:'USD':true:'1.2-2'}}
+                                Total Amount Due: {{orderData.totalAmount | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                         </ion-col>
                     </ion-row>
@@ -525,19 +525,19 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                     <ion-row *ngIf="this.taxMeal == 1 && this.patronDetails.IsSaleTaxable == true">
                         <ion-col class="ion-text-center label-margin-v3">
                             <ion-label class="ion-text-center" text-bold>Item Total :
-                                {{this.orderData.subTotal | currency:'USD':true:'1.2-2'}}
+                                {{this.orderData.subTotal | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                         </ion-col>
                         <ion-col class="ion-text-center label-margin-v3">
                             <ion-label text-bold> Tax @ {{taxPercent}} % :
-                                {{this.orderData.tax | currency:'USD':true:'1.2-2'}}
+                                {{this.orderData.tax | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                         </ion-col>
                     </ion-row>
                     <ion-row>
                         <ion-col class="ion-text-center label-margin-v3">
                             <ion-label text-bold>
-                                Total Amount Due: {{cashtendAmount | currency:'USD':true:'1.2-2'}}
+                                Total Amount Due: {{cashtendAmount | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                         </ion-col>
                     </ion-row>
@@ -548,7 +548,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                 Pay
                                 <span *ngIf="patronDetails.isSpecialAccount==false"
                                     class="btn-transaction-charge-amount">
-                                    {{orderData.totalAmount | currency:'USD':true:'1.2-2'}}
+                                    {{orderData.totalAmount | currency:'USD':'symbol':'1.2-2'}}
                                 </span>
                             </ion-button>
                         </ion-col>

@@ -11,27 +11,27 @@
       <ion-list>
 
         <ion-item>
-          <ion-label float-left static class="ion-margin-start" bold>Cost/Item</ion-label>
-          <ion-label float-right class="ion-text-right" text-bold custom-outline width-100
+          <ion-label static class="ion-float-left ion-margin-start" bold>Cost/Item</ion-label>
+          <ion-label class="ion-float-right ion-text-right" text-bold custom-outline width-100
             *ngIf="showPaidPrice == false">
             {{selAmount}}
           </ion-label>
-          <ion-label float-right class="ion-text-right" text-bold custom-outline width-100
+          <ion-label class="ion-float-right ion-text-right" text-bold custom-outline width-100
             *ngIf="showPaidPrice == true">
             {{selPaidAmount}}</ion-label>
         </ion-item>
         <ion-item>
-          <ion-label float-left static class="ion-margin-start" bold>Quantity</ion-label>
-          <ion-label float-right text-right custom-outline-quantity width-100>{{selQuantity}}</ion-label>
+          <ion-label static class="ion-float-left ion-margin-start" bold>Quantity</ion-label>
+          <ion-label class="ion-float-right" text-right custom-outline-quantity width-100>{{selQuantity}}</ion-label>
           <!-- <input type="text" id="quantity" class="ion-text-right" custom-outline-quantity [(ngModel)]="selQuantity"
             style="width: -webkit-fill-available" appKeyDownEvent> -->
         </ion-item>
         <ion-item>
-          <ion-label float-left static class="ion-margin-start" bold>Extended Cost</ion-label>
-          <ion-label float-right class="ion-text-right" text-bold custom-outline width-100
+          <ion-label static class="ion-float-left ion-margin-start" bold>Extended Cost</ion-label>
+          <ion-label class="ion-float-right ion-text-right" text-bold custom-outline width-100
             *ngIf="showPaidPrice == false">
             {{extendedCost}}</ion-label>
-          <ion-label float-right class="ion-text-right" text-bold custom-outline width-100
+          <ion-label class="ion-float-right ion-text-right" text-bold custom-outline width-100
             *ngIf="showPaidPrice == true">
             {{extendedPaidCost}}</ion-label>
         </ion-item>

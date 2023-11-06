@@ -89,11 +89,7 @@ export class MenuGridComponent {
                 // this.utilService.showToast('Student restrictions do not allow the sale of this item.');
                 return;
             }
-            let priceTypeId = this.stateEigSetting ?
-                (patronDetails['StatePriceTypeId'] == null
-                    || patronDetails['StatePriceTypeId'] == undefined) ?
-                    patronDetails['PriceTypeId'] : patronDetails['StatePriceTypeId']
-                : patronDetails['PriceTypeId'];
+            let priceTypeId = patronDetails['PriceTypeId'];
 
             if (patronDetails['IsSecondMeal'] === true && mealCount === 0) {
                 this.changes.emit({
@@ -128,11 +124,7 @@ export class MenuGridComponent {
                         })
                     } else { // adult
 
-                        priceTypeId = this.stateEigSetting ?
-                            (patronDetails['StatePriceTypeId'] == null
-                                || patronDetails['StatePriceTypeId'] == undefined) ?
-                                patronDetails['PriceTypeId'] : patronDetails['StatePriceTypeId']
-                            : patronDetails['PriceTypeId'];
+                        priceTypeId = patronDetails['PriceTypeId'];
                             
                         this.changes.emit({
                             type: MenuGridEventType.SetMealCount,

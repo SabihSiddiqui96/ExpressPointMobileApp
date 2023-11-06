@@ -110,7 +110,11 @@ export class MenuItemQuantityPopupPage implements OnInit, OnDestroy {
   }
 
   public ionViewDidEnter() {
-    setTimeout(() => { document.getElementById('quantity').focus() }, 1000);
+    setTimeout(() => {
+      if (document.getElementById('quantity') != null && document.getElementById('quantity') != undefined) {
+        document.getElementById('quantity').focus()
+      }
+    }, 1000);
   }
 
   public ngOnDestroy() {
