@@ -2070,11 +2070,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         menuItem['NoContributions'] = true;
                                         menuItem['IsPartOfMeal'] = false;
                                     }
-                                    const priceTypeId = this.stateEigSetting ?
-                                        (this.patronDetails.StatePriceTypeId == null
-                                            || this.patronDetails.StatePriceTypeId == undefined) ?
-                                            this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                                        : this.patronDetails.PriceTypeId;
+                                    const priceTypeId = this.patronDetails.PriceTypeId;
                                     this.Confirmed_CartMenuItem(menuItem, priceTypeId);
 
                                 });
@@ -5516,9 +5512,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId, isSecondMeal = false) {
 
+        let secondmeal = false;
+        (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         let priceTypeId_State = priceTypeId;
-        if (!isSecondMeal) {
+        if (!secondmeal) {
             priceTypeId_State = this.stateEigSetting ?
                 (this.patronDetails.StatePriceTypeId == null
                     || this.patronDetails.StatePriceTypeId == undefined) ?
@@ -5549,14 +5548,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             });
 
         PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
-
-
-            let secondmeal = false;
+            
             let currPrice = 0;
             let cepPriceApply = false;
             let canAdd = false;
-
-            (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
             if (this.mealCount === 1 && menuItem.IsReimbursable) {
                 if (this.patronDetails.IsStudent === true
@@ -5763,13 +5758,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 return;
             }
             let priceTypeId = this.patronDetails.PriceTypeId;
-            if (this.patronDetails['IsSecondMeal'] !== true) {
-                priceTypeId = this.stateEigSetting ?
-                    (this.patronDetails.StatePriceTypeId == null
-                        || this.patronDetails.StatePriceTypeId == undefined) ?
-                        this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                    : this.patronDetails.PriceTypeId;
-            }
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
                 this.mealCount = 1;
