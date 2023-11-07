@@ -1871,11 +1871,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public addMenuToCart(menuItem) {
         if (this.patronId) {
-            let priceTypeId = this.stateEigSetting ?
-                (this.patronDetails.StatePriceTypeId == null
-                    || this.patronDetails.StatePriceTypeId == undefined) ?
-                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                : this.patronDetails.PriceTypeId;
+            let priceTypeId = this.patronDetails.PriceTypeId;
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
 
@@ -1899,11 +1895,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         // this.showConfrim(txt, 'second_meal', { 'menu_item': menuItem, 'price_type_id': priceTypeId }); // todo
                     } else {
 
-                        priceTypeId = this.stateEigSetting ?
-                            (this.patronDetails.StatePriceTypeId == null
-                                || this.patronDetails.StatePriceTypeId == undefined) ?
-                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                            : this.patronDetails.PriceTypeId;
+                        priceTypeId = this.patronDetails.PriceTypeId;
                         this.mealCount = this.mealCount + 1;
                         this.Confirmed_CartMenuItem(menuItem, priceTypeId);
                     }
@@ -1936,18 +1928,29 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public Confirmed_CartMenuItem(menuItem, priceTypeId) {
 
         // this._appservice.setLoader(true);
+        let secondmeal = false;
+        (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+
+        let priceTypeId_State = priceTypeId;
+        if (!secondmeal) {
+            priceTypeId_State = this.stateEigSetting ?
+                (this.patronDetails.StatePriceTypeId == null
+                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                : this.patronDetails.PriceTypeId;
+        }
+
         const date = new Date();
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
             + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
         console.log('Patron Details' + JSON.stringify(this.patronDetails));
-        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails['RDAGroupId'],
+        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails['RDAGroupId'],
             this.patronDetails.IsStudent, this.priceMode).then((price) => {
                 // debugger;
-                let secondmeal = false;
+                
                 let currPrice = 0;
                 let cepPriceApply = false;
-                let canAdd = false;
-                (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+                let canAdd = false;                
 
                 if (this.mealCount === 1 && menuItem.IsReimbursable) {
                     if ((this.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
