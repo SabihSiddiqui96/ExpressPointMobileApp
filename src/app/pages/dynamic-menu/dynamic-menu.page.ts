@@ -2493,8 +2493,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        let priceTypeId_State = priceTypeId;
         if (!isSecondMeal) {
-            priceTypeId = this.stateEigSetting ?
+            priceTypeId_State = this.stateEigSetting ?
                 (this.patronDetails.StatePriceTypeId == null
                     || this.patronDetails.StatePriceTypeId == undefined) ?
                     this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
@@ -2530,7 +2531,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         this.menuItemsArr.push(menuItemNo);
 
-        PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+        PouchQueriesService.GetPrice(menuItem.MenuItemId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
             // this.utilService.setLoader(true);
             let currPrice = 0;
             let canAdd = false;
@@ -2569,6 +2570,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ShowPaidPrice': false,
                     'NoContributions': menuItem.NoContributions ? true : false,
                     'isChecked': menuItem.IsPartOfMeal === false ? false : null,
+                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
                     'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                 };
 
@@ -3267,6 +3269,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TransactionNo': this.transactionNumber,
                     'TerminalName': this.terminalName,
                     'MenuId': !this.orderData.items[i]['NoContributions'] ? this.selectedServingLine : null,
+                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
                     'StatePriceTypeId': this.orderData.items[i]['StateEligibilityId'] ? this.orderData.items[i]['StateEligibilityId'] : this.orderData.items[i]['StatePriceTypeId'] //Intentially Added
                 });
             }
@@ -3292,6 +3295,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'IsPartOfMeal': false, // **verify
                     'Date': (new Date).getTime().toString(),
                     'TransactionNo': this.transactionNumber,
+                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
                     'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
 
                 });
@@ -3307,6 +3311,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TerminalName': this.terminalName,
                     'IsTaxable': this.systemMenuItem.IsTaxable,
                     'MenuId': null,
+                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
                     'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
                 });
             }
@@ -5512,8 +5517,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId, isSecondMeal = false) {
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
+        let priceTypeId_State = priceTypeId;
         if (!isSecondMeal) {
-            priceTypeId = this.stateEigSetting ?
+            priceTypeId_State = this.stateEigSetting ?
                 (this.patronDetails.StatePriceTypeId == null
                     || this.patronDetails.StatePriceTypeId == undefined) ?
                     this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
@@ -5542,7 +5548,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
             });
 
-        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
 
 
             let secondmeal = false;
@@ -5704,7 +5710,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,
                         'NoContributions': true,
-                        'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
+                        'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId, //Intentially Added
+                        'StateEligibilityId': this.patronDetails.StateEligibilityId
 
                     });
                     this.isStaticMenuItemSelected = true;
