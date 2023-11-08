@@ -3044,11 +3044,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         this.postSaleTransaction(transactionType);
                         this.isToggleNeedSwitchToDynamic = 0;
                         this.event.publish('patron-released', { 'patronDetails': null });
+                        /* This part is already executing inside postSaleTransaction - checkMenuConditionsAfterTransactionDone
                         if (this.isDynamicMenuSelected) {
                             this.getMenuDetails();
                         } else {
                             this.changeMenuType();
                         }
+                        */
                     }
                 });
 
