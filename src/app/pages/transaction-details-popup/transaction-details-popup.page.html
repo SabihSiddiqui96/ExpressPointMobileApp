@@ -50,7 +50,7 @@
 <ion-content bg-theme [ngClass]="searchClicked ? 'custom_margin': ''">
   <div custom-list view-full>
 
-    <div box-list-white style="margin-bottom : 36px; height: unset" margin>
+    <div box-list-white style="margin-bottom : 36px; height: unset" class="ion-margin">
       <div style="padding-bottom: 4px; text-align: right">
         <ion-text color="danger">
           <ion-icon name="close-circle" color="danger"></ion-icon>&ensp;Not Sent
@@ -142,7 +142,7 @@
           </ion-label>
         </ion-col>
         <ion-col size="1">
-          <ion-label>{{SaleData.PaymentAmount | currency:'USD':true:'1.2-2'}}</ion-label>
+          <ion-label>{{SaleData.PaymentAmount | currency:'USD':'symbol':'1.2-2'}}</ion-label>
         </ion-col>
         <!--<ion-col col-1>
             <ion-label>

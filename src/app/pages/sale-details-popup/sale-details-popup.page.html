@@ -19,7 +19,7 @@
           <div *ngIf="!useDynamicMenus">
             <div *ngIf="navSaleData.TransactionType !== 4">
               <div custom-list view-full>
-                <div box-list-white style="margin-bottom : 10px; height: unset; padding:4px !important;" margin>
+                <div box-list-white style="margin-bottom : 10px; height: unset; padding:4px !important;" class="ion-margin">
                   <ion-row header-row style="padding-right: 10px;">
                     <!-- <ion-item> -->
                     <ion-col size="3">
@@ -54,7 +54,7 @@
                       </ion-col>
                       <ion-col size="3">
                         <ion-label class="ion-text-right" class="payment-details-col">
-                          {{solditem.Price | currency:'USD':true:'1.2-2'}}
+                          {{solditem.Price | currency:'USD':'symbol':'1.2-2'}}
                         </ion-label>
                       </ion-col>
                       <ion-col size="3">
@@ -78,7 +78,7 @@
           <div *ngIf="useDynamicMenus">
             <div *ngIf="navSaleData.TransactionType !== 4">
               <div custom-list view-full>
-                <div box-list-white style="margin-bottom : 10px; height: unset; padding:4px !important;" margin>
+                <div box-list-white style="margin-bottom : 10px; height: unset; padding:4px !important;" class="ion-margin">
                   <ion-row header-row style="padding-right: 10px;">
                     <!-- <ion-item> -->
                     <ion-col size="3">
@@ -115,7 +115,7 @@
                         </ion-col>
                         <ion-col size="3">
                           <ion-label class="" class="payment-details-col ion-text-right">
-                            {{soldItem.Price | currency:'USD':true:'1.2-2'}}
+                            {{soldItem.Price | currency:'USD':'symbol':'1.2-2'}}
                           </ion-label>
                         </ion-col>
                         <ion-col size="3">
@@ -161,7 +161,7 @@
                           </ion-col>
                           <ion-col size="3">
                             <ion-label class="payment-details-col ion-text-right">
-                              {{soldItem.Price | currency:'USD':true:'1.2-2'}}
+                              {{soldItem.Price | currency:'USD':'symbol':'1.2-2'}}
                             </ion-label>
                           </ion-col>
                           <ion-col size="3">
@@ -265,7 +265,7 @@
                       Payment Amount:
                     </ion-col>
                     <ion-col class="payment-details-col">
-                      {{transactionDetails.PaymentAmt | currency:'USD':true:'1.2-2'}}
+                      {{transactionDetails.PaymentAmt | currency:'USD':'symbol':'1.2-2'}}
                     </ion-col>
                   </ion-row>
 

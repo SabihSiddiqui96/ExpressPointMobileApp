@@ -37,11 +37,11 @@
                 <ion-icon name="add-circle" class="iconmargin" *ngIf="denomination.DenominationId==activeField"
                   (click)="incrDenominationCnt(denomination.DenominationId, denomination.Quantity )"></ion-icon>
               </ion-col>
-              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':true:'1.2-2'}}
+              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':'symbol':'1.2-2'}}
               </ion-col>
             </ion-row>
           </ion-item-group>
-          <h2 class="ion-text-center" bold>Coins totaling {{denominationTotalCoins | currency:'USD':true:'1.2-2'}}
+          <h2 class="ion-text-center" bold>Coins totaling {{denominationTotalCoins | currency:'USD':'symbol':'1.2-2'}}
           </h2>
         </div>
       </ion-col>
@@ -69,11 +69,11 @@
                 <ion-icon name="add-circle" class="iconmargin" *ngIf="denomination.DenominationId==activeField"
                   (click)="incrDenominationCnt(denomination.DenominationId, denomination.Quantity )"></ion-icon>
               </ion-col>
-              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':true:'1.2-2'}}
+              <ion-col size="4" class="ion-align-self-center">{{denomination.Total | currency:'USD':'symbol':'1.2-2'}}
               </ion-col>
             </ion-row>
           </ion-item-group>
-          <h2 class="ion-text-center" bold>Bills totaling {{denominationTotalBills | currency:'USD':true:'1.2-2'}}
+          <h2 class="ion-text-center" bold>Bills totaling {{denominationTotalBills | currency:'USD':'symbol':'1.2-2'}}
           </h2>
         </div>
       </ion-col>
@@ -99,7 +99,7 @@
           </ion-item-group>
           <h2 class="ion-text-center">
             <ion-input type="text" hidden placeholder="{{checkList.length}}" value="{{checkList.length}}" maxlength="5"></ion-input>
-          {{checkList.length}} Check(s) totaling {{checkTotal | currency:'USD':true:'1.2-2'}}
+          {{checkList.length}} Check(s) totaling {{checkTotal | currency:'USD':'symbol':'1.2-2'}}
           </h2>
         </div>
       </ion-col>
@@ -122,7 +122,7 @@
             <h2 class="ion-text-center">
               <ion-input type="text" class="ion-hide" placeholder="{{checkList.length}}" value="{{checkList.length}}"
                 maxlength="5"></ion-input>
-              {{checkList.length}} Check(s) totaling {{checkTotal | currency:'USD':true:'1.2-2'}}
+              {{checkList.length}} Check(s) totaling {{checkTotal | currency:'USD':'symbol':'1.2-2'}}
             </h2>
           </ion-row>
 
@@ -147,7 +147,7 @@
               <ion-input type="text" class="ion-hide" placeholder="{{cardList.length}}" value="{{cardList.length}}"
                 maxlength="5">
               </ion-input>
-              {{cardList.length}} Card(s) totaling {{cardTotal | currency:'USD':true:'1.2-2'}}
+              {{cardList.length}} Card(s) totaling {{cardTotal | currency:'USD':'symbol':'1.2-2'}}
             </h2>
           </ion-row>
 
@@ -168,7 +168,7 @@
     </ion-col>
     <ion-col size="3" size-md='4' class="ion-align-self-auto">
       <h1 style="line-height: 6.5rem; margin: 0;" class="ion-text-center">Closing Balance
-        {{total | currency:'USD':true:'1.2-2'}}
+        {{total | currency:'USD':'symbol':'1.2-2'}}
       </h1>
     </ion-col>
     <ion-col size="3" *ngIf="IsElectron" class="ion-align-self-auto">

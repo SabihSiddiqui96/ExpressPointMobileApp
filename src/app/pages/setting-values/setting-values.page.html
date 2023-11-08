@@ -132,7 +132,7 @@
                   </ion-col>
                   <ion-col size="3" *ngFor="let limit of studentLimits; let i=index;">
                     <div>
-                      {{limit.CreditLimit | currency:'USD':true:'1.2-2'}}
+                      {{limit.CreditLimit | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
 
@@ -170,7 +170,7 @@
                   </ion-col>
                   <ion-col size="3" *ngFor="let adult of adultLimits; let i=index;">
                     <div>
-                      {{adult.CreditLimit | currency:'USD':true:'1.2-2'}}
+                      {{adult.CreditLimit | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
                 </ion-row>
@@ -207,7 +207,7 @@
                   </ion-col>
                   <ion-col size="3" *ngFor="let limit of studentLimits; let i=index;">
                     <div>
-                      {{limit.CreditLimitAlaCarte | currency:'USD':true:'1.2-2'}}
+                      {{limit.CreditLimitAlaCarte | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
 
@@ -245,7 +245,7 @@
                   </ion-col>
                   <ion-col size="3" *ngFor="let adult of adultLimits; let i=index;">
                     <div>
-                      {{adult.CreditLimitAlaCarte | currency:'USD':true:'1.2-2'}}
+                      {{adult.CreditLimitAlaCarte | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
                 </ion-row>
@@ -297,17 +297,17 @@
                   </ion-col>
                   <ion-col size="3">
                     <div>
-                      {{meal.Free | currency:'USD':true:'1.2-2'}}
+                      {{meal.Free | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
                   <ion-col size="3">
                     <div>
-                      {{meal.Reduced | currency:'USD':true:'1.2-2'}}
+                      {{meal.Reduced | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
                   <ion-col size="3">
                     <div>
-                      {{meal.Paid | currency:'USD':true:'1.2-2'}}
+                      {{meal.Paid | currency:'USD':'symbol':'1.2-2'}}
                     </div>
                   </ion-col>
                 </ion-row>

@@ -4097,7 +4097,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 break;
             
             case ServiceToolbarEvent.SwapAutoServeEnabled:
-                this.SwapAutoServeEnabled();
+                this.swapAutoServeEnabled();
                 break;
 
             default:
@@ -4199,7 +4199,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
     }
 
-    public SwapAutoServeEnabled() {
+    public swapAutoServeEnabled() {
         const currentAutoServeSetting = AppStateService.get('autoServeEnabled');
         if (currentAutoServeSetting) {
             if (this.menuGridCount === 0) {

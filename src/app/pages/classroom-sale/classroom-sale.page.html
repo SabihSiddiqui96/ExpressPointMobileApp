@@ -215,7 +215,7 @@
                         <ion-col size="8" size-md="8" class="ion-align-self-center" style="padding: 0px; text-align: center;">
                           <span 
                           [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
-                        | currency:'USD':true:'1.2-2'}}
+                        | currency:'USD':'symbol':'1.2-2'}}
                           </span>
                         </ion-col>
                         <ion-col size="4" size-md="4" class="ion-align-self-center">
@@ -290,7 +290,7 @@
                     <br>
                     <span *ngIf="hideBalSetting==0"
                       [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
-                    | currency:'USD':true:'1.2-2'}}
+                    | currency:'USD':'symbol':'1.2-2'}}
                     </span>
                     <ion-button class="alertBtn" *ngIf="student.ShowAlert" style="width:12rem !important;" expand="block"
                       (click)="setRestrictions(student)">
@@ -331,7 +331,7 @@
                             <strong>{{items.MenuItemDescription}}</strong>
                           </ion-label>
                           <ion-label>
-                            <strong>{{items.Price | currency:'USD':true:'1.2-2'}}</strong>
+                            <strong>{{items.Price | currency:'USD':'symbol':'1.2-2'}}</strong>
                           </ion-label>
                         </ion-item>
                       </ion-col>
@@ -348,7 +348,7 @@
                             <span>Tax <ion-icon name="at"></ion-icon> {{taxPercent}}%</span>
                           </ion-label>
                           <ion-label>
-                            <span>{{ item.alaCartTotalTax | currency:'USD':true:'1.2-2'}} </span>
+                            <span>{{ item.alaCartTotalTax | currency:'USD':'symbol':'1.2-2'}} </span>
                           </ion-label>
                         </ion-item>
                       </ion-col>
@@ -361,7 +361,7 @@
                             <strong>Total</strong>
                           </ion-label>
                           <ion-label>
-                            <strong>{{item.alaCartTotalWithTax  | currency:'USD':true:'1.2-2'}} </strong>
+                            <strong>{{item.alaCartTotalWithTax  | currency:'USD':'symbol':'1.2-2'}} </strong>
                           </ion-label>
                         </ion-item>
                       </ion-col>

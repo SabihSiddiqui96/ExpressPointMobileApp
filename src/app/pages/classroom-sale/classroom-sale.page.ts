@@ -636,7 +636,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'Site': doc.SiteCode,
                             'Teacher': doc.HomeRoom,
                             'isPriceSetForStudentPriceType': true,
-                            'PersonIdentifier': doc.PersonIdentifier
+                            'PersonIdentifier': doc.PersonIdentifier,
+                            'StatePriceTypeId': doc.StatePriceTypeId,
+                            'StateEligibilityId': doc.StateEligibilityId
                         };
                     });
                     students = _.sortBy(students, ['LastName', 'FirstName']);
@@ -716,8 +718,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'Site': doc.SiteCode,
                             'Teacher': doc.HomeRoom,
                             'isPriceSetForStudentPriceType': true,
-                            'PersonIdentifier': doc.PersonIdentifier
-
+                            'PersonIdentifier': doc.PersonIdentifier,
+                            'StatePriceTypeId': doc.StatePriceTypeId,
+                            'StateEligibilityId': doc.StateEligibilityId
                         };
 
                     });
@@ -809,7 +812,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                 'Site': doc.SiteCode,
                                 'Teacher': doc.HomeRoom,
                                 'isPriceSetForStudentPriceType': true,
-                                'PersonIdentifier': doc.PersonIdentifier
+                                'PersonIdentifier': doc.PersonIdentifier,
+                                'StatePriceTypeId': doc.StatePriceTypeId,
+                                'StateEligibilityId': doc.StateEligibilityId
                             };
                         });
 
@@ -902,25 +907,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         cepPriceApply = false;
                     }
                 }
-                if (cepPriceApply) {
-                    student.Price = 0;
-                    student.isPriceSetForStudentPriceType = true;
-                } else {
-                    // if (price.rows.length > 0) {
-                    //   studentWithTypeCheked.Price = price.rows[0].doc.Price;
-                    // }
-                    student.Price = this.getPrice(student.PriceTypeId,
-                        student.RDAGroupId, student.IsStudent, this.priceMode);
-                    if (student.Price === null) {
-                        student.Price = 0;
-                        student.isPriceSetForStudentPriceType = false;
-                        this.hasStudentsWithoutPriceTypes = true;
-                    } else {
-                        student.isPriceSetForStudentPriceType = true;
-                    }
-                }
-                //  });
-
+                
                 if (student.PreviousSales) {
                     student.PreviousSales.map(s => {
                         if (s.MealTypeId === this.filter.selected_mealtype) {
@@ -933,6 +920,34 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         }
                     });
                 }
+
+                let priceTypeId_State = student.PriceTypeId;
+                if (student.HadMeal == false) {
+                    priceTypeId_State = this.stateEigSetting ?
+                        (student.StatePriceTypeId == null
+                            || student.StatePriceTypeId == undefined) ?
+                            student.PriceTypeId : student.StatePriceTypeId
+                        : student.PriceTypeId;
+                }
+
+                if (cepPriceApply) {
+                    student.Price = 0;
+                    student.isPriceSetForStudentPriceType = true;
+                } else {
+                    // if (price.rows.length > 0) {
+                    //   studentWithTypeCheked.Price = price.rows[0].doc.Price;
+                    // }
+                    student.Price = this.getPrice(priceTypeId_State,
+                        student.RDAGroupId, student.IsStudent, this.priceMode);
+                    if (student.Price === null) {
+                        student.Price = 0;
+                        student.isPriceSetForStudentPriceType = false;
+                        this.hasStudentsWithoutPriceTypes = true;
+                    } else {
+                        student.isPriceSetForStudentPriceType = true;
+                    }
+                }
+                //  });
 
                 if (student.HadMeal) {
                     studentsHadMeal.push(student);
@@ -1088,7 +1103,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'TerminalName': this.terminalName,
                             'TransactionNo': this.transactionNumber,
                             'IsTaxable': this.filter.selected_menuItem_isTaxable,
-                            'MenuId': null
+                            'MenuId': null,
+                            'StateEligibilityId': student.StateEligibilityId,
+                            'StatePriceTypeId': student.StateEligibilityId
                         }];
                     } else {
                         student.Price = 0; // Price Should be zero as this will be the total amount of the sale
@@ -1177,8 +1194,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'OrderNumber': '',
                         'IsServed': false,
                         'AppVersion': this.utilService.versionNumber,
-                        'StatePriceTypeId': this.patronDetails["StatePriceTypeId"], //Intentially Added
-                        'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
+                        'StatePriceTypeId': student.StatePriceTypeId, //Intentially Added
+                        'StateEligibilityId': student.StateEligibilityId,
                         '_id': student._id
                     };
 
@@ -1224,7 +1241,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                     'TerminalName': this.terminalName,
                                     'TransactionNo': this.transactionNumber,
                                     'IsTaxable': this.filter.selected_menuItem_isTaxable,
-                                    'StatePriceTypeId': student.StateEligibilityId ? student.StateEligibilityId : student.StatePriceTypeId //Intentially Added
+                                    'StatePriceTypeId': student.StateEligibilityId ? student.StateEligibilityId : student.StatePriceTypeId, //Intentially Added
+                                    'StateEligibilityId': student.StateEligibilityId
                                 });
                             }
 
@@ -1261,7 +1279,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                                 'Date': itemAddedAt,
                                                 'MenuItemDescription': this.filter.selected_menuitem_name,
                                                 'TransactionNo': this.transactionNumber,
-                                                'TerminalName': this.terminalName
+                                                'TerminalName': this.terminalName,
+                                                'StateEligibilityId': student.StateEligibilityId,
+                                                'StatePriceTypeId': student.StateEligibilityId
                                             });
                                         }
 
@@ -1851,11 +1871,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public addMenuToCart(menuItem) {
         if (this.patronId) {
-            let priceTypeId = this.stateEigSetting ?
-                (this.patronDetails.StatePriceTypeId == null
-                    || this.patronDetails.StatePriceTypeId == undefined) ?
-                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                : this.patronDetails.PriceTypeId;
+            let priceTypeId = this.patronDetails.PriceTypeId;
 
             if (this.patronDetails['IsSecondMeal'] === true && this.mealCount === 0) {
 
@@ -1879,11 +1895,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         // this.showConfrim(txt, 'second_meal', { 'menu_item': menuItem, 'price_type_id': priceTypeId }); // todo
                     } else {
 
-                        priceTypeId = this.stateEigSetting ?
-                            (this.patronDetails.StatePriceTypeId == null
-                                || this.patronDetails.StatePriceTypeId == undefined) ?
-                                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
-                            : this.patronDetails.PriceTypeId;
+                        priceTypeId = this.patronDetails.PriceTypeId;
                         this.mealCount = this.mealCount + 1;
                         this.Confirmed_CartMenuItem(menuItem, priceTypeId);
                     }
@@ -1916,18 +1928,29 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public Confirmed_CartMenuItem(menuItem, priceTypeId) {
 
         // this._appservice.setLoader(true);
+        let secondmeal = false;
+        (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+
+        let priceTypeId_State = priceTypeId;
+        if (!secondmeal) {
+            priceTypeId_State = this.stateEigSetting ?
+                (this.patronDetails.StatePriceTypeId == null
+                    || this.patronDetails.StatePriceTypeId == undefined) ?
+                    this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+                : this.patronDetails.PriceTypeId;
+        }
+
         const date = new Date();
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
             + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
         console.log('Patron Details' + JSON.stringify(this.patronDetails));
-        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId, this.patronDetails['RDAGroupId'],
+        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails['RDAGroupId'],
             this.patronDetails.IsStudent, this.priceMode).then((price) => {
                 // debugger;
-                let secondmeal = false;
+                
                 let currPrice = 0;
                 let cepPriceApply = false;
-                let canAdd = false;
-                (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
+                let canAdd = false;                
 
                 if (this.mealCount === 1 && menuItem.IsReimbursable) {
                     if ((this.isSpecialAccount === true && JSON.parse(AppStateService.get('patron_details')).FullName === 'Student') ||
@@ -2316,6 +2339,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
             'IsTaxable': menuItem.IsTaxable,
+            'StateEligibilityId': stateEligibilityId,
             'StatePriceTypeId': stateEligibilityId ? stateEligibilityId : statePriceTypeId //Intentially Added
         });
         const tax = this.menuGridService.calculateTax(this.alaCartItems, this.patronDetails.IsSaleTaxable);
@@ -2355,6 +2379,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
             'IsTaxable': menuItem.IsTaxable,
+            'StateEligibilityId': this.patronDetails.StateEligibilityId,
             'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
         });
         studentAlaCarte['alaCartTotalTax'] = this.menuGridService.calculateTax(items, this.patronDetails.IsSaleTaxable);
