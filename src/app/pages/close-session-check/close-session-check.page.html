@@ -31,7 +31,7 @@
         <ion-label *ngIf="!check.IsDeleted">{{check.CheckNumber}}</ion-label>
       </ion-col>
       <ion-col size="3">
-        <ion-label *ngIf="!check.IsDeleted">{{check.Amount | currency:'USD':true:'1.2-2'}}</ion-label>
+        <ion-label *ngIf="!check.IsDeleted">{{check.Amount | currency:'USD':'symbol':'1.2-2'}}</ion-label>
       </ion-col>
       <ion-col size="2">
         <ion-button *ngIf="!check.IsDeleted && !hideChecks" expand="block" fill="clear" (click)="removeCheck(i)">
@@ -44,7 +44,7 @@
 <ion-footer>
   <ion-toolbar>
     <ion-title *ngIf="checkList.length !=0">
-      {{checkList.length}} checks totaling {{checkTotal | currency:'USD':true:'1.2-2'}}
+      {{checkList.length}} checks totaling {{checkTotal | currency:'USD':'symbol':'1.2-2'}}
     </ion-title>
     <ion-buttons slot="primary">
       <ion-button size="large" expand="block" fill="clear" color="secondary" (click)="dismiss()">

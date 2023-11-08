@@ -82,7 +82,7 @@
                     <br>
                     <span
                       [ngClass]="{ 'color-green': student.Balance>0 ,'color-black': student.Balance == 0 ,'color-red': student.Balance < 0 }">{{student.Balance
-                      | currency:'USD':true:'1.2-2'}}</span>
+                      | currency:'USD':'symbol':'1.2-2'}}</span>
                   </ion-label>
                 </ion-item>
               </ion-col>
