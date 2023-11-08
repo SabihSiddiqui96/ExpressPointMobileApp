@@ -4,5 +4,7 @@ export enum CCTransactionStatusType {
     FAILED = 'FAILED',
     CANCELED = 'CANCELED',
     COMPLETED = 'COMPLETED',
-    CALLED = 'CALLED'
+    CALLED = 'CALLED',
+    CANCEL_REQ = 'CANCEL_REQ'
+
 }

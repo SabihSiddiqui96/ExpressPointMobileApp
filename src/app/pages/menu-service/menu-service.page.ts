@@ -3240,7 +3240,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 this.utilService.showToast('Square transaction failed, Please try again.');
                                 // this.voidOrder();
                                 resolve(false);
-                            } else if (this.transactionDetails.Status === CCTransactionStatusType.CANCELED) {
+                            } else if (this.transactionDetails.Status === CCTransactionStatusType.CANCELED || this.transactionDetails.Status === CCTransactionStatusType.CANCEL_REQ) {
                                 clearInterval(this.ApiInterval)
                                 this.transactionInProgress = false;
                                 this.utilService.showToast('Square transaction CANCELED, Please try again.');
