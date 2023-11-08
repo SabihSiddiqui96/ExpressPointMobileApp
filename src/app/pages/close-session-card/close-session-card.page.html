@@ -31,7 +31,7 @@
         <ion-label *ngIf="!card.IsDeleted">{{card.CardNumber}}</ion-label>
       </ion-col>
       <ion-col size="3">
-        <ion-label *ngIf="!card.IsDeleted">{{card.Amount | currency:'USD':true:'1.2-2'}}</ion-label>
+        <ion-label *ngIf="!card.IsDeleted">{{card.Amount | currency:'USD':'symbol':'1.2-2'}}</ion-label>
       </ion-col>
       <ion-col size="2">
         <ion-button *ngIf="!card.IsDeleted && !hideChecks" expand="block" fill="clear" (click)="removeCard(i)">
@@ -44,7 +44,7 @@
 <ion-footer>
   <ion-toolbar>
     <ion-title *ngIf="cardList.length !=0">
-      {{cardList.length}} cards totaling {{cardTotal | currency:'USD':true:'1.2-2'}}
+      {{cardList.length}} cards totaling {{cardTotal | currency:'USD':'symbol':'1.2-2'}}
     </ion-title>
     <ion-buttons slot="primary">
       <ion-button size="large" expand="block" fill="clear" color="secondary" (click)="dismiss()">
