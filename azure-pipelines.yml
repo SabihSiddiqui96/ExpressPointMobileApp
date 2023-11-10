@@ -6,8 +6,11 @@ variables:
 
 pool:
   name: PrimeroEdge
+  jobs:
+  - job: BuildJob
+    displayName: Build
   demands:
-  - agent.name -equals Agent
+      - Agent.Name -equals Agent-2
 
 steps:
 - checkout: self
