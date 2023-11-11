@@ -10,7 +10,7 @@
 *.sublime-workspace
 .DS_Store
 Thumbs.db
-azure-pipelines.yml
+azure-pipelines.yml*
 UserInterfaceState.xcuserstate
 $RECYCLE.BIN/
 
