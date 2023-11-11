@@ -225,12 +225,18 @@ export class TransactionDetailsPopupPage implements OnInit {
 
     }
 
+    public getMinutesBetweenDates(startDate, endDate) {
+        const diff = parseInt(endDate) - parseInt(startDate);
+        return (diff / 60000);
+    }
+
 
     public GetTransactions() {
         this.transactionList = [];
         this.saleDataList = [];
         const now = new Date();
         const localOffset = (+1) * now.getTimezoneOffset() * 60000;
+        let addOffset = true;
         this.transactionServiceProvider.getUpdatedTransactions().then((transactions) => {
             if (transactions.length > 0) {
                 transactions.map(doc => {
@@ -243,8 +249,14 @@ export class TransactionDetailsPopupPage implements OnInit {
                         } else {
                             doc.saleData['PersonName'] = "" + doc.saleData.LastName + ", " + doc.saleData.FirstName + "";
                         }
+                        if (doc.saleData.MenuItems != null && this.getMinutesBetweenDates(doc.saleData.MenuItems[0].Date, doc.saleData.TransactionDate) < 30) {
+                            addOffset = false;
+                        }
+                        else {
+                            addOffset = true;
+                        }
                         doc.saleData.MenuItems.map(mitem => {
-                            mitem.Date = parseInt(mitem.Date) + localOffset;
+                            mitem.Date = addOffset == true ? parseInt(mitem.Date) + localOffset : mitem.Date;
                         });
                         this.saleDataList.push(doc.saleData);
                     }

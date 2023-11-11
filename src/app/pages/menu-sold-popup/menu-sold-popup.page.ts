@@ -35,14 +35,6 @@ export class MenuSoldPopupPage implements OnInit {
       new Promise((resolve, reject) => {
         this.navPatronDetails = this.patronDetails;
 
-        const now = new Date();
-        const localOffset = (+1) * now.getTimezoneOffset() * 60000;
-        if (this.navPatronDetails != null && this.navPatronDetails.SoldItems) {
-          this.navPatronDetails.SoldItems.map(doc => {
-            doc.SoldDateTime = Number(doc.Date) + localOffset;
-          });
-        }
-
         console.log('Hello MenuSoldPopup Page');
 
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
@@ -52,7 +44,6 @@ export class MenuSoldPopupPage implements OnInit {
           const transactions = x.map(d => d.TransactionNo);
 
           transactions.forEach(TransactionNo => {
-
 
             const saleDetail = _.filter(this.navPatronDetails.SoldItems, { 'TransactionNo': TransactionNo });
             const i = _.findIndex(saleDetail, { 'IsReimbursable': true });
