@@ -45,7 +45,6 @@ export class MenuSoldPopupPage implements OnInit {
 
           transactions.forEach(TransactionNo => {
 
-
             const saleDetail = _.filter(this.navPatronDetails.SoldItems, { 'TransactionNo': TransactionNo });
             const i = _.findIndex(saleDetail, { 'IsReimbursable': true });
             if (i !== -1) { // mealcombo / reimbursable founnd: push reim item  to first index to show itemized list
