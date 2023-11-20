@@ -3456,7 +3456,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
                             'BonusAmount': Number(this.bonusAmount).toFixed(2),
                             'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(this.cashTendAmount).toFixed(2).toString(),
-                            'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString(),
+                            'ChangeReturned': this.cashDue === undefined || this.cashDue === null ? '0' : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString(),
                             'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                             'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                             'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
