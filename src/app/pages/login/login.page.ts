@@ -27,6 +27,7 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { HashingService } from '../../services/hashing.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
+import { PatronLookupPage } from '../patron-lookup/patron-lookup.page';
 
 @Component({
   selector: 'app-login',
@@ -39,7 +40,23 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   @ViewChild("loginViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
 
   ngOnInit() {
+    //Added due to keyup listeners are not removing from detsroy method
+    this.removeKeyUpDownListeners_LookUp();
   }
+
+  public removeKeyUpDownListeners_LookUp() {
+    if (PatronLookupPage.onKeyUpCallback) {
+      document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
+      document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false);
+      PatronLookupPage.onKeyUpCallback = null; // Reset the listener
+    }
+    if (PatronLookupPage.onKeyDownCallback) {
+      document.removeEventListener('keyup', PatronLookupPage.onKeyDownCallback, false);
+      document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
+      PatronLookupPage.onKeyDownCallback = null; // Reset the listener
+    }
+  }
+  
   public loginUrl = null;
   public versionNumber;
   public keyboardVisible: boolean = false;
