@@ -1160,8 +1160,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 */
             const alaCarteItems = _.filter(allItems, (o) => {
                 let date = new Date(_.toInteger(o.Date));
-                return (o.IsReimbursable === false ||
-                    (o.IsReimbursable === true && o.IsSecondMeal === true))
+                return o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true)
                     && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
                         && date.getFullYear() === today.getFullYear())
             });
