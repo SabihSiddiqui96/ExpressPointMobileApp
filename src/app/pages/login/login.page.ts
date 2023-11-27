@@ -39,22 +39,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
   @ViewChild("loginViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
 
-  ngOnInit() {
-    //Added due to keyup listeners are not removing from detsroy method
-    this.removeKeyUpDownListeners_LookUp();
-  }
-
-  public removeKeyUpDownListeners_LookUp() {
-    if (PatronLookupPage.onKeyUpCallback) {
-      document.removeEventListener('keyup', PatronLookupPage.onKeyUpCallback, false);
-      document.removeEventListener('keydown', PatronLookupPage.onKeyUpCallback, false);
-      PatronLookupPage.onKeyUpCallback = null; // Reset the listener
-    }
-    if (PatronLookupPage.onKeyDownCallback) {
-      document.removeEventListener('keyup', PatronLookupPage.onKeyDownCallback, false);
-      document.removeEventListener('keydown', PatronLookupPage.onKeyDownCallback, false);
-      PatronLookupPage.onKeyDownCallback = null; // Reset the listener
-    }
+  ngOnInit() {   
   }
   
   public loginUrl = null;
