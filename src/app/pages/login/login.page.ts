@@ -27,7 +27,6 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { HashingService } from '../../services/hashing.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
-import { PatronLookupPage } from '../patron-lookup/patron-lookup.page';
 
 @Component({
   selector: 'app-login',
@@ -39,9 +38,8 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
   @ViewChild("loginViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
 
-  ngOnInit() {   
+  ngOnInit() {
   }
-  
   public loginUrl = null;
   public versionNumber;
   public keyboardVisible: boolean = false;
