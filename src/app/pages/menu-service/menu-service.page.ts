@@ -1160,8 +1160,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 */
             const alaCarteItems = _.filter(allItems, (o) => {
                 let date = new Date(_.toInteger(o.Date));
-                return o.IsReimbursable === false ||
-                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                return (o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true))
                     && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
                         && date.getFullYear() === today.getFullYear())
             });
@@ -2987,7 +2987,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                             'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
                                             'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                                             'Balance': Number(this.saleData['NewBalance']).toFixed(2),
-                                            'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
+                                            'ChangeReturned': this.cashDue === undefined || this.cashDue === null ? 0 : Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                                             'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
                                             'ServingSiteId': this.siteName,
                                             'TransactionNumber': this.transactionNumber,

@@ -1233,8 +1233,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             const alaCarteItems = _.filter(allItems, (o) => {
                 let date = new Date(_.toInteger(o.Date));
-                return o.IsReimbursable === false ||
-                    (o.IsReimbursable === true && o.IsSecondMeal === true)
+                return (o.IsReimbursable === false ||
+                    (o.IsReimbursable === true && o.IsSecondMeal === true))
                     && (date.getDate() === today.getDate() && date.getMonth() === today.getMonth()
                         && date.getFullYear() === today.getFullYear())
             });
@@ -3426,7 +3426,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'BuyerId': this.patronId,
                             'IsDeposit': this.orderData.IsDeposit,
                             'IsCheck': this.orderData.IsCheck,
-                            'TransactionType': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType,
+                            'TransactionType': (transactionType == 0) ? TransactionTypes.VOID : ((this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType),
                             'PriceTypeId': this.patronDetails.PriceTypeId,
                             'BuyerGradeId': this.patronDetails.GradeId,
                             'MealTypeId': this.defaultMealTypeId,
@@ -3456,7 +3456,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
                             'BonusAmount': Number(this.bonusAmount).toFixed(2),
                             'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(this.cashTendAmount).toFixed(2).toString(),
-                            'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString(),
+                            'ChangeReturned': this.cashDue === undefined || this.cashDue === null ? '0' : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString(),
                             'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                             'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                             'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
