@@ -74,7 +74,7 @@ export class AllPopupPage implements OnInit {
             this.updateAdvLookupSortOrder();
             navigatedData = this.popUpData;
         }
-        this.handleKeyboardEvent();
+
         switch (this.navType) {
             case "dayOfWeek":
                 this.lists = this.rawList = navigatedData;
@@ -412,7 +412,9 @@ export class AllPopupPage implements OnInit {
     }
 
     async close() {
-        this.domEvent.unsubscribe();
+        if (this.domEvent != undefined && this.domEvent != null) {
+            this.domEvent.unsubscribe();
+        }
 
         if (this.navType == "ReviewTypes") {
             this.event.publish("close-review-popup:close");
@@ -750,14 +752,6 @@ export class AllPopupPage implements OnInit {
 
     public isNameSortOrder(type) {
         return type === this.nameSortOrder;
-    }
-
-    // @HostListener('document:keydown', ['$event'])
-    public handleKeyboardEvent() {
-        this.domEvent = fromEvent(document, "keydown").subscribe((event) => {
-            
-        });
-
     }
 
     public setActiveField(field) {
