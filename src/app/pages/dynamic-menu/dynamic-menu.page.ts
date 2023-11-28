@@ -3426,7 +3426,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'BuyerId': this.patronId,
                             'IsDeposit': this.orderData.IsDeposit,
                             'IsCheck': this.orderData.IsCheck,
-                            'TransactionType': (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType,
+                            'TransactionType': (transactionType == 0) ? TransactionTypes.VOID : ((this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) ? TransactionTypes.VISITORPAYMENT : transactionType),
                             'PriceTypeId': this.patronDetails.PriceTypeId,
                             'BuyerGradeId': this.patronDetails.GradeId,
                             'MealTypeId': this.defaultMealTypeId,
