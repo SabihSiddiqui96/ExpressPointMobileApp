@@ -572,18 +572,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
             this.orderData.subTotal = this.orderData.subTotal - userEventData.orderItemData.IniTotalPrice;
 
-            // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable, this.taxMeal, this.taxPercent);
-
-            //  this.orderData.subTotal = this.orderData.subTotal - userEventData.orderItemData.IniTotalPrice
-            //     + userEventData.orderItemData.Price;
-            // this.orderData.totalAmount = +(this.orderData.tax + this.orderData.subTotal).toFixed(2);
-
-            // this.orderData.accountBalance = this.setAmount();
-            // /////////////////////
-            // let accbal: any = parseFloat(this.orderData.accountBalance);
-            // accbal = (Math.round(accbal * 100) / 100).toFixed(2);
-            // this.cashtendered = '$' + accbal;
-            // this.cashtendAmount = this.orderData.accountBalance;
             this.calculateTotals(userEventData.orderItemData.Price, true);
 
         });
@@ -993,7 +981,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 // this.utilService.showToast('Patron does not belong to this school.');
             }
             if (this.isMakeCharge === true && this.patronDetails.PersonId === this.oldPatronId) {
-                this.patronDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(this.oldBalance).toFixed(2)) : this.oldBalance;
+                this.patronDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(Math.round(parseFloat(this.oldBalance) * 100) / 100).toFixed(2)) : this.oldBalance;
             }
         }
 
@@ -2760,9 +2748,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         const payment = Math.round(paymentAmnt * 100) / 100;
                         const saleTotal = this.orderData.totalAmount;
                         if (transactionType === 1) {
-                            updatedPatronDetails.Balance = Number(Number(balance - (saleTotal - payment)).toFixed(2));
+                            updatedPatronDetails.Balance = Number(Number(Math.round((balance - (saleTotal - payment)) * 100) / 100).toFixed(2));
                         } else if (transactionType === 2) {
-                            updatedPatronDetails.Balance = Number(Number(balance - saleTotal).toFixed(2));
+                            updatedPatronDetails.Balance = Number(Number(Math.round((balance - saleTotal) * 100) / 100).toFixed(2));
                         }
 
                         const sortedItems = this.sortMenuItems(items);
@@ -2778,7 +2766,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     squarePaymentAmount = parseFloat(this.cashtendAmount) * 100
                                     paymentData = {
                                         'PaymentAmount': Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2)),
-                                        'Balance': Number(Number(this.selectedAccountDetails.Balance).toFixed(2)),
+                                        'Balance': Number(Number(Math.round(parseFloat(this.selectedAccountDetails.Balance) * 100) / 100).toFixed(2)),
                                         'AccountId': this.selectedAccountDetails.AccountId,
                                         'ServingSchoolId': siteSchool,
                                         'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -2810,10 +2798,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         'TerminalName': this.terminalName,
                                         'IsCard': this.orderData.IsCard,
                                         'CardNumber': this.orderData.CardNumber,
-                                        'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toFixed(2),
-                                        'DepositAmount': (this.cashtendAmount === undefined || this.cashtendAmount === null) ? this.cashtendAmount : parseFloat(this.cashtendAmount).toFixed(2),
-                                        'NewBalance': (parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount.toString())).toFixed(2),
-                                        'BonusAmount': this.bonusAmount.toFixed(2),
+                                        'OldBalance': Number(Math.round(parseFloat(this.selectedAccountDetails.Balance) * 100) / 100).toFixed(2),
+                                        'DepositAmount': (this.cashtendAmount === undefined || this.cashtendAmount === null) ? this.cashtendAmount : Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2)),
+                                        'NewBalance': Number(Math.round((parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashtendAmount != null && this.cashtendAmount != undefined ? this.cashtendAmount.toString() : 0)) * 100) / 100).toFixed(2),
+                                        'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
                                         'AmountTendered': '0',
                                         'Identifier': this.patronDetails.Identifier,
                                         'Site': this.patronDetails.SiteCode,
@@ -2849,8 +2837,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 }
 
                                 this.saleData = {
-                                    'PaymentAmount': Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)), // parseFloat(paymentAmnt.toFixed(2))
-                                    'Balance': this.patronDetails.Balance != null && this.patronDetails.Balance != undefined ? Number(Number(this.patronDetails.Balance).toFixed(2)) : this.patronDetails.Balance,
+                                    'PaymentAmount': Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)),
+                                    'Balance': this.patronDetails.Balance != null && this.patronDetails.Balance != undefined ? Number(Number(Math.round(parseFloat(this.patronDetails.Balance) * 100) / 100).toFixed(2)) : this.patronDetails.Balance,
                                     'AccountId': this.patronDetails.AccountId,
                                     'ServingSchoolId': this.schoolId,
                                     'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -2883,17 +2871,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                                     'IsCard': this.orderData.IsCard,
                                     'CardNumber': this.orderData.CardNumber,
-                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2).toString() : '0',
-                                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toFixed(2).toString(),
-                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2).toString() : '0',
-                                    'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                                    'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(this.cashtendAmount).toFixed(2).toString(),
+                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2).toString() : '0',
+                                    'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2).toString(),
+                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(updatedPatronDetails.Balance * 100) / 100).toFixed(2).toString() : '0',
+                                    'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
+                                    'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(Math.round(this.cashtendAmount * 100) / 100).toFixed(2).toString(),
                                     'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() !== 'NaN' ? Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString() : '0',
                                     'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                                     'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                                     'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
                                     'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                                    'TotalAmount': Number(this.orderData.totalAmount).toFixed(2).toString(),
+                                    'TotalAmount': Number(Math.round(this.orderData.totalAmount * 100) / 100).toFixed(2).toString(),
                                     'ServingSiteId': this.siteName,
                                     'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                                     'UserId': this.userId,
@@ -2977,16 +2965,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                             'Cashier': UtilService.userNameLoggedIn,
                                             'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
                                                 this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
-                                            'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                                            'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
-                                            'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(this.saleData['NewBalance']).toFixed(2) : Number(0).toFixed(2),
+                                            'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
+                                            'DepositAmount': transactionType === TransactionTypes.CHARGE ? 0 : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2)),
+                                            'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(parseFloat(this.saleData['NewBalance']) * 100) / 100).toFixed(2) : Number(0).toFixed(2),
                                             'IsCheck': this.orderData.IsCheck,
                                             'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
                                                 { hour: 'numeric', minute: 'numeric', hour12: true }),
-                                            'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                                            'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(this.cashtendAmount),
+                                            'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
+                                            'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2)),
                                             'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                                            'Balance': Number(this.saleData['NewBalance']).toFixed(2),
+                                            'Balance': Number(Math.round(parseFloat(this.saleData['NewBalance']) * 100) / 100).toFixed(2),
                                             'ChangeReturned': this.cashDue === undefined || this.cashDue === null ? 0 : Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
                                             'MenuItemTemplate': this.GetMenuItemsPriceList(sortedItems),
                                             'ServingSiteId': this.siteName,
@@ -3046,11 +3034,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                             const accBal = this.selectedAccountDetails.Balance;
 
                                             if (Number(this.cashtendAmount) !== 0 && (Number(this.cashtendAmount) > Number(saleTotal))) {
-                                                this.selectedAccountDetails.Balance = Number(Number(accBal + Number(this.amountTowardsBalance)).toFixed(2));
+                                                this.selectedAccountDetails.Balance = Number(Number(Math.round((accBal + Number(this.amountTowardsBalance)) * 100) / 100).toFixed(2));
 
                                             } else {
 
-                                                this.selectedAccountDetails.Balance = Number(Number(accBal - saleTotal).toFixed(2));
+                                                this.selectedAccountDetails.Balance = Number(Number(Math.round((accBal - saleTotal) * 100) / 100).toFixed(2));
 
                                             }
 
@@ -3336,7 +3324,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (this.saleData['TransactionType'] !== 4) {
 
             for (let solditem of menuItems) {
-                var item = '<tr><td>' + solditem.MenuItemDescription + ' </td><td>$' + solditem.Price.toFixed(2) + '</td></tr>';
+                var item = '<tr><td>' + solditem.MenuItemDescription + ' </td><td>$' + Number(Math.round(solditem.Price * 100) / 100).toFixed(2) + '</td></tr>';
                 html.push(item);
             }
 
@@ -3345,7 +3333,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (menuItems.length > 0) {
             html.push('<tr><td></td><td>--------</td></tr>');
 
-            var totalSum = '<tr><td>Total </td><td>$' + Number(this.saleData['TotalAmount']).toFixed(2) + '</td></tr>';
+            var totalSum = '<tr><td>Total </td><td>$' + Number(Math.round(Number(this.saleData['TotalAmount']) * 100) / 100).toFixed(2) + '</td></tr>';
             html.push(totalSum);
             html.push('<tr><td colspan="2">---------------------------------</td></tr>');
 
@@ -3751,7 +3739,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             price = 0 - price;
         }
         this.orderData.subTotal = this.orderData.subTotal + price;
-        this.orderData.totalAmount = +(this.orderData.tax + this.orderData.subTotal).toFixed(2);
+        this.orderData.totalAmount = +Number(Number(Math.round((this.orderData.tax + this.orderData.subTotal) * 100) / 100).toFixed(2));
         this.orderData.accountBalance = this.setAmount();
         /////////////////////
         let accbal: any = parseFloat(this.orderData.accountBalance);
@@ -3765,28 +3753,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public showPatronPin() {
         this.showPin = !this.showPin;
     }
-
-    // public calcAlaTotal(items) { // To calculate sum of only categorical restricted ala carte items
-    //   this.alacarteTotal = 0.00;
-    //   const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
-    //     (o.IsReimbursable === true && o.isSecondMeal === true));
-    //   if (alaItems.length > 0) {
-    //     alaItems.map(item => {
-    //       let isRestrictedCategory = -1;
-    //       if (item.CategoryId !== 0) {
-    //         isRestrictedCategory = this.restrictableCategories.indexOf(item.CategoryId);
-    //       }
-    //       const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);
-    //       if ((isRestrictedItem !== -1 || isRestrictedCategory !== -1)) {
-    //         this.alacarteTotal += item.Price;
-    //       }
-
-    //     });
-    //     return this.alacarteTotal;
-    //   } else {
-    //     return this.alacarteTotal;
-    //   }
-    // }
 
     public checkForBirthday(patronData) {
         let selectedPatron = patronData;
@@ -3831,21 +3797,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }, 2000);
             } catch (e) {
                 console.log('Caught in error for confetti');
-            }
-
-            // const confirm = this.alertCtrl.create({
-            //     header: 'Birthday Alert',
-            //     message: '<p><img src="assets/img/birthDayPictureBox.png"><strong>Don`t forget to wish ' + selectedPatron.FirstName + ' !!</strong></p>',
-            //     cssClass: 'customAlertCss',
-            //     buttons: [
-            //         {
-            //             text: 'OK',
-            //             handler: () => {
-            //             }
-            //         }
-            //     ]
-            // });
-            // confirm.present();
+            }            
         } else {
             this.isBirthDay = false;
 
@@ -4043,7 +3995,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 // this.utilService.showToast('Patron does not belong to this school.');
             }
             if (this.isMakeCharge === true && this.selectedAccountDetails.PersonId === this.oldPatronId) {
-                this.selectedAccountDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(this.oldBalance).toFixed(2)) : this.oldBalance;
+                this.selectedAccountDetails.Balance = (this.oldBalance != null && this.oldBalance != undefined) ? Number(Number(Math.round(this.oldBalance * 100) / 100).toFixed(2)) : this.oldBalance;
             }
         }
         if (this.largeImageToShow) {

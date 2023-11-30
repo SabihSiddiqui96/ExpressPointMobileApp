@@ -1750,7 +1750,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         const refId = this.orderData.items[index].RefId;
         const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(refId);
-        this.alacarteCount = this.alacarteCount - this.orderData.items[index].Quantity;        
+        this.alacarteCount = this.alacarteCount - this.orderData.items[index].Quantity;
 
         if ((isRestrictedItem !== -1 || isRestrictedCategory !== -1) &&
             this.patronDetails.isSpecialAccount === false &&
@@ -2653,7 +2653,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 rEIMTotal += item.Price;
             });
 
-            this.orderData.totalAmount = (aLCTotal + rEIMTotal + this.systemMenuItem.Price).toFixed(2);
+            this.orderData.totalAmount = (Math.round((aLCTotal + rEIMTotal + this.systemMenuItem.Price) * 100) / 100).toFixed(2);
         } else {
             let t = 0;
             this.orderData.items.map(i => { t += i.Price; });
@@ -3337,16 +3337,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         const balance = this.patronDetails.Balance;
                         const saleToatal = this.orderData.totalAmount;
                         if (transactionType === 1) {
-                            updatedPatronDetails.Balance = Number(Number(balance - (saleToatal - paymentAmnt)).toFixed(2));
+                            updatedPatronDetails.Balance = Number(Number(Math.round((balance - (saleToatal - paymentAmnt)) * 100) / 100).toFixed(2));
                         } else if (transactionType === 2) {
-                            updatedPatronDetails.Balance = Number(Number(balance - saleToatal).toFixed(2));
+                            updatedPatronDetails.Balance = Number(Number(Math.round((balance - saleToatal) * 100) / 100).toFixed(2));
                         }
                         let paymentData: TransactionDoc, paymentDoc;
                         if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
                             && this.orderData.IsDeposit) {
                             paymentData = {
                                 'PaymentAmount': Number(Number(Math.round(parseFloat(this.cashTendAmount) * 100) / 100).toFixed(2)),
-                                'Balance': Number(Number(this.selectedAccountDetails.Balance).toFixed(2)),
+                                'Balance': Number(Number(Math.round(this.selectedAccountDetails.Balance * 100) / 100).toFixed(2)),
                                 'AccountId': this.selectedAccountDetails.AccountId,
                                 'ServingSchoolId': siteSchool,
                                 'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -3379,10 +3379,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 'TerminalName': this.terminalName,
                                 'IsCard': this.orderData.IsCard,
                                 'CardNumber': this.orderData.CardNumber,
-                                'OldBalance': parseFloat(this.selectedAccountDetails.Balance).toFixed(2).toString(),
-                                'DepositAmount': Number(this.cashTendAmount).toFixed(2).toString(),
-                                'NewBalance': parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString()).toFixed(2).toString(),
-                                'BonusAmount': (this.bonusAmount === undefined || this.bonusAmount === null) ? this.bonusAmount : Number(this.bonusAmount).toFixed(2),
+                                'OldBalance': Number(Math.round(parseFloat(this.selectedAccountDetails.Balance) * 100) / 100).toFixed(2).toString(),
+                                'DepositAmount': this.cashTendAmount != null && this.cashTendAmount != undefined ? Number(Math.round(this.cashTendAmount * 100) / 100).toFixed(2).toString() : '0',
+                                'NewBalance': Number(Math.round((parseFloat(this.selectedAccountDetails.Balance) + parseFloat(this.cashTendAmount.toString())) * 100) / 100).toFixed(2).toString(),
+                                'BonusAmount': (this.bonusAmount === undefined || this.bonusAmount === null) ? this.bonusAmount : Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
                                 'AmountTendered': '0',
                                 'Identifier': this.patronDetails.Identifier,
                                 'Site': this.patronDetails.SiteCode,
@@ -3418,7 +3418,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         }
                         this.saleData = {
                             'PaymentAmount': Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)),
-                            'Balance': this.patronDetails.Balance != null && this.patronDetails.Balance != undefined ? Number(Number(this.patronDetails.Balance).toFixed(2)) : this.patronDetails.Balance,
+                            'Balance': this.patronDetails.Balance != null && this.patronDetails.Balance != undefined ? Number(Number(Math.round(this.patronDetails.Balance * 100) / 100).toFixed(2)) : this.patronDetails.Balance,
                             'AccountId': this.patronDetails.AccountId,
                             'ServingSchoolId': this.schoolId,
                             'BuyerSchoolId': this.patronDetails.SchoolId,
@@ -3451,17 +3451,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                             'IsCard': this.orderData.IsCard,
                             'CardNumber': this.orderData.CardNumber,
-                            'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                            'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(this.amountTowardsBalance).toFixed(2).toString(),
-                            'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
-                            'BonusAmount': Number(this.bonusAmount).toFixed(2),
-                            'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(this.cashTendAmount).toFixed(2).toString(),
+                            'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
+                            'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2).toString(),
+                            'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(updatedPatronDetails.Balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
+                            'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
+                            'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? '0' : Number(Math.round(this.cashTendAmount * 100) / 100).toFixed(2).toString(),
                             'ChangeReturned': this.cashDue === undefined || this.cashDue === null ? '0' : Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString(),
                             'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                             'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
                             'Grade': this.patronDetails.isSpecialAccount === false ? this.patronDetails.GradeDescription : 'NA',
                             'Teacher': this.patronDetails.isSpecialAccount === false ? this.patronDetails.HomeRoom : 'NA',
-                            'TotalAmount': Number(this.orderData.totalAmount).toFixed(2),
+                            'TotalAmount': Number(Math.round(this.orderData.totalAmount * 100) / 100).toFixed(2),
                             'ServingSiteId': this.siteName,
                             'ReceiptType': PrintReceiptTypes.TRANSACTIONRECEIPT,
                             'UserId': this.userId,
@@ -3568,16 +3568,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     'Cashier': this.userName,
                                     'TransactionType': transactionType === TransactionTypes.CHARGE ? 'Charge' :
                                         this.orderData.IsCheck === true ? 'Check' : this.orderData.IsCard === true ? 'Card' : 'Cash',
-                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(balance).toFixed(2) : Number(0).toFixed(2),
-                                    'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(this.amountTowardsBalance),
-                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(updatedPatronDetails.Balance).toFixed(2) : Number(0).toFixed(2),
+                                    'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
+                                    'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? 0 : Number(Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2)),
+                                    'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(updatedPatronDetails.Balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
                                     'IsCheck': this.orderData.IsCheck,
                                     'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
                                         { hour: 'numeric', minute: 'numeric', hour12: true }),
-                                    'BonusAmount': Number(this.bonusAmount).toFixed(2),
+                                    'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
                                     'AmountTendered': this.cashTendAmount === undefined || this.cashTendAmount === null ? 0 : Number(this.cashTendAmount),
                                     'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
-                                    'Balance': Number(this.patronDetails.Balance).toFixed(2),
+                                    'Balance': Number(Math.round(this.patronDetails.Balance * 100) / 100).toFixed(2),
                                     'ChangeReturned': transactionType === TransactionTypes.CHARGE || this.orderData.IsCheck || this.orderData.IsCard ? 0 : (this.cashTendAmount === undefined || this.cashTendAmount === null || this.amountTowardsBalance === undefined || this.amountTowardsBalance === null) ? 0 : this.cashDue,
                                     'MenuItemTemplate': this.GetMenuItemsPriceList(items),
                                     'ServingSiteId': this.siteName,
@@ -3639,10 +3639,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                     const accBal = this.selectedAccountDetails.Balance;
 
                                     if (Number(this.cashTendAmount) != 0 && (Number(this.cashTendAmount) > Number(this.orderData.totalAmount))) {
-                                        this.selectedAccountDetails.Balance = Number(Number(accBal + Number(this.amountTowardsBalance)).toFixed(2));
+                                        this.selectedAccountDetails.Balance = Number(Number(Math.round((accBal + Number(this.amountTowardsBalance)) * 100) / 100).toFixed(2));
                                     }
                                     else {
-                                        this.selectedAccountDetails.Balance = Number(Number(accBal - this.orderData.totalAmount).toFixed(2));
+                                        this.selectedAccountDetails.Balance = Number(Number(Math.round((accBal - this.orderData.totalAmount) * 100) / 100).toFixed(2));
                                     }
 
                                     PouchDBService.UpsertSingleDoc(this.selectedAccountDetails, EXP_PERSON);
@@ -4072,7 +4072,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 if (item.IsReimbursable) {
 
-                    var dynItem = '<tr><td>' + item.MenuItemDescription + '</td> <td>$' + item.Price.toFixed(2) + '</td></tr>';
+                    var dynItem = '<tr><td>' + item.MenuItemDescription + '</td> <td>$' + Number(Math.round(item.Price * 100) / 100).toFixed(2) + '</td></tr>';
                     html.push(dynItem);
 
                 }
@@ -4086,7 +4086,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 if (!item.IsReimbursable && !item.IsPartOfMeal) {
 
-                    var dynItem = '<tr><td>' + item.MenuItemDescription + '</td> <td>$' + item.Price.toFixed(2) + '</td></tr>';
+                    var dynItem = '<tr><td>' + item.MenuItemDescription + '</td> <td>$' + Number(Math.round(item.Price * 100) / 100).toFixed(2) + '</td></tr>';
                     html.push(dynItem);
 
                 }
@@ -4096,7 +4096,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (menuItems.length > 0) {
                 html.push('<tr><td></td><td>-------</td></tr>');
 
-                var totalSum = '<tr><td>Total</td> <td>$' + Number(this.saleData['TotalAmount']).toFixed(2) + '</td></tr>';
+                var totalSum = '<tr><td>Total</td> <td>$' + Number(Math.round(parseFloat(this.saleData['TotalAmount']) * 100) / 100).toFixed(2) + '</td></tr>';
                 html.push(totalSum);
                 html.push('<tr><td colspan="2">---------------------------------</td></tr>');
 
@@ -5550,7 +5550,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             });
 
         PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
-            
+
             let currPrice = 0;
             let cepPriceApply = false;
             let canAdd = false;
@@ -6060,28 +6060,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             })
         );
     }
-
-
-    // public Confirm_DeleteFormCartForStaticMenu(item_price) {
-    //   var cart_items = [];
-
-
-    //   this.orderData.tax = 0.00;
-    //   this.orderData.subTotal = this.orderData.subTotal - item_price;
-
-    //   var amt = this.orderData.tax + this.orderData.subTotal;
-    //   this.orderData.totalAmount = +amt.toFixed(2);
-
-    //   //edited on Jan-16-2017
-    //   this.orderData.accountBalance = this.orderData.totalAmount;
-    //   // this.orderData.accountBalance = this.setAmount();
-    //   /////////////////
-    //   var accbal: any = parseFloat(this.orderData.accountBalance);
-    //   accbal = (Math.round(accbal * 100) / 100).toFixed(2);
-
-    //   this.cashtendered = '$' + accbal;
-    //   this.cashtend_amount = this.orderData.accountBalance;
-    // }
 
     public loadMenuGridForStaticmenus(menuGridId, schoolId) {
         // if (this.orderData.items.length != 0) {
