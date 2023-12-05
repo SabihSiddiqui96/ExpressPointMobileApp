@@ -289,10 +289,31 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             if (AppStateService.get('openingBalance')) {
                 this.openingBalance = JSON.parse(AppStateService.get('openingBalance'));
             }
+            else {
+                this.getOpeningBalance();
+            }
             this.ChangeTotal();
             this.utilService.setLoader(false);
         }).catch((e) => {
             console.log(e);
+        });
+    }
+
+    private getOpeningBalance() {
+        PouchQueriesService.GetAllOpenSessions().then(data => {
+
+            let sessionDocs = data.rows.map(row => row.doc);
+
+            sessionDocs = sessionDocs.filter(s => {
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+                    Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
+                    && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
+                    && s.SessionId === AppStateService.get('session_id');
+            });
+
+            sessionDocs.map(doc => {
+                this.openingBalance = doc.OpeningBalance;
+            });
         });
     }
 
@@ -810,7 +831,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                     { hour: 'numeric', minute: 'numeric', hour12: true })
             };
 
-                    const receiptFormat = this.printService.getCloseSessionReportFormat(CloseSessionPrintFormat);
+            const receiptFormat = this.printService.getCloseSessionReportFormat(CloseSessionPrintFormat);
 
             this.utilService.publishIpcEvent('print', {
                 data: [{ html: receiptFormat }],
