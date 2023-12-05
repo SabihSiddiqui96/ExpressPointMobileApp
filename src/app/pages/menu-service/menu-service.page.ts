@@ -56,6 +56,7 @@ import { TimerComponent } from './components/timer-modal/timer-modal.component';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service'
 import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
+
 enum SuspiciousActivityTypes {
     VOID = 1,
     CLEARLAST,
@@ -89,6 +90,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public settingAutoPause: PauseOptions;
     public itemsWithAlergies: any[] = [];
     public toastAlert;
+    public isPatronHavingImage = false;
+
     // public squareRetry: boolean = false;
     public ngOnInit() {
         PouchQueriesService.GetAutoServeSetting().then((res) => {
@@ -147,6 +150,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         this.subscribeToMenuServicePopupEvents();
     }
+
+    @ViewChild('displayImage', { static: false }) public canvasRef: ElementRef;
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
@@ -911,7 +916,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public getPatronDetails(patronSelectedData) {
         // Put this check in place to make sure duplicates doesnot happen on the same terminal at the same time. 
         // if (!this.patronSelectedData.PersonId) {
-
+        this.isPatronHavingImage = false;
         this.patronDetails = JSON.parse(patronSelectedData);
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName'];
@@ -927,14 +932,45 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.setPreviousSaleCounts();
         this.setRestrictions();
         this.patronImage = null;
+        this.isPatronHavingImage = null;
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
             if (image) {
-                this.patronImage = image;
-                this.largeImageToShow = true;
-                this.largeImageSrc = image;
-                if (this.patronDetails) {
-                    // this.showLargeImage(1000);
-                }
+                //this.patronImage = image;
+                const img = new Image();
+                img.onload = () => {
+                    const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
+                    const context = cv.getContext('2d');
+
+                    if (context) {
+                        const targetWidth = 85;
+                        const targetHeight = 85;
+
+                        // Calculate the aspect ratio of the image
+                        const aspectRatio = img.naturalWidth / img.naturalHeight;
+
+                        // Calculate the new width and height to maintain aspect ratio
+                        let newWidth, newHeight;
+                        if (aspectRatio > 1) {
+                            newWidth = targetWidth;
+                            newHeight = targetWidth / aspectRatio;
+                        } else {
+                            newWidth = targetHeight * aspectRatio;
+                            newHeight = targetHeight;
+                        }
+
+                        // console.log('Original Dimensions:', img.naturalWidth, img.naturalHeight);
+                        // console.log('New Dimensions:', newWidth, newHeight);
+
+                        // Set the canvas size to the target width and height
+                        cv.width = targetWidth;
+                        cv.height = targetHeight;
+
+                        // Draw the image onto the canvas
+                        context.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+                    }
+                };
+                img.src = image;
+
             } else {
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
