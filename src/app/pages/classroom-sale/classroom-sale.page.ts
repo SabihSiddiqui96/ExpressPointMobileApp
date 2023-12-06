@@ -1138,7 +1138,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     let studentTotalTax = 0.00;
                     studentTotalTax = this.menuGridService.calculateTax(items, student.IsSaleTaxable);
                     orderdata = {
-                        'Balance': student.Balance != null && student.Balance != undefined ? Number(Number(student.Balance).toFixed(2)) : student.Balance,
+                        'Balance': student.Balance != null && student.Balance != undefined ? Number(Number(Math.round(student.Balance * 100) / 100).toFixed(2)) : student.Balance,
                         'PaymentAmount': Number(Number(Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2)),
                         'AccountId': student.AccountId,
                         'ServingSchoolId': this.schoolId,
@@ -1172,10 +1172,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         'IsSent': false,
                         'IsfromSameDay': false,
                         'IsProcessed': false,
-                        'SalesTax': studentTotalTax != null && studentTotalTax != undefined ? Number(Number(studentTotalTax).toFixed(2)) : studentTotalTax,
+                        'SalesTax': studentTotalTax != null && studentTotalTax != undefined ? Number(Number(Math.round(studentTotalTax * 100) / 100).toFixed(2)) : studentTotalTax,
                         'IsCard': false,
                         'CardNumber': '',
-                        'OldBalance': student.Balance != null && student.Balance != undefined ? Number(Number(student.Balance).toFixed(2)) : student.Balance,
+                        'OldBalance': student.Balance != null && student.Balance != undefined ? Number(Number(Math.round(student.Balance * 100) / 100).toFixed(2)) : student.Balance,
                         'DepositAmount': '0',
                         'NewBalance': (student.Balance - Math.round((student.Price + studentTotalTax) * 100) / 100).toFixed(2),
                         'BonusAmount': '0',
@@ -2360,7 +2360,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     // Student Ala Carte items list is not empty
     public addAlaCartItemsIfExists(totalPrice, menuItem, currPrice, refId, priceTypeId, studentAlaCarte, items, day) {
         totalPrice += currPrice;
-        studentAlaCarte['alaCartTotalPrice'] = totalPrice.toFixed(2);
+        studentAlaCarte['alaCartTotalPrice'] = Number(Number(Math.round(totalPrice * 100) / 100).toFixed(2));
         let isRestrictedItem;
         if (this.restrictableAlaCarteItems.indexOf(menuItem.RefId) !== -1 ||
             this.restrictableCategories.indexOf(menuItem.CategoryId) !== -1) {
