@@ -934,46 +934,44 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.patronImage = null;
         this.isPatronHavingImage = null;
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
+            const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
             if (image) {
-                //this.patronImage = image;
+                this.isPatronHavingImage = true;
                 const img = new Image();
                 img.onload = () => {
-                    const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
                     const context = cv.getContext('2d');
 
                     if (context) {
-                        const targetWidth = 85;
-                        const targetHeight = 85;
-
-                        // Calculate the aspect ratio of the image
-                        const aspectRatio = img.naturalWidth / img.naturalHeight;
-
-                        // Calculate the new width and height to maintain aspect ratio
                         let newWidth, newHeight;
-                        if (aspectRatio > 1) {
-                            newWidth = targetWidth;
-                            newHeight = targetWidth / aspectRatio;
-                        } else {
-                            newWidth = targetHeight * aspectRatio;
-                            newHeight = targetHeight;
-                        }
 
-                        // console.log('Original Dimensions:', img.naturalWidth, img.naturalHeight);
-                        // console.log('New Dimensions:', newWidth, newHeight);
+                        newWidth = 85;
+                        newHeight = 85;
 
-                        // Set the canvas size to the target width and height
-                        cv.width = targetWidth;
-                        cv.height = targetHeight;
+                        // Set the canvas size to the new dimensions
+                        cv.width = newWidth;
+                        cv.height = newHeight;
 
-                        // Draw the image onto the canvas
-                        context.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+                        // Draw the image onto the canvas with rounded corners
+                        context.beginPath();
+                        context.moveTo(40, 0); // Move to top-left corner with border-radius
+                        context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                        context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                        context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                        context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                        context.closePath();
+                        context.clip();
+
+                        context.drawImage(img, 0, 0, 85, 100);
                     }
                 };
                 img.src = image;
+                cv.style.display = "inline";
 
             } else {
+                cv.style.display = "none";
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
+                this.isPatronHavingImage = false;
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
@@ -984,6 +982,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             console.log('Error in gettng image ' + err);
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
+            this.isPatronHavingImage = false;
         });
         this.setCreditLimit();
 

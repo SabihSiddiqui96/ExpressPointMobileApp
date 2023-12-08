@@ -987,6 +987,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
         this.GetComboRules(this.patronDetails.GradeId);
         this.patronImage = null;
+        this.isPatronHavingImage = null;
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
                 if (this.patronId) {
@@ -1042,6 +1043,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.largeImageToShow = false;
                     this.largeImageIsShowing = false;
                 }
+            }
+            else {
+                this.isPatronHavingImage = false;
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
