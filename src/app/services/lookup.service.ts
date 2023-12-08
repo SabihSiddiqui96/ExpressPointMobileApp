@@ -607,6 +607,8 @@ export class LookupService {
                             reject(null);
                         });
                     }
+                } else {
+                    resolve(null);
                 }
             });
         });

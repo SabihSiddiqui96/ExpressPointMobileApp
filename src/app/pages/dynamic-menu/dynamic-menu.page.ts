@@ -149,9 +149,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public alaCarteCharge: Array<string>;
 
     toggleName: string = 'Alacarte';
+    public isPatronHavingImage = false;
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
+
+    @ViewChild('displayImage', { static: false }) public canvasRef: ElementRef;
 
     public type = 'DynamicMenus';
     public patronId = null;
@@ -937,6 +940,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public getPatronDetails(patronSelectedData) {
         // console.clear();
+        this.isPatronHavingImage = null;
         this.patronDetails = JSON.parse(patronSelectedData);
         this.hideBalSetting = parseInt(SettingService.getSettingValue('HIDEBAL'));
         // this.transactionNumber = this.transactionService.getCurrentTransactionNo(); // Transaction Number Changed here
@@ -972,7 +976,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.setTransactionListHeight();
         this.isSpecialAccount = this.patronDetails.isSpecialAccount;
 
-        this.utilService.setLoader(true);
+        //this.utilService.setLoader(true);
         this.patronDetails = this.patronDetails;
         this.orderData.accountBalance = this.patronDetails.Balance;
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
@@ -983,43 +987,71 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
         this.GetComboRules(this.patronDetails.GradeId);
         this.patronImage = null;
+        this.isPatronHavingImage = null;
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
                 if (this.patronId) {
                     this.http.GetPersonImage(this.patronId).subscribe(data => {
-                        if (data != null) {
-                            this.patronImage = data;
-                            this.largeImageToShow = true;
-                            this.largeImageSrc = data;
-                            if (this.patronDetails) {
-                                this.showLargeImage(1000);
-                            }
+                        const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
+                        if (data) {
+                            this.isPatronHavingImage = true;
+                            const img = new Image();
+                            img.onload = () => {                                
+                                const context = cv.getContext('2d');
+
+                                if (context) {
+                                    let newWidth, newHeight;
+                                  
+                                    newWidth = 85;
+                                    newHeight = 85;
+
+                                    // Set the canvas size to the new dimensions
+                                    cv.width = newWidth;
+                                    cv.height = newHeight;
+
+                                    // Draw the image onto the canvas with rounded corners
+                                    context.beginPath();
+                                    context.moveTo(40, 0); // Move to top-left corner with border-radius
+                                    context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                                    context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                                    context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                                    context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                                    context.closePath();
+                                    context.clip();
+
+                                    context.drawImage(img, 0, 0, 85, 100);
+                                }
+                            };
+                            img.src = data;
+                            cv.style.display = "inline";
+                            
                         } else {
+                            cv.style.display = "none";
+                            this.isPatronHavingImage = false;
                             this.largeImageToShow = false;
                             this.largeImageIsShowing = false;
                         }
                     }, e => {
                         console.log(e);
+                        this.isPatronHavingImage = false;
                         this.largeImageToShow = false;
                         this.largeImageIsShowing = false;
                     }, () => {
                     });
                 } else {
+                    this.isPatronHavingImage = false;
                     this.largeImageToShow = false;
                     this.largeImageIsShowing = false;
                 }
+            }
+            else {
+                this.isPatronHavingImage = false;
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
                 this.patronDetails.InputDirection = inputDirId;
                 sessionStorage.removeItem(this.patronDetails.Identifier);
-            }
-            //   }).catch((err) => {
-            //     console.log(err);
-            //     this.largeImageToShow = false;
-            //     this.largeImageIsShowing = false;
-            //   });
-            // }
+            }            
         });
 
         // **********!!!!TO DO: Menu Item Restrictions with Dynamic Menus!!!!!!!!!******** */

@@ -209,21 +209,20 @@
                                     </ion-icon>
                                 </ion-col>
                                 <ion-col>
-                                    <ion-avatar class="ion-float-right" style="width: auto !important;">
-                                        <img src="{{patronImage}}" *ngIf="patronImage" (click)="showLargeImage(10)"
-                                            style="padding-right:3px!important;">
-
+                                    <ion-avatar class="ion-float-right" style="width: auto !important;">                                       
+                                        <canvas #displayImage id="displayImage"
+                                            style="padding-right:3px!important; display: none;"></canvas>
 
                                         <img class="flip_image" src="assets/img/default_male.png"
-                                            *ngIf="!patronImage && patronDetails.Gender === 'M'">
+                                            *ngIf="!isPatronHavingImage && patronDetails.Gender === 'M' && isPatronHavingImage != null">
 
 
                                         <img class="flip_image" src="assets/img/default_female.png"
-                                            *ngIf="!patronImage && patronDetails.Gender === 'F'">
+                                            *ngIf="!isPatronHavingImage && patronDetails.Gender === 'F' && isPatronHavingImage != null">
 
 
                                         <img style="--border-radius: 0%;" src="assets/img/no_image.png"
-                                            *ngIf="!patronImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F')">
+                                            *ngIf="!isPatronHavingImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F') && isPatronHavingImage != null">
 
                                     </ion-avatar>
                                     <div *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true)" style="position: absolute;top: 8.5rem;right:1rem;">
@@ -339,7 +338,7 @@
                                     </ion-label>
                                 </ion-col>
                                 <ion-col>
-                                    <ion-avatar class="ion-float-right" style="width: auto !important;">
+                                   <ion-avatar class="ion-float-right" style="width: auto !important;">
                                         <a (click)="showLargeImage(10)">
                                             <img src="{{patronImage}}" *ngIf="patronImage"
                                                 style="padding-right:3px!important;">
