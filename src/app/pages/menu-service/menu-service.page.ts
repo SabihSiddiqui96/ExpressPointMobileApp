@@ -56,6 +56,7 @@ import { TimerComponent } from './components/timer-modal/timer-modal.component';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service'
 import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
+
 enum SuspiciousActivityTypes {
     VOID = 1,
     CLEARLAST,
@@ -89,6 +90,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public settingAutoPause: PauseOptions;
     public itemsWithAlergies: any[] = [];
     public toastAlert;
+    public isPatronHavingImage = false;
+
     // public squareRetry: boolean = false;
     public ngOnInit() {
         PouchQueriesService.GetAutoServeSetting().then((res) => {
@@ -147,6 +150,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         this.subscribeToMenuServicePopupEvents();
     }
+
+    @ViewChild('displayImage', { static: false }) public canvasRef: ElementRef;
 
     @ViewChild('confettiHolder', { static: false })
     public elConfettiHolder: ElementRef;
@@ -911,7 +916,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public getPatronDetails(patronSelectedData) {
         // Put this check in place to make sure duplicates doesnot happen on the same terminal at the same time. 
         // if (!this.patronSelectedData.PersonId) {
-
+        this.isPatronHavingImage = false;
         this.patronDetails = JSON.parse(patronSelectedData);
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName'];
@@ -927,17 +932,46 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.setPreviousSaleCounts();
         this.setRestrictions();
         this.patronImage = null;
+        this.isPatronHavingImage = null;
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
+            const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
             if (image) {
-                this.patronImage = image;
-                this.largeImageToShow = true;
-                this.largeImageSrc = image;
-                if (this.patronDetails) {
-                    // this.showLargeImage(1000);
-                }
+                this.isPatronHavingImage = true;
+                const img = new Image();
+                img.onload = () => {
+                    const context = cv.getContext('2d');
+
+                    if (context) {
+                        let newWidth, newHeight;
+
+                        newWidth = 85;
+                        newHeight = 85;
+
+                        // Set the canvas size to the new dimensions
+                        cv.width = newWidth;
+                        cv.height = newHeight;
+
+                        // Draw the image onto the canvas with rounded corners
+                        context.beginPath();
+                        context.moveTo(40, 0); // Move to top-left corner with border-radius
+                        context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                        context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                        context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                        context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                        context.closePath();
+                        context.clip();
+
+                        context.drawImage(img, 0, 0, 85, 100);
+                    }
+                };
+                img.src = image;
+                cv.style.display = "inline";
+
             } else {
+                cv.style.display = "none";
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
+                this.isPatronHavingImage = false;
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
@@ -948,6 +982,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             console.log('Error in gettng image ' + err);
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
+            this.isPatronHavingImage = false;
         });
         this.setCreditLimit();
 

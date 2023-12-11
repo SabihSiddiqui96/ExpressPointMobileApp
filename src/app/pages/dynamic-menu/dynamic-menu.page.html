@@ -256,20 +256,19 @@
                   <ion-avatar class="ion-float-right" style="width: auto !important;">
                     <!-- <ion-icon name="contact" *ngIf="!patronDetails.Image && patronDetails.IsStudent"></ion-icon> -->
 
-                    <img src="{{patronImage}}" *ngIf="patronImage" (click)="showLargeImage(10)"
-                      style="padding-right:3px!important;">
+                  <canvas #displayImage id="displayImage" style="display:none; padding-right:3px!important;"></canvas>
 
 
                     <img class="flip_image" src="assets/img/default_male.png"
-                      *ngIf="!patronImage && patronDetails.Gender === 'M'">
+                      *ngIf="!isPatronHavingImage && patronDetails.Gender === 'M' && isPatronHavingImage != null">
 
 
                     <img class="flip_image" src="assets/img/default_female.png"
-                      *ngIf="!patronImage && patronDetails.Gender === 'F'">
+                      *ngIf="!isPatronHavingImage && patronDetails.Gender === 'F' && isPatronHavingImage != null">
 
 
                     <img style="--border-radius: 0%;" src="assets/img/no_image.png"
-                      *ngIf="!patronImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F')">
+                      *ngIf="!isPatronHavingImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F') && isPatronHavingImage != null">
 
                   </ion-avatar>
                 </ion-col>
@@ -280,66 +279,6 @@
           </ion-label>
 
         </ion-item-divider>
-        <!-- <ion-item-divider *ngIf="isSpecialAccount==false" class="patron-info-actions">
-                  <ion-row>
-                      <ion-col col-4 *ngIf="!hideAddFunds">
-                          <ion-button default expand="block" icon-start (click)="ShowAddDollarPopover($event)"
-                              *ngIf="isSpecialAccount==false"
-                              [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'">
-                              Add Funds
-                          </ion-button>
-                      </ion-col>
-                      <ion-col col-4>
-                          <ion-button default expand="block" icon-start (click)="ShowallergyPopover($event)"
-                              [style.border]="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
-      || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
-      this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
-      || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')? '4px solid #b22222':''">
-                              Alerts
-                              <span
-                                  *ngIf="(this.allergenCount > 0 || this.patronDetails.SpecialInstruction_count > 0
-      || this.patronDetails.CannotCharge || !this.patronDetails.AcceptCheck ||
-      this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestriction
-      || this.patronDetails.MonthlyALCRestriction || this.alaCarteCash[currentDay-1] == '1' || this.alaCarteCharge[currentDay-1] == '1')">*</span>
-                          </ion-button>
-                      </ion-col>
-                      <ion-col col-4>
-                          <ion-button default expand="block" icon-start (click)="getReviews()"
-                              [style.border]="isMarked ? '4px solid #27FA58':''" [disabled]='isMarkForReviewClicked'>
-                              Mark for Review
-                              <span *ngIf='isMarked'>*</span>
-                              <div class="spinMarkForReview" *ngIf='isMarkForReviewClicked'>
-
-                                  <ion-spinner name="bubbles"></ion-spinner>
-                              </div>
-                          </ion-button>
-                      </ion-col>
-                  </ion-row>
-              </ion-item-divider> -->
-        <!--
-                <ion-item-divider [style.display]="patronDetails.SchoolId==schoolId ? 'none': ((patronDetails.SiteCode)? '':'none')" class="patron-info-visiting">
-                  <p>
-                    <ion-icon name="help-circle" small></ion-icon>
-                    Visiting from {{patronDetails.SiteCode}}
-                  </p>
-                </ion-item-divider>
-                <ion-item-divider *ngIf="(patronDetails.GradeId && patronDetails.HadSale===true)" class="patron-info-prior-serve">
-                  <ion-row>
-                    <ion-col col-8>
-                      <p>
-                        <ion-icon name="flag" small></ion-icon>
-                        Previously served <span *ngIf="patronDetails.IsSecondMeal==true">a meal.</span>
-                      </p>
-                    </ion-col>
-                    <ion-col>
-                      <ion-button default expand="block" icon-start size="small" (click)="ShowsolditemsPopover($event)">
-                        <ion-icon name="restaurant"></ion-icon>
-                        View
-                      </ion-button>
-                    </ion-col>
-                  </ion-row>
-                </ion-item-divider>
-              -->
       </ion-list>
 
       <ion-list lines="none" *ngIf="displayDetails" class="panel-patron-info" style="margin-top: 0;">
