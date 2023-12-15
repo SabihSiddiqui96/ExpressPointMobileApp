@@ -20,7 +20,7 @@ import { Router } from '@angular/router';
 import { PrintService, TransactionDetailPrintFormat } from '../../services/print.service';
 import { PrintReceiptTypes } from '../../services/enums/print-receipt-types';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
-import { PatronLookupPage } from '../patron-lookup/patron-lookup.page';
+import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 import { LocalTimerService } from '../../services/local-timer.service';
 
 enum SuspiciousActivityTypes {

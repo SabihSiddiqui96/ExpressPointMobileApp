@@ -105,6 +105,7 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
 import { CreditCardTransactionService } from './services/Credit-Card-Transaction.service';
 import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
+import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup-popup.page';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -119,6 +120,7 @@ import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-op
         TransactionMealTypePopupPage,
         MenuServicePage,
         PatronLookupPage,
+        PatronLookupPopupPage,
         ServiceSelectionPage,
         LoginPage,
         AboutPage,
@@ -185,6 +187,7 @@ import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-op
         IonDigitKeyboardCmp,
         MenuServicePage,
         PatronLookupPage,
+        PatronLookupPopupPage,
         ServiceSelectionPage,
         LoginPage,
         AboutPage,

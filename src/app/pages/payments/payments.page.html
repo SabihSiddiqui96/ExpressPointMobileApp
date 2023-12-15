@@ -238,7 +238,7 @@
     <!-- </ion-content> -->
     <ion-row *ngIf="patronId == null" >
       <ion-col size="4" size-md="4" size-lg="4" push-md="8" push-lg="8" style="position: absolute;top:0px">
-        <page-patron-lookup *ngIf="patronId == null" [page]="type"></page-patron-lookup>
+        <page-patron-lookup-popup *ngIf="patronId == null" [page]="type"></page-patron-lookup-popup>
         <!--[ngClass]="{'ion-hide' : patronId!=null}"-->
       </ion-col>
     </ion-row>

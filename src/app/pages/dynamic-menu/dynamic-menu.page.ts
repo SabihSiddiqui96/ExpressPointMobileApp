@@ -44,6 +44,7 @@ import { ConfettiService } from '../../services/confetti.service';
 import { LogsDBService } from '../../services/Database/logs-db.service';
 import { LogType } from '../../services/enums/log-type';
 import { EventType } from '../../services/enums/event-type';
+import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 
 enum Contributors {
     Fruit = 1,
@@ -6704,7 +6705,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public showPatronAccountPopup() {
         this.utilService.selectAccountClick = true;
         this.modalCtrl.create({
-            component: PatronLookupPage,
+            component: PatronLookupPopupPage,
             componentProps: {
                 'prevPatron': this.canLoadPrevPatron,
                 'lastPatronDetails': this.lastPatron
