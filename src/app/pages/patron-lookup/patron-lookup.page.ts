@@ -1587,7 +1587,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public onKeyDown(event: KeyboardEvent) {
-        const field = this.activeField
+        const field = this.activeField;
         if (event.shiftKey && event.keyCode === 9) { // Shift and Tab both keys are pressed
             console.log('shift and tab');
             if (field === 'externalId') {
@@ -1595,8 +1595,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             } else if (field === 'lastName') {
                 this.setActiveField('firstName');
             } else {
-                event.preventDefault();
-                event.stopPropagation();
+                this.setActiveField('');
+                // event.preventDefault();
+                // event.stopPropagation();
             }
         } else if (event['keyCode'] === 9 && !event.shiftKey) {
             if (field === 'firstName') {
@@ -1604,8 +1605,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             } else if (field === 'lastName') {
                 this.setActiveField('externalId');
             } else {
-                event.preventDefault();
-                event.stopPropagation();
+                this.setActiveField('');
+                // event.preventDefault();
+                // event.stopPropagation();
             }
         }
     }
@@ -1930,6 +1932,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.lastNameClass = 'inactive-input-border';
             this.firstNameClass = 'inactive-input-border';
             this.externalIdClass = 'active-input-border';
+        }
+        else {
+            this.lastNameClass = 'inactive-input-border';
+            this.firstNameClass = 'inactive-input-border';
+            this.externalIdClass = 'inactive-input-border';
         }
     }
 

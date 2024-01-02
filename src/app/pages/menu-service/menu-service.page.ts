@@ -56,6 +56,7 @@ import { TimerComponent } from './components/timer-modal/timer-modal.component';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service'
 import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
+import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -3943,7 +3944,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public showPatronAccountPopup() {
         this.utilService.selectAccountClick = true;
         this.modalCtrl.create({
-            component: PatronLookupPage,
+            component: PatronLookupPopupPage,
             componentProps: {
                 'prevPatron': this.canLoadPrevPatron,
                 'lastPatronDetails': this.lastPatron

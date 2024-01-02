@@ -19,6 +19,7 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { Subscription, timer } from "rxjs";
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
+import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -1552,7 +1553,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
         this.lookUpService.menuPayselectAccountClick = true;
         this.modalCtrl.create({
-            component: PatronLookupPage,
+            component: PatronLookupPopupPage,
             componentProps: {
                 'prevPatron': this.canLoadPrevPatron,
                 'lastPatronDetails': this.lastPatron

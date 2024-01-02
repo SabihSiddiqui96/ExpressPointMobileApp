@@ -1,0 +1,701 @@
+<ion-grid bg-theme>
+  <ion-row vh-100 bg-theme *ngIf="selectAccuntClick === false && menuPayselectAcctClick==false">
+    <ion-col size="12" class="panel-side">
+      <ion-header>
+        <ion-toolbar color="slate">
+          <ion-row class="ion-align-items-center">
+            <ion-col size="2" size-md="2" size-sm="2" [ngClass]="{'ion-hide':swapLeft}">
+             
+              <ion-menu-toggle>
+                <ion-button fill="clear" class="btn-full-size-icon">
+                  <ion-icon slot="icon-only" name="menu"></ion-icon>
+                </ion-button>
+              </ion-menu-toggle>
+              <!-- </ion-buttons> -->
+            </ion-col>
+            <ion-col [attr.size]="changeWidth()" [attr.size-md]="changeWidth()" [attr.size-sm]="changeWidth()">
+              
+              <ion-segment [(ngModel)]="patronAccount">
+                <ion-segment-button value="patron_pin" (click)="patronPinClick()">
+                  <ion-label class="color-white">
+                    {{PinIdLabel}}
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="advanced" (click)="advancePatronClick()">
+                  <ion-label class="color-white">
+                    Lookup
+                  </ion-label>
+                </ion-segment-button>
+              </ion-segment>
+            </ion-col>
+            <ion-col size="4" size-md="4" size-sm="4" *ngIf="!hideQueue">
+              <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement(); lookUpService.populatePersonsFromQ()">
+                <ion-icon slot="start" name="people"></ion-icon>
+                Queue <span class="queue_count">{{countQ}}</span>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-toolbar>
+      </ion-header>
+      <div [ngSwitch]="patronAccount" view-full>
+        <ion-row *ngSwitchCase="'advanced'" vh-100-dyn class="ion-justify-content-center patron-advanced-search"
+          bg-theme>
+          <ion-col size="12" size-md="12" size-sm="12">
+            <div class="ion-padding">
+              <ion-segment color="slate" [(ngModel)]="advancedPatron">
+                <ion-segment-button value="by_patron" (click)="advancePatronClick()">
+                  <ion-label>Name</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="by_homeroom" (click)="advancePatronClick()">
+                  <ion-label>Homeroom</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="by_specialroster">
+                  <ion-label>Roster</ion-label>
+                </ion-segment-button>
+              </ion-segment>
+              <div [ngSwitch]="advancedPatron">
+                <ion-list *ngSwitchCase="'by_specialroster'" class="ion-no-padding ion-no-margin">
+                  
+                  <ion-item lines="none" (click)="showPopup('patronSpecialRoster')">
+
+                    <ion-label *ngIf="selectedSpecialRosterId !=-1">Selected Roster:
+                      <strong>{{selectedSpecialRosterName}}</strong>
+                    </ion-label>
+                    <ion-label *ngIf="selectedSpecialRosterId ==-1 && specialRosterList.length >0">
+                      Select a Roster ...</ion-label>
+                    <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available
+                    </ion-label>
+                    <ion-icon *ngIf="specialRosterList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+
+                  </ion-item>
+                 
+                </ion-list>
+                <ion-list *ngSwitchCase="'by_specialroster'" class="margin-top10 ion-no-padding">
+                  <ion-item class="ion-text-center" lines="none" class="search-btn">
+                    <ion-label>
+                      <ion-button class="ion-no-padding ion-no-margin" expand="block" size="large"
+                        (click)="blurInputElement(); showPopup('patronSpecialRosterPersonList')" [disabled]="selectedSpecialRosterId=== -1">
+                        Load
+                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                      </ion-button>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+                <ion-list *ngSwitchCase="'by_patron'" class="padd-bt-5 ion-no-margin">
+                  
+                  <ion-row class='selectedSiteRow'>
+                    <ion-col>
+                      <ion-list class="ion-no-padding ion-no-margin">
+                        <ion-radio-group [(ngModel)]="selectedSite"
+                          *ngIf="!isCordovaApp || (isCordovaApp && !isKeyboardOpen)">
+                          <ion-list-header class="center-text">
+                            <ion-label>
+                              Selected Site
+                            </ion-label>
+                          </ion-list-header>
+                          <ion-item lines="none" *ngFor="let site of siteList">
+
+                            <ion-label>{{site.SiteNameWithCode}}</ion-label>
+                            <ion-radio slot="end" id="{{site.SchoolId}}" color="slate" value="{{site.SchoolId}}"
+                              [ngStyle]="{'margin-left':'0px' }">
+                            </ion-radio>
+
+                          </ion-item>
+                        </ion-radio-group>
+                      </ion-list>
+                     
+                    </ion-col>
+                  </ion-row>
+
+                  <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
+                    <ion-row>
+                      <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                    </ion-row>
+                  </ng-container>
+
+                  <!-- Non iOS -->
+                  <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
+                  <ion-item lines="none">
+                    <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
+                    <ion-input type="text" [(ngModel)]="patronSearch.firstname" placeholder="First Name"
+                      (ionFocus)="setActiveField('firstName')" [ngClass]="firstNameClass" id="firstname"
+                      (keyup)="checkAlphaNumericFN($event); handleKeyDown($event)">
+                      <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+
+                  </ion-item>
+                 
+                  <ion-item lines="none">
+                    <!-- <ion-label slot="start" fixed>Last Name</ion-label> -->
+
+                    <ion-input type="text" [(ngModel)]="patronSearch.lastname" placeholder="Last Name"
+                      (ionFocus)="setActiveField('lastName')" [ngClass]="lastNameClass" id="lastname"
+                      (keyup)="checkAlphaNumericLN($event); handleKeyDown($event)">
+                      <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                 
+                  <ion-item lines="none">
+                    <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
+
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" id="externalId"
+                      placeholder="{{AdvancedPinLookupLabel}}" (ionFocus)="setActiveField('externalId')"
+                      [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
+                      (keyup)="checkNumeric($event); handleKeyDown($event)">
+                      <!-- (keyup)=""> -->
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                 
+                </ion-list>
+                <ion-list *ngSwitchCase="'by_patron'" class="margin-top10 ion-no-padding">
+                  <ion-item class="ion-text-center" lines="none" *ngSwitchCase="'by_patron'" class="search-btn">
+                    <ion-label>
+                      <ion-button expand="block" size="large" class="ion-no-padding ion-no-margin"
+                        [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname || patronSearch.externalId))"
+                        (click)="blurInputElement(); AdvancedPatronLookup()">
+                        Search
+                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                      </ion-button>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+                <ion-list *ngSwitchCase="'by_homeroom'" class="ion-no-padding ion-no-margin">
+                  <ion-item lines="none" (click)="showPopup('patronGrade')">
+
+                    <ion-label *ngIf="this.selectedGrade!=-1">Selected Grade:
+                      <strong>{{this.selectedGradeName}}</strong>
+                    </ion-label>
+                    <ion-label *ngIf="this.selectedGrade == -1 && gradeList.length ==0">Grade: None
+                      Available
+                    </ion-label>
+                    <ion-label *ngIf="this.selectedGrade == -1 && gradeList.length >0">Select a
+                      Grade ...
+                    </ion-label>
+                    <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown">
+                    </ion-icon>
+
+                  </ion-item>
+                  <ion-item lines="none" (click)="showPopup('patronHomeroom')">
+
+                    <ion-label *ngIf="this.selectedHomeroom!=-1">Selected Homeroom:
+                      <strong>{{this.selectedHomeroomName}}</strong>
+                    </ion-label>
+                    <ion-label *ngIf="this.selectedHomeroom == -1 && homeRoomList.length ==0">
+                      Homeroom: None Available</ion-label>
+                    <ion-label *ngIf="this.selectedHomeroom == -1 && homeRoomList.length >0">Select
+                      a Homeroom ...</ion-label>
+                    <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown">
+                    </ion-icon>
+
+                  </ion-item>
+                  <ion-item lines="none" (click)="showPopup('patronPatron')">
+
+                    <ion-label *ngIf="this.selectedHomeroomPatronId!=-1">Selected Patron:
+                      <strong>{{this.selectedHomeroomPatronName}}</strong>
+                    </ion-label>
+                   
+                    <ion-label *ngIf=" personlist.length == 0 || this.selectedHomeroom == -1">
+                      Patron: None Available</ion-label>
+                    <ion-label
+                      *ngIf=" personlist.length >0 && this.selectedHomeroom != -1 && this.selectedHomeroomPatronId==-1">
+                      Select a Patron ...</ion-label>
+                    <ion-icon *ngIf="personlist.length !=0" slot="end" name="md-arrow-dropdown">
+                    </ion-icon>
+
+                  </ion-item>
+                  
+                </ion-list>
+                <ion-list *ngSwitchCase="'by_homeroom'" class="margin-top10 ion-no-padding">
+                  <ion-item class="ion-text-center" lines="none" class="search-btn">
+                    <ion-label>
+                      <ion-button class="ion-no-padding ion-no-margin" expand="block" (click)="blurInputElement(); selectHomeroomPatron()"
+                        size="large"
+                        [disabled]="selectedGrade==-1 || selectedHomeroom==-1 || selectedHomeroomPatronId==-1">
+                        Load
+                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                      </ion-button>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngSwitchCase="'patron_pin'" vh-100-dyn class="ion-justify-content-center patron-pin-search" bg-theme>
+          <ion-col size="12" size-md="12" size-sm="12">
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-item class="ion-text-center" lines="none">
+
+                    <ion-input id="pinInput" #patron_search_id placeholder="{{SearchByText}}" type="text"
+                      [(ngModel)]="patronSearch.keyword" class="ion-text-center" (keyup)="checkNumericLookUp($event)">
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" class="openOSKbutton"
+                      style="font-size: 12px !important;padding-right:20px;" (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                    
+                  </ion-item>
+                </ion-col>
+                <ion-col size="3" size-md="3" size-sm="3" *ngIf="!hidePrevPatron">
+                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                    *ngIf="canLoadPrevPatron" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
+                    [disabled]="!canLoadPrevPatron">
+                    &lt;&lt; &nbsp;Previous
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <ion-digit-keyboard *ngIf="patronAccount == 'patron_pin'" [align]="keyboardSettings.align"
+              [width]="keyboardSettings.width" [visible]="keyboardSettings.visible"
+              [leftActionOptions]="keyboardSettings.leftActionOptions"
+              [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
+              [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
+              [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
+            </ion-digit-keyboard>
+          </ion-col>
+        </ion-row>
+      </div>
+      <div [ngSwitch]="patronAccount" view-mobile>
+        <ion-row *ngSwitchCase="'advanced'" class="patron-advanced-search">
+          <ion-col>
+            <ion-segment color="white" [(ngModel)]="advancedPatron">
+              <ion-segment-button value="by_patron" (click)="advancePatronClick()">
+                <ion-label>Name</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="by_homeroom" (click)="advancePatronClick()">
+                <ion-label>Homeroom</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="by_specialroster" (click)="getSpecialRostersList()">
+                <ion-label>Roster</ion-label>
+              </ion-segment-button>
+            </ion-segment>
+            <div [ngSwitch]="advancedPatron">
+              <ion-list *ngSwitchCase="'by_specialroster'">
+
+                <ion-item lines="none" (click)="showPopup('patronSpecialRoster')">
+
+                  <ion-label *ngIf="selectedSpecialRosterId !=-1">Selected Roster:
+                    <strong>{{selectedSpecialRosterName}}</strong>
+                  </ion-label>
+                  <ion-label *ngIf="selectedSpecialRosterId ==-1">Select a Roster ...</ion-label>
+                  <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available
+                  </ion-label>
+                  <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown">
+                  </ion-icon>
+
+                </ion-item>
+
+
+                <ion-item class="ion-text-center" lines="none" class="lookup-button">
+                  <ion-label>
+                    <ion-button class="ion-no-padding ion-no-margin" expand="block"
+                      (click)="blurInputElement(); showPopup('patronSpecialRosterPersonList')" size="large"
+                      [disabled]="selectedSpecialRosterId=== -1">
+                      Load
+                      <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                    </ion-button>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+              <ion-list *ngSwitchCase="'by_patron'">
+                <ion-item lines="none">
+
+                  <ion-label slot="start" position="fixed">Site</ion-label>
+                  <ion-select [(ngModel)]="selectedSite" >
+                    <ion-select-option value="{{site.SchoolId}}" *ngFor="let site of siteList;let i = index;">
+                      {{site.SiteNameWithCode}}
+                    </ion-select-option>
+                  </ion-select>
+
+                </ion-item>
+
+
+                <!-- Non iOS -->
+                <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
+                  <ion-row>
+                    <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                  </ion-row>
+                </ng-container>
+                <!-- <ion-item lines="none" *ngIf="!isIOS"> -->
+                <ion-item lines="none">
+                  <ion-label slot="start" position="fixed">First Name</ion-label>
+
+                  <ion-input type="text" [(ngModel)]="patronSearch.firstname" id="firstname" (keypress)="onKeyPressFN($event)"
+                    (keyup)="checkAlphaNumericFN($event);handleKeyDown($event)">
+                    <!-- (keyup)=""> -->
+                  </ion-input>
+                  <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                  </ion-button>
+
+                </ion-item>
+                
+                <ion-item lines="none">
+                  <ion-label slot="start" position="fixed">Last Name</ion-label>
+
+                  <ion-input type="text" [(ngModel)]="patronSearch.lastname" (keypress)="onKeyPressLN($event)"
+                    (keyup)="checkAlphaNumericLN($event);handleKeyDown($event)">
+                    <!-- (keyup)=""> -->
+                  </ion-input>
+                  <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                  </ion-button>
+                </ion-item>
+               
+                <ion-item lines="none">
+                  <ion-label slot="start" position="fixed">{{AdvancedPinLookupLabel}}</ion-label>
+
+                  <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
+                    (keyup)="checkNumeric($event);"></ion-input>
+                  <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                  </ion-button>
+                </ion-item>
+                
+                <ion-item class="ion-text-center" lines="none" class="lookup-button no-background">
+                  <ion-label>
+                    <ion-button class="ion-no-padding ion-no-margin" expand="block" slot="end" size="large"
+                      [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname ))"
+                      (click)="AdvancedPatronLookup()">
+                      Search
+                      <ion-icon name="arrow-round-forward"></ion-icon>
+                    </ion-button>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+              <ion-list *ngSwitchCase="'by_homeroom'" class="ion-no-padding ion-no-margin">
+                <ion-item lines="none" (click)="showPopup('patronGrade')">
+
+                  <ion-label *ngIf="this.selectedGrade!=-1">Selected Grade:
+                    <strong>{{this.selectedGradeName}}</strong>
+                  </ion-label>
+                  <ion-label *ngIf="this.selectedGrade == -1 && gradeList.length ==0">Grade: None
+                    Available
+                  </ion-label>
+                  <ion-label *ngIf="this.selectedGrade == -1 && gradeList.length >0">Select a Grade
+                    ...
+                  </ion-label>
+                  <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown">
+                  </ion-icon>
+
+                </ion-item>
+                <ion-item lines="none" (click)="showPopup('patronHomeroom')">
+
+                  <ion-label *ngIf="this.selectedHomeroom!=-1">Selected Homeroom:
+                    <strong>{{this.selectedHomeroomName}}</strong>
+                  </ion-label>
+                  <ion-label *ngIf="this.selectedHomeroom == -1 && homeRoomList.length ==0">Homeroom:
+                    None Available
+                  </ion-label>
+                  <ion-label *ngIf="this.selectedHomeroom == -1 && homeRoomList.length >0">Select a
+                    Homeroom ...
+                  </ion-label>
+                  <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown">
+                  </ion-icon>
+
+                </ion-item>
+                <ion-item lines="none" (click)="showPopup('patronPatron')">
+
+                  <ion-label *ngIf="this.selectedHomeroomPatronId!=-1">Selected Patron:
+                    <strong>{{this.selectedHomeroomPatronName}}</strong>
+                  </ion-label>
+                  <ion-label
+                    *ngIf="this.selectedHomeroomPatronId == -1 && personlist.length ==0  && this.selectedGrade != -1 && this.selectedHomeroom!=-1">
+                    Patron: None Available</ion-label>
+                  <ion-label *ngIf="this.selectedHomeroomPatronId == -1  && personlist.length >0">
+                    Select a Patron ...</ion-label>
+                  <ion-label
+                    *ngIf="this.selectedHomeroomPatronId == -1 && (this.selectedGrade ==0  || this.selectedHomeroom==-1)">
+                    Select a Patron ...</ion-label>
+                  <ion-icon *ngIf="personlist.length !=0" slot="end" name="md-arrow-dropdown">
+                  </ion-icon>
+
+                </ion-item>
+                <ion-item class="ion-text-center" lines="none" class="lookup-button">
+                  <ion-label>
+                    <ion-button class="ion-no-padding ion-no-margin" expand="block" (click)="blurInputElement(); selectHomeroomPatron()"
+                      size="large"
+                      [disabled]="selectedGrade==-1 || selectedHomeroom==-1 || selectedHomeroomPatronId==-1">
+                      Load
+                      <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                    </ion-button>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+            </div>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngSwitchCase="'patron_pin'" class="patron-pin-search">
+          <ion-col>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="9" size-md="9" size-sm="9">
+                  <ion-item lines="none">
+                    <ion-input id="pinInput" placeholder="{{SearchByText}}" value="{{patronSearch.keyword}}"
+                      class="ion-text-center">
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK"
+                      style="font-size: 12px !important;" (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="3" size-md="3" size-sm="3">
+                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
+                    [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" [disabled]="!canLoadPrevPatron">
+                    &lt; &lt; &nbsp;Previous
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+            <ion-digit-keyboard *ngIf="patronAccount == 'patron_pin'" [align]="keyboardSettings.align"
+              [width]="keyboardSettings.width" [visible]="keyboardSettings.visible"
+              [leftActionOptions]="keyboardSettings.leftActionOptions"
+              [rightActionOptions]="keyboardSettings.rightActionOptions" [roundButtons]="keyboardSettings.roundButtons"
+              [showLetters]="keyboardSettings.showLetters" [swipeToHide]="keyboardSettings.swipeToHide"
+              [theme]="keyboardSettings.theme" (buttonClick)="numberClick($event)">
+            </ion-digit-keyboard>
+          </ion-col>
+        </ion-row>
+      </div>
+      <ion-footer class="bottom-footer" [ngClass]="{'ion-hide': specialAccountHide, 'bottom-bar':true}" color="gray">
+        <ion-toolbar class="ion-no-border" bg-transparent>
+          <ion-row *ngFor="let special_account of specialAccountsArray" class="btn-patron-special-account">
+            <ion-col size="6" *ngFor="let account of special_account">
+              <ion-button expand="block" (click)="blurInputElement(); selectPatron(account,true)">
+                {{account.Description}}
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-toolbar>
+      </ion-footer>
+    </ion-col>
+  </ion-row>
+  <ion-row vh-100 bg-theme *ngIf="selectAccuntClick === true || menuPayselectAcctClick===true">
+    <ion-col size="12" class="panel-side cus-padding">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>
+            Search Patron
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <div view-full>
+        <ion-row class="patron-advanced-search ion-justify-content-center" vh-100-dyn bg-theme>
+          <ion-col size="12" size-md="12" size-sm="12">
+            <div>
+              <div>
+                <ion-list no-margin class="padd-bt-5">
+                  <ion-row class='selectedSiteRow'>
+                    <!--(click)="showPopup('patronSites')" -->
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-label class="ion-text-center">
+                          Selected Site
+                        </ion-label>
+                        <ion-button slot="end" (click)="loadPrevPatron()" class="previous_patron_btn"
+                          style="height: 40px;" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
+                          [disabled]="!canLoadPrevPatron">
+                          &lt; &lt; &nbsp;Previous
+                        </ion-button>
+                      </ion-item>
+                      <ion-list class="ion-no-padding ion-no-margin">
+                        <ion-radio-group [(ngModel)]="selectedSite">
+                          <ion-item lines="none" *ngFor="let site of siteList">
+
+                            <ion-label>{{site.SiteNameWithCode}}</ion-label>
+                            <ion-radio slot="end" id="{{site.SchoolId}}" color="slate" value="{{site.SchoolId}}"
+                              [ngStyle]="{'padding-right':(isElectronApp && openOSK) ? '10px' : '', 'margin-left':'0px' }">
+                            </ion-radio>
+
+                          </ion-item>
+                        </ion-radio-group>
+                      </ion-list>
+                    </ion-col>
+                  </ion-row>
+                  <!-- Non iOS -->
+                  <!-- <ion-item lines="none" *ngIf="!isIOS" tabindex="-1"> -->
+                    <ng-container *ngIf="selectedSite && selectedSite.toString().includes('00000000-0000-0000-0000-000000000000')">
+                      <ion-row>
+                        <ion-label class="otherSchoolLabel">Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+                      </ion-row>
+                    </ng-container>
+                    
+                  <ion-item lines="none">
+                    <!-- <ion-label slot="start" position="fixed">First Name</ion-label> -->
+
+                    <ion-input type="text" [(ngModel)]="patronSearch.firstname" class="fnamecss" placeholder="First Name"
+                      (ionFocus)="setActiveField('firstName')" [ngClass]="firstNameClass" id="firstname"
+                      (keyup)="checkAlphaNumericFN($event); handleKeyDown($event)">
+                      <!--  (keypress)="onKeyPressFN($event)" (keyup)=""> -->
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                  <ion-item lines="none">
+                    <!-- <ion-label slot="start" fixed>Last Name</ion-label> -->
+
+                    <ion-input type="text" [(ngModel)]="patronSearch.lastname" placeholder="Last Name"
+                      (ionFocus)="setActiveField('lastName')" [ngClass]="lastNameClass" id="lastname"
+                      (keyup)="checkAlphaNumericLN($event); handleKeyDown($event)">
+                      <!-- (keypress)="onKeyPressLN($event)" (keyup)=""> -->
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                      (click)="blurInputElement(); openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                  <ion-item lines="none">
+                    <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
+
+                    <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" id="externalId"
+                      placeholder="{{AdvancedPinLookupLabel}}" (ionFocus)="setActiveField('externalId')"
+                      [ngClass]="externalIdClass" (keypress)="keyUpPIN($event)"
+                      (keyup)="checkNumeric($event); handleKeyDown($event)">
+                      <!-- (keyup)=""> -->
+                    </ion-input>
+                    <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                      (click)="openOnScreenKeyboard()">
+                      <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                    </ion-button>
+                  </ion-item>
+                </ion-list>
+                <ion-list class="margin-top10 ion-no-padding">
+                  <ion-item class="ion-text-center" lines="none" class="search-btn">
+                    <ion-label>
+                      <ion-button expand="block" size="large" class="ion-no-padding ion-no-margin"
+                        [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname || patronSearch.externalId))"
+                        (click)="blurInputElement(); AdvancedPatronLookup()">
+                        Search
+                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                      </ion-button>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+      <div view-mobile>
+        <ion-row class="patron-advanced-search">
+          <ion-col>
+            <div>
+              <ion-list>
+                <ion-item>
+                  <ion-label slot="start" position="fixed">Site</ion-label>
+                  <ion-select [(ngModel)]="selectedSite">
+                    <ion-select-option value="{{site.SchoolId}}" *ngFor="let site of siteList;let i = index;">
+                      {{site.SiteNameWithCode}}
+                    </ion-select-option>
+                  </ion-select>
+
+                </ion-item>
+                <ion-label>Full First Name, Last Name, or Patron ID must be entered for Other School search</ion-label>
+
+                <!-- Non iOS -->
+                <ion-item *ngIf="!isIOS">
+                  <ion-label item-start fixed>First Name</ion-label>
+
+                  <ion-input type="text" [(ngModel)]="patronSearch.firstname" id="firstname" (keypress)="onKeyPressFN($event)"
+                    (keyup)="checkAlphaNumericFN($event);handleKeyDown($event)">
+                    <!-- (keyup)=""> -->
+                  </ion-input>
+                  <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                  </ion-button>
+                </ion-item>
+                <!-- Non iOS -->
+                <!-- iOS only -->
+                <ion-item *ngIf="isIOS" (click)="changeActiveInput('firstName')">
+                  <ion-label item-start fixed>First Name</ion-label>
+                  <ion-label item-end class="{{firstNameClass}}">{{patronSearch.firstname}}
+                  </ion-label>
+                </ion-item>
+                <!-- iOS only -->
+                <!-- Non iOS -->
+                <ion-item *ngIf="!isIOS">
+                  <ion-label item-start fixed>Last Name</ion-label>
+
+                  <ion-input type="text" [(ngModel)]="patronSearch.lastname" (keypress)="onKeyPressLN($event)"
+                    (keyup)="checkAlphaNumericLN($event);handleKeyDown($event)">
+                    <!-- (keyup)=""> -->
+                  </ion-input>
+                  <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                  </ion-button>
+                </ion-item>
+                <!-- Non iOS -->
+                <!-- iOS only -->
+                <ion-item *ngIf="isIOS" (click)="changeActiveInput('lastName')">
+                  <ion-label item-start fixed>Last Name</ion-label>
+                  <ion-label item-end class="{{lastNameClass}}">{{patronSearch.lastname}}</ion-label>
+                </ion-item>
+                <!-- iOS only -->
+                <!-- Non iOS -->
+                <ion-item *ngIf="!isIOS">
+                  <ion-label item-start fixed>{{AdvancedPinLookupLabel}}</ion-label>
+
+                  <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
+                    (keyup)="checkNumeric($event)"></ion-input>
+                  <ion-button fill="clear" color="slate" *ngIf="isElectronApp && openOSK" style="padding-right:20px;"
+                    (click)="blurInputElement(); openOnScreenKeyboard()">
+                    <ion-icon slot="icon-only" name="keypad"></ion-icon>
+                  </ion-button>
+                </ion-item>
+                <!-- Non iOS -->
+                <!-- iOS only -->
+                <ion-item *ngIf="isIOS" (click)="changeActiveInput('externalId')">
+                  <ion-label item-start fixed>{{AdvancedPinLookupLabel}}</ion-label>
+                  <ion-label item-end class="{{externalIdClass}}">{{patronSearch.externalId}}
+                  </ion-label>
+                </ion-item>
+                <!-- iOS only -->
+                <ion-item class="lookup-button">
+                  <ion-button expand="block" size="large" class="ion-no-padding ion-no-margin"
+                    [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname ))"
+                    (click)="blurInputElement(); AdvancedPatronLookup()">
+                    Search
+
+                    <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                  </ion-button>
+                </ion-item>
+              </ion-list>
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+    </ion-col>
+    <ion-footer>
+      <ion-toolbar position="bottom">
+        <div class="ion-text-center">
+          <ion-button color="slate" (click)="close(false)">
+            Close
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+  </ion-row>
+</ion-grid>
