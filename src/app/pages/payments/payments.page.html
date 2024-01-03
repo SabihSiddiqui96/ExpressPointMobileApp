@@ -41,11 +41,11 @@
     </ion-header>
     <!-- <ion-content scroll-y="true"> -->
 
-    <ion-row bg-theme *ngIf="patronId != null" class="ion-justify-content-center">
+    <ion-row bg-theme class="ion-justify-content-center">
       <!--[ngClass]="{'ion-hide' : patronId==null}"-->
       <ion-col size="12" size-lg="8" size-xl="5">
 
-        <div box-payment-list marg-payment>
+        <div *ngIf="patronId != null" box-payment-list marg-payment>
           <ion-list style="padding-bottom: 0px;padding-top: 0px;">
             <ion-item-divider style="border:none" class="patron-info-name">
               <ion-label>
