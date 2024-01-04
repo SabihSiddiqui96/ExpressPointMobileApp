@@ -39,14 +39,14 @@
                                         <ion-button size="small" expand="block" style="width: -webkit-fill-available;"
                                             class="name-display-button ion-float-right"
                                             [color]="isNameSortOrder('LnFn') ? 'slate' : ''"
-                                            (click)="setNameSortOrder('LnFn')">Last Name
+                                            (click)="blurInputElement(); setNameSortOrder('LnFn')">Last Name
                                         </ion-button>
                                     </ion-col>
                                     <ion-col>
                                         <ion-button size="small" expand="block" style="width: -webkit-fill-available;"
                                             class="name-display-button ion-float-left"
                                             [color]="isNameSortOrder('FnLn') ? 'slate' : ''"
-                                            (click)="setNameSortOrder('FnLn')">First Name
+                                            (click)="blurInputElement(); setNameSortOrder('FnLn')">First Name
                                         </ion-button>
                                     </ion-col>
                                     <ion-col>

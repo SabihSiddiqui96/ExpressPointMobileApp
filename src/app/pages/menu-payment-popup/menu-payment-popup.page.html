@@ -97,7 +97,7 @@
       <ion-row>
         <ion-col *ngFor="let button of priceButtons">
           <ion-button expand="block" medium color="secondary" [ngClass]="{'active' : buttonPriceActive== button.value }"
-            (click)="setCashTopupAmount(button.price,button.value)">${{button.value}}</ion-button>
+            (click)="blurInputElement(); setCashTopupAmount(button.price,button.value)">${{button.value}}</ion-button>
         </ion-col>
       </ion-row>
       <ion-digit-keyboard (keydown)="onKeydown($event)" [align]="keyboardSettings.align" [width]="keyboardSettings.width"
@@ -150,12 +150,12 @@
 </ion-content>
 <ion-footer>
   <ion-toolbar>
-    <ion-button size="large" fill="clear" color="black" (click)="close(transactionNumber)">
+    <ion-button size="large" fill="clear" color="black" (click)="blurInputElement(); close(transactionNumber)">
 
       Close
     </ion-button>
     <ion-buttons slot="primary">
-      <ion-button expand="block" size="large" color="slate" (click)="checkPayment()"
+      <ion-button expand="block" size="large" color="slate" (click)="blurInputElement(); checkPayment()"
         [disabled]="checkButtonDisabled() || makePaymentProcessing">
         Make Payment
         <ion-icon slot="end" name="arrow-round-forward" class="color_green"></ion-icon>

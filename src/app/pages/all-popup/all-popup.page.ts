@@ -801,6 +801,12 @@ export class AllPopupPage implements OnInit {
         }
     }
 
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
+
     public openOnScreenKeyboard() {
         //Check if toggle is enabled in admin settings
         if (this.utilService.isElectronApp()) {
