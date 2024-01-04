@@ -469,6 +469,12 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     }
   }
 
+  public blurInputElement() {
+    setTimeout(() => {
+      (document.activeElement as HTMLElement).blur();
+    }, 0);
+  }
+
   public findBonus(total) {
 
     const thresholdAmount = parseFloat(SettingService.getSettingValue('BONUSTHRES'));

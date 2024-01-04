@@ -12,7 +12,7 @@
         <ion-row class="bg-transparent no-line" class="ion-align-items-center">
           <ion-col size="3" size-md="3" size-sm="3">
             <!-- <ion-label slot="start"> -->
-            <ion-button fill="clear" color="slate" (click)="back()" class="ion-align-self-start">
+            <ion-button fill="clear" color="slate" (click)="blurInputElement(); back()" class="ion-align-self-start">
               <ion-icon name="arrow-back"></ion-icon>
               All Categories
             </ion-button>
@@ -38,7 +38,7 @@
             <ion-item lines="none" class="bg-transparent" style="padding-top: 4px;">
               <ion-label class="ion-text-right" position="bottom">Remain Open</ion-label>
               <ion-toggle slot="end" class="ion-float-left" color="slate" [(ngModel)]="remainOpen"
-                (ionChange)="setRemainOpen($event)">
+                (ionChange)="blurInputElement(); setRemainOpen($event)">
               </ion-toggle>
             </ion-item>
           </ion-col>
@@ -61,7 +61,7 @@
     <ion-col *ngFor="let subgrid of sub_array;let j=index;">
       <div class="menu-item-category menu-button" *ngIf="subgrid.isCategory==true">
         <ion-button expand="block" [style.border]="'1px solid ' + subgrid.BackColor"
-          (click)="showCategoryItems(subgrid)">
+          (click)="blurInputElement(); showCategoryItems(subgrid)">
           {{subgrid.ButtonDescription}} <span *ngIf = 'subgrid.IsDynamicMenu==true'> (D)</span>
           <ion-icon slot="end" name="alert" [style.display]="subgrid.restrictedItem==true? '' : 'none'">
           </ion-icon>
@@ -71,7 +71,7 @@
         <ion-button expand="block" *ngIf="subgrid.isCategory!=true" [style.backgroundColor]="subgrid.BackColor"
           [style.color]="subgrid.ForeColor"
           [style.borderColor]="subgrid.RefId == navDefaultMenuItemId ? 'transparent' : subgrid.BackColor"
-          (click)="addMenuToCart(subgrid)">
+          (click)="blurInputElement(); addMenuToCart(subgrid)">
           {{subgrid.ButtonDescription}}&ensp;
           <ion-icon slot="end" name="alert" [style.display]="subgrid.restrictedItem==true? '' : 'none'"></ion-icon>
           <ion-icon slot="end" name="restaurant" [style.display]="subgrid.IsReimbursable== true? '' : 'none'">
@@ -85,7 +85,7 @@
 
 <ion-footer class="ion-text-center">
   <ion-toolbar class="ion-align-items-center" position="bottom">
-    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="blurInputElement(); close()">
       Close
     </ion-button>
   </ion-toolbar>
