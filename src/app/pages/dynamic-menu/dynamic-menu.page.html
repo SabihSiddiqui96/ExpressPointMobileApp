@@ -258,17 +258,12 @@
 
                   <canvas #displayImage id="displayImage" style="display:none; padding-right:3px!important;"></canvas>
 
-
-                    <img class="flip_image" src="assets/img/default_male.png"
-                      *ngIf="!isPatronHavingImage && patronDetails.Gender === 'M' && isPatronHavingImage != null">
-
-
-                    <img class="flip_image" src="assets/img/default_female.png"
-                      *ngIf="!isPatronHavingImage && patronDetails.Gender === 'F' && isPatronHavingImage != null">
-
-
-                    <img style="--border-radius: 0%;" src="assets/img/no_image.png"
-                      *ngIf="!isPatronHavingImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F') && isPatronHavingImage != null">
+                    <img class="flip_image" [src]="patronImageConditionCheck" *ngIf="!isPatronHavingImage && patronDetails.Gender === 'M'">
+                    
+                    <img class="flip_image" [src]="patronImageConditionCheck" *ngIf="!isPatronHavingImage && patronDetails.Gender === 'F'">
+                    
+                    <img style="--border-radius: 0%;" [src]="patronImageConditionCheck"
+                      *ngIf="!isPatronHavingImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F')">
 
                   </ion-avatar>
                 </ion-col>

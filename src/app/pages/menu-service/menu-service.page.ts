@@ -1,5 +1,5 @@
 import { MenuGridComponent, MenuGridEvent, MenuGridEventType } from './components/menu-grid/menu-grid.component';
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
 import { Network } from '@ionic-native/network/ngx';
@@ -181,6 +181,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null
     };
     // public setting={}
+    public patronImageConditionCheck = '';
     public dayOfWeek = '0';
     public paymentValidation;
     public tempMealTypeId = 0;
@@ -338,6 +339,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public pouchQuery: PouchQueriesService,
         public logDBService: LogsDBService,
+        private cdr: ChangeDetectorRef,
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
         AppStateService.remove('patron_details');
@@ -986,7 +988,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.isPatronHavingImage = false;
         });
         this.setCreditLimit();
-
+        this.generateRandomImageURL();
         /** ToDo: Probably not needed - verify and remove */
         if (this.patronDetails.isSpecialAccount === true) {
             this.patronDetails.SchoolId = this.schoolId;
@@ -1052,6 +1054,23 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
 
         // }
+    }
+
+    public generateRandomImageURL(): void {
+        // Update the image URL with a new timestamp
+        if (this.isPatronHavingImage == null || this.isPatronHavingImage == false) {
+            if (this.patronDetails.Gender === 'M') {
+                this.patronImageConditionCheck = 'assets/img/default_male.png?lastmod=' + Date.now();
+            }
+            if (this.patronDetails.Gender === 'F') {
+                this.patronImageConditionCheck = 'assets/img/default_female.png?lastmod=' + Date.now();
+            }
+            else if (this.patronDetails.Gender != 'M' && this.patronDetails.Gender != 'F') {
+                this.patronImageConditionCheck = 'assets/img/no_image.png?lastmod=' + Date.now();
+            }
+        }
+        // Manually trigger change detection
+        Promise.resolve().then(() => this.cdr.markForCheck());
     }
 
     public hideLargeImage() {
