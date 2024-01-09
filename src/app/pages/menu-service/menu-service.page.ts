@@ -936,45 +936,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.setRestrictions();
         this.patronImage = null;
         this.isPatronHavingImage = null;
+        this.patronImageConditionCheck = null;
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
             const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
-            if (image) {
-                this.isPatronHavingImage = true;
-                const img = new Image();
-                img.onload = () => {
-                    const context = cv.getContext('2d');
-
-                    if (context) {
-                        let newWidth, newHeight;
-
-                        newWidth = 85;
-                        newHeight = 85;
-
-                        // Set the canvas size to the new dimensions
-                        cv.width = newWidth;
-                        cv.height = newHeight;
-
-                        // Draw the image onto the canvas with rounded corners
-                        context.beginPath();
-                        context.moveTo(40, 0); // Move to top-left corner with border-radius
-                        context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
-                        context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
-                        context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
-                        context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
-                        context.closePath();
-                        context.clip();
-
-                        context.drawImage(img, 0, 0, 85, 100);
-                    }
-                };
-                img.src = image;
-                cv.style.display = "inline";
-
+            if (image) {                
+                this.patronImageLoad(image);
             } else {
                 cv.style.display = "none";
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
                 this.isPatronHavingImage = false;
+                this.patronImageLoad();
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
@@ -982,13 +954,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 sessionStorage.removeItem(this.patronDetails.Identifier);
             }
         }).catch((err) => {
+            this.patronImageLoad();
             console.log('Error in gettng image ' + err);
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
             this.isPatronHavingImage = false;
         });
-        this.setCreditLimit();
-        this.generateRandomImageURL();
+        this.setCreditLimit();        
         /** ToDo: Probably not needed - verify and remove */
         if (this.patronDetails.isSpecialAccount === true) {
             this.patronDetails.SchoolId = this.schoolId;
@@ -1055,6 +1027,44 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         // }
     }
+    
+    public patronImageLoad(imageSrc = null) {
+        this.generateRandomImageURL();
+        const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
+        this.isPatronHavingImage = true;
+        const img = new Image();
+        img.onload = () => {
+            const context = cv.getContext('2d');
+
+            if (context) {
+                let newWidth, newHeight;
+
+                newWidth = 85;
+                newHeight = 85;
+
+                // Set the canvas size to the new dimensions
+                cv.width = newWidth;
+                cv.height = newHeight;
+
+                // Draw the image onto the canvas with rounded corners
+                context.beginPath();
+                context.moveTo(40, 0); // Move to top-left corner with border-radius
+                context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                context.closePath();
+                context.clip();
+                if ((this.patronDetails.Gender == 'M' || this.patronDetails.Gender == 'F') && imageSrc == null) {
+                    context.translate(newWidth, 0);
+                    context.scale(-1, 1);
+                }
+                context.drawImage(img, 0, 0, 85, 100);
+            }
+        };
+        img.src = imageSrc!= null ? imageSrc : this.patronImageConditionCheck;        
+        cv.style.display = "inline";
+    }
 
     public generateRandomImageURL(): void {
         // Update the image URL with a new timestamp
@@ -1074,7 +1084,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public hideLargeImage() {
-
         document.querySelector('.PatronLargeImage').setAttribute('src', '');
         document.querySelector('.PatronLargeImage').setAttribute('width', 0 + 'px');
         document.querySelector('.PatronLargeImage').setAttribute('height', 0 + 'px');
@@ -1082,7 +1091,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             + 0 + 'px;' + 'margin-left:' + 0 + 'px;background-repeat: no-repeat;');
         this.largeImageIsShowing = false;
         this.clearLargeImageTimouts();
-
     }
 
     public clearLargeImageTimouts() {
@@ -1095,44 +1103,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public showLargeImage(timeoutVal) {
-        // this.hideLargeImage();
-        // this.showLargeImageTimeout = setTimeout(() => {
-        //     try {
-
-        //         const pictureTop = Math.floor((document.getElementById('startPatronPicture'))
-        //             .getBoundingClientRect().top + window.scrollY);
-
-        //         let pictureStartX = Math.floor((document.getElementById('startPatronPicture'))
-        //             .getBoundingClientRect().left + window.scrollX);
-
-        //         const topPosFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture'))
-        //             .getBoundingClientRect().top + window.scrollY);
-        //         const rightXFooter = Math.floor((this.elRef.nativeElement.querySelector('.endPatronPicture')).getBoundingClientRect().right + window.scrollX);
-
-        //         //Calculate the exact picture width and height and show only if image available
-        //         if (pictureTop && pictureStartX && topPosFooter) {
-        //             let pictureWidth = rightXFooter - pictureStartX;
-        //             let pictureHeight = topPosFooter - pictureTop - 10;
-        //             let newWidthHeight = Math.floor(Math.sqrt((pictureWidth * pictureHeight) / 4));
-        //             let diffDisp = (pictureWidth - newWidthHeight);
-        //             pictureStartX = Math.floor(pictureStartX + diffDisp) - 8;
-        //             pictureWidth = newWidthHeight;
-        //             pictureHeight = newWidthHeight;
-        //             document.querySelector('.PatronLargeImage').setAttribute('src', this.largeImageSrc);
-        //             document.querySelector('.PatronLargeImage').setAttribute('width', pictureWidth + 'px');
-        //             document.querySelector('.PatronLargeImage').setAttribute('height', pictureHeight + 'px');
-        //             document.querySelector('.PatronLargeImage').setAttribute('style', 'z-index:100;position:absolute;top:'
-        //                 + pictureTop + 'px;' + 'margin-left:' + pictureStartX + 'px;background-repeat:no-repeat;border:3px;border-color:black;border-style:solid;');
-        //         }
-        //         this.largeImageIsShowing = true;
-        //     } catch (e) {
-        //         console.log('Caught in error while enlarging picture...');
-        //     }
-
-        //     this.hideLargeImageTimeout = setTimeout(() => {
-        //         this.hideLargeImage();
-        //     }, 5000);
-        // }, timeoutVal);
+        
     }
 
     public setCreditLimit() {

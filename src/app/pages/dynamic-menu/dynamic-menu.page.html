@@ -255,24 +255,12 @@
                 <ion-col>
                   <ion-avatar class="ion-float-right" style="width: auto !important;">
                     <!-- <ion-icon name="contact" *ngIf="!patronDetails.Image && patronDetails.IsStudent"></ion-icon> -->
-
-                  <canvas #displayImage id="displayImage" style="display:none; padding-right:3px!important;"></canvas>
-
-                    <img class="flip_image" [src]="patronImageConditionCheck" *ngIf="!isPatronHavingImage && patronDetails.Gender === 'M'">
-                    
-                    <img class="flip_image" [src]="patronImageConditionCheck" *ngIf="!isPatronHavingImage && patronDetails.Gender === 'F'">
-                    
-                    <img style="--border-radius: 0%;" [src]="patronImageConditionCheck"
-                      *ngIf="!isPatronHavingImage && (patronDetails.Gender !== 'M' && patronDetails.Gender !== 'F')">
-
+                    <canvas #displayImage id="displayImage" style="display:none; padding-right:3px!important;"></canvas>
                   </ion-avatar>
                 </ion-col>
               </ion-row>
-
             </ion-grid>
-
           </ion-label>
-
         </ion-item-divider>
       </ion-list>
 

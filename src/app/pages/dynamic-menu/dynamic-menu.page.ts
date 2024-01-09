@@ -997,48 +997,20 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.http.GetPersonImage(this.patronId).subscribe(data => {
                         const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
                         if (data) {
-                            this.isPatronHavingImage = true;
-                            const img = new Image();
-                            img.onload = () => {                                
-                                const context = cv.getContext('2d');
-
-                                if (context) {
-                                    let newWidth, newHeight;
-                                  
-                                    newWidth = 85;
-                                    newHeight = 85;
-
-                                    // Set the canvas size to the new dimensions
-                                    cv.width = newWidth;
-                                    cv.height = newHeight;
-
-                                    // Draw the image onto the canvas with rounded corners
-                                    context.beginPath();
-                                    context.moveTo(40, 0); // Move to top-left corner with border-radius
-                                    context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
-                                    context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
-                                    context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
-                                    context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
-                                    context.closePath();
-                                    context.clip();
-
-                                    context.drawImage(img, 0, 0, 85, 100);
-                                }
-                            };
-                            img.src = data;
-                            cv.style.display = "inline";
-                            
+                            this.patronImageLoad(data);                            
                         } else {
                             cv.style.display = "none";
                             this.isPatronHavingImage = false;
                             this.largeImageToShow = false;
                             this.largeImageIsShowing = false;
+                            this.patronImageLoad();
                         }
                     }, e => {
                         console.log(e);
                         this.isPatronHavingImage = false;
                         this.largeImageToShow = false;
                         this.largeImageIsShowing = false;
+                        this.patronImageLoad();
                     }, () => {
                     });
                 } else {
@@ -1049,6 +1021,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             else {
                 this.isPatronHavingImage = false;
+                this.patronImageLoad();
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
@@ -1209,6 +1182,44 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.largeImageToShow) {
             this.showLargeImage(1000);
         }
+    }
+
+    public patronImageLoad(imageSrc = null) {
+        this.generateRandomImageURL();
+        const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
+        this.isPatronHavingImage = true;
+        const img = new Image();
+        img.onload = () => {
+            const context = cv.getContext('2d');
+
+            if (context) {
+                let newWidth, newHeight;
+
+                newWidth = 85;
+                newHeight = 85;
+
+                // Set the canvas size to the new dimensions
+                cv.width = newWidth;
+                cv.height = newHeight;
+
+                // Draw the image onto the canvas with rounded corners
+                context.beginPath();
+                context.moveTo(40, 0); // Move to top-left corner with border-radius
+                context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                context.closePath();
+                context.clip();
+                if ((this.patronDetails.Gender == 'M' || this.patronDetails.Gender == 'F') && imageSrc == null) {
+                    context.translate(newWidth, 0);
+                    context.scale(-1, 1);
+                }
+                context.drawImage(img, 0, 0, 85, 100);
+            }
+        };
+        img.src = imageSrc != null ? imageSrc : this.patronImageConditionCheck;
+        cv.style.display = "inline";
     }
 
     public generateRandomImageURL(): void {
