@@ -938,11 +938,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.isPatronHavingImage = null;
         this.patronImageConditionCheck = null;
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
-            const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
             if (image) {                
                 this.patronImageLoad(image);
             } else {
-                cv.style.display = "none";
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
                 this.isPatronHavingImage = false;
@@ -1030,40 +1028,42 @@ export class MenuServicePage implements OnInit, OnDestroy {
     
     public patronImageLoad(imageSrc = null) {
         this.generateRandomImageURL();
-        const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
-        this.isPatronHavingImage = true;
-        const img = new Image();
-        img.onload = () => {
-            const context = cv.getContext('2d');
+        if (this.canvasRef != null && this.canvasRef != undefined) {
+            const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
+            this.isPatronHavingImage = true;
+            const img = new Image();
+            img.onload = () => {
+                const context = cv.getContext('2d');
 
-            if (context) {
-                let newWidth, newHeight;
+                if (context) {
+                    let newWidth, newHeight;
 
-                newWidth = 85;
-                newHeight = 85;
+                    newWidth = 85;
+                    newHeight = 85;
 
-                // Set the canvas size to the new dimensions
-                cv.width = newWidth;
-                cv.height = newHeight;
+                    // Set the canvas size to the new dimensions
+                    cv.width = newWidth;
+                    cv.height = newHeight;
 
-                // Draw the image onto the canvas with rounded corners
-                context.beginPath();
-                context.moveTo(40, 0); // Move to top-left corner with border-radius
-                context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
-                context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
-                context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
-                context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
-                context.closePath();
-                context.clip();
-                if ((this.patronDetails.Gender == 'M' || this.patronDetails.Gender == 'F') && imageSrc == null) {
-                    context.translate(newWidth, 0);
-                    context.scale(-1, 1);
+                    // Draw the image onto the canvas with rounded corners
+                    context.beginPath();
+                    context.moveTo(40, 0); // Move to top-left corner with border-radius
+                    context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                    context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                    context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                    context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                    context.closePath();
+                    context.clip();
+                    if ((this.patronDetails.Gender == 'M' || this.patronDetails.Gender == 'F') && imageSrc == null) {
+                        context.translate(newWidth, 0);
+                        context.scale(-1, 1);
+                    }
+                    context.drawImage(img, 0, 0, 85, 100);
                 }
-                context.drawImage(img, 0, 0, 85, 100);
-            }
-        };
-        img.src = imageSrc!= null ? imageSrc : this.patronImageConditionCheck;        
-        cv.style.display = "inline";
+            };
+            img.src = imageSrc != null ? imageSrc : this.patronImageConditionCheck;
+            cv.style.display = "inline";
+        }
     }
 
     public generateRandomImageURL(): void {
