@@ -31,12 +31,12 @@
                     <ion-row>
                       <ion-col size="6">
                         <ion-button size="small" expand="block" class="full-width name-display-button ion-float-right"
-                          [color]="isNameSortOrder('LnFn') ? 'slate' : ''" (click)="setNameSortOrder('LnFn')">Last Name
+                          [color]="isNameSortOrder('LnFn') ? 'slate' : ''" (click)="blurInputElement(); setNameSortOrder('LnFn')">Last Name
                         </ion-button>
                       </ion-col>
                       <ion-col size="6">
                         <ion-button size="small" expand="block" class="full-width name-display-button ion-float-left"
-                          [color]="isNameSortOrder('FnLn') ? 'slate' : ''" (click)="setNameSortOrder('FnLn')">First Name
+                          [color]="isNameSortOrder('FnLn') ? 'slate' : ''" (click)="blurInputElement(); setNameSortOrder('FnLn')">First Name
                         </ion-button>
                       </ion-col>
                     </ion-row>
@@ -48,13 +48,13 @@
           <ion-col size="6">
             <ion-col size="6" *ngIf="navType === 'patronlist' || navType === 'patronSpecialRosterPersonList'" style="width: 20rem ;">
               <ion-label >List</ion-label>
-              <ion-toggle style="padding-bottom: 5px;" color="success" (ionChange)="toggleView()" [checked]="isGridView"></ion-toggle>
+              <ion-toggle style="padding-bottom: 5px;" color="success" (ionChange)="blurInputElement(); toggleView()" [checked]="isGridView"></ion-toggle>
               <ion-label>Picture</ion-label>
             </ion-col>
             <ion-col  size="6" *ngIf="((this.navType=='patronPatron' ||
                         this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' ) && this.navPage!='Payments')">
               <ion-label style="margin: auto;text-align:right">Show All </ion-label>
-              <ion-toggle style="padding-bottom: 5px;" color="secondary" [(ngModel)]="showFullList" (ionChange)="showAll(showFullList)"
+              <ion-toggle style="padding-bottom: 5px;" color="secondary" [(ngModel)]="showFullList" (ionChange)="blurInputElement(); showAll(showFullList)"
               class="toggle_small"></ion-toggle>
             </ion-col>
             
@@ -103,7 +103,7 @@
                     [(ngModel)]="keyword" (ngModelChange)="keyword = $event.toLocaleUpperCase()">
                 </ion-searchbar>
                 <ion-button fill="clear" style="z-index: 99!important;" color="slate" *ngIf="isElectronApp"
-                    class="ion-align-self-end eye-icon" (click)="openOnScreenKeyboard()">
+                    class="ion-align-self-end eye-icon" (click)="blurInputElement(); openOnScreenKeyboard()">
                     <ion-icon slot="icon-only" name="keypad">
                     </ion-icon>
                 </ion-button>
@@ -295,11 +295,11 @@
   <ion-toolbar position="bottom">
 
     <div class="ion-text-center">
-      <ion-button color="slate" (click)="close()">
+      <ion-button color="slate" (click)="blurInputElement(); close()">
         Close
       </ion-button>
 
-      <ion-button color="slate" (click)="menuSave()" *ngIf="this.navType=='menuType' || this.navType=='servingLine'">
+      <ion-button color="slate" (click)="blurInputElement(); menuSave()" *ngIf="this.navType=='menuType' || this.navType=='servingLine'">
         Save
       </ion-button>
     </div>

@@ -103,6 +103,12 @@ export class MenuCategoryModelPage implements OnInit {
 
   }
 
+  public blurInputElement() {
+    setTimeout(() => {
+      (document.activeElement as HTMLElement).blur();
+    }, 0);
+  }
+
   public addMenuToCart(subgrid) {
     if (this.navPatronId) {
       if (subgrid.restrictedItem === true) {

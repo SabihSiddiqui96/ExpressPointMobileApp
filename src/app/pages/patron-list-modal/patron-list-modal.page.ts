@@ -127,7 +127,10 @@ export class PatronListModalPage implements OnInit {
 
     }
 
-    toggleView(){    
+    toggleView() {    
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
         this.isGridView = !this.isGridView;
         AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
@@ -189,5 +192,11 @@ export class PatronListModalPage implements OnInit {
         }
         this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
 
+    }
+
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
     }
 }

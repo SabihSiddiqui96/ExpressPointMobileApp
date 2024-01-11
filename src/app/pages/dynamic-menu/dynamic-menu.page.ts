@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
 import { NavController, AlertController, PopoverController, ModalController, Platform } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
@@ -144,6 +144,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     // public isPayButtonDisabled=true
     /**********Static menus in Dynamic Menu END ********************* */
 
+    public patronImageConditionCheck = '';
     public siteName;
     public hideBalSetting: number = 0;
     public alaCarteCash: Array<string>;
@@ -337,6 +338,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
+        private cdr: ChangeDetectorRef,
         public utilService: UtilService, public http: HttpService,
         public lookUpService: LookupService, public patronLookup: PatronLookupPage, private dynamicMenusDB: DynamicMenusDBService,
         public switchHandsService: SwitchHandsService,
@@ -989,54 +991,25 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.GetComboRules(this.patronDetails.GradeId);
         this.patronImage = null;
         this.isPatronHavingImage = null;
+        this.patronImageConditionCheck = null;
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
                 if (this.patronId) {
                     this.http.GetPersonImage(this.patronId).subscribe(data => {
-                        const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
                         if (data) {
-                            this.isPatronHavingImage = true;
-                            const img = new Image();
-                            img.onload = () => {                                
-                                const context = cv.getContext('2d');
-
-                                if (context) {
-                                    let newWidth, newHeight;
-                                  
-                                    newWidth = 85;
-                                    newHeight = 85;
-
-                                    // Set the canvas size to the new dimensions
-                                    cv.width = newWidth;
-                                    cv.height = newHeight;
-
-                                    // Draw the image onto the canvas with rounded corners
-                                    context.beginPath();
-                                    context.moveTo(40, 0); // Move to top-left corner with border-radius
-                                    context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
-                                    context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
-                                    context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
-                                    context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
-                                    context.closePath();
-                                    context.clip();
-
-                                    context.drawImage(img, 0, 0, 85, 100);
-                                }
-                            };
-                            img.src = data;
-                            cv.style.display = "inline";
-                            
+                            this.patronImageLoad(data);                            
                         } else {
-                            cv.style.display = "none";
                             this.isPatronHavingImage = false;
                             this.largeImageToShow = false;
                             this.largeImageIsShowing = false;
+                            this.patronImageLoad();
                         }
                     }, e => {
                         console.log(e);
                         this.isPatronHavingImage = false;
                         this.largeImageToShow = false;
                         this.largeImageIsShowing = false;
+                        this.patronImageLoad();
                     }, () => {
                     });
                 } else {
@@ -1047,6 +1020,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             else {
                 this.isPatronHavingImage = false;
+                this.patronImageLoad();
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
@@ -1057,7 +1031,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         // **********!!!!TO DO: Menu Item Restrictions with Dynamic Menus!!!!!!!!!******** */
 
-
+        this.generateRandomImageURL();
 
         if (!this.isDynamicMenuSelected) { //  Menu Item Restrictions with Static menus in Dynamic Menus
             this.setStaticMenuRestrictions();
@@ -1207,6 +1181,63 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.largeImageToShow) {
             this.showLargeImage(1000);
         }
+    }
+
+    public patronImageLoad(imageSrc = null) {
+        this.generateRandomImageURL();
+        if (this.canvasRef != null && this.canvasRef != undefined) {
+            const cv: HTMLCanvasElement = this.canvasRef.nativeElement;
+            this.isPatronHavingImage = true;
+            const img = new Image();
+            img.onload = () => {
+                const context = cv.getContext('2d');
+
+                if (context) {
+                    let newWidth, newHeight;
+
+                    newWidth = 85;
+                    newHeight = 85;
+
+                    // Set the canvas size to the new dimensions
+                    cv.width = newWidth;
+                    cv.height = newHeight;
+
+                    // Draw the image onto the canvas with rounded corners
+                    context.beginPath();
+                    context.moveTo(40, 0); // Move to top-left corner with border-radius
+                    context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
+                    context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
+                    context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
+                    context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                    context.closePath();
+                    context.clip();
+                    if ((this.patronDetails.Gender == 'M' || this.patronDetails.Gender == 'F') && imageSrc == null) {
+                        context.translate(newWidth, 0);
+                        context.scale(-1, 1);
+                    }
+                    context.drawImage(img, 0, 0, 85, 100);
+                }
+            };
+            img.src = imageSrc != null ? imageSrc : this.patronImageConditionCheck;
+            cv.style.display = "inline";
+        }
+    }
+
+    public generateRandomImageURL(): void {
+        // Update the image URL with a new timestamp
+        if (this.isPatronHavingImage == null || this.isPatronHavingImage == false) {
+            if (this.patronDetails.Gender === 'M') {
+                this.patronImageConditionCheck = 'assets/img/default_male.png?lastmod=' + Date.now();
+            }
+            if (this.patronDetails.Gender === 'F') {
+                this.patronImageConditionCheck = 'assets/img/default_female.png?lastmod=' + Date.now();
+            }
+            else if (this.patronDetails.Gender != 'M' && this.patronDetails.Gender != 'F') {
+                this.patronImageConditionCheck = 'assets/img/no_image.png?lastmod=' + Date.now();
+            }
+        }
+        // Manually trigger change detection
+        Promise.resolve().then(() => this.cdr.markForCheck());
     }
 
     public getCreditLimit() {

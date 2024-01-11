@@ -30,7 +30,7 @@
 
           <ion-item>
             <ion-label>
-              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="setCashPaymentOption()"
+              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="blurInputElement(); setCashPaymentOption()"
                 class="pay_segment" mode="md">
                 <ion-segment-button value="cash" (click)="changeActiveInput('amount')">
                   <ion-label>
@@ -83,7 +83,7 @@
           </ion-item>
           <ion-item *ngIf="navIsSpecialAccount==false && cashpaymentOption=='cash'">
             <ion-label>Deposit Change?</ion-label>
-            <ion-toggle color="slate" [(ngModel)]="depositChangeDue" (ionChange)="setCashTendered()"></ion-toggle>
+            <ion-toggle color="slate" [(ngModel)]="depositChangeDue" (ionChange)="blurInputElement(); setCashTendered()"></ion-toggle>
           </ion-item>
           <!-- "setDepositChangeDue(depositChangeDue)" -->
           <ion-item
@@ -95,7 +95,7 @@
           <ion-item
             *ngIf="cashpaymentOption =='cash' && patronDetails.isSpecialAccount && showSelectAccount && isStaffNVisitor && showPatron">
             <ion-label>Deposit Change to student account?</ion-label>
-            <ion-toggle color="slate" [(ngModel)]="depositChangeDue" (ionChange)="setCashTendered()"></ion-toggle>
+            <ion-toggle color="slate" [(ngModel)]="depositChangeDue" (ionChange)="blurInputElement(); setCashTendered()"></ion-toggle>
           </ion-item>
 
           <ion-item *ngIf="cashpaymentOption=='check' && !hideCheckOption">
@@ -136,7 +136,7 @@
               style="text-align: center;padding:5rem 5rem 3rem 5rem;">
               <label style="padding:0.5rem;">Square Transaction in Progress ...</label><br /><br />
               <label style="font-size: 24px;font-weight: bold;">{{counter | formatTime}}</label>
-              <ion-button *ngIf="ShowSquareRetry" (click)="makeSale(true)">Retry Square Transaction
+              <ion-button *ngIf="ShowSquareRetry" (click)="blurInputElement(); makeSale(true)">Retry Square Transaction
               </ion-button>
             </div>
           </ion-item>
@@ -144,7 +144,7 @@
       </ion-card>
       <ion-row>
         <ion-col size="6" size-md="6" size-sm="6" class="btn-select-account">
-          <ion-button expand="block" (click)="selectPatronAccount()"
+          <ion-button expand="block" (click)="blurInputElement(); selectPatronAccount()"
             [ngClass]="{'previous_patron_btn_mobile': !isElectron}" class="previous_patron_btn" style="height:3.6rem;"
             *ngIf="isStaffNVisitor && showSelectAccount && patronDetails.isSpecialAccount">
             Select Account
@@ -157,7 +157,7 @@
         <ion-col size="3" *ngFor="let button of priceButtons">
           <ion-button expand="block" size="large" color="secondary"
             [ngClass]="{'active' : buttonPriceActive== button.value }"
-            (click)="preSetCashTendered(button.price,button.value)">${{button.value}}</ion-button>
+            (click)="blurInputElement(); preSetCashTendered(button.price,button.value)">${{button.value}}</ion-button>
         </ion-col>
       </ion-row>
       <ion-digit-keyboard (keydown)="onKeydown($event)" [align]="keyboardSettings.align"
@@ -223,7 +223,7 @@
                       <ion-grid lines="none" class="ion-no-padding">
                         <ion-row>
                           <ion-col size="6" class="ion-no-padding ion-no-margin">
-                            <ion-button *ngIf="hideBalSetting==1" (click)="showBalance()">
+                            <ion-button *ngIf="hideBalSetting==1" (click)="blurInputElement(); showBalance()">
                               Show Balance
                             </ion-button>
                             <label *ngIf="hideBalSetting==0" class="patron-info-balance"
@@ -276,19 +276,19 @@
 </ion-content>
 <ion-footer>
   <ion-toolbar>
-    <ion-button size="large" fill="clear" color="black" (click)="close(true)">
+    <ion-button size="large" fill="clear" color="black" (click)="blurInputElement(); close(true)">
       Cancel
 
     </ion-button>
 
     <ion-buttons slot="primary">
-      <ion-button size="large" color="slate" (click)="goToMenuService()" style="font-size: 135%;"
+      <ion-button size="large" color="slate" (click)="blurInputElement(); goToMenuService()" style="font-size: 135%;"
         [ngClass]="{'show':canUsePrincipalAccount == true,'ion-hide':canUsePrincipalAccount == false && disablePrincipalAcctButton == false}"
         [disabled]="canUsePrincipalAccount == false && disablePrincipalAcctButton == true">
 
         Use Principal Account
       </ion-button>
-      <ion-button size="large" color="slate" (click)="makeSale(ShowSquareRetry)" style="font-size: 135%;"
+      <ion-button size="large" color="slate" (click)="blurInputElement(); makeSale(ShowSquareRetry)" style="font-size: 135%;"
         [disabled]="checkPayDisable() || saveInProgress || isCompleteTransactionProcessing || ShowSquareRetry">
         Complete Transaction
         <ion-icon slot="end" name="arrow-round-forward"></ion-icon>

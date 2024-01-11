@@ -1549,6 +1549,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         });
     }
 
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
+
     public showPatronAccountPopup() {
 
         this.lookUpService.menuPayselectAccountClick = true;
