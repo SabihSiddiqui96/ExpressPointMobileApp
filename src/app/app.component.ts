@@ -617,6 +617,8 @@ export class AppComponent {
             "You have been logged out due to inactivity. To continue please log in.",
             false
           );
+          //Setting previously selected patron to null
+          this.selectedPatron = "";
           // _this.utilService.showToast('You have been logged out due to inactivity. Please Sign In.');
           _thisRef.navCtrl.navigateRoot("logout");
         });
@@ -861,6 +863,8 @@ export class AppComponent {
         if (maxIdleTime && maxIdleTime !== 0) {
           if (AppStateService.get("login_details")) {
             if (currTime - lastBgTime > maxIdleTime) {
+              //Setting previously selected patron to null
+              this.selectedPatron = "";
               console.log("In timeout case using background time diff...");
               this.dismissPopup();
               // _thisRef.event.publish('timeOut');
