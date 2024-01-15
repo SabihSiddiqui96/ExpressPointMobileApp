@@ -48,17 +48,19 @@ namespace ExpressPointPeripherals
         public InputDeviceConfiguration(bool visibleOnLoad = false, bool loadTroubleshootMode = false)
         {
             _formHandle = Handle;
-
+            InitializeComponent();
+            RegisterHidNotification();
             /*visibleOnLoad = false when app launches intially; true in any other case */
 
             if (!visibleOnLoad)
             {
                 queueInput = new QueueInput(true);
-                HideForm();
-            }
 
-            InitializeComponent();
-            RegisterHidNotification();
+                WindowState = FormWindowState.Normal;
+                ShowInTaskbar = true;
+                CenterToScreen();
+                Show();
+            }
 
             if (visibleOnLoad) // weird resize/event issues coming up if this block is not after InitializeComponent
             {
@@ -68,6 +70,10 @@ namespace ExpressPointPeripherals
                     troubleshootMode = loadTroubleshootMode;
                     enableTroubleShootingMode();
                 }
+            }
+            else
+            {
+                HideForm();
             }
 
 
