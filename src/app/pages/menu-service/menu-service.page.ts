@@ -3055,7 +3055,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         if (this.reviewReasonDoc) {
                                             PouchDBService.UpsertSingleDoc(this.reviewReasonDoc, EXP_TRANSACTIONS).then(() => { this.reviewType = 0; });
                                         }
-                                        if (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) {
+                                        if (transactionType != 0 && (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true)) {
 
                                             const accBal = this.selectedAccountDetails.Balance;
 

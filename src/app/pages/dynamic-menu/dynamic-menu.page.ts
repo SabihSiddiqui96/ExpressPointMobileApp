@@ -3698,7 +3698,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 this.deviceTransactionId = null;
                                 this.utilService.setLoader(false);
 
-                                if (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true) {
+                                if (transactionType != 0 && (this.utilService.selectAccountClick === true || this.lookUpService.menuPayselectAccountClick === true)) {
 
                                     const accBal = this.selectedAccountDetails.Balance;
 
