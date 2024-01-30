@@ -92,7 +92,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public itemsWithAlergies: any[] = [];
     public toastAlert;
     public isPatronHavingImage = false;
-
+    public priceTypeStatus: string = "";
     // public squareRetry: boolean = false;
     public ngOnInit() {
         PouchQueriesService.GetAutoServeSetting().then((res) => {
@@ -937,6 +937,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.patronImage = null;
         this.isPatronHavingImage = null;
         this.patronImageConditionCheck = null;
+
+        this.priceTypeStatus = (this.patronDetails.PriceTypeStatus != null) ? this.patronDetails.PriceTypeStatus.trim() : "";
+        if (this.priceTypeStatus != "" && this.patronDetails.StatePriceTypeId != null && this.patronDetails.PriceTypeId != this.patronDetails.StatePriceTypeId) {
+            PouchQueriesService.GetPriceTypeById(this.patronDetails.StatePriceTypeId).then((res) => {
+                if (res) {
+                    if (res.rows.length > 0) {
+                        const desc = res.rows[0].doc.PriceTypeDescription;
+                        if (desc === 'Free') {
+                            this.priceTypeStatus = this.priceTypeStatus + " *";
+                        }
+                        if (desc === 'Reduced') {
+                            this.priceTypeStatus = this.priceTypeStatus + " **";
+                        }
+                    }
+                }
+            });
+        }
+
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
             if (image) {                
                 this.patronImageLoad(image);

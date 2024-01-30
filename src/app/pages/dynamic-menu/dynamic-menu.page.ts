@@ -323,7 +323,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public isAndroid: boolean = false;
     public stateEigSetting: boolean = false;
     public PaymentAmount: number = 0.00;
-
+    public priceTypeStatus: string = "";
 
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -992,6 +992,24 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.patronImage = null;
         this.isPatronHavingImage = null;
         this.patronImageConditionCheck = null;
+
+        this.priceTypeStatus = (this.patronDetails.PriceTypeStatus != null) ? this.patronDetails.PriceTypeStatus.trim() : "";
+        if (this.priceTypeStatus != "" && this.patronDetails.StatePriceTypeId != null && this.patronDetails.PriceTypeId != this.patronDetails.StatePriceTypeId) {
+            PouchQueriesService.GetPriceTypeById(this.patronDetails.StatePriceTypeId).then((res) => {
+                if (res) {
+                    if (res.rows.length > 0) {
+                        const desc = res.rows[0].doc.PriceTypeDescription;
+                        if (desc === 'Free') {
+                            this.priceTypeStatus = this.priceTypeStatus + " *";
+                        }
+                        if (desc === 'Reduced') {
+                            this.priceTypeStatus = this.priceTypeStatus + " **";
+                        }
+                    }
+                }
+            });
+        }
+
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
                 if (this.patronId) {
