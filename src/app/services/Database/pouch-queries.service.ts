@@ -417,6 +417,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetPriceTypeById(priceType: string) {
+    return EXP_COMMON.allDocs({
+      startkey: 'PriceType' + priceType,
+      endkey: 'PriceType' + priceType + '\uffff',
+      include_docs: true
+    });
+  }
+
 
   public static GetOfflineUser(username: string): any {
 
