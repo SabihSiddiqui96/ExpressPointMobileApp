@@ -2030,6 +2030,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                             this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
+                            this.alacarteCount = this.alacarteCount - 1;
                             this.popupMessageService.showMessage(PopupMessageCode.E05429);
                             // this.utilService.showToast('A La Carte dollar amount restriction has been reached for this patron.');
                             const menuItemIndex = this.menuItemsArr.indexOf(menuItemNo);
@@ -2136,6 +2137,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 console.log(this.patronDetails);
                 if (menuItem.IsReimbursable && this.mealCount > 0) {
                     this.mealCount = this.mealCount - 1;
+                }
+                else {
+                    this.alacarteCount = this.alacarteCount - 1;
                 }
                 const isRestrictedCategory = this.restrictableCategories.indexOf(menuItem.CategoryId);
                 const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(refId);
