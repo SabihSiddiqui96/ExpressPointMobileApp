@@ -452,6 +452,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_SYSTEM.allDocs({
+        startkey: 'AuthenticatedUser',
+        endkey: 'AuthenticatedUser\uffff',
         include_docs: true
       }).then(res => {
         const searchResult = JSON.parse('{ "docs": [] }');
@@ -507,6 +509,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_SYSTEM.allDocs({
+        startkey: 'AuthenticatedUser',
+        endkey: 'AuthenticatedUser\uffff',
         include_docs: true
       }).then(res => {
         const searchResult = JSON.parse('{ "docs": [] }');
@@ -783,6 +787,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_TRANSACTIONS.allDocs({
+        startkey: 'SessionCheck--',
+        endkey: 'SessionCheck--\uffff',
         include_docs: true
       }).then(res => {
         const testRegex = '^SessionCheck--.*';
@@ -814,6 +820,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_TRANSACTIONS.allDocs({
+        startkey: 'SessionCard--',
+        endkey: 'SessionCard--\uffff',
         include_docs: true
       }).then(res => {
         const testRegex = '^SessionCard--.*';
@@ -1018,6 +1026,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_STANDARD_MENUS.allDocs({
+        startkey: 'MenuItem--',
+        endkey: 'MenuItem--\uffff',
         include_docs: true
       }).then(res => {
         const testRegex = '^MenuItem.*';
@@ -1053,6 +1063,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_STANDARD_MENUS.allDocs({
+        startkey: 'MenuItem--',
+        endkey: 'MenuItem--\uffff',
         include_docs: true
       }).then(res => {
         const testRegex = '^MenuItem.*';
@@ -1152,6 +1164,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_DYNAMIC_MENUS.allDocs({
+        startkey: 'comboRule--' + gradeId,
+        endkey: 'comboRule--' + gradeId + '\uffff',
         include_docs: true
       }).then(res => {
         const testRegex = '^comboRule--' + gradeId;
@@ -1181,6 +1195,8 @@ export class PouchQueriesService {
 
     return new Promise<FilteredDocs>((resolve) => {
       EXP_STANDARD_MENUS.allDocs({
+        startkey: 'systemMenuItem--' + mealTypeId,
+        endkey: 'systemMenuItem--' + mealTypeId + '\uffff',
         include_docs: true
       }).then(res => {
         const testRegex = '^systemMenuItem--' + mealTypeId;

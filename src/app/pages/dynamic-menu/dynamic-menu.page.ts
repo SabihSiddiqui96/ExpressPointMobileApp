@@ -5686,6 +5686,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
                             this.patronDetails['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
+                            this.alacarteCount = this.alacarteCount - 1;
                             this.popupMessageService.showMessage(PopupMessageCode.E06430);
                             // this.utilService.showToast('A la carte dollar amount restriction has been reached for this patron.');
                             const menuItemIndex = this.menuItemsArr.indexOf(menuItemNo);
