@@ -1805,3 +1805,26 @@ ion-progress-bar{
     border-radius: 0%;
   }
 }
+
+@media (max-width: 1200px) {  
+    .previous-meal-btn {
+      height: 2.8rem !important;
+      font-size: 1rem !important;
+      padding-top: 10px;
+      margin-top: -10px;
+    }
+
+    ion-avatar canvas {
+      width: 70px !important;
+      height: 70px !important;
+    }
+
+    .inputDirectionArrowClass {
+      font-size: 18px !important;
+      margin-top: -5px !important;
+    }
+
+    .previous_patron_btn {
+      font-size: 11px !important;
+    }
+}
