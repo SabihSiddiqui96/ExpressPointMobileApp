@@ -33,8 +33,12 @@ export class MenuSoldPopupPage implements OnInit {
     console.log("@@ Starting loader with id: " + this.loadingID);
     this.loadingService.present(this.loadingID, null, false).then(() => {
       new Promise((resolve, reject) => {
+        const now = new Date();
+        const localOffset = (+1) * now.getTimezoneOffset() * 60000;
         this.navPatronDetails = this.patronDetails;
-
+        this.navPatronDetails.SoldItems.map(sitem => {
+          sitem.OffsetDate = parseInt(sitem.Date) + localOffset;
+        });
         console.log('Hello MenuSoldPopup Page');
 
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
