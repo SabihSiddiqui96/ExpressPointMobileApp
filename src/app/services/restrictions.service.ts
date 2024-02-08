@@ -682,9 +682,9 @@ export class RestrictionsService {
     // tslint:disable-next-line:max-line-length
     public CheckIfOnlyReimbursableMealsAreAllowed(promptUser: boolean, projBal, payAmnt, accBal) {
 
-        const saleHasOnlyOneReimbursableMeal = (this.mealCount === 1) ? this.alacarteCount > 0 ? false : true : false;
-        const saleHasBothReimbursableMealsAndAlacarteItems = (this.mealCount > 0 && this.alacarteCount > 0) ? true : false;
-        const saleHasOnlyAlaCarteItems = (this.mealCount === 0 && this.alacarteCount > 0) ? true : false;
+        const saleHasOnlyOneReimbursableMeal = (this.mealCount === 1) ? (this.alacarteTotal > 0 && this.alacarteCount > 0) ? false : true : false;
+        const saleHasBothReimbursableMealsAndAlacarteItems = (this.mealCount > 0 && (this.alacarteTotal > 0 && this.alacarteCount > 0)) ? true : false;
+        const saleHasOnlyAlaCarteItems = (this.mealCount === 0 && (this.alacarteTotal > 0 && this.alacarteCount > 0)) ? true : false;
         const saleTotalOfJustALaCarteItems = this.alacarteTotal;
 
         if (saleHasOnlyOneReimbursableMeal ||

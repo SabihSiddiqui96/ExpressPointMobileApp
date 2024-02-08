@@ -92,6 +92,13 @@ ion-list.addFunds_btn_mobile ion-button{
 ion-list.addFunds_btn ion-button{
    font-size: 1.4rem !important;
 }
+
+@media (max-width: 1200px) { 
+  ion-list.addFunds_btn ion-button {
+    font-size: 11px !important;
+  }
+}
+
 ion-footer ion-toolbar {
   padding: 4px;
   .label-margin-v3 {

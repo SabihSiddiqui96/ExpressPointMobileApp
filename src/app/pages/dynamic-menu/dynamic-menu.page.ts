@@ -2642,7 +2642,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ItemIndex': this.itemIndex,
                     'OriginalPrice': currPrice,
                     'TransactionNo': this.transactionNumber,
-                    'ItemAddedAt': (new Date).getTime(), // recording the item added time to track the item sale uniquely per terminal
+                    'ItemAddedAt': LocalTimerService.getTime('time'), // recording the item added time to track the item sale uniquely per terminal
                     'IsTaxable': menuItem.IsTaxable,
                     'PaidPrice': currPrice,
                     'ShowPaidPrice': false,
@@ -5686,6 +5686,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
                             this.patronDetails['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
+                            this.alacarteCount = this.alacarteCount - 1;
                             this.popupMessageService.showMessage(PopupMessageCode.E06430);
                             // this.utilService.showToast('A la carte dollar amount restriction has been reached for this patron.');
                             const menuItemIndex = this.menuItemsArr.indexOf(menuItemNo);
@@ -5784,7 +5785,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'ItemIndex': this.itemIndex,
                         'OriginalPrice': currPrice,
                         'TransactionNo': this.transactionNumber,
-                        'ItemAddedAt': (new Date).getTime(),
+                        'ItemAddedAt': LocalTimerService.getTime('time'),
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,
