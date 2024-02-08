@@ -1828,3 +1828,16 @@ ion-progress-bar{
       font-size: 11px !important;
     }
 }
+
+@media (max-width: 900px) {
+  .previous-meal-btn {
+      height: 2.8rem !important;
+      font-size: 0.73rem !important;
+      padding-top: 10px;
+      margin-top: -10px;
+    }
+
+    .transactionFont{
+      font-size: 10px !important;
+    }
+}
