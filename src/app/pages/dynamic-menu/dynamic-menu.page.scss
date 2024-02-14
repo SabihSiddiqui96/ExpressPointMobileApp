@@ -101,6 +101,12 @@ ion-list.addFunds_btn ion-button {
   }
 }
 
+@media (max-width: 1000px) {
+  ion-list.addFunds_btn ion-button {
+    font-size: 9px !important;
+  }
+}
+
 ion-footer ion-toolbar {
   padding: 4px;
   .label-margin-v3 {

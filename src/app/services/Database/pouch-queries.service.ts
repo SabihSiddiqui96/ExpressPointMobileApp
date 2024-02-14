@@ -753,7 +753,7 @@ export class PouchQueriesService {
 
   public static GetSessionChecks_PostNotSynced() {
     var current_Date = new Date();
-    var numberOfDayToSubtract = 3;
+    var numberOfDayToSubtract = 14;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionChecksGrThan = current_Date.getTime();
 
@@ -847,7 +847,7 @@ export class PouchQueriesService {
 
   public static GetSessionCards_PostNotSynced() {
     var current_Date = new Date();
-    var numberOfDayToSubtract = 3;
+    var numberOfDayToSubtract = 14;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionCardsGrThan = current_Date.getTime();
 

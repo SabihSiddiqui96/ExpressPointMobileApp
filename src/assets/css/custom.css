@@ -1840,4 +1840,8 @@ ion-progress-bar{
     .transactionFont{
       font-size: 10px !important;
     }
+
+    .patron-info-balance {
+        font-size: 12px !important;
+    }
 }

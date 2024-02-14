@@ -212,7 +212,7 @@
 
                   <!-- Non iOS -->
                   <!-- <ion-item lines="none" *ngIf="!isIOS"> -->
-                  <ion-item lines="none">
+                  <ion-item lines="none" style="display: none;">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
                     <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" id="externalId"
@@ -488,7 +488,7 @@
 
                 <!-- Non iOS -->
                 <!-- <ion-item lines="none" *ngIf="!isIOS"> -->
-                <ion-item lines="none">
+                <ion-item lines="none" style="display: none;">
                   <ion-label slot="start" position="fixed">{{AdvancedPinLookupLabel}}</ion-label>
 
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
@@ -704,7 +704,7 @@
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
-                  <ion-item lines="none">
+                  <ion-item lines="none" style="display: none;">
                     <!-- <ion-label slot="start" fixed>Patron Id</ion-label> -->
 
                     <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId" id="externalId"
@@ -794,7 +794,7 @@
                 </ion-item>
                 <!-- iOS only -->
                 <!-- Non iOS -->
-                <ion-item *ngIf="!isIOS">
+                <ion-item *ngIf="!isIOS" style="display: none;">
                   <ion-label item-start fixed>{{AdvancedPinLookupLabel}}</ion-label>
 
                   <ion-input type="text" #patron_id [(ngModel)]="patronSearch.externalId"
