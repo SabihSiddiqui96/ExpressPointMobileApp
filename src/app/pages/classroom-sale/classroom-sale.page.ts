@@ -66,7 +66,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
     isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
     isGridView = (this.gridViewPatronIsPic != null && this.gridViewPatronIsPic != undefined) ? Boolean(this.gridViewPatronIsPic) : this.isGridViewParent;
-
+    public nameSortOrder: string = 'LnFn';
 
     public filter = {
         'selected_grade': -1, 'selected_grade_name': '',
@@ -640,8 +640,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'StatePriceTypeId': doc.StatePriceTypeId,
                             'StateEligibilityId': doc.StateEligibilityId
                         };
-                    });
-                    students = _.sortBy(students, ['LastName', 'FirstName']);
+                    });                    
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -663,6 +662,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                     this.elRef.nativeElement.querySelector('.list-quick-sale').setAttribute('style', 'height: calc(100vh - 315px)');
                                 }, 50);
                             }
+                            this.updateStudentSortOrder();
                             this.utilService.setLoader(false);
                         });
                     });
@@ -723,9 +723,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'StateEligibilityId': doc.StateEligibilityId
                         };
 
-                    });
-
-                    students = _.sortBy(students, ['LastName', 'FirstName']);
+                    });                    
 
                     this.getStudentsImage(students).then((studentsWithImage) => {
                         this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -736,11 +734,11 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             this.totalStudent = this.studentList.length;
                             this.studentLoaded = true;
 
-
                             if (this.totalStudent > 0) {
                                 this.studentBtnDisable = true;
                                 this.filterDisable = true;
                             }
+                            this.updateStudentSortOrder();
                             this.utilService.setLoader(false);
                         });
                     });
@@ -816,8 +814,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                 'StatePriceTypeId': doc.StatePriceTypeId,
                                 'StateEligibilityId': doc.StateEligibilityId
                             };
-                        });
-
+                        });                        
                         const canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
                         const canServeVisitingAdults = SettingService.isUserPermitted('OTHRSADLT');
 
@@ -834,10 +831,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             students = students.filter(r => r.isActive === true);
                         }
 
-                        students = _.sortBy(students, ['LastName', 'FirstName']);
-                        console.log(students);
-
-
                         this.getStudentsImage(students).then((studentsWithImage) => {
 
                             this.getMealPrice(studentsWithImage, day).then((studentsWithPrices) => {
@@ -850,9 +843,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                     this.studentBtnDisable = true;
                                     this.filterDisable = true;
                                 }
+                                this.updateStudentSortOrder();
                                 this.utilService.setLoader(false);
                             });
-                        });
+                        });                       
                     }).catch(err => console.log(err));
                 }
             } else {
@@ -993,7 +987,21 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     }
 
-    public clearStudents() {
+    public clearStudents(showprompt: boolean = false) {
+        const showCancelWarning = Boolean(parseInt(SettingService.getSiteSettingValue('BULCANWAR')));
+        if (showprompt == true && this.getSelectedStudentCount() > 0 && showCancelWarning == true) {            
+            this.popupMessageService.showMessage(PopupMessageCode.E05305).then((bool) => {
+                if (bool) {
+                    this.clearStudentButtonCLick();
+                }
+            });
+        }
+        else {
+            this.clearStudentButtonCLick();
+        }
+    }
+
+    private clearStudentButtonCLick() {
         this.transactionInProgress = false;
         this.hasStudentsWithoutPriceTypes = false;
         this.utilService.setLoader(true);
@@ -1924,6 +1932,43 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         }
     }
 
+    public blurInputElement() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+    }
+
+    public updateStudentSortOrder() {
+        if (this.isNameSortOrder('FnLn')) {
+            try {
+                const newSortedList = _.orderBy(this.studentList, function (value) {
+                    return value.FirstName.toLowerCase();
+                }, ['asc']);
+                this.studentList = newSortedList;
+            } catch (e) {
+                console.log('Error in sorting patronList');
+            }
+        } else {
+            try {
+                const newSortedList = _.orderBy(this.studentList, function (value) {
+                    return value.LastName.toLowerCase();
+                }, ['asc']);
+                this.studentList = newSortedList;
+            } catch (e) {
+                console.log('Error in sorting patronList');
+            }
+        }
+    }
+
+    public setNameSortOrder(type) {
+        this.nameSortOrder = type;
+        AppStateService.set('AdvLookupSortOrder', this.nameSortOrder);
+        this.updateStudentSortOrder();
+    }
+
+    public isNameSortOrder(type) {
+        return type === this.nameSortOrder;
+    }
 
     public Confirmed_CartMenuItem(menuItem, priceTypeId) {
 
