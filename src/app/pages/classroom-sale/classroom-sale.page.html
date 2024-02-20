@@ -166,7 +166,7 @@
                 Students cannot be selected if price is not set for students price type. Verify all expected students are selected
           </p>
 
-        <ion-item box-header *ngIf="selectAllSetting== 1 && studentLoaded"
+        <ion-item box-header *ngIf="studentLoaded"
           [ngClass]="{'ion-hide' : (previousMealsCount == totalStudent || totalStudent==0 )}">
 
           <ion-col lines="none" bold class="bg-transparent ion-no-padding" style="display: flex;">
@@ -194,11 +194,11 @@
           </ng-container>
           
 
-          <ion-label style="max-width:11rem;" class="ion-text-right ion-padding">
+          <ion-label *ngIf="selectAllSetting == 1" style="max-width:11rem;" class="ion-text-right ion-padding">
             <strong>Select All</strong>
           </ion-label>
 
-          <ion-checkbox slot="end" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons()" title="Select All">
+          <ion-checkbox slot="end" *ngIf="selectAllSetting == 1" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate" secondary (click)="selectAllPatrons()" title="Select All">
           </ion-checkbox>
 
         </ion-item>
