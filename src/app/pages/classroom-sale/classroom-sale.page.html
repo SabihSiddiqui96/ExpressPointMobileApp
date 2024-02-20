@@ -276,7 +276,8 @@
                   </ion-row>    
                   <ion-row style="width: 100%" (click)="launchAlacarteItemsPopups(student)">
                     <ion-label>
-                      <strong>{{student.LastName}}<br>{{student.FirstName}}</strong>
+                      <strong *ngIf="nameSortOrder === 'LnFn'">{{student.LastName}}<br>{{student.FirstName}}</strong>
+                      <strong *ngIf="nameSortOrder === 'FnLn'">{{student.FirstName}}<br>{{student.LastName}}</strong>
                         <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
                     </ion-label> 
                 </ion-row>                  
@@ -301,7 +302,8 @@
               <ion-col size="4" size-md="4">
                 <ion-item lines="none">
                   <ion-label>
-                    <strong>{{student.LastName}},&nbsp;{{student.FirstName}}</strong>
+                    <strong *ngIf="nameSortOrder === 'LnFn'">{{student.LastName}},&nbsp;{{student.FirstName}}</strong>
+                    <strong *ngIf="nameSortOrder === 'FnLn'">{{student.FirstName}},&nbsp;{{student.LastName}}</strong>
                     <!-- <span *ngIf="student.IsAllergent" (click)="showAllergyPopover(student)">
                     <ion-icon name="alert"></ion-icon>
                   </span> -->
