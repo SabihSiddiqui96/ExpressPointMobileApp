@@ -5949,7 +5949,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 .then((items) => {
 
                     const buttons = items.rows[0].doc.Buttons;
-                    this.utilService.setLoader(true);
+                    //this.utilService.setLoader(true);
                     const subMenuGridName = grid.ButtonDescription;
                     if (buttons !== undefined || buttons != null) {
                         if (this.patronDetails.RestrictedMenuItems) {
@@ -6008,7 +6008,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         this.popupMessageService.showMessage(PopupMessageCode.E06409);
                         // this.utilService.showToast('There are no items within this category.');
                     }
-                    this.utilService.setLoader(false);
+                    //this.utilService.setLoader(false);
 
                 }).catch(err => console.log(err));
         } else {

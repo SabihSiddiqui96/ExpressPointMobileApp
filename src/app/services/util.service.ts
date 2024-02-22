@@ -107,21 +107,21 @@ export class UtilService {
   }
 
 
-  async setLoader(type) {
+  public async setLoader(type) {
     if (type === true) {
       const loading = await this.loadingCtrl.create({
         message: '',
         // dismissOnPageChange: true, // - not supported
         showBackdrop: false,
         cssClass: 'custom-loader-class',
-        duration: 1000
+        duration: 100
       });
       await loading.present();
     }
     if (type === false) {
       const element = await this.loadingCtrl.getTop();
       if (element) {
-        element.dismiss();
+        await element.dismiss();
       }
     }
   }
@@ -139,7 +139,7 @@ export class UtilService {
     } else {
       const element = await this.loadingCtrl.getTop();
       if (element) {
-        element.dismiss();
+        await element.dismiss();
       }
     }
   }
