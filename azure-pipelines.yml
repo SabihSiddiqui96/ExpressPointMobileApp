@@ -18,7 +18,7 @@ steps:
 
 - task: NodeTool@0
   inputs:
-    versionSpec: '10.9'
+    versionSpec: '12.18'
     checkLatest: true
 
 - task: Npm@0
