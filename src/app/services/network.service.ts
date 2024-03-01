@@ -27,16 +27,17 @@ export class NetworkService {
   private connectSubscription = undefined;
   private isOnline: boolean = false;
 
-  private NETWORK_FAILURE_LIMIT = 3; // 3 failures
+  private NETWORK_FAILURE_LIMIT = 8; // 8 failures
   private NETWORK_FAILURE_TIME = 2 * (60 * 1000); // in 2 minutes
   private IS_FORCED_OFFLINE = false;
   private countNetworkFailures = 0;
   private networkFailureCheckStartTime = undefined;
 
-  private SERVER_FAILURE_LIMIT = 3; // 3 failures
+  private SERVER_FAILURE_LIMIT = 6; // 6 failures
   private SERVER_FAILURE_TIME = 2 * (60 * 1000); // in 2 minutes
   private countServerFailures = 0;
   private serverFailureCheckStartTime = undefined;
+  private serverFailureLastTime = undefined;
 
   public resetNetworkCounters() {
     this.networkFailureCheckStartTime = undefined;
@@ -45,6 +46,7 @@ export class NetworkService {
 
   public resetServerCounters() {
     this.serverFailureCheckStartTime = undefined;
+    this.serverFailureLastTime = undefined;
     this.countServerFailures = 0;
   }
 
@@ -122,9 +124,13 @@ export class NetworkService {
     const currTime = (new Date()).getTime();
     if (this.serverFailureCheckStartTime === undefined) {
       this.serverFailureCheckStartTime = currTime;
-    }
-    this.countServerFailures++;
+      this.serverFailureLastTime = currTime;
+    }    
     if (((currTime - this.serverFailureCheckStartTime) <= this.SERVER_FAILURE_TIME)) {
+      if (currTime != this.serverFailureLastTime && (currTime - this.serverFailureLastTime) >= 6000) {
+        this.countServerFailures++;
+        this.serverFailureLastTime = currTime;
+      }
       if (this.countServerFailures >= this.SERVER_FAILURE_LIMIT) {
         this.resetServerCounters();
         this.utilService.showToast(this.serverFrequentNotReachable);
