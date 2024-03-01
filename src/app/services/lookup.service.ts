@@ -40,7 +40,7 @@ export class LookupService {
     // showModalPopup: boolean = true;
     public localtimer_device: number = 0;
     public CanServeVisitingAdults = null;
-
+    public isModelWindowOpened: boolean = false;
     public menuPayselectAccountClick: boolean = false;
 
     constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
@@ -52,6 +52,7 @@ export class LookupService {
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
             if (userEventData.selected_patron) {
                 if (userEventData.selected_patron.PersonId) {
+                    this.lookupResults = [];
                     // If the Person is from the server lookup, make a call to get his Details
                     if (userEventData.selected_patron.IsFromServer) {
                         this.getPersonInfoByPersonId(userEventData.selected_patron.PersonId).then((personDetails: any) => {
@@ -105,7 +106,10 @@ export class LookupService {
 
         this.lookupAndPushPersonToQ(queueInput).then(() => {
             if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
-                AppStateService.get('currentTab') !== 'advanced') {
+                AppStateService.get('currentTab') !== 'advanced') {                
+                if (this.isModelWindowOpened) {
+                    return;
+                }
                 this.selectPatron(this.personsQ[0]);
             }
         });
@@ -259,8 +263,13 @@ export class LookupService {
                 backdropDismiss: false,
                 cssClass: 'patron-modal-popup'
             }).then(async (res) => {
+                this.isModelWindowOpened = true;
                 await res.present().then(() => {
                     resolve('Success');
+                });
+
+                await res.onDidDismiss().then(() => {
+                    this.isModelWindowOpened = false;
                 });
             });
         });
@@ -305,9 +314,10 @@ export class LookupService {
                 //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
                 this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result: any) => {
                     this.publishEvents(result);
-                    if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
-                        this.popPersonFromQ(result.PersonIdentifier);
-                    }
+                    //commented due to selecting a patron from list doesn't have lookup results
+                    //if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
+                        this.popPersonFromQ(result.Identifier);
+                    //}
                 })
             }
         } else { // lookup from peripheral yielded non-unique results / no results

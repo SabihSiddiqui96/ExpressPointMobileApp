@@ -3545,7 +3545,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            }
+            AppStateService.remove('patron_details');
             if (this.patronDetails.PersonId !== null) {
                 this.logDBService.logData({
                     event: EventType.QUEUE,
@@ -3589,7 +3592,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }
-            this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            this.goToLookUp();
+            if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+            }
             this.lookUpService.populatePersonsFromQ();
 
         } else {
