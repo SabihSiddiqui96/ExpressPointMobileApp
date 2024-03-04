@@ -45,6 +45,7 @@ export class LookupService {
 
     constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
         private logDBService: LogsDBService,
+        private keywordService: KeywordService,
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
         private electronService: ElectronService, private personService: PersonService) {
@@ -66,7 +67,7 @@ export class LookupService {
                     const index = userEventData.index;
                     this.lookupFromNonUniquePIN(userEventData.selected_patron, index).then(() => {
                         if (this.personsQ.length === 0) {
-                            this.handlePersonResults(false);
+                            //this.handlePersonResults(false);//Commenting as causing multiple pop calls in case of similar non unique id list in queue
                         }
                     });
                 }
@@ -87,14 +88,15 @@ export class LookupService {
         if (this.utilService.isElectronApp() && this.utilService.showModalPopup) {
             this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
                 this.localtimer_device = new Date().getTime();
-                AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);
-                this.setQ(queueInput);
+                AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);     
+                const keywordSearchLength = this.keywordService.keywordSearchLength;
+                this.setQ(queueInput, keywordSearchLength > 0);
                 this.utilService.showModalPopup = false;
             });
         }
     }
 
-    public setQ(queueInput) {
+    public setQ(queueInput, searchTextExists: boolean = false) {
         this.getSettingValuesRequired(); // Added this to get the setting values in lookup using peripherals
 
         this.logDBService.logData({
@@ -108,6 +110,9 @@ export class LookupService {
             if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
                 AppStateService.get('currentTab') !== 'advanced') {                
                 if (this.isModelWindowOpened) {
+                    return;
+                }
+                if (searchTextExists && this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false) {
                     return;
                 }
                 this.selectPatron(this.personsQ[0]);
@@ -863,4 +868,12 @@ export enum Direction {
     None = 0,
     Left,
     Right
+}
+
+@Injectable({ providedIn: 'root' })
+export class KeywordService {
+    keyword: string = '';
+    get keywordSearchLength(): number {
+        return this.keyword == null ? 0 : this.keyword.length;
+    }
 }
