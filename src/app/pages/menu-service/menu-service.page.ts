@@ -3565,6 +3565,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.patronDetails.PersonId = null;
             this.patronImage = null;
             this.mealCount = 0;
+            this.menuItemsArr = [];
+            if (this.menuGrid['Buttons'].length) {
+                for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                    this.menuGrid['Buttons'][k]['restrictedItem'] = false;
+                }
+            }
             this.orderData = {
                 accountBalance: 0.00,
                 subTotal: 0.00,
