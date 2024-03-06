@@ -474,16 +474,23 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public numberClick(key: any) {
         if (key !== 'X' && key !== 'GO') {
+            if (this.patronSearch.keyword != null) {
+                this.customKeys = this.patronSearch.keyword.length > 0 ? this.patronSearch.keyword : '';
+            }
             this.customKeys += key;
-            this.patronSearch.keyword = this.customKeys;
+            this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
-            this.inputBuffer=[];
+            this.inputBuffer = [];
+            if (this.patronSearch.keyword != null && this.patronSearch.externalId != null && this.patronSearch.externalId.length < this.patronSearch.keyword.length) {
+                this.patronSearch.keyword = this.patronSearch.externalId;
+            }
+            this.patronSearch.externalId = null;
             this.lookupByPIN();
             this.customKeys = '';
             this.patronSearch.keyword = null;
         } else if (key === 'X') {
             this.customKeys = this.customKeys.slice(0, -1);
-            this.patronSearch.keyword = this.customKeys;
+            this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         }
 
 
@@ -621,6 +628,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public checkNumericLookUp(event) {
         this.keywordService.keyword = null;
+        this.patronSearch.externalId = null;
         if (event['keyCode'] === 9) {
             // event.stopPropagation();
             // setTimeout(() => {
@@ -653,8 +661,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.keywordService.keyword = this.patronSearch.keyword;
         if (isBarcodeInput) {
             return false;
-        }        
-
+        }
+        this.patronSearch.externalId = this.previousValidInput;
         // divide input char into char array
         // and then check each char against regex
         let chars = inputChar.split('');
@@ -691,6 +699,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.lookupByPIN();
                         this.customKeys = '';
                         this.patronSearch.keyword = null;
+                        this.previousValidInput = '';
                     }
                 }, 100);
             }
@@ -1122,6 +1131,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 else {
                     this.isEnterKeyHandled = true;
                     this.patronSearch.keyword = null;
+                    this.previousValidInput = '';
+                    this.customKeys = '';
                     this.AdvancedPatronLookup();
                 }
             }, 100);
