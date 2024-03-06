@@ -659,10 +659,10 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
         this.isTyping = false; // Reset typing flag   
         this.keywordService.keyword = this.patronSearch.keyword;
+        this.patronSearch.externalId = this.previousValidInput;
         if (isBarcodeInput) {
             return false;
         }
-        this.patronSearch.externalId = this.previousValidInput;
         // divide input char into char array
         // and then check each char against regex
         let chars = inputChar.split('');
