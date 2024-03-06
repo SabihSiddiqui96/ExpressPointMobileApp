@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, OnDestroy, Injectable } from '@angular/core';
 
 import { NavController, PopoverController, ModalController, Platform, LoadingController, IonInput } from '@ionic/angular';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
@@ -8,7 +8,7 @@ import { Network } from '@ionic-native/network/ngx';
 import { IonDigitKeyboardOptions } from '../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface';
 // import { SchoolSelection } from '../../pages/school-selection/school-selection';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
-import { LookupService, Direction } from '../../services/lookup.service';
+import { LookupService, Direction, KeywordService } from '../../services/lookup.service';
 import { SwitchHandsService } from '../../services/switch-hands.service';
 import { MenuServiceOptionsPage } from '../../pages/menu-service-options/menu-service-options.page';
 import { UtilService } from '../../services/util.service';
@@ -163,6 +163,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public PinIdLabel: string;
     showModalPopup: boolean = true;
     enablePinSchool: boolean = true;
+    public previousValidInput: string = '';
+    public lastInputTime: number = 0;
+    public isTyping: boolean = false;
 
     constructor(
         public modalCtrl: ModalController,
@@ -176,6 +179,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         private logDBService: LogsDBService,
         public loadingService: LoadingService,
         private http: HttpService,
+        private keywordService: KeywordService,
         public popupMessageService: PopupMessageService,
         private popoverCtrl: PopoverController, public platform: Platform,
         public loadingCtrl: LoadingController, public electronService: ElectronService,
@@ -204,7 +208,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         });
 
         this.event.subscribe('peripheral:input', (userEventData) => {
-            this.patronSearch.keyword = '';
+            this.patronSearch.keyword = null;
         });
 
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
@@ -316,7 +320,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             // this.event.destroy('patronLookup:ready');
             this.returnToWhatPage = userEventData.returnToWhatPage;
             // this.ngzone.run(() => {
-            this.patronSearch.keyword = '';
+            this.patronSearch.keyword = null;
             // })1
             const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
             console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
@@ -425,7 +429,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
         this.personQSubscription = this.lookUpService.personsQSubject.subscribe(
             value => {
-                this.patronSearch.keyword = null;
+                if (value.length == 0) {
+                    this.patronSearch.keyword = null;
+                }
                 if (value) {
                     this.countQ = value.length;
                 } else {
@@ -468,15 +474,23 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public numberClick(key: any) {
         if (key !== 'X' && key !== 'GO') {
+            if (this.patronSearch.keyword != null) {
+                this.customKeys = this.patronSearch.keyword.length > 0 ? this.patronSearch.keyword : '';
+            }
             this.customKeys += key;
-            this.patronSearch.keyword = this.customKeys;
+            this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
-            this.inputBuffer=[];
+            this.inputBuffer = [];
+            if (this.patronSearch.keyword != null && this.patronSearch.externalId != null && this.patronSearch.externalId.length < this.patronSearch.keyword.length) {
+                this.patronSearch.keyword = this.patronSearch.externalId;
+            }
+            this.patronSearch.externalId = null;
             this.lookupByPIN();
             this.customKeys = '';
+            this.patronSearch.keyword = null;
         } else if (key === 'X') {
             this.customKeys = this.customKeys.slice(0, -1);
-            this.patronSearch.keyword = this.customKeys;
+            this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         }
 
 
@@ -613,6 +627,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public checkNumericLookUp(event) {
+        this.keywordService.keyword = null;
+        this.patronSearch.externalId = null;
         if (event['keyCode'] === 9) {
             // event.stopPropagation();
             // setTimeout(() => {
@@ -630,6 +646,23 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         }
         let newInputChar = '';
 
+        const currentTime = performance.now();
+        const timeElapsed = currentTime - this.lastInputTime;
+        // Assuming barcode scanners input faster than a typical human typing speed
+        const isBarcodeInput = timeElapsed < 10 && this.isTyping;
+        if (isBarcodeInput) {
+            // If the input is from a barcode scanner, restore the previous valid input
+            (<HTMLInputElement>event.target).value = this.previousValidInput;
+        } else {
+            // If the input is from the keyboard, update the previous valid input
+            this.previousValidInput = (<HTMLInputElement>event.target).value;
+        }
+        this.isTyping = false; // Reset typing flag   
+        this.keywordService.keyword = this.patronSearch.keyword;
+        this.patronSearch.externalId = this.previousValidInput;
+        if (isBarcodeInput) {
+            return false;
+        }
         // divide input char into char array
         // and then check each char against regex
         let chars = inputChar.split('');
@@ -646,7 +679,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         (<HTMLInputElement>event.target).value = inputChar;
         let code = inputChar.charCodeAt((inputChar.length) - 1);
         code = (isNaN(code)) ? 58 : code;
-        if (event['keyCode'] == 13 && this.isElectronApp == true) {
+        if (event['keyCode'] == 13 && this.isElectronApp == true && isBarcodeInput == false) {
             if (AppStateService.get('pnpPeripherals') == false) {
                 let localTimerSearchPatron_Keyboard: number = new Date().getTime();
                 if (event.target.parentElement.id == "pinInput" && event.target.value != this.patronSearch.keyword && this.patronSearch.keyword != null) {
@@ -665,6 +698,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.inputBuffer = [];
                         this.lookupByPIN();
                         this.customKeys = '';
+                        this.patronSearch.keyword = null;
+                        this.previousValidInput = '';
                     }
                 }, 100);
             }
@@ -968,7 +1003,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
             this.lookUpService.lookupByPIN(this.patronSearch.keyword, Direction.None, this.enablePinSchool).then((patrons) => {
-                this.patronSearch.keyword = '';
+                this.patronSearch.keyword = null;
             });
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E18372);
@@ -1095,6 +1130,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 }
                 else {
                     this.isEnterKeyHandled = true;
+                    this.patronSearch.keyword = null;
+                    this.previousValidInput = '';
+                    this.customKeys = '';
                     this.AdvancedPatronLookup();
                 }
             }, 100);
@@ -1505,8 +1543,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput);                                                      
+                            this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length > 0);                                                      
                             this.utilService.showModalPopup = false;
+                            this.patronSearch.keyword = null;
                         }
                         incomingID = '';
                         this.inputBuffer = [];
@@ -1552,8 +1591,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput);                             
+                            this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length > 0);                             
                             this.utilService.showModalPopup = false;
+                            this.patronSearch.keyword = null;
                         }
                         incomingID = '';
                         this.inputBuffer = [];
@@ -1587,6 +1627,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public onKeyDown(event: KeyboardEvent) {
+        this.lastInputTime = performance.now();
+        this.isTyping = true;
         const field = this.activeField;
         if (event.shiftKey && event.keyCode === 9) { // Shift and Tab both keys are pressed
             console.log('shift and tab');
@@ -1879,7 +1921,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
         // this.lastPatron is an object
         if ((this.lastPatron !== undefined && this.lastPatron !== null) && this.canLoadPrevPatron) {
-            this.patronSearch.keyword = '';
+            this.patronSearch.keyword = null;
             this.event.publish('peripheral:input', {});
             this.hideKeyboard();
             if (!PatronLookupPage.canAccountSkipSync(this.lastPatron)) {
