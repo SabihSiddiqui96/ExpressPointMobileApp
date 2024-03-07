@@ -4761,6 +4761,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 IsCard: false,
                 CardNumber: ''
             };
+            this.menuItemsArr = [];
+            this.resetmenuItemRestrictions();
             this.bonusAmount = 0;
             this.event.publish('patron-released', { 'patronDetails': null });
             this.event.publish('GotoLookup', {});
