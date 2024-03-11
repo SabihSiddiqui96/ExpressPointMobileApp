@@ -693,7 +693,7 @@ export class LookupService {
                             searchServer = 1;
                             this.patronFromServer(firstname, lastname, externalId, selectedsite);
                         }
-                        if (searchServer = 0) {
+                        if (searchServer == 0) {
                             this.handlePersonResults(true).then(() => {
                                 this.utilService.setLoader(false);
                             }).catch(() => this.utilService.setLoader(false));
