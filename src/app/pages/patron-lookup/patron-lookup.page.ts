@@ -708,6 +708,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.lookupByPIN();
                         this.customKeys = '';
                         this.patronSearch.keyword = null;
+                        this.patronSearch.externalId = '';
+                        this.keywordService.keyword = null;
                         this.previousValidInput = '';
                     }
                 }, 100);

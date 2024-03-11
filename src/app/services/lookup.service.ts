@@ -543,6 +543,7 @@ export class LookupService {
                     AppStateService.set("UnidentifiedPatronPopUp", "1");
                     this.event.publish('unidentifiedPatron:show', { params });
                 }
+                this.utilService.setLoader(false);
                 resolve('Success');
                 // this.utilService.showToast('No results found.');
             } else if (this.lookupResults.length === 1) {
@@ -557,6 +558,7 @@ export class LookupService {
                     resolve('Success');
                     this.selectPatron(this.lookupResults[0]);
                 }
+                this.utilService.setLoader(false);
             } else if (this.lookupResults.length > 1) { // && this.lookupResults.length <= 20
                 this.lookupResults.map(PL => {
                     if (PL !== undefined)
@@ -565,7 +567,9 @@ export class LookupService {
                 this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch).then(() => {
                     resolve('Success');
                 });
+                this.utilService.setLoader(false);
             } else {
+                this.utilService.setLoader(false);
                 resolve('Success');
                 // this.popupMessageService.showMessage(PopupMessageCode.E24398);
                 // this.utilService.showToast('Search results are too large. Please refine your search criteria.');
@@ -684,12 +688,16 @@ export class LookupService {
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
+                        let searchServer = 0;
                         if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.CanServeVisitingAdults)) {
+                            searchServer = 1;
                             this.patronFromServer(firstname, lastname, externalId, selectedsite);
                         }
-                        this.handlePersonResults(true).then(() => {
-                            this.utilService.setLoader(false);
-                        }).catch(() => this.utilService.setLoader(false));
+                        if (searchServer = 0) {
+                            this.handlePersonResults(true).then(() => {
+                                this.utilService.setLoader(false);
+                            }).catch(() => this.utilService.setLoader(false));
+                        }
                         resolve(this.lookupResults);
                     }).catch((err) => {
                         this.lookupResults = [];
