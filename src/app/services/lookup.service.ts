@@ -688,7 +688,7 @@ export class LookupService {
                         if (this.serveInactiveStudents === 0) {
                             this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
                         }
-                        let searchServer = 0;
+                        let searchServer: number = 0;
                         if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.CanServeVisitingAdults)) {
                             searchServer = 1;
                             this.patronFromServer(firstname, lastname, externalId, selectedsite);
