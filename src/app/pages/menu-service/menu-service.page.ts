@@ -4898,6 +4898,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }                
             }
             if (popupShow == false) {
+                AppStateService.set("UnidentifiedPatronPopUp", "0");
                 this.popupMessageService.showMessage(PopupMessageCode.E24397, userEventData);
             }
         });
