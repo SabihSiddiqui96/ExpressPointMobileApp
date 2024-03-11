@@ -50,10 +50,17 @@
       </ion-toggle>
     </ion-item>
     <ion-item *ngIf="autoServeEnabled && autoPauseEnabled" lines="none" class="bg-transparent pause-padding">
+      <ion-label class="ion-text-left" position="bottom">Pause Auto-Serve for Unidentified patron</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="autoPauseOptions.unidentifiedPatron" (ionChange)="setAutoPauseOptions($event)">
+      </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="autoServeEnabled && autoPauseEnabled" lines="none" class="bg-transparent pause-padding">
       <ion-label class="ion-text-left" position="bottom">Pause Auto-Serve for Menu Item Restrictions</ion-label>
       <ion-toggle color="slate" [(ngModel)]="autoPauseOptions.restrictions" (ionChange)="setAutoPauseOptions($event)">
       </ion-toggle>
     </ion-item>
+    <!-- Added this div, intentianally for height beween close and options -->
+    <div style="height:45px;"></div>
   </ion-list>
 </ion-content>
 <ion-footer>

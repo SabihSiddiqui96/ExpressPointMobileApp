@@ -44,7 +44,7 @@
               </ion-segment>
             </ion-col>
             <ion-col size="4" size-md="4" size-sm="4" *ngIf="!hideQueue">
-              <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement(); lookUpService.populatePersonsFromQ()">
+              <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement(); lookUpService.populatePersonsFromQ(); queueClick();">
                 <ion-icon slot="start" name="people"></ion-icon>
                 Queue <span class="queue_count">{{countQ}}</span>
               </ion-button>

@@ -57,6 +57,7 @@ import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transa
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service'
 import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
 import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
+import { UnidentifiedPatronPopupPage } from './components/unidentified-patron-popup/unidentified-patron-popup.page';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -111,7 +112,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     secondMeal: false,
                     restrictions: false,
                     visitingStudents: false,
-                    allergensAndNotes: false
+                    allergensAndNotes: false,
+                    unidentifiedPatron:false
                 }
             }
         });
@@ -148,7 +150,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // this.event.destroy('all_categories:show');
             this.showAllCategories();
         });
-
+        this.pauseAutoServeWhenUnidentifiedPatron();
         this.subscribeToMenuServicePopupEvents();
     }
 
@@ -1998,14 +2000,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
 
             if (cepPriceApply) {
-                currPrice = 0;
-                canAdd = true;
+                if (price.rows.length > 0) {
+                    currPrice = 0;
+                    canAdd = true;
+                }
             } else {
                 if (price.rows.length > 0) {
                     itemPrice = price.rows[0].doc.Price;
                     currPrice = price.rows[0].doc.Price;
                     canAdd = true;
-
                 }
             }
             let refId = 0;
@@ -4305,6 +4308,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 element.dismiss();
             }
         }
+        AppStateService.set("UnidentifiedPatronPopUp", "0");
     }
 
     public doAutoServe() {
@@ -4558,14 +4562,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }
 
                     if (cepPriceApply) {
-                        currPrice = 0;
-                        canAdd = true;
+                        if (price.rows.length > 0) {
+                            currPrice = 0;
+                            canAdd = true;
+                        }
                     } else {
                         if (price.rows.length > 0) {
                             itemPrice = price.rows[0].doc.Price;
                             currPrice = price.rows[0].doc.Price;
                             canAdd = true;
-
                         }
                     }
 
@@ -4867,6 +4872,49 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
         }, 500);
+    }
+
+    public pauseAutoServeWhenUnidentifiedPatron() {        
+        this.event.destroy('unidentifiedPatron:show');
+        this.event.subscribe('unidentifiedPatron:show', (userEventData) => {
+            let popupShow = false;
+            if (this.autoServeEnabled) {
+                if (this.settingAutoPause.unidentifiedPatron) {
+                    this.impermanentAutoServePause = true;
+                    popupShow = true;
+                    this.modalCtrl.create({
+                        component: UnidentifiedPatronPopupPage,
+                        cssClass: 'customModal',
+                        componentProps: {
+                            'Message': userEventData.params[0].replace('for', '')
+                        }, backdropDismiss: false
+                    }).then(async (res) => {
+                        await res.present();
+                        // await res.onDidDismiss().then(() => {
+                        //     this.event.publish('unidentifiedPatronLookUp', {});
+                        // });
+                    });
+                    
+                }                
+            }
+            if (popupShow == false) {
+                this.popupMessageService.showMessage(PopupMessageCode.E24397, userEventData);
+            }
+        });
+
+        this.event.destroy('unidentifiedPatron:nextPatron');
+        this.event.subscribe('unidentifiedPatron:nextPatron', (userEventData) => {
+            if (this.autoServeEnabled) {
+                if (this.settingAutoPause.unidentifiedPatron) {
+                    this.impermanentAutoServePause = false;
+                    this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
+                    if (this.lookUpService.getQ().length !== 0) {
+                        console.log('GetQ   ' + this.lookUpService.getQ()[0]);
+                        this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+                    }
+                }
+            }
+        });
     }
 
     public getItemAllergies(itemId) {

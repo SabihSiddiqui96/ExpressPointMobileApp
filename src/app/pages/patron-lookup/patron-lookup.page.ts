@@ -408,7 +408,17 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.event.subscribe('enablePrevPatronPatronLookup', (data) => {
             this.enablePrevPatron(true);
         });
-
+        this.event.destroy('unidentifiedPatronLookUp');
+        this.event.subscribe('unidentifiedPatronLookUp', (userEventData) => {
+            if (userEventData != null && userEventData.pinLookUp) {
+                this.patronAccount = 'patron_pin';
+                this.patronPinClick();
+            }
+            else {
+                this.patronAccount = 'advanced';
+                this.advancePatronClick();
+            }
+        });
         this.selectAccuntClick = this.utilService.selectAccountClick;
         this.menuPayselectAcctClick = this.lookUpService.menuPayselectAccountClick;
         if (this.selectAccuntClick || this.menuPayselectAcctClick) {
@@ -478,22 +488,21 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.customKeys = this.patronSearch.keyword.length > 0 ? this.patronSearch.keyword : '';
             }
             this.customKeys += key;
-            this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
+            this.keywordService.keyword = this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
             this.inputBuffer = [];
             if (this.patronSearch.keyword != null && this.patronSearch.externalId != null && this.patronSearch.externalId.length < this.patronSearch.keyword.length) {
-                this.patronSearch.keyword = this.patronSearch.externalId;
+                this.keywordService.keyword = this.patronSearch.keyword = this.patronSearch.externalId;
             }
             this.patronSearch.externalId = null;
             this.lookupByPIN();
             this.customKeys = '';
+            this.keywordService.keyword = '';
             this.patronSearch.keyword = null;
         } else if (key === 'X') {
             this.customKeys = this.customKeys.slice(0, -1);
             this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         }
-
-
     }
 
     // public hideKeyboard() {
@@ -840,6 +849,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
     }
 
     public blurInputElement() {
@@ -856,6 +867,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
         if (!this.utilService.isElectronApp()) {
@@ -874,12 +887,18 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if (this.specialRosterList.length === 0) {
             this.getSpecialRostersList();
         }
+    }
 
-
+    public queueClick() {
+        this.patronSearch.keyword = null;
+        this.patronSearch.externalId = null;
+        this.patronSearch.firstname = '';
+        this.patronSearch.lastname = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
     }
 
     public AdvancePatronSchoolList() {
-
         if (this.siteList.length === 0) {
             this.siteList = [];
             const currentSchoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -892,7 +911,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.selectedSite = this.siteList[0]['SchoolId'];
             this.selectedSiteName = this.siteList[0]['SiteNameWithCode'];
         }
-
     }
 
     public gotoAdvOtherSchoolSearch() {
@@ -1055,6 +1073,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
         this.patronSearch.externalId = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
         this.patronList = [];
         this.selectedSite = -1;
         this.selectedSiteName = '';
