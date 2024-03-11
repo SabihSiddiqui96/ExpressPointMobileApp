@@ -18,6 +18,7 @@ import { LogsDBService } from './Database/logs-db.service';
 import { LogType } from './enums/log-type';
 import { EventType } from './enums/event-type';
 import { PersonService } from './person.service';
+import { Router } from '@angular/router';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -48,6 +49,7 @@ export class LookupService {
         private keywordService: KeywordService,
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
+        public router: Router,
         private electronService: ElectronService, private personService: PersonService) {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
@@ -110,6 +112,9 @@ export class LookupService {
             if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
                 AppStateService.get('currentTab') !== 'advanced') {                
                 if (this.isModelWindowOpened) {
+                    return;
+                }
+                if (AppStateService.get('UnidentifiedPatronPopUp') == '1'){
                     return;
                 }
                 if (searchTextExists && this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false) {
@@ -529,7 +534,15 @@ export class LookupService {
                 } else {
                     params.push(' for ' + this.studentPin.toString());
                 }
-                this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
+                AppStateService.set("UnidentifiedPatronPopUp", "0");
+                const routeURL = this.router.url.includes('dynamic-menu');
+                if (routeURL == true) {
+                    this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
+                }
+                else {
+                    AppStateService.set("UnidentifiedPatronPopUp", "1");
+                    this.event.publish('unidentifiedPatron:show', { params });
+                }
                 resolve('Success');
                 // this.utilService.showToast('No results found.');
             } else if (this.lookupResults.length === 1) {
