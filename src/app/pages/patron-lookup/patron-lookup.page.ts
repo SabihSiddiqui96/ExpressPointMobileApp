@@ -408,7 +408,17 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.event.subscribe('enablePrevPatronPatronLookup', (data) => {
             this.enablePrevPatron(true);
         });
-
+        this.event.destroy('unidentifiedPatronLookUp');
+        this.event.subscribe('unidentifiedPatronLookUp', (userEventData) => {
+            if (userEventData != null && userEventData.pinLookUp) {
+                this.patronAccount = 'patron_pin';
+                this.patronPinClick();
+            }
+            else {
+                this.patronAccount = 'advanced';
+                this.advancePatronClick();
+            }
+        });
         this.selectAccuntClick = this.utilService.selectAccountClick;
         this.menuPayselectAcctClick = this.lookUpService.menuPayselectAccountClick;
         if (this.selectAccuntClick || this.menuPayselectAcctClick) {
@@ -478,22 +488,21 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 this.customKeys = this.patronSearch.keyword.length > 0 ? this.patronSearch.keyword : '';
             }
             this.customKeys += key;
-            this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
+            this.keywordService.keyword = this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
             this.inputBuffer = [];
             if (this.patronSearch.keyword != null && this.patronSearch.externalId != null && this.patronSearch.externalId.length < this.patronSearch.keyword.length) {
-                this.patronSearch.keyword = this.patronSearch.externalId;
+                this.keywordService.keyword = this.patronSearch.keyword = this.patronSearch.externalId;
             }
             this.patronSearch.externalId = null;
             this.lookupByPIN();
             this.customKeys = '';
+            this.keywordService.keyword = '';
             this.patronSearch.keyword = null;
         } else if (key === 'X') {
             this.customKeys = this.customKeys.slice(0, -1);
             this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         }
-
-
     }
 
     // public hideKeyboard() {
@@ -648,9 +657,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
-        // Assuming barcode scanners input faster than a typical human typing speed
-        const isBarcodeInput = timeElapsed < 10 && this.isTyping;
-        if (isBarcodeInput) {
+        // Assuming peripherals input is faster than a typical human typing speed
+        const isPeripheralsInput = timeElapsed < 10 && this.isTyping;
+        if (isPeripheralsInput) {
             // If the input is from a barcode scanner, restore the previous valid input
             (<HTMLInputElement>event.target).value = this.previousValidInput;
         } else {
@@ -660,7 +669,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.isTyping = false; // Reset typing flag   
         this.keywordService.keyword = this.patronSearch.keyword;
         this.patronSearch.externalId = this.previousValidInput;
-        if (isBarcodeInput) {
+        if (isPeripheralsInput) {
             return false;
         }
         // divide input char into char array
@@ -679,7 +688,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         (<HTMLInputElement>event.target).value = inputChar;
         let code = inputChar.charCodeAt((inputChar.length) - 1);
         code = (isNaN(code)) ? 58 : code;
-        if (event['keyCode'] == 13 && this.isElectronApp == true && isBarcodeInput == false) {
+        if (event['keyCode'] == 13 && this.isElectronApp == true && isPeripheralsInput == false) {
             if (AppStateService.get('pnpPeripherals') == false) {
                 let localTimerSearchPatron_Keyboard: number = new Date().getTime();
                 if (event.target.parentElement.id == "pinInput" && event.target.value != this.patronSearch.keyword && this.patronSearch.keyword != null) {
@@ -699,6 +708,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         this.lookupByPIN();
                         this.customKeys = '';
                         this.patronSearch.keyword = null;
+                        this.patronSearch.externalId = '';
+                        this.keywordService.keyword = null;
                         this.previousValidInput = '';
                     }
                 }, 100);
@@ -840,6 +851,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
     }
 
     public blurInputElement() {
@@ -856,6 +869,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = null;
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
         if (!this.utilService.isElectronApp()) {
@@ -874,12 +889,18 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if (this.specialRosterList.length === 0) {
             this.getSpecialRostersList();
         }
+    }
 
-
+    public queueClick() {
+        this.patronSearch.keyword = null;
+        this.patronSearch.externalId = null;
+        this.patronSearch.firstname = '';
+        this.patronSearch.lastname = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
     }
 
     public AdvancePatronSchoolList() {
-
         if (this.siteList.length === 0) {
             this.siteList = [];
             const currentSchoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -892,7 +913,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.selectedSite = this.siteList[0]['SchoolId'];
             this.selectedSiteName = this.siteList[0]['SiteNameWithCode'];
         }
-
     }
 
     public gotoAdvOtherSchoolSearch() {
@@ -1055,6 +1075,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.firstname = '';
         this.patronSearch.lastname = '';
         this.patronSearch.externalId = '';
+        this.customKeys = '';
+        this.keywordService.keyword = '';
         this.patronList = [];
         this.selectedSite = -1;
         this.selectedSiteName = '';
@@ -1094,6 +1116,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         if (this.selectedSite !== -1 && (this.patronSearch.firstname !== '' || this.patronSearch.lastname !== '' || this.patronSearch.externalId !== '')) {
             this.loadingID = LoadingService.generateLoadingID();
             this.loadingService.present(this.loadingID, null, false).then(() => {
+                this.patronSearch.firstname = this.patronSearch.firstname != null ? this.patronSearch.firstname.replace(/\d+/g, '') : '';
+                this.patronSearch.lastname = this.patronSearch.lastname != null ? this.patronSearch.lastname.replace(/\d+/g, '') : '';
+                this.patronSearch.externalId = this.patronSearch.externalId != null ? this.patronSearch.externalId.replace(/\d+/g, '') : '';
                 this.lookUpService.AdvancedPatronlookup(this.selectedSite, this.patronSearch.firstname,
                     this.patronSearch.lastname, this.patronSearch.externalId, this.isServerLookup)
                     .then(() => {
@@ -1121,6 +1146,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public handleKeyDown(event) {        
         let localTimerSearchPatron_Keyboard: number = new Date().getTime();
+        const currentTime = performance.now();
+        const timeElapsed = currentTime - this.lastInputTime;
+        // Assuming peripherals input is faster than a typical human typing speed
+        const isPeripheralInput = timeElapsed < 10 && this.isTyping;        
+        this.isTyping = false; // Reset typing flag
+        if (isPeripheralInput) {
+            return false;
+        }
         if (event.keyCode === 13) {
             setTimeout(() => {
                 /* code for checking the characters from periperal */

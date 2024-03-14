@@ -106,6 +106,7 @@ import { CreditCardTransactionService } from './services/Credit-Card-Transaction
 import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
 import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup-popup.page';
+import { UnidentifiedPatronPopupPage } from './pages/menu-service/components/unidentified-patron-popup/unidentified-patron-popup.page';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -157,6 +158,7 @@ import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup
         HasPropPipe,
         FormatTimePipe,
         TimerComponent,
+        UnidentifiedPatronPopupPage,
         StudentWiseAlacarteComponent,
         AutoServePauseOptionsPopUpComponent
     ],
@@ -212,6 +214,7 @@ import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup
         CloseSessionPage,
         QuickClassroomSalePage,
         TimerComponent,
+        UnidentifiedPatronPopupPage,
         AutoServePauseOptionsPopUpComponent
         /** Components */
     ],

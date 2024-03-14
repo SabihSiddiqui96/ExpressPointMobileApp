@@ -206,5 +206,13 @@ ion-button {
   --background-hover-opacity: 0.5 !important;
 }
 
+.customModal {
+  .modal-wrapper {
+      max-width: 550px !important;
+      max-height: 450px !important;
+      min-width: 350px !important;
+      min-height: 300px !important;
+  }
+}
 
 

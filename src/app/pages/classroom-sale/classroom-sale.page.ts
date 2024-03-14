@@ -2019,8 +2019,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 }
 
                 if (cepPriceApply) {
-                    currPrice = 0;
-                    canAdd = true;
+                    if (price.rows.length > 0) {
+                        currPrice = 0;
+                        canAdd = true;
+                    }
                 } else {
                     if (price.rows.length > 0) {
                         currPrice = price.rows[0].doc.Price;

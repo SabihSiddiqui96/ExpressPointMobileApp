@@ -4761,6 +4761,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 IsCard: false,
                 CardNumber: ''
             };
+            this.menuItemsArr = [];
+            this.resetmenuItemRestrictions();
             this.bonusAmount = 0;
             this.event.publish('patron-released', { 'patronDetails': null });
             this.event.publish('GotoLookup', {});
@@ -5665,8 +5667,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
 
             if (cepPriceApply) {
-                currPrice = 0;
-                canAdd = true;
+                if (price.rows.length > 0) {
+                    currPrice = 0;
+                    canAdd = true;
+                }
             } else {
                 if (price.rows.length > 0) {
                     currPrice = price.rows[0].doc.Price;
