@@ -50,6 +50,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public counter = 300;
     public tick = 1000;
     private ApiInterval;
+    public disableCancelButton: boolean = false;
+    public isContentDisabled: boolean = false;
     // public ShowRetrySubscription: Subscription;
 
     ngOnInit() {
@@ -296,6 +298,31 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         if (this.utilService.isElectronApp()) {
             this.utilService.publishIpcEvent('Open-CashDrawer');
         }
+
+        if (this.SquareSetting) {
+            this.ShowRetrySubscription =
+                this.creditCardTransactionService.ShowRetryButton.subscribe((val) => {
+                    if (val) {
+                        this.ShowSquareRetry = val;
+                        this.isContentDisabled = false;
+                        this.isCompleteTransactionProcessing = false;
+                        this.saveInProgress = false;
+                        clearInterval(this.ApiInterval)
+                        this.countDown.unsubscribe();
+                    }
+
+                })
+            
+            this.event.destroy('creditCardShowRetryButton');
+            this.event.subscribe('creditCardShowRetryButton', (userEventData) => {                
+                this.ShowSquareRetry = true;
+                this.isContentDisabled = false;
+                this.isCompleteTransactionProcessing = false;
+                this.saveInProgress = false;
+                clearInterval(this.ApiInterval)
+                this.countDown.unsubscribe();
+            });
+        }
     }
 
     public navPatronDetails;
@@ -422,24 +449,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
         }
 
-
-        if (this.SquareSetting) {
-            this.ShowRetrySubscription =
-                this.creditCardTransactionService.ShowRetryButton.subscribe((val) => {
-
-                    if (val) {
-                        this.ShowSquareRetry = val;
-                        this.isCompleteTransactionProcessing = false;
-                        this.saveInProgress = false;
-                        clearInterval(this.ApiInterval)
-                        this.countDown.unsubscribe();
-                    }
-
-                })
-        }
-
-
-
     }
     private inputBuffer = [];
 
@@ -449,9 +458,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.ShowRetrySubscription.unsubscribe();
             this.creditCardTransactionService.ShowRetryButton.complete();
         }
-
     }
     public numberInput(key: any, isKeyInput: boolean = false) {
+        if (this.isContentDisabled) {
+            return;
+        }
         //key.preventDefault();
         if (isKeyInput) {
             if (this.navPatronDetails.AcceptCheck === false && this.cashpaymentOption === 'check') {
@@ -639,9 +650,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             if (this.SquareSetting === true) {
                 this.countDown = timer(0, this.tick).subscribe(() => this.counter > 0 ? --this.counter : 0);
+                this.isContentDisabled = true;
                 resolve(true)
             }
             else {
+                this.isContentDisabled = false;
                 resolve(true)
             }
         })
@@ -792,6 +805,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     public preSetCashTendered(amount, price) {
+        if (this.isContentDisabled) {
+            return;
+        }
         this.customKeys = '';
         if (this.activeInputField === 'amount') {
             this.buttonPriceActive = price;
@@ -1252,6 +1268,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
                 this.eventPublish(retrySquareTransaction);
             }
+            if (this.SquareTransactionStarted) {
+                this.disableCancelButton = true;
+                setTimeout(() => {
+                    this.disableCancelButton = false;
+                }, 10000);
+            }
         }
     }
 
@@ -1395,6 +1417,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.isCompleteTransactionProcessing = false;
                 this.close();
             });
+
+            if (retrySquareTransaction == true) {
+                this.SquareTransactionStarted = true;
+            }
         })
 
     }

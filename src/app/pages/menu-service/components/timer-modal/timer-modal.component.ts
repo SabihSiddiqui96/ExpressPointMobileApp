@@ -29,21 +29,25 @@ export class TimerComponent {
       if (this.counter == 0) {
         this.close()
       }
-      this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.referenceId).then((res: CCTransactionStatus) => {
+      if (this.referenceId != null) {
+        this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.referenceId).then((res: CCTransactionStatus) => {
 
-        if (res !== null) {
-          this.transactionDetails = res
-
-
-          if (this.transactionDetails.Status == CCTransactionStatusType.COMPLETED || this.transactionDetails.Status == CCTransactionStatusType.CANCELED
-            || this.transactionDetails.Status == CCTransactionStatusType.FAILED) this.closeTimerModal();
+          if (res !== null) {
+            this.transactionDetails = res
 
 
-          this.creditCardTransactionService.SquareTransactionStatusSubject.next(this.transactionDetails.Status);
+            if (this.transactionDetails.Status == CCTransactionStatusType.COMPLETED || this.transactionDetails.Status == CCTransactionStatusType.CANCELED
+              || this.transactionDetails.Status == CCTransactionStatusType.CANCEL_REQ
+              || this.transactionDetails.Status == CCTransactionStatusType.FAILED) this.closeTimerModal();
 
-        }
 
-      })
+            this.creditCardTransactionService.SquareTransactionStatusSubject.next(this.transactionDetails.Status);
+
+          }
+
+        })
+      }
+      
     }, this.interval);
   }
 
