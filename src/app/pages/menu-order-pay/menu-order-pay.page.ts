@@ -300,21 +300,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
         if (this.SquareSetting) {
-            this.ShowRetrySubscription =
-                this.creditCardTransactionService.ShowRetryButton.subscribe((val) => {
-                    if (val) {
-                        this.ShowSquareRetry = val;
-                        this.isContentDisabled = false;
-                        this.isCompleteTransactionProcessing = false;
-                        this.saveInProgress = false;
-                        clearInterval(this.ApiInterval)
-                        this.countDown.unsubscribe();
-                    }
-
-                })
-            
             this.event.destroy('creditCardShowRetryButton');
-            this.event.subscribe('creditCardShowRetryButton', (userEventData) => {                
+            this.event.subscribe('creditCardShowRetryButton', (userEventData) => {
                 this.ShowSquareRetry = true;
                 this.isContentDisabled = false;
                 this.isCompleteTransactionProcessing = false;
@@ -448,7 +435,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         if (sellerDetails) {
             this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
         }
-
     }
     private inputBuffer = [];
 
