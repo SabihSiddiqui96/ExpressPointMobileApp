@@ -78,3 +78,11 @@ app-menu-order-pay .placeholder-input-label{
         min-height: 600px !important;
     }
 }
+
+.disabled {
+    pointer-events: none;
+    /* Disables pointer events on all child elements */
+    opacity: 0.6;
+    /* Optionally, reduce opacity to visually indicate disabled state */
+    /* Add more styles as needed */
+}

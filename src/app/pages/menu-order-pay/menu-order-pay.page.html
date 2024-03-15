@@ -3,7 +3,7 @@
     <ion-title>Pay Transaction</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-no-padding">
+<ion-content class="ion-no-padding" [class.disabled]="isContentDisabled">
   <!-- class="vh100" -->
   <ion-row>
     <ion-col size="6" size-lg="6" [attr.push-lg]="swapLeft==true ? 6: 0">
@@ -276,7 +276,7 @@
 </ion-content>
 <ion-footer>
   <ion-toolbar>
-    <ion-button size="large" fill="clear" color="black" (click)="blurInputElement(); close(true)">
+    <ion-button size="large" fill="clear" color="black" [disabled]="disableCancelButton" (click)="blurInputElement(); close(true)">
       Cancel
 
     </ion-button>
@@ -284,7 +284,7 @@
     <ion-buttons slot="primary">
       <ion-button size="large" color="slate" (click)="blurInputElement(); goToMenuService()" style="font-size: 135%;"
         [ngClass]="{'show':canUsePrincipalAccount == true,'ion-hide':canUsePrincipalAccount == false && disablePrincipalAcctButton == false}"
-        [disabled]="canUsePrincipalAccount == false && disablePrincipalAcctButton == true">
+        [disabled]="(canUsePrincipalAccount == false && disablePrincipalAcctButton == true) || (saveInProgress || isCompleteTransactionProcessing || ShowSquareRetry)">
 
         Use Principal Account
       </ion-button>
