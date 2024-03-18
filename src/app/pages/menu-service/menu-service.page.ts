@@ -3318,20 +3318,22 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         clearInterval(this.ApiInterval);
                         resolve(null);
                     }
-                    this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.deviceTransactionId).then((res: CCTransactionStatus) => {
+                    else{
+                        this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.deviceTransactionId).then((res: CCTransactionStatus) => {
 
-                        if (res !== null && res !== undefined) {
-                            // this.transactionDetails = res
-                            // this.creditCardTransactionService.SquareTransactionStatusSubject.next(res);
-                            this.creditCardTransactionService.SquareTransactionObject = res;
-                            if (res.Status == CCTransactionStatusType.COMPLETED || res.Status == CCTransactionStatusType.CANCELED
-                                || res.Status == CCTransactionStatusType.FAILED || res.Status == CCTransactionStatusType.CANCEL_REQ) { 
-                                clearInterval(this.ApiInterval)
-                                resolve(res)
+                            if (res !== null && res !== undefined) {
+                                // this.transactionDetails = res
+                                // this.creditCardTransactionService.SquareTransactionStatusSubject.next(res);
+                                this.creditCardTransactionService.SquareTransactionObject = res;
+                                if (res.Status == CCTransactionStatusType.COMPLETED || res.Status == CCTransactionStatusType.CANCELED
+                                    || res.Status == CCTransactionStatusType.FAILED || res.Status == CCTransactionStatusType.CANCEL_REQ) { 
+                                    clearInterval(this.ApiInterval)
+                                    resolve(res)
+                                }
                             }
-                        }
 
-                    })
+                        })
+                    }
                 }, this.interval);
 
             }
