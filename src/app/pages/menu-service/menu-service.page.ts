@@ -3314,6 +3314,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             if (this.SquareSetting === true && this.deviceTransactionId != null) {
                 this.ApiInterval = setInterval(() => {
+                    if (this.deviceTransactionId == null) {
+                        clearInterval(this.ApiInterval);
+                        resolve(null);
+                    }
                     this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.deviceTransactionId).then((res: CCTransactionStatus) => {
 
                         if (res !== null && res !== undefined) {

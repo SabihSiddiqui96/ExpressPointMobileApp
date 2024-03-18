@@ -413,7 +413,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public isStaffNVisitor: boolean = false;
     public selectedPatronDetails;
     public ShowSquareRetry: boolean = false
-    public ShowRetrySubscription: Subscription;
+    //public ShowRetrySubscription: Subscription;
     public paymentAmnt: number = 0.00
     public PARTIALPAY: boolean = false;
     public squareDeviceId: string = undefined;
@@ -441,7 +441,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public ngOnDestroy() {
         this.event.destroy('numberInput');
         if (this.SquareSetting) {
-            this.ShowRetrySubscription.unsubscribe();
+            //this.ShowRetrySubscription.unsubscribe();
             this.creditCardTransactionService.ShowRetryButton.complete();
         }
     }
