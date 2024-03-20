@@ -2707,7 +2707,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.cashDue = userEventData.cashDue;
                     // need to give a new deviceTransactionId for the sake of creating a new square ReferenceId 
                     // this.squareRetry = userEventData.squareRetry;
-                    this.deviceTransactionId = userEventData.squareRetry ? this.utilService.generateUUID() : this.deviceTransactionId
+                    //this.deviceTransactionId = userEventData.squareRetry ? this.utilService.generateUUID() : this.deviceTransactionId
                     this.PaymentAmount = userEventData.PaymentAmount;
                     this.makeSalePay();
                 } else {
@@ -3228,7 +3228,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 }
                             }
                             else {
-                                this.creditCardTransactionService.ShowRetryButton.next(true);
+                                //this.creditCardTransactionService.ShowRetryButton.next(true);
+                                this.event.publish('creditCardShowRetryButton', {});
                             }
                         });
                     }
@@ -3242,7 +3243,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // Setting here 
           
             if (this.SquareSetting === true && transactionType == 1 && this.orderData.IsCard === true && this.squareDeviceId!= null) {
-                let squarePaymentAmount = Math.round(paymentAmnt * 100)
+                let squarePaymentAmount = Math.round(paymentAmnt * 100);
+                // need to give a new deviceTransactionId for the sake of creating a new square ReferenceId 
+                this.deviceTransactionId = this.utilService.generateUUID();
                 const squareTransaction: SquareTransactionDoc = {
                     "idempotency_key": this.deviceTransactionId,
                     "checkout": {
@@ -3275,12 +3278,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 // Show a message here on if the transaction is saved or not 
                                 // this.dismissPopup(modal)
                                 this.transactionInProgress = false;
-                                clearInterval(this.ApiInterval)
+                                clearInterval(this.ApiInterval);
                                 this.utilService.showToast('Square transaction failed, Please try again.');
                                 // this.voidOrder();
                                 resolve(false);
                             } else if (this.transactionDetails.Status === CCTransactionStatusType.CANCELED || this.transactionDetails.Status === CCTransactionStatusType.CANCEL_REQ) {
-                                clearInterval(this.ApiInterval)
+                                clearInterval(this.ApiInterval);
                                 this.transactionInProgress = false;
                                 this.utilService.showToast('Square transaction CANCELED, Please try again.');
                                 // this.voidOrder();
@@ -3309,25 +3312,28 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public checkSquareTransactionRegularly() {
 
         return new Promise((resolve, reject) => {
-            if (this.SquareSetting === true) {
+            if (this.SquareSetting === true && this.deviceTransactionId != null) {
                 this.ApiInterval = setInterval(() => {
-                    this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.deviceTransactionId).then((res: CCTransactionStatus) => {
+                    if (this.deviceTransactionId == null) {
+                        clearInterval(this.ApiInterval);
+                        resolve(null);
+                    }
+                    else{
+                        this.creditCardTransactionService.GetCCTransactionStatusFromPrimero(this.deviceTransactionId).then((res: CCTransactionStatus) => {
 
-                        if (res !== null && res !== undefined) {
-                            // this.transactionDetails = res
-                            // this.creditCardTransactionService.SquareTransactionStatusSubject.next(res);
-                            this.creditCardTransactionService.SquareTransactionObject = res
-                            if (res.Status == CCTransactionStatusType.COMPLETED || res.Status == CCTransactionStatusType.CANCELED
-                                || res.Status == CCTransactionStatusType.FAILED) {
-                                clearInterval(this.ApiInterval)
-                                resolve(res)
+                            if (res !== null && res !== undefined) {
+                                // this.transactionDetails = res
+                                // this.creditCardTransactionService.SquareTransactionStatusSubject.next(res);
+                                this.creditCardTransactionService.SquareTransactionObject = res;
+                                if (res.Status == CCTransactionStatusType.COMPLETED || res.Status == CCTransactionStatusType.CANCELED
+                                    || res.Status == CCTransactionStatusType.FAILED || res.Status == CCTransactionStatusType.CANCEL_REQ) { 
+                                    clearInterval(this.ApiInterval)
+                                    resolve(res)
+                                }
                             }
 
-
-
-                        }
-
-                    })
+                        })
+                    }
                 }, this.interval);
 
             }
