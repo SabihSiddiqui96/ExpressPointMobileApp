@@ -364,25 +364,14 @@ export class RestrictionsService {
     }
 
     public checkForReimbursable(menuItemId, mealTypeId) {
-        PouchQueriesService.GetAllMenutItems().then(res => {
-            const menuItems = res.rows.map(row => {
-                return row.doc;
-            });
+        PouchQueriesService.CkeckMenuItemsForReimbursable(menuItemId, mealTypeId).then(res => {
+            const menuItems = res.docs;
             if (menuItems.length > 0) {
-                const items = _.filter(menuItems,
-                    {
-                        'MenuItemId': menuItemId,
-                        'MealTypeId': mealTypeId
-                    });
-                if (items.length > 0) {
-                    return items[0].IsReimbursable;
-                } else {
-                    return false;
-                }
+                return true; 
+            } else {
+                return false;
             }
         });
-
-
     }
 
     public setRestrictableItems() {

@@ -3349,8 +3349,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TransactionNo': this.transactionNumber,
                     'TerminalName': this.terminalName,
                     'MenuId': !this.orderData.items[i]['NoContributions'] ? this.selectedServingLine : null,
-                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
-                    'StatePriceTypeId': this.orderData.items[i]['StateEligibilityId'] ? this.orderData.items[i]['StateEligibilityId'] : this.orderData.items[i]['StatePriceTypeId'] //Intentially Added
+                    'StateEligibilityId': (this.orderData.items[i]['IsReimbursable'] && this.orderData.items[i]['isSecondMeal'] == false) ? this.patronDetails.StateEligibilityId : null,
+                    'StatePriceTypeId': (this.orderData.items[i]['IsReimbursable'] && this.orderData.items[i]['isSecondMeal'] == false) ? this.orderData.items[i]['StateEligibilityId'] ? this.orderData.items[i]['StateEligibilityId'] : this.orderData.items[i]['StatePriceTypeId'] : null //Intentially Added
                 });
             }
 
@@ -3375,8 +3375,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'IsPartOfMeal': false, // **verify
                     'Date': (new Date).getTime().toString(),
                     'TransactionNo': this.transactionNumber,
-                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
-                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
+                    'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
+                    'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
 
                 });
                 items.push({
@@ -3391,8 +3391,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'TerminalName': this.terminalName,
                     'IsTaxable': this.systemMenuItem.IsTaxable,
                     'MenuId': null,
-                    'StateEligibilityId': this.patronDetails.StateEligibilityId,
-                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
+                    'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
+                    'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
                 });
             }
 
