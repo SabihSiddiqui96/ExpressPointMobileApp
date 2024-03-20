@@ -2133,7 +2133,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
                         'CurrentPaidMealPrice': this.currPaidMealPrice,
-                        'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
+                        'StatePriceTypeId': (menuItem.IsReimbursable && secondmeal == false) ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
                     });
                 }
             } else {
@@ -2766,8 +2766,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             'MenuItemDescription': this.orderData.items[i]['Name'],
                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
-                            'StatePriceTypeId': this.patronDetails['StateEligibilityId'] ? this.patronDetails['StateEligibilityId'] : this.patronDetails['StatePriceTypeId'], //Intentially Added
-                            'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
+                            'StatePriceTypeId': (this.orderData.items[i]['IsReimbursable'] && this.orderData.items[i]['isSecondMeal'] == false) ? this.patronDetails['StateEligibilityId'] ? this.patronDetails['StateEligibilityId'] : this.patronDetails['StatePriceTypeId'] : null, //Intentially Added
+                            'StateEligibilityId': (this.orderData.items[i]['IsReimbursable'] && this.orderData.items[i]['isSecondMeal'] == false) ? this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null : null,
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
                             'TerminalName': this.terminalName,
@@ -4704,7 +4704,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'PaidPrice': paidMealPrice,
                                     'ShowPaidPrice': this.showPaidPrice,
                                     'CurrentPaidMealPrice': this.currPaidMealPrice,
-                                    'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
+                                    'StatePriceTypeId': (menuItem.IsReimbursable && secondmeal == false) ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
                                 });
                             } else {
                                 resolve(false);

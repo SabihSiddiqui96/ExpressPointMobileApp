@@ -145,7 +145,7 @@ export class TransactionService {
         return new Promise((resolve) => {
 
             PouchQueriesService.GetAllPendingSummarySale().then((res) => {
-                this.transactions = res.rows.map(row => row.doc);
+                this.transactions = res.docs;
                 resolve(this.transactions);
 
             });
