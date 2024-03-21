@@ -1103,6 +1103,31 @@ export class PouchQueriesService {
       include_docs: true
     });
   }
+
+  public static CkeckMenuItemsForReimbursable(menuItemId, mealTypeId) {
+    var promise = EXP_STANDARD_MENUS.find({
+      selector: {
+        _id: {
+          $gt: "MenuItem",
+          $lt: "MenuItem\uffff"
+        },
+        MenuItemId: {
+          $eq: menuItemId
+        },
+        MealTypeId: {
+          $eq: mealTypeId
+        },
+        IsReimbursable: {
+          $eq: true
+        }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+
   public static GetAllMenuItemCategories() {
     return EXP_STANDARD_MENUS.allDocs({
       startkey: 'MIC',
@@ -1295,6 +1320,24 @@ export class PouchQueriesService {
       include_docs: true
     });
   }
+
+  public static GetAllPendingTransactions_NotSynced() {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "Transaction",
+          $lt: "Transaction\uffff"
+        },
+        'saleData.IsSynced': {
+          $eq: false
+        }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
   public static GetAllPendingClassRoomSales() {
     return EXP_TRANSACTIONS.allDocs({
       startkey: 'ClassRoomSale',
@@ -1338,12 +1381,29 @@ export class PouchQueriesService {
   //#endregion: Transaction Queries
 
   // #region: SummarySale
-  public static GetAllPendingSummarySale() {
+  public static GetAllPendingSummarySale_Old() {
     return EXP_TRANSACTIONS.allDocs({
       startkey: 'SummarySale',
       endkey: 'SummarySale\uffff',
       include_docs: true
     });
+  }
+
+  public static GetAllPendingSummarySale(syncedRecords: boolean = false) {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SummarySale",
+          $lt: "SummarySale\uffff"
+        },        
+        IsSynced: {
+          $eq: syncedRecords
+        }        
+      },
+      include_docs: true
+    });
+
+    return (promise);
   }
 
   public static GetAllPendingTerminalStatus() {
@@ -1426,8 +1486,8 @@ export class PouchQueriesService {
   public PostTransactions(): any {
     console.log('-----------------Checking for pending transactions---------------------');
     return new Promise((resolve, reject) => {
-      PouchQueriesService.GetAllPendingTransactions().then((res) => {
-        const transactions = res.rows.map(row => row.doc);
+      PouchQueriesService.GetAllPendingTransactions_NotSynced().then((res) => {
+        const transactions = res.docs;
         if (transactions.length > 0) {
           transactions.map(doc => {
             if (doc.saleData.IsSynced === false) {
@@ -1742,7 +1802,7 @@ export class PouchQueriesService {
     // console.log(manualSaleData.length);
     return new Promise((resolve, reject) => {
       PouchQueriesService.GetAllPendingSummarySale().then((res) => {
-        const summarySales = res.rows.map(row => row.doc);
+        const summarySales = res.docs;
         if (summarySales.length > 0) {
           summarySales.map((doc) => {
             if (doc.IsSynced === false) {
@@ -2175,9 +2235,9 @@ export class PouchQueriesService {
     console.log('-----------------Checking for pending Summary Sales---------------------');
     return new Promise((resolve, reject) => {
       // var Today = new Date().setHours(0, 0, 0, 0)
-      PouchQueriesService.GetAllPendingSummarySale().then((res) => {
+      PouchQueriesService.GetAllPendingSummarySale(true).then((res) => {
 
-        const summarySales = res.rows.map(row => row.doc);
+        const summarySales = res.docs;
         if (summarySales.length > 0) {
           summarySales.map(doc => {
             if (doc.IsSynced === true) {

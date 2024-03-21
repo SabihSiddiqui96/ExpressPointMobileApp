@@ -1249,8 +1249,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                     'TerminalName': this.terminalName,
                                     'TransactionNo': this.transactionNumber,
                                     'IsTaxable': this.filter.selected_menuItem_isTaxable,
-                                    'StatePriceTypeId': student.StateEligibilityId ? student.StateEligibilityId : student.StatePriceTypeId, //Intentially Added
-                                    'StateEligibilityId': student.StateEligibilityId
+                                    'StatePriceTypeId': student.isSelected ? student.StateEligibilityId ? student.StateEligibilityId : student.StatePriceTypeId : null, //Intentially Added
+                                    'StateEligibilityId': student.isSelected ? student.StateEligibilityId : null
                                 });
                             }
 
@@ -1288,8 +1288,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                                 'MenuItemDescription': this.filter.selected_menuitem_name,
                                                 'TransactionNo': this.transactionNumber,
                                                 'TerminalName': this.terminalName,
-                                                'StateEligibilityId': student.StateEligibilityId,
-                                                'StatePriceTypeId': student.StateEligibilityId
+                                                'StateEligibilityId': student.isSelected ? student.StateEligibilityId : null,
+                                                'StatePriceTypeId': student.isSelected ? student.StateEligibilityId : null
                                             });
                                         }
 
@@ -2386,8 +2386,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
             'IsTaxable': menuItem.IsTaxable,
-            'StateEligibilityId': stateEligibilityId,
-            'StatePriceTypeId': stateEligibilityId ? stateEligibilityId : statePriceTypeId //Intentially Added
+            'StateEligibilityId': menuItem.IsReimbursable == true ? stateEligibilityId : null,
+            'StatePriceTypeId': menuItem.IsReimbursable == true ? stateEligibilityId ? stateEligibilityId : statePriceTypeId : null //Intentially Added
         });
         const tax = this.menuGridService.calculateTax(this.alaCartItems, this.patronDetails.IsSaleTaxable);
         studentAlaCarteDoc = {
@@ -2426,8 +2426,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             'TerminalName': this.terminalName,
             'TransactionNo': this.transactionNumber,
             'IsTaxable': menuItem.IsTaxable,
-            'StateEligibilityId': this.patronDetails.StateEligibilityId,
-            'StatePriceTypeId': this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId //Intentially Added
+            'StateEligibilityId': (menuItem.IsReimbursable && this.patronDetails.IsSecondMeal == false) ? this.patronDetails.StateEligibilityId : null,
+            'StatePriceTypeId': (menuItem.IsReimbursable && this.patronDetails.IsSecondMeal == false) ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
         });
         studentAlaCarte['alaCartTotalTax'] = this.menuGridService.calculateTax(items, this.patronDetails.IsSaleTaxable);
 

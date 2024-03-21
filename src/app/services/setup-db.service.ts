@@ -175,8 +175,8 @@ export class SetupDbService {
             let canDeleteOpenSession: boolean = false;
             let canDeleteCloseSession: boolean = false;
 
-            PouchQueriesService.GetAllPendingTransactions().then((res) => {
-                const transactions = res.rows.map(row => row.doc);
+            PouchQueriesService.GetAllPendingTransactions_NotSynced().then((res) => {
+                const transactions = res.docs;
                 const hasNotProcessed =
                     transactions.length > 0 ? transactions.find((doc) => doc.saleData.IsProcessed === false) : true;
                 if (hasNotProcessed) {
