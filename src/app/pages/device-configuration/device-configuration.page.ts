@@ -32,7 +32,7 @@ export class DeviceConfigurationPage implements OnInit {
   public hasNotSentTransactions: boolean;
   public transactions: any = [];
   public timerSubscription;
-  @ViewChild('tabElement', { static: false }) public myElement: ElementRef;
+  @ViewChild('tabElement') public myElement: ElementRef;
 
   constructor(public navCtrl: NavController, private events: Events, private alertCtrl: AlertController,
     public utilService: UtilService, private modalCtrl: ModalController,

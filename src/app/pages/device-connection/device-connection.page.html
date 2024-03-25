@@ -43,7 +43,7 @@
       <div *ngIf="selectedDistrict.districtName && !showLogin">
         <ion-button expand="block" size="large" box-action class="ion-margin-top" color="slate" (click)="setDistrict()">
           Connect
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
         </ion-button>
       </div>
 
@@ -52,7 +52,7 @@
 
           <ion-button color="slate" expand="block" size="large" box-action class="ion-margin-top"
             (click)="ChangeDistrict()">
-            <ion-icon slot="start" name="arrow-round-back"></ion-icon>
+            <ion-icon slot="start" name="arrow-back"></ion-icon>
             <div style="margin-left: 10px;">Change district</div>
           </ion-button>
 
@@ -71,7 +71,7 @@
             </ion-item>
             <ion-item mode="ios" class="no-line ion-align-items-center">
               <!-- <ion-label> -->
-              <ion-icon color="slate" slot="start" name="lock"></ion-icon>
+              <ion-icon color="slate" slot="start" name="lock-closed"></ion-icon>
               <ion-input [type]="passwordType" custom-tb #input2 (ionBlur)="passwordfocusblur('blur')"
                 placeholder="Password" (ionFocus)="passwordfocusblur('focus')" (keyup)="focusInput($event,null)"
                 [(ngModel)]="login.password" autocorrect="off" autocapitalize="none"></ion-input>
@@ -94,7 +94,7 @@
           <ion-button expand="block" size="large" color="slate" box-action class="ion-margin-top"
             [disabled]="disableLogin" (click)="validateLogin()">
             Login
-            <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+            <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
             <div class="spinLogin" *ngIf="canProceed">
               <ion-spinner name="bubbles"></ion-spinner>
             </div>
@@ -105,7 +105,7 @@
           <ion-button expand="block" size="large" color="slate" box-action class="ion-margin-top"
             [disabled]="disableLogin" (click)="showLoginDetails()">
             Use PrimeroEdge Login
-            <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+            <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
           </ion-button>
         </div>
 
@@ -114,7 +114,7 @@
           <ion-button expand="block" size="large" box-action class="ion-margin-top" color="slate"
             [disabled]="disableLogin || loginProcessing" (click)="validateSSOLogin()" *ngIf="isSSOAuth">
             Use Single Sign On
-            <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+            <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
             <div class="spinLogin" *ngIf="canProceed || loginProcessing">
               <ion-spinner name="bubbles"></ion-spinner>
             </div>
@@ -124,7 +124,7 @@
           <ion-button expand="block" size="large" box-action class="ion-margin-top" color="slate"
             [disabled]="disableLogin || loginProcessing" (click)="validateWindowsLogin()" *ngIf="isWindowsAuth">
             Use Windows Login
-            <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+            <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
             <div class="spinLogin" *ngIf="canProceed || loginProcessing">
               <ion-spinner name="bubbles"></ion-spinner>
             </div>
@@ -136,7 +136,7 @@
           <br />
           <ion-button expand="block" size="large" box-action class="ion-margin-top" color="slate"
             [disabled]="disableLogin || loginProcessing" (click)="showLoginDetails()">
-            <ion-icon slot="start" name="arrow-round-back"></ion-icon>
+            <ion-icon slot="start" name="arrow-back"></ion-icon>
             Back
           </ion-button>
         </div>

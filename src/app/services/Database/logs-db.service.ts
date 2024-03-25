@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { Events } from "@ionic/angular";
 import { AppStateService } from "../app-state.service";
 import { HttpService } from "../HTTP/http.service";
 import { EXP_LOGS, PouchDBService } from "../pouch-db.service";
@@ -24,7 +23,7 @@ export class LogsDBService {
   ("00" + new Date().getMinutes()).slice(-2) + ":" +
   ("00" + new Date().getSeconds()).slice(-2);
 
-  constructor(private http: HttpService, public utilService: UtilService, public events: Events, public appStateService: AppStateService) {
+  constructor(private http: HttpService, public utilService: UtilService, public appStateService: AppStateService) {
     if (AppStateService.get("DeviceInfo")) {
       let deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"));
       this.terminalId = null;

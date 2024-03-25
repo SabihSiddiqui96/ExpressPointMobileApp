@@ -2,7 +2,7 @@
   <ion-row vh-100 bg-theme *ngIf="selectAccuntClick === false && menuPayselectAcctClick==false">
     <ion-col size="12" class="panel-side">
       <ion-header>
-        <ion-toolbar color="slate">
+        <ion-toolbar color="slate" class="hearderToolbarLookup">
           <ion-row class="ion-align-items-center">
             <ion-col size="2" size-md="2" size-sm="2" [ngClass]="{'ion-hide':swapLeft}">
              
@@ -65,7 +65,7 @@
                       Select a Roster ...</ion-label>
                     <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available
                     </ion-label>
-                    <ion-icon *ngIf="specialRosterList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+                    <ion-icon *ngIf="specialRosterList.length !=0" slot="end" name="caret-down"></ion-icon>
 
                   </ion-item>
                  
@@ -76,7 +76,7 @@
                       <ion-button class="ion-no-padding ion-no-margin" expand="block" size="large"
                         (click)="blurInputElement(); showPopup('patronSpecialRosterPersonList')" [disabled]="selectedSpecialRosterId=== -1">
                         Load
-                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                       </ion-button>
                     </ion-label>
                   </ion-item>
@@ -166,7 +166,7 @@
                         [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname || patronSearch.externalId))"
                         (click)="blurInputElement(); AdvancedPatronLookup()">
                         Search
-                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                       </ion-button>
                     </ion-label>
                   </ion-item>
@@ -183,7 +183,7 @@
                     <ion-label *ngIf="this.selectedGrade == -1 && gradeList.length >0">Select a
                       Grade ...
                     </ion-label>
-                    <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown">
+                    <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down">
                     </ion-icon>
 
                   </ion-item>
@@ -196,7 +196,7 @@
                       Homeroom: None Available</ion-label>
                     <ion-label *ngIf="this.selectedHomeroom == -1 && homeRoomList.length >0">Select
                       a Homeroom ...</ion-label>
-                    <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown">
+                    <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="caret-down">
                     </ion-icon>
 
                   </ion-item>
@@ -211,7 +211,7 @@
                     <ion-label
                       *ngIf=" personlist.length >0 && this.selectedHomeroom != -1 && this.selectedHomeroomPatronId==-1">
                       Select a Patron ...</ion-label>
-                    <ion-icon *ngIf="personlist.length !=0" slot="end" name="md-arrow-dropdown">
+                    <ion-icon *ngIf="personlist.length !=0" slot="end" name="caret-down">
                     </ion-icon>
 
                   </ion-item>
@@ -224,7 +224,7 @@
                         size="large"
                         [disabled]="selectedGrade==-1 || selectedHomeroom==-1 || selectedHomeroomPatronId==-1">
                         Load
-                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                       </ion-button>
                     </ion-label>
                   </ion-item>
@@ -295,7 +295,7 @@
                   <ion-label *ngIf="selectedSpecialRosterId ==-1">Select a Roster ...</ion-label>
                   <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available
                   </ion-label>
-                  <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown">
+                  <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down">
                   </ion-icon>
 
                 </ion-item>
@@ -307,7 +307,7 @@
                       (click)="blurInputElement(); showPopup('patronSpecialRosterPersonList')" size="large"
                       [disabled]="selectedSpecialRosterId=== -1">
                       Load
-                      <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                     </ion-button>
                   </ion-label>
                 </ion-item>
@@ -376,7 +376,7 @@
                       [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname ))"
                       (click)="AdvancedPatronLookup()">
                       Search
-                      <ion-icon name="arrow-round-forward"></ion-icon>
+                      <ion-icon name="arrow-forward-outline"></ion-icon>
                     </ion-button>
                   </ion-label>
                 </ion-item>
@@ -393,7 +393,7 @@
                   <ion-label *ngIf="this.selectedGrade == -1 && gradeList.length >0">Select a Grade
                     ...
                   </ion-label>
-                  <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown">
+                  <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down">
                   </ion-icon>
 
                 </ion-item>
@@ -408,7 +408,7 @@
                   <ion-label *ngIf="this.selectedHomeroom == -1 && homeRoomList.length >0">Select a
                     Homeroom ...
                   </ion-label>
-                  <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown">
+                  <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="caret-down">
                   </ion-icon>
 
                 </ion-item>
@@ -425,7 +425,7 @@
                   <ion-label
                     *ngIf="this.selectedHomeroomPatronId == -1 && (this.selectedGrade ==0  || this.selectedHomeroom==-1)">
                     Select a Patron ...</ion-label>
-                  <ion-icon *ngIf="personlist.length !=0" slot="end" name="md-arrow-dropdown">
+                  <ion-icon *ngIf="personlist.length !=0" slot="end" name="caret-down">
                   </ion-icon>
 
                 </ion-item>
@@ -435,7 +435,7 @@
                       size="large"
                       [disabled]="selectedGrade==-1 || selectedHomeroom==-1 || selectedHomeroomPatronId==-1">
                       Load
-                      <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                     </ion-button>
                   </ion-label>
                 </ion-item>
@@ -587,7 +587,7 @@
                         [disabled]="!(selectedSite!=-1 && ( patronSearch.firstname || patronSearch.lastname || patronSearch.externalId))"
                         (click)="blurInputElement(); AdvancedPatronLookup()">
                         Search
-                        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                       </ion-button>
                     </ion-label>
                   </ion-item>
@@ -679,7 +679,7 @@
                     (click)="blurInputElement(); AdvancedPatronLookup()">
                     Search
 
-                    <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+                    <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
                   </ion-button>
                 </ion-item>
               </ion-list>

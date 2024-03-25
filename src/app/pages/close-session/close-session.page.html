@@ -17,8 +17,8 @@
         <div box-denom class="ion-margin-bottom ion-margin-horizontal" #CoinBox>
           <h1 class="ion-text-center">Coins</h1>
           <ion-item-group class="close-session-denominations ion-margin-bottom" style="height: 315px;">
-            <ion-row no-lines-padding *ngFor="let denomination of denominationDetailsCoins; let i=index"
-              justify-content-center>
+            <ion-row no-lines-padding lines="none" *ngFor="let denomination of denominationDetailsCoins; let i=index"
+              class="ion-justify-content-center" style="padding: 5px;">
               <ion-col size="4" position="fixed" *ngIf="denomination.Type=='COINS'" class="ion-align-self-center">
                 {{denomination.Description}}
               </ion-col>
@@ -49,8 +49,8 @@
         <div box-denom class="ion-margin-horizontal" #BillBox>
           <h1 class="ion-text-center">Bills</h1>
           <ion-item-group class="close-session-denominations ion-margin-bottom">
-            <ion-row no-lines-padding *ngFor="let denomination of denominationDetailsBills; let i=index"
-              class="ion-justify-content-center">
+            <ion-row no-lines-padding lines="none" *ngFor="let denomination of denominationDetailsBills; let i=index"
+              class="ion-justify-content-center" style="padding: 5px;">
               <ion-col size="4" position="fixed" *ngIf="denomination.Type=='BILLS'" class="ion-align-self-center">
                 {{denomination.Description}}
               </ion-col>
@@ -159,7 +159,7 @@
   </ion-grid>
 </ion-content>
 <ion-footer class="ion-align-self-center" no-shadow>
-  <ion-row padding class="ion-justify-content-center">
+  <ion-row padding class="ion-justify-content-center ion-padding">
     <ion-col size="3" size-md='2' class="ion-align-self-auto">
       <ion-button expand="block" size="large" (click)="clearQuantity()">
         <ion-icon slot="start" name="backspace"></ion-icon>
@@ -179,7 +179,7 @@
     <ion-col size="3" class="ion-align-self-auto">
       <ion-button expand="block" size="large" color="slate" (click)="checkCloseSession()" [disabled]="saveInProgress">
         Close Service
-        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
       </ion-button>
     </ion-col>
 

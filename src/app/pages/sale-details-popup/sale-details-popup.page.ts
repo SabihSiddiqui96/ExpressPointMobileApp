@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import { Components } from '@ionic/core';
-import { Renderer } from '@angular/core';
+import { Renderer2 } from '@angular/core';
 import { NavController, PopoverController } from '@ionic/angular';
 import * as _ from 'lodash';
 import { AppStateService } from '../../services/app-state.service';
@@ -122,9 +122,9 @@ export class SaleDetailsPopupPage implements OnInit {
   public patronInfo = undefined;
   public userName;
 
-  @ViewChild("saleDetailPopup", { static: false }) el: ElementRef;
+  @ViewChild("saleDetailPopup") el: ElementRef;
   constructor(private _nav: NavController,
-    private renderer: Renderer, public router: Router, public appStateService: AppStateService,
+    private renderer: Renderer2, public router: Router, public appStateService: AppStateService,
     private popoverController: PopoverController, public loadingService: LoadingService,
     public utilService: UtilService, public printService: PrintService) {
 

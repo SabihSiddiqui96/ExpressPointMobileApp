@@ -1,7 +1,7 @@
 import { MenuGridComponent, MenuGridEvent, MenuGridEventType } from './components/menu-grid/menu-grid.component';
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 
-import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
+import { ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import { Network } from '@ionic-native/network/ngx';
 import {
     AlertController, ModalController, NavController,
@@ -154,15 +154,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.subscribeToMenuServicePopupEvents();
     }
 
-    @ViewChild('displayImage', { static: false }) public canvasRef: ElementRef;
+    @ViewChild('displayImage') public canvasRef: ElementRef;
 
-    @ViewChild('confettiHolder', { static: false })
+    @ViewChild('confettiHolder')
     public elConfettiHolder: ElementRef;
 
-    @ViewChild(ServiceToolbarComponent, { static: false })
+    @ViewChild(ServiceToolbarComponent)
     public serviceToolbarComponent;
 
-    @ViewChild(MenuGridComponent, { static: false })
+    @ViewChild(MenuGridComponent)
     public menuGridComponent;
 
     @HostListener('document:keyup', ['$event'])
@@ -337,7 +337,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public switchHandsService: SwitchHandsService, private utilService: UtilService, private printService: PrintService,
         public transactionService: TransactionService, private elRef: ElementRef,
         private menuGridService: MenugridService, public restrictService: RestrictionsService,
-        public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
+        public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer2,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public pouchQuery: PouchQueriesService,
         public logDBService: LogsDBService,
@@ -3838,7 +3838,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     const nextId = "mycanvas" + UtilService.confettiID++;
                     d1.id = nextId;
                     let confettiSettings = ConfettiService.getConfettiSettings(nextId);
-                    this.renderer.setElementClass(d1, "mycanvas", true);
+                    this.renderer.addClass(d1, "mycanvas");
 
                     const textWidth = (this.elConfettiHolder.nativeElement).scrollWidth;
                     const textHeight = (this.elConfettiHolder.nativeElement).scrollHeight;

@@ -19,7 +19,7 @@
           </ion-button>
         </ion-item>
         <ion-item mode="ios" class="no-line ion-align-items-center">
-          <ion-icon name="lock" color="slate" slot="start"></ion-icon>
+          <ion-icon name="lock-closed" color="slate" slot="start"></ion-icon>
           <ion-input [type]="passwordType" placeholder="Password" custom-tb #input2 (keyup)="focusInput($event,null)"
             [(ngModel)]="login.password" autocorrect="off" autocapitalize="none">
           </ion-input>
@@ -43,7 +43,7 @@
         <label class="{{userNameClass}}" tappable (click)="changeActiveInput('userName')">{{login.username}}</label>
         <br />
         <br />
-        <ion-icon slot="start" name="lock" color="slate"></ion-icon>
+        <ion-icon slot="start" name="lock-closed" color="slate"></ion-icon>
         <label>Password</label>
         <label class="{{pwdClass}}" tappable
           (click)="changeActiveInput('password')">{{passwordIcon==='eye-off'?maskedPassword:login.password}}
@@ -60,7 +60,7 @@
           (click)="validateLogin()">
           Login
 
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
           <div class="spinLogin" *ngIf="canProceed || loginProcessing">
             <ion-spinner name="bubbles"></ion-spinner>
           </div>
@@ -72,7 +72,7 @@
         <ion-button expand="block" size="large" box-action color="slate" [disabled]="disableLogin || loginProcessing"
           (click)="showLogin()">
           Use PrimeroEdge Login
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
         </ion-button>
       </div>
 
@@ -81,7 +81,7 @@
         <ion-button expand="block" size="large" box-action margin-top color="slate"
           [disabled]="disableLogin || loginProcessing" (click)="validateSSOLogin()" *ngIf="isSSOAuth">
           Use Single Sign On
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
           <div class="spinLogin" *ngIf="canProceed || loginProcessing">
             <ion-spinner name="bubbles"></ion-spinner>
           </div>
@@ -90,7 +90,7 @@
         <ion-label class="ion-text-center" *ngIf="isWindowsAuth">OR</ion-label>
         <ion-button expand="block" size="large" box-action margin-top color="slate"
           [disabled]="disableLogin || loginProcessing" (click)="validateWindowsLogin()" *ngIf="isWindowsAuth">
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
           Use Windows Login
           <div class="spinLogin" *ngIf="canProceed || loginProcessing">
             <ion-spinner name="bubbles"></ion-spinner>
@@ -103,7 +103,7 @@
         <br />
         <ion-button expand="block" size="large" box-action class="ion-margin-top" color="slate"
           [disabled]="disableLogin || loginProcessing" (click)="showLogin()">
-          <ion-icon slot="start" name="arrow-round-back"></ion-icon>
+          <ion-icon slot="start" name="arrow-back"></ion-icon>
           Back
         </ion-button>
       </div>
@@ -130,7 +130,7 @@
     <ion-buttons *ngIf="loginUrl" class="ion-align-items-end" slot="end">
       <ion-button slot="end" fill="clear" color="slate" (click)="removeDeviceConnection()">
         <!--<ion-icon name="settings"></ion-icon>Reset-->
-        <ion-icon color="slate" name="ios-help-buoy" slot="icon-only"></ion-icon>
+        <ion-icon color="slate" name="help-buoy" slot="icon-only"></ion-icon>
       </ion-button>
       <ion-button *ngIf="!pnpPeripherals && isElectronApp" fill="clear" color="slate"
         (click)="troubleShootPeripherals()">

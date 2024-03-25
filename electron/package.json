@@ -1,12 +1,11 @@
 {
-  "name": "ExpressPoint",
+  "name": "expresspoint",
   "productName": "ExpressPoint",
   "description": "Point Of Service, Powered by PrimeroEdge",
   "author": "Cybersoft Technologies Inc",
   "version": "4.4.0",
   "main": "src/main/index.js",
   "scripts": {
-    "dev": "electron-webpack dev",
     "copy-www": "cpx ../www/**/* src/renderer",
     "build": "yarn copy-www && tsc && electron-builder build -w",
     "build-windows": "electron-builder build -w ",
@@ -52,7 +51,7 @@
     "electron-browser-storage": "^1.0.7",
     "@trodi/electron-splashscreen": "^1.0.0",
     "electron-log": "^4.3.1",
-    "electron-updater": "^4.3.5",
+    "electron-updater": "4.3.9",
     "machine-uuid": "^1.2.0",
     "net": "^1.0.2",
     "os": "^0.1.1",
@@ -64,18 +63,11 @@
     "@types/semver": "^6.0.0",
     "angular2-template-loader": "^0.6.2",
     "cpx": "^1.5.0",
-    "electron": "11.2.0",
+    "electron": "11.5.0",
     "electron-builder": "^22.9.1",
     "electron-builder-squirrel-windows": "^22.10.4",
-    "electron-rebuild": "^2.3.4",
-    "electron-webpack": "^2.8.2",
-    "electron-webpack-ts": "^4.0.1",
-    "typescript": "^3.4.1",
-    "webpack": "^5.17.0"
-  },
-  "electronWebpack": {
-    "renderer": {
-      "sourceDirectory": null
-    }
+    "electron-rebuild": "^2.3.4",    
+    "typescript": "^5.4.3",
+    "webpack": "^5.87.0"
   }
 }

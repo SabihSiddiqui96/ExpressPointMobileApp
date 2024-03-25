@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Output, EventEmitter, Renderer, HostBinding } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, Renderer2, HostBinding } from '@angular/core';
 // import { Gesture } from '@ionic/angular/gestures/gesture';
 import { Subject } from 'rxjs';
 import { ActionOptions } from '../../interfaces/action.interface';
@@ -16,7 +16,7 @@ export class IonAlphaKeyboardCmp {
     @Output() numberClick: EventEmitter<any> = new EventEmitter();
     @HostBinding('class.visible') @Input() visible: boolean = true;
 
-    constructor(public el: ElementRef, public renderer: Renderer) {
+    constructor(public el: ElementRef, public renderer: Renderer2) {
 
     }
 

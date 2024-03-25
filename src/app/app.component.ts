@@ -48,7 +48,6 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { SignalRService } from './services/SignalR.service';
 import { SetupDbService } from "./services/setup-db.service";
 import { LocalTimerService } from "./services/local-timer.service";
-import { Session } from "inspector";
 import { SessionType } from "./services/enums/session-types";
 
 declare var Fullscreen: any;
@@ -59,7 +58,7 @@ declare var Fullscreen: any;
   providers: [Network, Device, Keyboard],
 })
 export class AppComponent {
-  // @ViewChild(Nav, { static: false }) public nav: Nav;
+  // @ViewChild(Nav) public nav: Nav;
 
   public connectionSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public rootPage: any = LoginPage;
@@ -136,7 +135,7 @@ export class AppComponent {
   public keyboardShowSubscription;
   public keyboardHideSubscription;
 
-  @ViewChild(IonRouterOutlet, { static: false }) routerOutlet: IonRouterOutlet;
+  @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
 
   constructor(
     public platform: Platform,
@@ -1395,13 +1394,13 @@ export class AppComponent {
         return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
           Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
           && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
-          && s.SessionType=== SessionType.EXPRESSPOINT;
+          && s.SessionType === SessionType.EXPRESSPOINT;
       });
 
       let sid = AppStateService.get('session_id');
       sessionDocs.map(doc => {
         doc.isStillOpen = false;
-        doc.SessionId = sid ;
+        doc.SessionId = sid;
         PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => {
         });
       });
