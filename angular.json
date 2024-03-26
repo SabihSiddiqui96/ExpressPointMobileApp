@@ -185,11 +185,11 @@
         "ionic-cordova-build": {
           "builder": "@ionic/cordova-builders:cordova-build",
           "options": {
-            "buildTarget": "app:build"
+            "browserTarget": "app:build"
           },
           "configurations": {
             "production": {
-              "buildTarget": "app:build:production"
+              "browserTarget": "app:build:production"
             }
           }
         },
