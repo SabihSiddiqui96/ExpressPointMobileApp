@@ -12,7 +12,7 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            loadChildren: '../../pages/device-info/device-info.module#DeviceInfoPageModule'
+            loadChildren: () => import('../../pages/device-info/device-info.module').then(m => m.DeviceInfoPageModule)
           }
         ]
       },
@@ -21,7 +21,7 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            loadChildren: '../../pages/session-info/session-info.module#SessionInfoPageModule'
+            loadChildren: () => import('../../pages/session-info/session-info.module').then(m => m.SessionInfoPageModule)
           }
         ]
       },
@@ -30,7 +30,7 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            loadChildren: '../../pages/setting-values/setting-values.module#SettingValuesPageModule'
+            loadChildren: () => import('../../pages/setting-values/setting-values.module').then(m => m.SettingValuesPageModule)
           }
         ]
       },
@@ -39,7 +39,7 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            loadChildren: '../../pages/device-controls/device-controls.module#DeviceControlsPageModule'
+            loadChildren: () => import('../../pages/device-controls/device-controls.module').then(m => m.DeviceControlsPageModule)
           }
         ]
       },

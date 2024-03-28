@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Output, EventEmitter, Renderer, HostBinding } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, Renderer2, HostBinding } from '@angular/core';
 //import { GestureController } from '@ionic/core/dist/collection/utils/gesture/gesture-controller';
 import { Subject } from 'rxjs';
 import { ActionOptions } from '../../interfaces/action.interface';
@@ -108,7 +108,7 @@ export class IonDigitKeyboardCmp {
     @Input() resize: string = undefined; // @TODO: Implement content resizing
 
 
-    constructor(public el: ElementRef, public renderer: Renderer) {
+    constructor(public el: ElementRef, public renderer: Renderer2) {
 
     }
 

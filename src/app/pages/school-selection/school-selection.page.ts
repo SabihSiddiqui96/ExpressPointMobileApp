@@ -30,7 +30,7 @@ export class SchoolSelectionPage implements OnInit {
     ngOnInit() {
         this.isElectronApp = this.utilService.isElectronApp();
   }
-  @ViewChild('schoolSearch', { static: false }) public schoolSearch;
+  @ViewChild('schoolSearch') public schoolSearch;
   public JSON = JSON;
   public deviceInfo;
   public siteList: any;

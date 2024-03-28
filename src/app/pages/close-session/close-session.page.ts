@@ -28,7 +28,7 @@ import { SessionType } from '../../services/enums/session-types';
 })
 export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
-    @ViewChild("CloseSessionViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+    @ViewChild("CloseSessionViewRoot", { read: ElementRef }) private el: ElementRef;
     sessionId: string;
 
     ngOnInit() {
@@ -106,13 +106,13 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         theme: 'light'
     };
 
-    @ViewChild('CoinBox', { static: false })
+    @ViewChild('CoinBox')
     public elCoinBox: ElementRef;
 
-    @ViewChild('BillBox', { static: false })
+    @ViewChild('BillBox')
     public elBillBox: ElementRef;
 
-    @ViewChild('KeyPadBox', { static: false })
+    @ViewChild('KeyPadBox')
     public elKeyPadBox: ElementRef;
     public isKeyboardOpen = false;
     public keyboardShowSubscription;

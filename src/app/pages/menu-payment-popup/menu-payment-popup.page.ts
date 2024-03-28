@@ -118,7 +118,7 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
   public navPatronSelectedData;
   /*Keypad code--------Kiran Patwardhan--------*/
   public cashpaymentOption = 'cash';
-  public cashCheckNum;
+  declare public cashCheckNum;
   public isSpecialAccount = false;
   public orderData: any;
   public buttonPriceActive = 0;

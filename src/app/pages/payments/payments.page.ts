@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Directive } from '@angular/core';
 
 import { NavController, AlertController, PopoverController, Platform, ModalController } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
@@ -32,9 +32,10 @@ enum SuspiciousActivityTypes {
     CANCELCHGDUE
 }
 
+@Directive()
 export class DoPayment {
 
-    @ViewChild("PaymentsViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+    @ViewChild("PaymentsViewRoot", { read: ElementRef }) private el: ElementRef;
 
     // public paymentValidation;
     public navPatronDetails: any = {};
@@ -919,7 +920,7 @@ export class PaymentsPage extends DoPayment implements OnInit {
         });
     }
     public patronSelectedData;
-    public schoolId;
+    declare public schoolId;
     public displayDetails = { 'user_name': null, 'site_name': null, 'date': null };
     public type = 'Payments';
 

@@ -16,15 +16,15 @@ import { HttpService } from '../../services/HTTP/http.service';
 import { AppStateService } from '../../services/app-state.service'
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
-import { OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { SignalRService } from '../../services/SignalR.service';
 import { HashingService } from '../../services/hashing.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
 
+@Injectable()
 export class GoLogin implements OnDestroy {
-
 
     public login = { username: null, password: null, windowsUsername: null, windowsDomain: null, WindowsAuth: false, ADFSAuth: false, ADFSDetails: null };
     public isWindowsAuth: boolean = false;

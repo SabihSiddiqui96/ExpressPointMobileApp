@@ -18,7 +18,7 @@ export class DeviceConnectionSearchPage implements OnInit {
   ngOnInit() {
   }
 
-  @ViewChild('districtSearch', { static: false }) public districtSearch;
+  @ViewChild('districtSearch') public districtSearch;
 
   public schoolDistrictList = [];
   public schoolKey = '';

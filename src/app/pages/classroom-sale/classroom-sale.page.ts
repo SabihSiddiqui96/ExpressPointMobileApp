@@ -56,9 +56,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     }
 
-    public schoolId: string;
+    declare public schoolId: string;
     public siteName: string;
-    public sessionId: string;
+    declare public sessionId: string;
     public gradeList: any = [{ 'GradeId': -1, 'GradeDescription': 'Please Select' }];
     public menuItems: any = [{ 'MenuItemId': -1, 'MenuItemDescription': 'Please Select' }];
     public mealTypes: any = [{ 'MealTypeId': -1, 'MealTypeDescription': 'Please Select' }];
@@ -111,7 +111,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public currPrice;
     public classroomSales: any = [];
     public image: any;
-    public terminalId;
+    declare public terminalId;
     public terminalName: any;
     public transactionNumber: number = 0;
     public selectAllSetting: number;
@@ -142,7 +142,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         CheckNumber: ''
     };
     public saleData: TransactionDoc;
-    public isSiteCEP;
+    declare public isSiteCEP;
     public alacarteTotal = 0.00;
     public setting = {
         'Setting_ChargeReimbursableMealsOnly': null, 'Setting_ActionWhenBelowChargeLimit': null,
@@ -153,7 +153,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public alaCartItems = [];
     public isAlaCarteExists: boolean = false;
     public totalAlaCartItemsPrice = 0.0;
-    public priceMode: number;
+    declare public priceMode: number;
     /*--------------------------------*/
     // Roles
     public isTeacher: boolean = false;

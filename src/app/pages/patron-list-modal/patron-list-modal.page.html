@@ -72,9 +72,9 @@
 
                             <ion-item (click)="selectPatron(patron,i)" lines="none">
 
-                                <ion-icon slot="start" name="rewind" color="slate"
+                                <ion-icon slot="start" name="play-back" color="slate"
                                     *ngIf="patron.InputDirection == 1"></ion-icon>
-                                <ion-icon slot="start" name="fastforward" color="slate"
+                                <ion-icon slot="start" name="play-forward" color="slate"
                                     *ngIf="patron.InputDirection == 2"></ion-icon>
 
                                 <ion-avatar slot="start" class="avatar-small">
@@ -150,9 +150,9 @@
                                 <ion-grid>
                                     <ion-row>
                                         <div style="position: absolute; z-index:2;">
-                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="rewind"
+                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="play-back"
                                                 color="slate"></ion-icon>
-                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="fastforward"
+                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="play-forward"
                                                 color="slate"></ion-icon>
                                         </div>
                                         <ion-col size="6" style="width: 100%;">
