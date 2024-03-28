@@ -1183,6 +1183,8 @@ ion-header ion-toolbar {
   min-width: calc(100vw - 30%) !important;
   left: 15% !important;
   top: 80px !important;
+  --max-height: calc(80%);
+  --min-height: calc(75%);
 }
 
 @media only screen and (min-height: 600px) {
@@ -1206,6 +1208,8 @@ ion-header ion-toolbar {
   min-width: calc(100vw - 30%) !important;
   left: 15% !important;
   top: 80px !important;
+  --max-height: calc(80%);
+  --min-height: calc(75%);
 }
 
 @media only screen and (min-height: 600px) {
@@ -1229,29 +1233,29 @@ ion-header ion-toolbar {
   }
 
   ion-popover.user_ppup::part(content) {
-    left: calc(50% - (700px / 2)) !important;
-    top: calc(50% - (700px / 2)) !important;
+    left: 15% !important;
+    top: calc(45% - (700px / 2)) !important;
     position: absolute !important;
-    max-width: 800px !important;
-    min-width: 700px !important;
+    width: calc(100vw - 30%) !important;
+    min-width: calc(100vw - 30%) !important;
   }
 
   .user_ppup {
     &::part(content) {
-      left: calc(50% - (700px / 2));
-      top: calc(50% - (700px / 2));
+      left: 15% !important;
+      top: calc(45% - (700px / 2));
       position: absolute;
-      max-width: 800px;
-      min-width: 700px;
+      width: calc(100vw - 30%) !important;
+      min-width: calc(100vw - 30%) !important;
     }
   }
 
   .user_ppup ::part(content) {
-    left: calc(50% - (700px / 2));
-    top: calc(50% - (700px / 2));
+    left: 15% !important;
+    top: calc(45% - (700px / 2));
     position: absolute;
-    max-width: 800px;
-    min-width: 700px;
+    width: calc(100vw - 30%) !important;
+    min-width: calc(100vw - 30%) !important;
   }
 
   .sc-ion-modal-md-h {
