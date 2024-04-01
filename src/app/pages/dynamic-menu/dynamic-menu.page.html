@@ -55,7 +55,7 @@
                 [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
                 (click)="blurInputElement(); gridClick($event, grid)">
                 {{grid.ButtonDescription}}&ensp;
-                <ion-icon class="button-icon" name="alert" [style.display]="grid.restrictedItem==false? 'none' : ''">
+                <ion-icon class="button-icon" name="alert-circle-sharp" [style.display]="grid.restrictedItem==false? 'none' : ''">
                 </ion-icon>
                 <ion-icon class="button-icon" name="restaurant"
                   [style.display]="grid.IsReimbursable==false? 'none' : ' '"></ion-icon>
@@ -80,7 +80,7 @@
             <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor"
               (click)="blurInputElement(); gridClick($event, menuItem)">
               {{menuItem.MenuItemDescription}}
-              <ion-icon name="alert" *ngIf="menuItem.restrictedItem"></ion-icon>
+              <ion-icon name="alert-circle-sharp" *ngIf="menuItem.restrictedItem"></ion-icon>
             </ion-button>
           </div>
         </ion-col>

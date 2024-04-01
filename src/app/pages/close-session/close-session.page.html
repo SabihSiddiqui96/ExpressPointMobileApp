@@ -160,7 +160,7 @@
 </ion-content>
 <ion-footer class="ion-align-self-center" no-shadow>
   <ion-row padding class="ion-justify-content-center ion-padding">
-    <ion-col size="3" size-md='2' class="ion-align-self-auto">
+    <ion-col size="3" *ngIf="cancelButtonVisible" size-md='2' class="ion-align-self-auto">
       <ion-button expand="block" size="large" (click)="clearQuantity()">
         <ion-icon slot="start" name="backspace"></ion-icon>
         Cancel

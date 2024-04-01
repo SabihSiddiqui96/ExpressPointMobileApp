@@ -240,7 +240,7 @@ export class SummarySalePage implements OnInit {
     const summarySale = [];
     // const manualSaleId = this.generateUUID();
     console.log('------Menu Items----------');
-    console.log(this.menuItems);
+    //console.log(this.menuItems);
     PouchQueriesService.GetPriceTypes().then((records) => {
       const priceTypeDoc = records.rows.map(row => {
         return row.doc;
@@ -356,7 +356,7 @@ export class SummarySalePage implements OnInit {
 
       this.mealTypes = this.mealTypes.filter(m => m.SchoolId === this.schoolId);
       this.mealTypes = _.orderBy(this.mealTypes, ['MealTypeId']);
-      console.log('Meal Types from DB' + JSON.stringify(this.mealTypes));
+      //console.log('Meal Types from DB' + JSON.stringify(this.mealTypes));
       this.menuItems = [];
       this.manualSale = [];
       this.terminalData = [];
@@ -368,7 +368,12 @@ export class SummarySalePage implements OnInit {
     if (this.filter.selected_mealtype !== -1 && type === 'classMealtype') {
       this.popupMessageService.showMessage(PopupMessageCode.E05516);
     } else if (this.filter.selected_menuitem !== -2 && type === 'classMealitem') {
-      this.popupMessageService.showMessage(PopupMessageCode.E05517);
+      if (this.filter.selected_mealtype !== -1) {
+        this.popupMessageService.showMessage(PopupMessageCode.E05517);
+      }
+      else {
+        this.utilService.showToast('Please select a Meal Type first!');
+      }
     } else {
       let postData = {};
       switch (type) {
@@ -644,7 +649,9 @@ export class SummarySalePage implements OnInit {
     this.event.publish('summary-sale-exists', { 'SummarySaleExists': false });
   }
   public goToServicePage() {
-    this._nav.navigateRoot('service-selection');
+    //this._nav.navigateRoot('service-selection');
+    this.resetSummarySale();
+    this._nav.navigateRoot('summary-sales-close-session', { queryParams: { sessionId: this.sessionId } });
   }
 
   public changeTotal() {
