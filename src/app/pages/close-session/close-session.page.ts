@@ -42,8 +42,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 this.sessionId = params.sessionId;
                 console.log(this.sessionId); // price
             }
-            );
-
+        );
+        this.cancelButtonVisible = true;
+        if (this.router.url.includes('summary-sales-close-session')) {
+            this.cancelButtonVisible = false;
+        }        
     }
 
     ngAfterViewInit() {
@@ -84,6 +87,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
     public hideChecks: boolean = false;
     public onKeyDownCallback;
+    public cancelButtonVisible: boolean = true;
 
     public keyboardSettings: IonDigitKeyboardOptions = {
         align: 'center',
