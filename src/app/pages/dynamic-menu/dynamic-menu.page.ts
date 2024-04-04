@@ -2642,7 +2642,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ItemIndex': this.itemIndex,
                     'OriginalPrice': currPrice,
                     'TransactionNo': this.transactionNumber,
-                    'ItemAddedAt': LocalTimerService.getTime('time'), // recording the item added time to track the item sale uniquely per terminal
+                    'ItemAddedAt': LocalTimerService.getUTCTime(), // recording the item added time to track the item sale uniquely per terminal
                     'IsTaxable': menuItem.IsTaxable,
                     'PaidPrice': currPrice,
                     'ShowPaidPrice': false,
@@ -5794,7 +5794,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'ItemIndex': this.itemIndex,
                         'OriginalPrice': currPrice,
                         'TransactionNo': this.transactionNumber,
-                        'ItemAddedAt': LocalTimerService.getTime('time'),
+                        'ItemAddedAt': LocalTimerService.getUTCTime(),
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,

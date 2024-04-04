@@ -636,7 +636,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             if (this.SquareSetting === true) {
                 this.countDown = timer(0, this.tick).subscribe(() => this.counter > 0 ? --this.counter : 0);
-                this.isContentDisabled = true;
+                if (this.cashpaymentOption === 'card') {
+                    this.isContentDisabled = true;
+                }
+                else {
+                    this.isContentDisabled = false;
+                }
                 resolve(true)
             }
             else {
