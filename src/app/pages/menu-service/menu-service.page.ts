@@ -2128,7 +2128,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'IniTotalPrice': itemPrice,
                         'IsStudent': this.patronDetails.IsStudent,
                         'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
-                        'ItemAddedAt': LocalTimerService.getTime('time'),  // epoch timestamp at the time of adding item to the sale
+                        'ItemAddedAt': LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
@@ -4699,7 +4699,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'IniTotalPrice': itemPrice,
                                     'IsStudent': this.patronDetails.IsStudent,
                                     'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
-                                    'ItemAddedAt': LocalTimerService.getTime('time'),  // epoch timestamp at the time of adding item to the sale
+                                    'ItemAddedAt': LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
                                     'IsTaxable': menuItem.IsTaxable,
                                     'PaidPrice': paidMealPrice,
                                     'ShowPaidPrice': this.showPaidPrice,
