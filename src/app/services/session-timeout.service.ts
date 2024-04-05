@@ -106,16 +106,6 @@ export class SessionTimeoutService {
   }
 
   async presentAlert(countdown) {
-    // Dismiss any previously open alert
-    if (this.timeOutWarning) {
-      await this.timeOutWarning.dismiss();
-      this.timeOutWarning = null;
-    }
-    const element = await this.alertCtrl.getTop();
-    if (element) {
-      element.dismiss();
-    }
-    
     this.timeOutWarning = await this.alertCtrl.create({
       header: 'Warning',
       message: 'You will be logged out in ' + countdown + ' seconds',
