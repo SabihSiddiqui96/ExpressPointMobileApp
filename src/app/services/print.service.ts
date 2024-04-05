@@ -251,9 +251,6 @@ export class PrintService {
                 <td>Total Checks: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.TotalChecks).toFixed(2) + `</td>
             </tr>
             <tr>
-                <td>Total Cards: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.TotalCard).toFixed(2) + `</td>
-            </tr>
-            <tr>
                 <td>Total closing: </td><td style="word-wrap: break-word;width:100px">` + '$ ' + Number(closeSessionFormat.TotalClosing).toFixed(2) + `</td>
             </tr>
             <tr>
