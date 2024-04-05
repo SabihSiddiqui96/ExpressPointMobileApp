@@ -277,7 +277,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getSessionChecks() {
-        PouchQueriesService.GetSessionChecks().then((res) => {
+        let sessionId_from = null;
+        if (this.router.url.includes('summary-sales-close-session')) {
+            sessionId_from = this.sessionId;
+        }
+        PouchQueriesService.GetSessionChecks(sessionId_from).then((res) => {
             this.checkList = res.docs.map(doc => {
                 return {
                     'CheckNumber': doc.CheckNumber,
@@ -307,12 +311,15 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         PouchQueriesService.GetAllOpenSessions().then(data => {
 
             let sessionDocs = data.rows.map(row => row.doc);
-
+            let sessionId_from = AppStateService.get('session_id');
+            if (this.router.url.includes('summary-sales-close-session')) {
+                sessionId_from = this.sessionId;
+            }
             sessionDocs = sessionDocs.filter(s => {
                 return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
-                    && s.SessionId === AppStateService.get('session_id');
+                    && s.SessionId === sessionId_from;
             });
 
             sessionDocs.map(doc => {
@@ -322,7 +329,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getSessionCards() {
-        PouchQueriesService.GetSessionCards().then((res) => {
+        let sessionId_from = null;
+        if (this.router.url.includes('summary-sales-close-session')) {
+            sessionId_from = this.sessionId;
+        }
+        PouchQueriesService.GetSessionCards(sessionId_from).then((res) => {
             this.cardList = res.docs.map(doc => {
                 return {
                     'CardNumber': doc.CardNumber,
