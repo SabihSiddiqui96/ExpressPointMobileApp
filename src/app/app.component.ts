@@ -906,6 +906,7 @@ export class AppComponent {
         element.dismiss();
       }
     }
+    this.sessionTimeOut.closeAllAlerts();
   }
 
   /**

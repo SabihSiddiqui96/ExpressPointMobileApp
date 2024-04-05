@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SessionTimeoutService {
-
+  public activeAlerts: any[] = [];
   public IDLE_TIME;
   public TIMEOUT_AFTER;
   public dismissObserver: any;
@@ -61,7 +61,7 @@ export class SessionTimeoutService {
     });
   }
 
-  public resetTimeoutWatch() {
+  public async resetTimeoutWatch() {
     const value = SettingService.getSettingValue('TEROFFA');
     if (/\S/.test(value) && value !== null) {
       this.IDLE_TIME = parseInt(value) * 60; // 20 * 60; // seconds
@@ -82,7 +82,7 @@ export class SessionTimeoutService {
 
       console.log('Idle Started');
       this.idle.watch();
-
+      this.closeAllAlerts();
     }
 
   }
@@ -106,6 +106,7 @@ export class SessionTimeoutService {
   }
 
   async presentAlert(countdown) {
+    this.closeAllAlerts();
     this.timeOutWarning = await this.alertCtrl.create({
       header: 'Warning',
       message: 'You will be logged out in ' + countdown + ' seconds',
@@ -117,14 +118,6 @@ export class SessionTimeoutService {
             this.idle.setInterrupts(
               [new DocumentInterruptSource('mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll')
               ]);
-            try {
-              const element = await this.alertCtrl.getTop();
-              if (element) {
-                element.dismiss();
-              }
-            } catch (error) {
-              console.log(error);
-            }
             this.timeOutWarning = null;
             this.resetTimeoutWatch();
           }
@@ -132,14 +125,21 @@ export class SessionTimeoutService {
       ],
       backdropDismiss: false
     });
+    this.activeAlerts.push(this.timeOutWarning);
     await this.timeOutWarning.present();
   }
 
   async dismissAlert() {
     try {
       await this.timeOutWarning.dismiss();
+      this.closeAllAlerts();
     } catch (e) {
       //click more than one time popover throws error, so ignore...
     }
+  }
+
+  public async closeAllAlerts() {
+    await Promise.all(this.activeAlerts.map(alert => alert.dismiss()));
+    this.activeAlerts = [];
   }
 }
