@@ -1643,7 +1643,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
 
     public showBalance() {
-        this.hideBalSetting = 0;
+        if (this.hideBalSetting == 0) {
+            this.hideBalSetting = 1;
+        }
+        else {
+            this.hideBalSetting = 0;
+        }
         this.event.publish('patronLargeImagehide', null);
     }
 

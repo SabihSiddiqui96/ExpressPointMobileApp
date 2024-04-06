@@ -740,7 +740,9 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         // if (AppStateService.get('TransactionNumber')) {
         //   AppStateService.set('TransactionNumber', AppStateService.get('TransactionNumber'));
         // } else {
-        AppStateService.set('TransactionNumber', 0);
+        if (this.router.url.includes('summary-sale') == false) {
+          AppStateService.set('TransactionNumber', 0);
+        }
         AppStateService.set('BonusAmount', 0);
         // }
 

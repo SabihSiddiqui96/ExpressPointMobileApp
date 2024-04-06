@@ -3637,7 +3637,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
         return grid.restrictedItem;
     }
     public showBalance() {
-        this.hideBalSetting = 0;
+        if (this.hideBalSetting == 0) {
+            this.hideBalSetting = 1;
+        }
+        else {
+            this.hideBalSetting = 0;
+        }
         // this.event.publish('patronLargeImagehide', null);
     }
     public getReviews() {
@@ -4038,6 +4043,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (this.selectedAccountDetails.Description !== 'Student') {
                 this.selectedAccountDetails.GradeId = null;
             }
+        }
+        if (this.selectedAccountDetails != null) {
+            this.disableCharge = this.enableCharge();
+            this.disablePay = this.enablePay();
         }
         if (this.selectedAccountDetails.GradeId === 0) {
             this.selectedAccountDetails.GradeId = null;

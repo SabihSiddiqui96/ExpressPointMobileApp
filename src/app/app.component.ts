@@ -1410,7 +1410,9 @@ export class AppComponent {
         AppStateService.set('removedSessionId', sid);
         AppStateService.remove('openingBalance');
         AppStateService.remove('session_id');
-        AppStateService.remove('TransactionNumber');
+        if (this.router.url.includes('summary-sales') == false) {
+          AppStateService.remove('TransactionNumber');
+        }
         AppStateService.remove('BonusAmount');
         this.utilService.setLoader(true);
         this.navCtrl.navigateRoot("logout");

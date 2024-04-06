@@ -6362,10 +6362,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         }
     }
+    
     public showBalance() {
         this.event.publish('patronLargeImagehide', null);
-        this.hideBalSetting = 0;
+        if (this.hideBalSetting == 0) {
+            this.hideBalSetting = 1;
+        }
+        else {
+            this.hideBalSetting = 0;
+        }
     }
+    
     public getReviews() {
 
         this.event.publish('patronLargeImagehide', null);
