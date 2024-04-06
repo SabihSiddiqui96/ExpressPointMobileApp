@@ -73,7 +73,7 @@
                 <ion-button *ngIf="hideBalSetting==1" slot="start" (click)="showBalance()">
                   Show Balance
                 </ion-button>
-                <p *ngIf="hideBalSetting==0" class="patron-info-balance"
+                <p *ngIf="hideBalSetting==0" class="patron-info-balance" (click)="showBalance()"
                   [ngClass]="{'color-green': navPatronDetails.Balance > 0, 'color-red': navPatronDetails.Balance < 0 }"
                   [style.display]="(navPatronDetails.Balance>0 || navPatronDetails.Balance == 0 || navPatronDetails.Balance < 0) ? ' ': 'none'">{{navPatronDetails.Balance
                   | currency:'USD':'symbol':'1.2-2'}}&nbsp; <span class="color-black"><span>

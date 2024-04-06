@@ -782,7 +782,9 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 if (closeSessionDoc.SessionType === SessionType.EXPRESSPOINT) {
                 AppStateService.remove('session_id');
                 }
-                AppStateService.remove('TransactionNumber');
+                if (this.router.url.includes('summary-sales-close-session') == false) {
+                    AppStateService.remove('TransactionNumber');
+                }
                 AppStateService.remove('BonusAmount');
                 this.utilService.setLoader(false);
                 this._nav.navigateRoot('service-selection');
