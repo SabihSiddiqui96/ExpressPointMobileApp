@@ -18,7 +18,7 @@ steps:
 
 - task: NodeTool@0
   inputs:
-    versionSpec: '12.18'
+    versionSpec: '20.11.1'
     checkLatest: true
 
 - task: Npm@0
@@ -29,7 +29,7 @@ steps:
 - task: Npm@1
   inputs:
     command: 'custom'
-    customCommand: 'install cordova@10.0.0 -g'
+    customCommand: 'install cordova@12.0.0 -g'
 
 - task: Npm@0
   inputs:

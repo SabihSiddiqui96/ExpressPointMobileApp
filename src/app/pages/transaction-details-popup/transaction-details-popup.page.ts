@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import { Components } from '@ionic/core';
-import { NgZone, Renderer } from '@angular/core';
+import { NgZone, Renderer2 } from '@angular/core';
 import { NavController, PopoverController, ModalController } from '@ionic/angular';
 import { Events } from '../../services/events.service';
 import { SaleDetailsPopupPage } from '../../pages/sale-details-popup/sale-details-popup.page';
@@ -96,13 +96,13 @@ export class TransactionDetailsPopupPage implements OnInit {
     public reviewReasonDoc = {};
     public transactionListCopy = [];
 
-    @ViewChild("TransactionDetailsPopup", { static: false, read: ElementRef }) popupElementRef: ElementRef;
+    @ViewChild("TransactionDetailsPopup", { read: ElementRef }) popupElementRef: ElementRef;
     constructor(private _nav: NavController,
         public popupMessageService: PopupMessageService,
         public events: Events,
         public utilService: UtilService, private popoverCtrl: PopoverController,
         public zone: NgZone, private modalCtrl: ModalController,
-        public transactionServiceProvider: TransactionService, private renderer: Renderer,
+        public transactionServiceProvider: TransactionService, private renderer: Renderer2,
         public router: Router, public appStateService: AppStateService, public pouchDBService: PouchDBService,
         public pouchQuery: PouchQueriesService, public keyboard: Keyboard, public loadingService: LoadingService) {
         this.events.subscribe('transactionDataChanged', (userEventData) => {

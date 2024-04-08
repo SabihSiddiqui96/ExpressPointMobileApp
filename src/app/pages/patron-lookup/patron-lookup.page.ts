@@ -37,9 +37,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     @Input() public page;
     @Input() public prevPatron;
     @Input() public lastPatronDetails;
-    @ViewChild('patron_search_id', { static: false }) patronSearchId: IonInput;
-    @ViewChild('patron_id', { static: false }) patronPinId: IonInput;
-    // @ViewChild(IonDigitKeyboardCmp, { static: false }) public keyboard;
+    @ViewChild('patron_search_id') patronSearchId: IonInput;
+    @ViewChild('patron_id') patronPinId: IonInput;
+    // @ViewChild(IonDigitKeyboardCmp) public keyboard;
     // @ViewChild(patronPin) patronPin;
 
 

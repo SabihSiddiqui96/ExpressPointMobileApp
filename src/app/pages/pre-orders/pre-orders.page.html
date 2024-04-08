@@ -2,7 +2,7 @@
   <!-- <ion-toolbar color="slate">
     <ion-buttons left>
       <ion-button default expand="block" icon-only fill="clear" color="primary" (click)="goToServicePage()">
-        <ion-icon name="arrow-round-back"></ion-icon>
+        <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>
@@ -31,12 +31,12 @@
             <strong *ngIf="selectedMealType != -1">{{selectedMealTypeName}}</strong>
             <strong *ngIf="selectedMealType == -1">Select Meal Type</strong>&nbsp;&nbsp;
             <ion-icon class="icon-custom" style="font-size: 22px;
-          vertical-align: middle;" name="md-arrow-dropdown"></ion-icon>
+          vertical-align: middle;" name="caret-down"></ion-icon>
           </span>
           <!-- </span> for serving line
           <strong>The Grill</strong>&nbsp;&nbsp;
           <ion-icon style="font-size: 22px;
-          vertical-align: middle;" name="md-arrow-dropdown"></ion-icon> -->
+          vertical-align: middle;" name="caret-down"></ion-icon> -->
           <strong>{{orderServedCount}}</strong> Orders of
           <strong>{{totalOrdersCount}}</strong> have been served
         </p>
@@ -111,7 +111,7 @@
                     <ion-checkbox mode="md"  id="{{student.PersonId}}" (click)="selectStudent()"
                       [(ngModel)]="studentList[i].isSelected" *ngIf="!student.IsServed">
                     </ion-checkbox>
-                    <ion-icon large name="md-checkmark" color="secondary" *ngIf="student.IsServed">
+                    <ion-icon large name="checkmark-sharp" color="secondary" *ngIf="student.IsServed">
                     </ion-icon>
                 </ion-row>
               </ion-col>
@@ -142,7 +142,7 @@
             <ion-button expand="block" color="slate" (click)="saveStudentData()">
               Record Sales for {{getSelectedStudentCount()}} Student
               <span slot="end" *ngIf="getSelectedStudentCount() > 1">s</span>
-              <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
+              <!--<ion-icon name="arrow-forward-outline" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
             </ion-button>
           </ion-col>
         </ion-row>
@@ -160,7 +160,7 @@
             <ion-button expand="block" color="slate" (click)="saveStudentData()" *ngIf="getSelectedStudentCount() > 0">
               Record Sales for {{getSelectedStudentCount()}} Student
               <span slot="end" *ngIf="getSelectedStudentCount() > 1">s</span>
-              <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
+              <!--<ion-icon name="arrow-forward-outline" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
             </ion-button>
           </ion-col>
         </ion-row>

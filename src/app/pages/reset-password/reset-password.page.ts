@@ -30,7 +30,7 @@ type PasswordSystemSettings = Array<{
   styleUrls: ['./reset-password.page.scss'],
 })
 export class ResetPasswordPage implements OnInit, OnDestroy {
-  @ViewChild("resetPasswordViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+  @ViewChild("resetPasswordViewRoot", { read: ElementRef }) private el: ElementRef;
   ngOnInit() {
   }
 
@@ -573,7 +573,7 @@ export class ResetPasswordPage implements OnInit, OnDestroy {
 
   }
 
-  private CountSpecialCharacters(specialCharacters, password): number {
+  private CountSpecialCharacters(specialCharacters, password): Number {
     let instancesCount: number = 0;
     specialCharacters.forEach(function (specialChar) {
       password.forEach(function (passwordChar) {

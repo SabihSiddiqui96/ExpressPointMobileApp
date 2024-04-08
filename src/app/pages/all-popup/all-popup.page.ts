@@ -308,8 +308,8 @@ export class AllPopupPage implements OnInit {
         }
     }
     // *ngIf="title=='PersonList'  || title=='Patron'"
-    // @ViewChild(IonDigitKeyboardCmp, {static: false}) public keyboard;
-    // @ViewChild('schoolSearch', {static: false}) public schoolSearch;
+    // @ViewChild(IonDigitKeyboardCmp) public keyboard;
+    // @ViewChild('schoolSearch') public schoolSearch;
     public lists = [];
     public rawList = [];
     public title = "";

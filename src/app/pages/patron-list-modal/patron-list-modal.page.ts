@@ -174,6 +174,7 @@ export class PatronListModalPage implements OnInit {
         this.loadMoreClicks = this.loadMoreClicks + 1;
         maxClicks = Math.floor(this.navPatronList.length / 20);
         this.filteredPatronList = this.navPatronList.slice(0, this.loadMoreCount);
+        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
         this.updateAdvLookupSortOrder();
         if (maxClicks === this.loadMoreClicks) {
             this.disableLoadMore = true;

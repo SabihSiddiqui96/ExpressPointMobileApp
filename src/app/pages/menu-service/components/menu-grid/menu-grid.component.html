@@ -9,7 +9,7 @@
                     [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
                     (click)="gridClick($event, grid);">
                     {{grid.ButtonDescription}}&ensp;
-                    <ion-icon name="alert" [style.display]="grid.restrictedItem==false? 'none' : ''">
+                    <ion-icon name="alert-circle-sharp" [style.display]="grid.restrictedItem==false? 'none' : ''">
                     </ion-icon>
                     <ion-icon name="restaurant" [style.display]="grid.IsReimbursable==false? 'none' : ' '">
                     </ion-icon>

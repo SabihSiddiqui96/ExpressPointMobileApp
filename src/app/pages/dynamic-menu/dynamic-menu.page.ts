@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
-import { ViewChild, ElementRef, Renderer, Renderer2 } from '@angular/core';
+import { ViewChild, ElementRef, Renderer2 } from '@angular/core';
 import { NavController, AlertController, PopoverController, ModalController, Platform } from '@ionic/angular';
 import { UserDetailsPopupPage } from '../../pages/user-details-popup/user-details-popup.page';
 import { PatronLookupPage } from '../../pages/patron-lookup/patron-lookup.page';
@@ -153,10 +153,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     toggleName: string = 'Alacarte';
     public isPatronHavingImage = false;
 
-    @ViewChild('confettiHolder', { static: false })
+    @ViewChild('confettiHolder')
     public elConfettiHolder: ElementRef;
 
-    @ViewChild('displayImage', { static: false }) public canvasRef: ElementRef;
+    @ViewChild('displayImage') public canvasRef: ElementRef;
 
     public type = 'DynamicMenus';
     public patronId = null;
@@ -344,7 +344,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public switchHandsService: SwitchHandsService,
         public transactionService: TransactionService, private elRef: ElementRef,
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
-        public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer,
+        public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer2,
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public logDBService: LogsDBService,
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
@@ -2642,7 +2642,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ItemIndex': this.itemIndex,
                     'OriginalPrice': currPrice,
                     'TransactionNo': this.transactionNumber,
-                    'ItemAddedAt': LocalTimerService.getTime('time'), // recording the item added time to track the item sale uniquely per terminal
+                    'ItemAddedAt': LocalTimerService.getUTCTime(), // recording the item added time to track the item sale uniquely per terminal
                     'IsTaxable': menuItem.IsTaxable,
                     'PaidPrice': currPrice,
                     'ShowPaidPrice': false,
@@ -5794,7 +5794,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'ItemIndex': this.itemIndex,
                         'OriginalPrice': currPrice,
                         'TransactionNo': this.transactionNumber,
-                        'ItemAddedAt': LocalTimerService.getTime('time'),
+                        'ItemAddedAt': LocalTimerService.getUTCTime(),
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,
@@ -6362,10 +6362,17 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         }
     }
+    
     public showBalance() {
         this.event.publish('patronLargeImagehide', null);
-        this.hideBalSetting = 0;
+        if (this.hideBalSetting == 0) {
+            this.hideBalSetting = 1;
+        }
+        else {
+            this.hideBalSetting = 0;
+        }
     }
+    
     public getReviews() {
 
         this.event.publish('patronLargeImagehide', null);
@@ -6559,7 +6566,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const nextId = "mycanvas" + UtilService.confettiID++;
                     d1.id = nextId;
                     let confettiSettings = ConfettiService.getConfettiSettings(nextId);
-                    this.renderer.setElementClass(d1, "mycanvas", true);
+                    this.renderer.addClass(d1, "mycanvas");
 
                     const textWidth = (this.elConfettiHolder.nativeElement).scrollWidth;
                     const textHeight = (this.elConfettiHolder.nativeElement).scrollHeight;

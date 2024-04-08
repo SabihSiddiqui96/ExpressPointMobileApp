@@ -26,7 +26,7 @@
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.SiteSettings=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.SiteSettings=='Success'"></ion-icon>
 
-            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.SiteSettings=='Failed'"></ion-icon>
+            <ion-icon slot="end" name="alert-circle-sharp" color="danger" *ngIf="syncList.SiteSettings=='Failed'"></ion-icon>
             <ion-button slot="end" fill="outline" (click)="retryGeneralDB()" class="margin-3px" *ngIf="syncList.SiteSettings=='Failed'">
                 <ion-icon slot="start" name="refresh"></ion-icon>
                 Retry
@@ -41,7 +41,7 @@
         </ion-item>
 
         <ion-item *ngIf="syncList.Students" class="done">
-            <ion-icon slot="start" name="contacts"></ion-icon>
+            <ion-icon slot="start" name="person-circle"></ion-icon>
             <ion-label slot="start">
                 Students
             </ion-label>
@@ -51,7 +51,7 @@
             <ion-spinner name="circles" slot="end" *ngIf="syncList.Students=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.Students=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Students=='Success'"></ion-icon>
-            <ion-icon slot="end" color="danger" name="alert" *ngIf="syncList.Students=='Failed'"></ion-icon>
+            <ion-icon slot="end" color="danger" name="alert-circle-sharp" *ngIf="syncList.Students=='Failed'"></ion-icon>
 
 
             <!-- <ion-label slot="start"> -->
@@ -81,7 +81,7 @@
             <ion-spinner name="circles" slot="end" *ngIf="syncList.StaticMenus=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.StaticMenus=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.StaticMenus=='Success'"></ion-icon>
-            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.StaticMenus=='Failed'"></ion-icon>
+            <ion-icon slot="end" name="alert-circle-sharp" color="danger" *ngIf="syncList.StaticMenus=='Failed'"></ion-icon>
             <!-- <ion-label slot="start"> -->
             <ion-button slot="end" fill="outline" (click)="retryStaticMenusDB()" class="margin-3px" *ngIf="syncList.StaticMenus=='Failed'">
                 <ion-icon slot="start" name="refresh"></ion-icon>
@@ -108,7 +108,7 @@
             <ion-spinner name="circles" slot="end" *ngIf="syncList.DynamicMenus=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.DynamicMenus=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.DynamicMenus=='Success'"></ion-icon>
-            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.DynamicMenus=='Failed'"></ion-icon>
+            <ion-icon slot="end" name="alert-circle-sharp" color="danger" *ngIf="syncList.DynamicMenus=='Failed'"></ion-icon>
             <!-- <ion-label slot="start"> -->
             <ion-button slot="end" fill="outline" (click)="retryDynamicMenusDB()" class="margin-3px"
                 *ngIf="syncList.DynamicMenus=='Failed'">
@@ -136,7 +136,7 @@
             <ion-spinner name="circles" slot="end" *ngIf="syncList.Users=='InProgress'"></ion-spinner>
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.Users=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Users=='Success'"></ion-icon>
-            <ion-icon slot="end" name="alert" color="danger" *ngIf="syncList.Users=='Failed'"></ion-icon>
+            <ion-icon slot="end" name="alert-circle-sharp" color="danger" *ngIf="syncList.Users=='Failed'"></ion-icon>
             <ion-button ion-button slot="end" (click)="retryUsersDB()" *ngIf="syncList.Users=='Failed'" class="margin-3px">
                 <ion-icon slot="start" name="refresh"></ion-icon>
                 Retry

@@ -77,9 +77,9 @@ ion-digit-keyboard {
                     
                         // Letters
                         .digit-keyboard-key-letters {
-                            font-size: (($dk-btn-font-size*40)/100);
-                            line-height: (($dk-btn-font-size*40)/100);
-                            height: (($dk-btn-font-size*40)/100);
+                            font-size: calc(($dk-btn-font-size*40)/100);
+                            line-height: calc(($dk-btn-font-size*40)/100);
+                            height: calc(($dk-btn-font-size*40)/100);
                             margin-top: -0.25em;
 
                             &.hidden {
@@ -190,8 +190,8 @@ ion-digit-keyboard {
                     .digit-keyboard-key-wrapper {
                         .digit-keyboard-key {
                             .digit-keyboard-key-number {
-                                height: (($dk-btn-height*96)/100);
-                                line-height: (($dk-btn-height*96)/100);
+                                height: calc(($dk-btn-height*96)/100);
+                                line-height: calc(($dk-btn-height*96)/100);
                             }
                         }
                     }

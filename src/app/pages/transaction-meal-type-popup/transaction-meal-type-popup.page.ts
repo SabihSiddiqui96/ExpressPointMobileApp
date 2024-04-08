@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import { Components } from '@ionic/core';
-import { NgZone, Renderer } from '@angular/core';
+import { NgZone, Renderer2 } from '@angular/core';
 import { NavController, PopoverController, ModalController } from '@ionic/angular';
 import { UtilService } from '../../services/util.service';
 import { Events } from '../../services/events.service';
@@ -16,7 +16,7 @@ export class TransactionMealTypePopupPage implements OnInit {
   @Input() modal: Components.IonModal;
   @Input() sortedMealsArray;
 
-  @ViewChild("transactionMealTypePopup", { static: false }) el: ElementRef;
+  @ViewChild("transactionMealTypePopup") el: ElementRef;
 
   ngOnInit() {
     this.sortedMeals = this.sortedMealsArray;
@@ -24,7 +24,7 @@ export class TransactionMealTypePopupPage implements OnInit {
   public sortedMeals: any = [];
 
 
-  constructor(private renderer: Renderer, private _nav: NavController,
+  constructor(private renderer: Renderer2, private _nav: NavController,
     public utilService: UtilService,
     private popoverCtrl: PopoverController, public event: Events, public zone: NgZone,
     private modalCtrl: ModalController, public router: Router) {

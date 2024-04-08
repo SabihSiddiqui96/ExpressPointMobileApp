@@ -5,7 +5,7 @@
     </ion-title>
   </ion-toolbar>
   <ion-toolbar class="ion-no-padding" *ngIf="!hideChecks">
-    <ion-row addbar padding>
+    <ion-row addbar class="ion-padding">
       <ion-input type="text" placeholder="Card Number" maxlength="10" [(ngModel)]="cardNumber" input-outline>
       </ion-input>
       <ion-input type="text" placeholder="Card Amount" (keyup)="numberOnly($event)" maxlength="8"
@@ -16,7 +16,7 @@
     </ion-row>
   </ion-toolbar>
 </ion-header>
-<ion-content padding>
+<ion-content class="ion-padding">
   <div custom-list>
     <ion-row header-row>
       <ion-col size="3">

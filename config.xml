@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.PrimeroEdge.ExpressPoint" version="4.4.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.PrimeroEdge.ExpressPoint" version="4.5.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>ExpressPoint</name>
-    <description />
+    <description /><!--android-versionCode="405000" -->
     <author email="apps@primeroedge.com" href="https://primeroedge.com/">Cybersoft Technologies Inc.</author>
     <content src="index.html" />
     <access origin="*" />
@@ -12,7 +12,7 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <preference name="ScrollEnabled" value="false" />
-     <preference name="AndroidInsecureFileModeEnabled" value="true" />
+    <preference name="AndroidInsecureFileModeEnabled" value="true" />
     <preference name="AndroidXEnabled" value="true" />
     <preference name="android-minSdkVersion" value="21" />
     <preference name="android-targetSdkVersion" value="33" />
@@ -32,6 +32,7 @@
     <preference name="WindowsStoreIdentityName" value="Primeroedge.ExpressPoint" />
     <preference name="KeyboardResize" value="false" />
     <platform name="android">
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
         <preference name="CodePushDeploymentKey" value="46wuyrjaLk1RxnaQhmdjOUB4Wl_s6abdec4d-807b-4777-817c-0320362a4194" />
         <preference name="android-windowSoftInputMode" value="adjustPan" />
         <preference name="Fullscreen" value="true" />

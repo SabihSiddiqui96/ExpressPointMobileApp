@@ -3,7 +3,7 @@
       <ion-toolbar color="slate">
         <!-- <ion-buttons left> -->
         <!-- <ion-button default expand="block" icon-only fill="clear" color="primary" (click)="goToServicePage()">
-        <ion-icon name="arrow-round-back"></ion-icon>
+        <ion-icon name="arrow-back"></ion-icon>
       </ion-button> -->
         <ion-menu-toggle slot="start">
           <ion-button fill="clear">
@@ -20,7 +20,7 @@
           </ion-col>
           <ion-col size="1">
             <ion-button fill="clear" (click)="openTransactionViewer()">
-              <ion-icon name="ios-paper" slot="icon-only"></ion-icon>
+              <ion-icon name="newspaper-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </ion-col>
         </ion-row>
@@ -31,7 +31,7 @@
           </ion-col>
           <ion-col size="3">
             <ion-button fill="clear" (click)="openTransactionViewer()">
-              <ion-icon name="ios-paper" slot="icon-only"></ion-icon>
+              <ion-icon name="newspaper-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </ion-col>
           <ion-col size="2">
@@ -73,11 +73,11 @@
                 <ion-button *ngIf="hideBalSetting==1" slot="start" (click)="showBalance()">
                   Show Balance
                 </ion-button>
-                <p *ngIf="hideBalSetting==0" class="patron-info-balance"
+                <p *ngIf="hideBalSetting==0" class="patron-info-balance" (click)="showBalance()"
                   [ngClass]="{'color-green': navPatronDetails.Balance > 0, 'color-red': navPatronDetails.Balance < 0 }"
                   [style.display]="(navPatronDetails.Balance>0 || navPatronDetails.Balance == 0 || navPatronDetails.Balance < 0) ? ' ': 'none'">{{navPatronDetails.Balance
                   | currency:'USD':'symbol':'1.2-2'}}&nbsp; <span class="color-black"><span>
-                    <ion-icon name="arrow-round-forward" *ngIf="cashAmount > 0" style="vertical-align: text-top;">
+                    <ion-icon name="arrow-forward-outline" *ngIf="cashAmount > 0" style="vertical-align: text-top;">
                     </ion-icon>
                 </span></span>
             &nbsp; <span *ngIf="cashAmount > 0" [ngClass]="{ 'color-green': newBalance>0 ,'color-black': newBalance == 0 ,
@@ -225,7 +225,7 @@
               <ion-button expand="block" size="large" color="slate" (click)="checkPayment()"
                 [disabled]="checkButtonDisabled() || makePaymentProcessing">
                 Make Payment
-                <ion-icon slot="end" name="arrow-round-forward" class="color_green"></ion-icon>
+                <ion-icon slot="end" name="arrow-forward-outline" class="color_green"></ion-icon>
                 <div class="spinLogin" *ngIf="makePaymentProcessing">
                   <ion-spinner name="bubbles"></ion-spinner>
                 </div>

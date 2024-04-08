@@ -13,7 +13,7 @@
             <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
               <ion-button fill="clear" color="danger"
               (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
-                <ion-icon slot="icon-only" sytle="font-size:21px;" name="md-close-circle"></ion-icon>
+                <ion-icon slot="icon-only" sytle="font-size:21px;" name="close-circle"></ion-icon>
               </ion-button>
               <ion-label>
                 <strong>{{items.MenuItemDescription}}</strong>

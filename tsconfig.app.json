@@ -6,12 +6,12 @@
       "node"
     ]
   },
-  "include": [
-    "src/**/*.ts",
-    "typings.d.ts"
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
   ],
-  "exclude": [
-    "src/test.ts",
-    "src/**/*.spec.ts"
+  "include": [
+    "src/**/*.d.ts",
+    "typings.d.ts"
   ]
 }
