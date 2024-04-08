@@ -24,7 +24,7 @@
             <span *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0"><strong>Select a Meal Type
                 ...</strong></span>
             <ion-icon class="icon-custom" style="font-size: 22px;
-                      vertical-align: middle;" name="md-arrow-dropdown"></ion-icon>
+                      vertical-align: middle;" name="caret-down"></ion-icon>
           </span>
           for
           <span (click)="showPopup('classMealitem')">
@@ -37,7 +37,7 @@
                 ...</strong></span>
             <span *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0"><strong>Select a Menu Item
                 ...</strong></span>
-            <ion-icon class="icon-custom" style="font-size: 22px; vertical-align: middle;" name="md-arrow-dropdown">
+            <ion-icon class="icon-custom" style="font-size: 22px; vertical-align: middle;" name="caret-down">
             </ion-icon>
           </span>
           <!-- <ion-content> -->
@@ -126,18 +126,17 @@
         <!-- </ion-content> -->
         <ion-row>
           <ion-col size="4">
-            <ion-button expand="block" (click)="goToServicePage()" *ngIf="summaryMealCount.length === 0">
+            <ion-button expand="block" (click)="goToServicePage()" *ngIf="summaryMealCount.length === 0 && filter.selected_mealtype == -1">
               <ion-icon slot="start" name="backspace"></ion-icon>
-              Cancel
+              Cancel and Close Service
             </ion-button>
-            <ion-button expand="block" (click)="resetSummarySale()" *ngIf="summaryMealCount.length > 0">
+            <ion-button expand="block" (click)="resetSummarySale()" *ngIf="summaryMealCount.length > 0 || filter.selected_mealtype > 0">
               <ion-icon slot="start" name="backspace"></ion-icon>
               Clear Selection
             </ion-button>
           </ion-col>
           <ion-col size="8">
             <ion-button expand="block" color="slate" [disabled]="!enableRecordSales" (click)="saveSummarySale()">
-
               Record Sales
             </ion-button>
           </ion-col>

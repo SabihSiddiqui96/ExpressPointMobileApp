@@ -20,12 +20,12 @@
                 <ion-list mode="ios" inset>
                     <ion-item option-open-session mode="ios" *ngIf="!openSession"
                         (click)="checkOpenSession('MenuService')" detail>
-                        <ion-icon slot="start" color="slate" name="ios-restaurant"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="restaurant"></ion-icon>
                         <ion-label text-large>Open Service</ion-label>
                     </ion-item>
                     <ion-item option-continue-session mode="ios" *ngIf="openSession"
                         (click)="checkOpenSession('MenuService')" detail>
-                        <ion-icon slot="start" color="slate" name="ios-restaurant"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="restaurant"></ion-icon>
                         <ion-label text-large>Continue Service</ion-label>
                     </ion-item>
                     <ion-item option-close-session mode="ios" *ngIf="openSession" (click)="goCloseSession()" detail>
@@ -33,32 +33,32 @@
                         <ion-label text-large>Close Service</ion-label>
                     </ion-item>
                     <ion-item option-transactions mode="ios" (click)="checkOpenSession('Transactions')" detail>
-                        <ion-icon slot="start" color="slate" name="ios-paper"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="newspaper-outline"></ion-icon>
                         <ion-label text-large>Transactions</ion-label>
                         <!--<ion-badge slot="end" color="slate">475</ion-badge>-->
                     </ion-item>
                     <ion-item option-quick-sales mode="ios" *ngIf="permissions.CanDoClassroomSale"
                         (click)="checkOpenSession('ClassroomSale')" detail>
 
-                        <ion-icon slot="start" color="slate" name="ios-people"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="people"></ion-icon>
                         <ion-label text-large>Bulk Sales</ion-label>
                     </ion-item>
                     <ion-item option-quick-sales mode="ios" *ngIf="canSumSale" (click)="checkOpenSession('SummarySale')"
                         detail>
-                        <ion-icon slot="start" color="slate" name="ios-clipboard"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="clipboard-outline"></ion-icon>
                         <ion-label text-large>Summary Sale</ion-label>
                     </ion-item>
                     <ion-item option-orders mode="ios" *ngIf="ORDMEALS" (click)="checkOpenSession('PreOrders')" detail>
-                        <ion-icon slot="start" color="slate" name="ios-filing"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="file-tray-full"></ion-icon>
                         <ion-label text-large>Orders</ion-label>
                     </ion-item>
                     <ion-item option-payments mode="ios" *ngIf="permissions.CanDoPayments && !hidePaymentOptions"
                         (click)="checkOpenSession('Payments')" detail>
-                        <ion-icon slot="start" color="slate" name="ios-cash"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="cash"></ion-icon>
                         <ion-label text-large>Payments</ion-label>
                     </ion-item>
                     <ion-item option-transactions mode="ios" (click)="checkOpenSession('DeviceConfiguration')" detail>
-                        <ion-icon slot="start" color="slate" name="ios-help-buoy"></ion-icon>
+                        <ion-icon slot="start" color="slate" name="help-buoy"></ion-icon>
                         <ion-label text-large>Device Information</ion-label>
                         <!--<ion-badge slot="end" color="slate">475</ion-badge>-->
                     </ion-item>

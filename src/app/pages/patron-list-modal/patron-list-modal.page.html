@@ -72,9 +72,9 @@
 
                             <ion-item (click)="selectPatron(patron,i)" lines="none">
 
-                                <ion-icon slot="start" name="rewind" color="slate"
+                                <ion-icon slot="start" name="play-back" color="slate"
                                     *ngIf="patron.InputDirection == 1"></ion-icon>
-                                <ion-icon slot="start" name="fastforward" color="slate"
+                                <ion-icon slot="start" name="play-forward" color="slate"
                                     *ngIf="patron.InputDirection == 2"></ion-icon>
 
                                 <ion-avatar slot="start" class="avatar-small">
@@ -91,7 +91,7 @@
                                 </ion-avatar>
 
                                 <ion-label text-large *ngIf="patron.FirstName==null || patron.FirstName==''">
-                                    <p style="color: red; font-weight: bolder; font-size: 18px;">Not Found</p>
+                                    <p style="color: red; font-weight: bolder; font-size: 18px;">Visiting / Unidentified Patron</p>
                                 </ion-label>
 
                                 <ion-label text-large *ngIf="nameSortOrder === 'FnLn' && patron.FirstName!=null && patron.FirstName!=''">
@@ -128,7 +128,7 @@
                         <ion-col [size]="patron.FirstName==null || patron.FirstName=='' ? '5' : '3'">
                             <ion-item (click)="selectPatron(patron,i)" lines="none">
                                 <ion-label text-large *ngIf="patron.FirstName==null || patron.FirstName==''">
-                                    <p style="color: red; font-weight: bolder; float: right; font-size: 18px;">Invalid Entered ID: </p>
+                                    <p style="color: red; font-weight: bolder; float: right; font-size: 18px;">Entered ID: </p>
                                 </ion-label>
                                 <ion-label item-content text-large style="text-align:center"
                                     *ngIf="patron.Identifier!=null">
@@ -150,9 +150,9 @@
                                 <ion-grid>
                                     <ion-row>
                                         <div style="position: absolute; z-index:2;">
-                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="rewind"
+                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 1" name="play-back"
                                                 color="slate"></ion-icon>
-                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="fastforward"
+                                            <ion-icon slot="start" *ngIf="patron.InputDirection == 2" name="play-forward"
                                                 color="slate"></ion-icon>
                                         </div>
                                         <ion-col size="6" style="width: 100%;">
@@ -196,7 +196,7 @@
                                             </ion-row>
                                             <ion-row style="width: 100%;">
                                                 <ion-label *ngIf="patron.FirstName==null || patron.FirstName==''">
-                                                    <p style="color: red; font-weight: bolder;font-size: 20px !important; padding-bottom: 20px;">Not Found</p>
+                                                    <p style="color: red; font-weight: bolder;font-size: 20px !important; padding-bottom: 20px;">Visiting / Unidentified Patron</p>
                                                 </ion-label>
                                             </ion-row>
                                             <ion-row style="width: 100%;">

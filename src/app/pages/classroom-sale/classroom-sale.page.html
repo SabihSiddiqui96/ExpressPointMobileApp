@@ -4,7 +4,7 @@
   <!-- <ion-toolbar color="slate">
     <ion-buttons left>
       <ion-button default block icon-only fill="clear" color="primary" *ngIf="!isTeacher" (click)="goToServicePage()">
-        <ion-icon name="arrow-round-back"></ion-icon>
+        <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
       <ion-button  default block icon-only fill="clear" color="primary" *ngIf="isTeacher" (click)="popoverClick($event)">
         <ion-icon name="menu"></ion-icon>
@@ -30,7 +30,7 @@
   <ion-row vh-100-dyn class="ion-justify-content-center" *ngIf="!studentLoaded">
     <ion-col size="12" size-lg="8" class="ion-align-self-center width-auto">
       <div box-list-white class="ion-margin-horizontal" style="height: 100% !important;">
-        <ion-icon color="slate" text-xxl text-block slot="end" class="ion-text-center" name="ios-people"></ion-icon>
+        <ion-icon color="slate" text-xxl text-block slot="end" class="ion-text-center" name="people"></ion-icon>
         <h1 class="ion-text-center" title>Perform meal sales by homeroom or roster.</h1>
         <ion-segment mode="md" color="slate" [(ngModel)]="patronAccount" class="ion-padding-horizontal">
           <ion-segment-button value="by_homeroom" (click)="resetHomeroom()">
@@ -51,7 +51,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length ==0">Grade: None Available</ion-label>
             <ion-label *ngIf="filter.selected_grade == -1 && gradeList.length >0">Select a Grade ...</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classHomeroom')">
             <ion-label *ngIf="filter.selected_homeroom!=-1 ">Selected Homeroom:
@@ -61,7 +61,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_homeroom == -1 && homeRoomList.length >0">Select a Homeroom ...
             </ion-label>
-            <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="homeRoomList.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealtype')">
             <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
@@ -71,7 +71,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
             </ion-label>
-            <ion-icon *ngIf="mealTypes.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="mealTypes.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealitem')">
             <ion-label *ngIf="filter.selected_menuitem >= 0">Selected Item:
@@ -81,13 +81,13 @@
               Item: None Available</ion-label>
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0">Select an Item ...</ion-label>
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
         </ion-list>
         <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
           (click)="getStudentList()" *ngIf="patronAccount=='by_homeroom'">
           Load Students
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
         </ion-button>
         <ion-list *ngIf="patronAccount=='by_specialroster'" class="ion-padding-horizontal">
           <ion-item (click)="showPopup('patronSpecialRoster')">
@@ -97,7 +97,7 @@
             <ion-label *ngIf="selectedSpecialRosterId ==-1 && specialRosterList.length>0 ">Select a Roster ...
             </ion-label>
             <ion-label *ngIf="specialRosterList.length==0 ">Roster: None Available</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealtype')">
             <ion-label *ngIf="filter.selected_mealtype!=-1">Selected Meal Type:
@@ -107,7 +107,7 @@
             </ion-label>
             <ion-label *ngIf="filter.selected_mealtype == -1 && mealTypes.length >0">Select a Meal Type ...
             </ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
           <ion-item (click)="showPopup('classMealitem')">
             <ion-label *ngIf="filter.selected_menuitem >= 0 ">Selected Item:
@@ -118,13 +118,13 @@
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length ==0 && filter.selected_mealtype ==-1">
               Select an Item ...</ion-label>
             <ion-label *ngIf="(filter.selected_menuitem < 0) && menuItems.length >0">Select an Item ...</ion-label>
-            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="md-arrow-dropdown"></ion-icon>
+            <ion-icon *ngIf="gradeList.length !=0" slot="end" name="caret-down"></ion-icon>
           </ion-item>
         </ion-list>
         <ion-button expand="block" size="large" fill="clear" color="slate" [disabled]="studentBtnDisable"
           (click)="getStudentListForSpecialRoster()" *ngIf="patronAccount=='by_specialroster'">
           Load Students
-          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
         </ion-button>
       </div>
     </ion-col>
@@ -135,7 +135,7 @@
         <ion-row *ngIf="previousMealsCount == totalStudent">
           <ion-col class="ion-no-padding">
             <ion-button expand="block" (click)="clearStudents()">
-              <ion-icon slot="start" name="arrow-round-back"></ion-icon>
+              <ion-icon slot="start" name="arrow-back"></ion-icon>
               Back
             </ion-button>
           </ion-col>
@@ -241,13 +241,13 @@
                             <ion-checkbox   id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
                             [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
                             </ion-checkbox>
-                            <ion-icon large name="md-checkmark" style="font-size: 31px; font-weight: bold;" color="secondary" *ngIf="student.HadMeal"></ion-icon>
+                            <ion-icon large name="checkmark-sharp" style="font-size: 31px; font-weight: bold;" color="secondary" *ngIf="student.HadMeal"></ion-icon>
                           </ng-container>
                           <ng-container *ngIf="!student.IsAllergent" style="background-color:'';">
                             <ion-checkbox   id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
                             [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
                             </ion-checkbox>
-                            <ion-icon large name="md-checkmark" style="font-size: 31px; font-weight: bold;" color="secondary" *ngIf="student.HadMeal"></ion-icon>
+                            <ion-icon large name="checkmark-sharp" style="font-size: 31px; font-weight: bold;" color="secondary" *ngIf="student.HadMeal"></ion-icon>
                           </ng-container>
                         </ion-col>
                       </ion-row>
@@ -305,7 +305,7 @@
                     <strong *ngIf="nameSortOrder === 'LnFn'">{{student.LastName}},&nbsp;{{student.FirstName}}</strong>
                     <strong *ngIf="nameSortOrder === 'FnLn'">{{student.FirstName}},&nbsp;{{student.LastName}}</strong>
                     <!-- <span *ngIf="student.IsAllergent" (click)="showAllergyPopover(student)">
-                    <ion-icon name="alert"></ion-icon>
+                    <ion-icon name="alert-circle-sharp"></ion-icon>
                   </span> -->
                     <br>
                     <span *ngIf="hideBalSetting==0"
@@ -345,7 +345,7 @@
                         <ion-item lines="none" *ngFor="let items of item.alaCarteItems; let i = index">
                           <ion-button fill="clear" color="danger"
                             (click)="deleteAlaCarteItems(student.PersonId,items.MenuItemId,i)">
-                            <ion-icon slot="icon-only" sytle="font-size:21px;" name="md-close-circle"></ion-icon>
+                            <ion-icon slot="icon-only" sytle="font-size:21px;" name="close-circle"></ion-icon>
                           </ion-button>
                           <ion-label>
                             <strong>{{items.MenuItemDescription}}</strong>
@@ -410,7 +410,7 @@
                   <ion-checkbox mode="md" id="{{student.PersonId}}" (ionChange)="selectStudent(i)"
                     [(ngModel)]="student.isSelected" *ngIf="!student.HadMeal && student.isPriceSetForStudentPriceType" [disabled]="student.IsAllergent">
                   </ion-checkbox>
-                  <ion-icon large name="md-checkmark" color="secondary" *ngIf="student.HadMeal"></ion-icon>
+                  <ion-icon large name="checkmark-sharp" color="secondary" *ngIf="student.HadMeal"></ion-icon>
                 </ion-row>
               </ion-col>
             </ion-row>
@@ -443,7 +443,7 @@
               </div>
               Record Sales for {{getSelectedStudentCount()}} Student
               <span *ngIf="getSelectedStudentCount() > 1">s</span>
-              <!--<ion-icon name="arrow-round-forward" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
+              <!--<ion-icon name="arrow-forward-outline" *ngIf="getSelectedStudentCount() > 0"></ion-icon>-->
             </ion-button>
           </ion-col>
         </ion-row>

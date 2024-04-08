@@ -5,7 +5,7 @@
     </ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content padding>
+<ion-content class="ion-padding">
   <div>
     <p style="color: #555; font-size: 1.1em;font-weight: bold;">
       Food Restrictions
@@ -37,7 +37,7 @@
     </ion-col>
   <ion-col>
       <ion-button fill="clear" [color]="navPatronDetails.CannotCharge ? 'danger' : 'secondary'">
-        <ion-icon slot="icon-only" [name]="navPatronDetails.CannotCharge ? 'md-close-circle' : 'md-checkmark-circle'">
+        <ion-icon slot="icon-only" [name]="navPatronDetails.CannotCharge ? 'close-circle' : 'checkmark-circle'">
         </ion-icon>
       </ion-button>
     </ion-col>
@@ -46,7 +46,7 @@
     </ion-col>
   <ion-col>
       <ion-button fill="clear" [color]="navPatronDetails.AcceptCheck ? 'secondary' : 'danger'">
-        <ion-icon slot="icon-only" [name]="navPatronDetails.AcceptCheck ? 'md-checkmark-circle' : 'md-close-circle'">
+        <ion-icon slot="icon-only" [name]="navPatronDetails.AcceptCheck ? 'checkmark-circle' : 'close-circle'">
         </ion-icon>
       </ion-button>
     </ion-col>
@@ -71,32 +71,32 @@
             </ion-col>
             <ion-col *ngIf="currentDay==1">
               <ion-button fill="clear" [color]="alaCarteCash[0]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCash[0]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[0]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
             <ion-col *ngIf="currentDay==2">
               <ion-button  fill="clear" [color]="alaCarteCash[1]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCash[1]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[1]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
             <ion-col *ngIf="currentDay==3">
               <ion-button fill="clear" [color]="alaCarteCash[2]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCash[2]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[2]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
 
             <ion-col *ngIf="currentDay==4">
               <ion-button fill="clear" [color]="alaCarteCash[3]=='1' ?'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCash[3]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[3]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
             <ion-col *ngIf="currentDay==5">
               <ion-button fill="clear" [color]="alaCarteCash[4]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCash[4]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCash[4]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
@@ -106,32 +106,32 @@
             </ion-col>
             <ion-col *ngIf="currentDay==1">
               <ion-button fill="clear" [color]="alaCarteCharge[0]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCharge[0]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[0]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
             <ion-col *ngIf="currentDay==2">
               <ion-button fill="clear" [color]="alaCarteCharge[1]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCharge[1]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[1]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
             <ion-col *ngIf="currentDay==3">
               <ion-button fill="clear" [color]="alaCarteCharge[2]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCharge[2]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[2]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
 
             <ion-col *ngIf="currentDay==4">
               <ion-button fill="clear" [color]="alaCarteCharge[3]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCharge[3]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[3]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>
             <ion-col *ngIf="currentDay==5">
               <ion-button fill="clear" [color]="alaCarteCharge[4]=='1' ? 'danger' : 'secondary'">
-                <ion-icon slot="icon-only" [name]="alaCarteCharge[4]=='1' ? 'md-close-circle' : 'md-checkmark-circle'">
+                <ion-icon slot="icon-only" [name]="alaCarteCharge[4]=='1' ? 'close-circle' : 'checkmark-circle'">
                 </ion-icon>
               </ion-button>
             </ion-col>

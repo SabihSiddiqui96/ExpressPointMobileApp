@@ -36,7 +36,7 @@ import { DeviceControlsService } from '../../services/device-controls.service';
 export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
 
-  @ViewChild("loginViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+  @ViewChild("loginViewRoot", { read: ElementRef }) private el: ElementRef;
 
   ngOnInit() {
   }

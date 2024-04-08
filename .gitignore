@@ -17,6 +17,8 @@ $RECYCLE.BIN/
 log.txt
 npm-debug.log*
 
+/ApkBuild
+/.angular
 /.idea
 /.ionic
 /.sass-cache
@@ -34,3 +36,4 @@ npm-debug.log*
 /electron/src/renderer
 /electron/ExpressPointPeripherals
 /electron/Peripherals
+/.angular/cache

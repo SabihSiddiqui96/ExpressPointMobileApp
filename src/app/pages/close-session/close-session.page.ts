@@ -28,7 +28,7 @@ import { SessionType } from '../../services/enums/session-types';
 })
 export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
-    @ViewChild("CloseSessionViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+    @ViewChild("CloseSessionViewRoot", { read: ElementRef }) private el: ElementRef;
     sessionId: string;
 
     ngOnInit() {
@@ -42,8 +42,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 this.sessionId = params.sessionId;
                 console.log(this.sessionId); // price
             }
-            );
-
+        );
+        this.cancelButtonVisible = true;
+        if (this.router.url.includes('summary-sales-close-session')) {
+            this.cancelButtonVisible = false;
+        }        
     }
 
     ngAfterViewInit() {
@@ -84,6 +87,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
     public hideChecks: boolean = false;
     public onKeyDownCallback;
+    public cancelButtonVisible: boolean = true;
 
     public keyboardSettings: IonDigitKeyboardOptions = {
         align: 'center',
@@ -106,13 +110,13 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         theme: 'light'
     };
 
-    @ViewChild('CoinBox', { static: false })
+    @ViewChild('CoinBox')
     public elCoinBox: ElementRef;
 
-    @ViewChild('BillBox', { static: false })
+    @ViewChild('BillBox')
     public elBillBox: ElementRef;
 
-    @ViewChild('KeyPadBox', { static: false })
+    @ViewChild('KeyPadBox')
     public elKeyPadBox: ElementRef;
     public isKeyboardOpen = false;
     public keyboardShowSubscription;
@@ -273,7 +277,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getSessionChecks() {
-        PouchQueriesService.GetSessionChecks().then((res) => {
+        let sessionId_from = null;
+        if (this.router.url.includes('summary-sales-close-session')) {
+            sessionId_from = this.sessionId;
+        }
+        PouchQueriesService.GetSessionChecks(sessionId_from).then((res) => {
             this.checkList = res.docs.map(doc => {
                 return {
                     'CheckNumber': doc.CheckNumber,
@@ -303,12 +311,15 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         PouchQueriesService.GetAllOpenSessions().then(data => {
 
             let sessionDocs = data.rows.map(row => row.doc);
-
+            let sessionId_from = AppStateService.get('session_id');
+            if (this.router.url.includes('summary-sales-close-session')) {
+                sessionId_from = this.sessionId;
+            }
             sessionDocs = sessionDocs.filter(s => {
                 return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
-                    && s.SessionId === AppStateService.get('session_id');
+                    && s.SessionId === sessionId_from;
             });
 
             sessionDocs.map(doc => {
@@ -318,7 +329,11 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private getSessionCards() {
-        PouchQueriesService.GetSessionCards().then((res) => {
+        let sessionId_from = null;
+        if (this.router.url.includes('summary-sales-close-session')) {
+            sessionId_from = this.sessionId;
+        }
+        PouchQueriesService.GetSessionCards(sessionId_from).then((res) => {
             this.cardList = res.docs.map(doc => {
                 return {
                     'CardNumber': doc.CardNumber,
@@ -767,7 +782,9 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 if (closeSessionDoc.SessionType === SessionType.EXPRESSPOINT) {
                 AppStateService.remove('session_id');
                 }
-                AppStateService.remove('TransactionNumber');
+                if (this.router.url.includes('summary-sales-close-session') == false) {
+                    AppStateService.remove('TransactionNumber');
+                }
                 AppStateService.remove('BonusAmount');
                 this.utilService.setLoader(false);
                 this._nav.navigateRoot('service-selection');

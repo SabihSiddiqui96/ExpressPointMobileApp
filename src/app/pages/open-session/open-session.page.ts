@@ -34,9 +34,9 @@ import { OpenSessionDoc } from '../../Interfaces/OpenSessionDoc';
 })
 export class OpenSessionPage implements OnInit, OnDestroy {
 
-  @ViewChild("OpenSessionViewRoot", { read: ElementRef, static: false }) private el: ElementRef;
+  @ViewChild("OpenSessionViewRoot", { read: ElementRef }) private el: ElementRef;
 
-  private ngUnsubscribe = new Subject();
+  private ngUnsubscribe = new Subject<void>();
   public isKeyboardOpen = false;
   public keyboardShowSubscription;
   public keyboardHideSubscription;
@@ -48,7 +48,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.router.events.pipe(startWith([]),
-      filter((event: RouterEvent) => event instanceof NavigationEnd), takeUntil(this.ngUnsubscribe)
+      filter((event) => event instanceof NavigationEnd), takeUntil(this.ngUnsubscribe)
     ).subscribe(() => {
       if (this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state && this.router.getCurrentNavigation().extras.state.navData) {
         this.type = this.router.getCurrentNavigation().extras.state.navData.type;
@@ -117,13 +117,13 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public saveInProgress: boolean = false;
 
   public balanceMode = '';
-  @ViewChild('CoinBox', { static: false })
+  @ViewChild('CoinBox')
   public elCoinBox: ElementRef;
 
-  @ViewChild('BillBox', { static: false })
+  @ViewChild('BillBox')
   public elBillBox: ElementRef;
 
-  @ViewChild('KeyPadBox', { static: false })
+  @ViewChild('KeyPadBox')
   public elKeyPadBox: ElementRef;
 
   constructor(
@@ -724,7 +724,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         isStillOpen: true,
         isSentToServer: false,
         OpenDateWithTime: currentTime,
-        OpenSessionDate : currentTime,
+        OpenSessionDate: currentTime,
         OpenDate: currentDate,
         OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
         TerminalId: this.terminalId,
@@ -740,7 +740,9 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         // if (AppStateService.get('TransactionNumber')) {
         //   AppStateService.set('TransactionNumber', AppStateService.get('TransactionNumber'));
         // } else {
-        AppStateService.set('TransactionNumber', 0);
+        if (this.router.url.includes('summary-sale') == false) {
+          AppStateService.set('TransactionNumber', 0);
+        }
         AppStateService.set('BonusAmount', 0);
         // }
 

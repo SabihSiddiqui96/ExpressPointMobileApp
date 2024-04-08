@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnDestroy, Renderer } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, Renderer2 } from '@angular/core';
 // import { Components } from '@ionic/core';
 import { NavController, AlertController, NavParams, ModalController } from '@ionic/angular';
 
@@ -43,8 +43,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() squareReferenceId;
 
     isEnterKey: boolean = false;
-    public SquareSetting: boolean
-    private SquareTransactionStarted: boolean = false
+    public SquareSetting: boolean;
+    private SquareTransactionStarted: boolean = false;
     public countDown: Subscription;
     public interval = 3000;
     public counter = 300;
@@ -421,7 +421,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     constructor(public navCtrl: NavController, public event: Events, public navParams: NavParams,
         private alertCtrl: AlertController, private utilService: UtilService,
         public lookUpService: LookupService, private modalCtrl: ModalController,
-        private http: HttpService, private renderer: Renderer,
+        private http: HttpService, private renderer: Renderer2,
         public popupMessageService: PopupMessageService, public transactionService: TransactionService,
         public router: Router, public appStateService: AppStateService, public settingService: SettingService, public creditCardTransactionService: CreditCardTransactionService) {
 
@@ -636,7 +636,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             if (this.SquareSetting === true) {
                 this.countDown = timer(0, this.tick).subscribe(() => this.counter > 0 ? --this.counter : 0);
-                this.isContentDisabled = true;
+                if (this.cashpaymentOption === 'card') {
+                    this.isContentDisabled = true;
+                }
+                else {
+                    this.isContentDisabled = false;
+                }
                 resolve(true)
             }
             else {
@@ -1638,7 +1643,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
 
     public showBalance() {
-        this.hideBalSetting = 0;
+        if (this.hideBalSetting == 0) {
+            this.hideBalSetting = 1;
+        }
+        else {
+            this.hideBalSetting = 0;
+        }
         this.event.publish('patronLargeImagehide', null);
     }
 

@@ -779,8 +779,8 @@ export class PouchQueriesService {
     return (promise);
   }
 
-  public static GetSessionChecks() {
-    const sessionId = AppStateService.get('session_id');
+  public static GetSessionChecks(session_id: any = null) {
+    const sessionId = (session_id != null) ? session_id : AppStateService.get('session_id');
 
     const args = {
     };
@@ -812,8 +812,8 @@ export class PouchQueriesService {
   }
 
 
-  public static GetSessionCards() {
-    const sessionId = AppStateService.get('session_id');
+  public static GetSessionCards(session_id: any = null) {
+    const sessionId = (session_id != null) ? session_id : AppStateService.get('session_id');
 
     const args = {
     };

@@ -99,7 +99,13 @@ export class UtilService {
       message: message,
       duration: duration,
       position: 'top',
-      showCloseButton: true,
+      buttons: [
+        {
+          text: 'Close',
+          role: 'cancel'
+        }
+      ]
+      //showCloseButton: true,
       // dismissOnPageChange: true // - not supported
     }).then(async (res) => {
       await res.present();

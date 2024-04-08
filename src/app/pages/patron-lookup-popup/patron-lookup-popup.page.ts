@@ -36,8 +36,8 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
     @Input() public page;
     @Input() public prevPatron;
     @Input() public lastPatronDetails;
-    @ViewChild('patron_search_id', { static: false }) patronSearchId: IonInput;
-    @ViewChild('patron_id', { static: false }) patronPinId: IonInput;
+    @ViewChild('patron_search_id') patronSearchId: IonInput;
+    @ViewChild('patron_id') patronPinId: IonInput;
 
     public patronAccount: string;
     public advancedPatron: string;

@@ -232,7 +232,7 @@
                               [style.display]="(accountDetails.Balance>0 || accountDetails.Balance == 0 || accountDetails.Balance < 0) ? ' ': 'none'"
                               (click)="showBalance()">{{accountDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
                               &nbsp; <span class="color-black"><span>
-                                  <ion-icon name="arrow-round-forward"></ion-icon>
+                                  <ion-icon name="arrow-forward-outline"></ion-icon>
                                 </span></span> &nbsp; <span
                                 [ngClass]="{'color-green': selectedStudentBalance  > 0, 'color-red': selectedStudentBalance < 0, 'color-black': selectedStudentBalance == 0 }">{{selectedStudentBalance
                                 |
@@ -291,7 +291,7 @@
       <ion-button size="large" color="slate" (click)="blurInputElement(); makeSale(ShowSquareRetry)" style="font-size: 135%;"
         [disabled]="checkPayDisable() || saveInProgress || isCompleteTransactionProcessing || ShowSquareRetry">
         Complete Transaction
-        <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+        <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

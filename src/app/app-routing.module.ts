@@ -108,7 +108,7 @@ const routes: Routes = [
   },
   {
     path: 'device-configuration',
-    loadChildren: './pages/device-configuration/device-configuration.module#DeviceConfigurationPageModule',
+    loadChildren: () => import('./pages/device-configuration/device-configuration.module').then(m => m.DeviceConfigurationPageModule),
     data: {
       preload: true
     }
@@ -129,7 +129,7 @@ const routes: Routes = [
   },
   {
     path: 'device-controls',
-    loadChildren: './pages/device-controls/device-controls.module#DeviceControlsPageModule',
+    loadChildren: () => import('./pages/device-controls/device-controls.module').then(m => m.DeviceControlsPageModule),
     data: {
       preload: true
     }
@@ -143,7 +143,7 @@ const routes: Routes = [
   },
   {
     path: 'device-info',
-    loadChildren: './pages/device-info/device-info.module#DeviceInfoPageModule',
+    loadChildren: () => import('./pages/device-info/device-info.module').then(m => m.DeviceInfoPageModule),
     data: {
       preload: true
     }
@@ -304,14 +304,14 @@ const routes: Routes = [
   },
   {
     path: 'session-info',
-    loadChildren: './pages/session-info/session-info.module#SessionInfoPageModule',
+    loadChildren: () => import('./pages/session-info/session-info.module').then(m => m.SessionInfoPageModule),
     data: {
       preload: true
     }
   },
   {
     path: 'setting-values',
-    loadChildren: './pages/setting-values/setting-values.module#SettingValuesPageModule',
+    loadChildren: () => import('./pages/setting-values/setting-values.module').then(m => m.SettingValuesPageModule),
     data: {
       preload: true
     }
