@@ -658,9 +658,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed
-        const isPeripheralsInput = timeElapsed < 10 && this.isTyping;
+        const isPeripheralsInput = timeElapsed < 15 && this.isTyping;
         if (isPeripheralsInput) {
-            // If the input is from a barcode scanner, restore the previous valid input
+            // If the input is from a peripheral, restore the previous valid input
             (<HTMLInputElement>event.target).value = this.previousValidInput;
         } else {
             // If the input is from the keyboard, update the previous valid input
@@ -1149,7 +1149,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed
-        const isPeripheralInput = timeElapsed < 10 && this.isTyping;        
+        const isPeripheralInput = timeElapsed < 15 && this.isTyping;        
         this.isTyping = false; // Reset typing flag
         if (isPeripheralInput) {
             return false;
