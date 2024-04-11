@@ -96,6 +96,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public priceTypeStatus: string = "";
     // public squareRetry: boolean = false;
     public ngOnInit() {
+        AppStateService.set("UnidentifiedPatronPopUp", "0");
         PouchQueriesService.GetAutoServeSetting().then((res) => {
             const autoServeDoc = res.rows.map(row => row.doc);
             if (autoServeDoc.length > 0) {

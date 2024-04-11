@@ -483,12 +483,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public numberClick(key: any) {
-        if (key !== 'X' && key !== 'GO') {
-            if (this.patronSearch.keyword != null) {
-                this.customKeys = this.patronSearch.keyword.length > 0 ? this.patronSearch.keyword : '';
-            }
+        if (key !== 'X' && key !== 'GO') {            
             this.customKeys += key;
-            this.keywordService.keyword = this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
+            this.previousValidInput = this.keywordService.keyword = this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
         } else if (key === 'GO') {
             this.inputBuffer = [];
             if (this.patronSearch.keyword != null && this.patronSearch.externalId != null && this.patronSearch.externalId.length < this.patronSearch.keyword.length) {
@@ -499,6 +496,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.customKeys = '';
             this.keywordService.keyword = '';
             this.patronSearch.keyword = null;
+            this.previousValidInput = '';
         } else if (key === 'X') {
             this.customKeys = this.customKeys.slice(0, -1);
             this.patronSearch.externalId = this.patronSearch.keyword = this.customKeys;
@@ -658,7 +656,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed
-        const isPeripheralsInput = timeElapsed < 15 && this.isTyping;
+        const isPeripheralsInput = timeElapsed < 20 && this.isTyping;
         if (isPeripheralsInput) {
             // If the input is from a peripheral, restore the previous valid input
             (<HTMLInputElement>event.target).value = this.previousValidInput;
@@ -667,8 +665,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.previousValidInput = (<HTMLInputElement>event.target).value;
         }
         this.isTyping = false; // Reset typing flag   
-        this.keywordService.keyword = this.patronSearch.keyword;
-        this.patronSearch.externalId = this.previousValidInput;
+        this.customKeys = this.keywordService.keyword = this.patronSearch.keyword = this.patronSearch.externalId = this.previousValidInput;
         if (isPeripheralsInput) {
             return false;
         }
@@ -1077,6 +1074,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.externalId = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
         this.patronList = [];
         this.selectedSite = -1;
         this.selectedSiteName = '';
@@ -1149,7 +1147,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed
-        const isPeripheralInput = timeElapsed < 15 && this.isTyping;        
+        const isPeripheralInput = timeElapsed < 20 && this.isTyping;        
         this.isTyping = false; // Reset typing flag
         if (isPeripheralInput) {
             return false;
