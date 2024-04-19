@@ -216,13 +216,14 @@ export class MenuGridComponent {
                                 'DefaultMenuItemId': 0,
                                 'PatronId': this.patronDetails.PersonId
                             },
-                            backdropDismiss: false
+                            backdropDismiss: true
                         }).then(async (res) => {
                             await res.present();
                         });
 
+                        this.event.destroy('menu_subcategory:select');
                         this.event.subscribe('menu_subcategory:select', (userEventData) => {
-                            this.event.destroy('menu_subcategory:select');
+                            //this.event.destroy('menu_subcategory:select');
                             if (userEventData.subgrid) {
                                 this.addMenuToCart(userEventData.subgrid, this.patronDetails, this.mealCount);
                             }

@@ -116,13 +116,17 @@ export class MenuCategoryModelPage implements OnInit {
         // this.utilService.showToast('This item is restricted to this patron.');
       } else {
         this.event.publish('menu_subcategory:select', { 'subgrid': subgrid });
-        this.dismiss();
+        //this.dismiss();
         if (this.remainOpen && !this.navFromClassroomSale) {
           setTimeout(() => {
             if (this.remainOpen) {
-              this.event.publish('all_categories:show', {});
+              //this.event.publish('all_categories:show', {});
+              //this.event.publish('category_all:select', { 'category': subgrid.CategoryId });
             }
           }, 50);
+        }
+        else {
+          this.dismiss();
         }
       }
     } else {

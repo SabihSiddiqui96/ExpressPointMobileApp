@@ -216,7 +216,7 @@
                             [style.font-size.rem]="((isElectronApp === true) && ((patronDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                             [ngClass]="{'color-green': patronDetails.Balance > 0, 'color-red': patronDetails.Balance < 0 }"
                             [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'"
-                            (click)="showBalance()">{{patronDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
+                            (click)="showBalance()" style="cursor: pointer;">{{patronDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
                             &nbsp; <span class="color-black">
                               <ion-icon name="arrow-forward-outline"></ion-icon>
                             </span> &nbsp; <span [ngClass]="{'color-green': ((patronDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -
@@ -310,7 +310,7 @@
                             [style.font-size.rem]="((isElectronApp === true) && ((selectedAccountDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                             [ngClass]="{'color-green': selectedAccountDetails.Balance > 0, 'color-red': selectedAccountDetails.Balance < 0 }"
                             [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? ' ': 'none'"
-                            (click)="showBalance()">{{selectedAccountDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
+                            (click)="showBalance()" style="cursor: pointer;">{{selectedAccountDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
                             &nbsp; <span class="color-black"><span>
                                 <ion-icon name="arrow-forward-outline"></ion-icon>
                               </span></span> &nbsp; <span [ngClass]="{'color-green': ((selectedAccountDetails.Balance - orderData.totalAmount) ) > 0, 'color-red': ((patronDetails.Balance -

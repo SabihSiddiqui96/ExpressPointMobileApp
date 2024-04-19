@@ -2225,7 +2225,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'subMenuGridName': 'All Categories',
                                     'DefaultMenuItemId': 0,
                                     'PatronId': this.patronDetails.PersonId
-                                }, backdropDismiss: false
+                                }, backdropDismiss: true
                             }).then(async (res) => {
                                 await res.present();
                             });
