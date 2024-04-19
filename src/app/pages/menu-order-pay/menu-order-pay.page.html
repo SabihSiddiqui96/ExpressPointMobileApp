@@ -230,7 +230,7 @@
                               [style.font-size.rem]="((isElectron === true) && ((accountDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                               [ngClass]="{'color-green': accountDetails.Balance > 0, 'color-red': accountDetails.Balance < 0 }"
                               [style.display]="(accountDetails.Balance>0 || accountDetails.Balance == 0 || accountDetails.Balance < 0) ? ' ': 'none'"
-                              (click)="showBalance()">{{accountDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
+                              (click)="showBalance()" style="cursor: pointer;">{{accountDetails.Balance | currency:'USD':'symbol':'1.2-2'}}
                               &nbsp; <span class="color-black"><span>
                                   <ion-icon name="arrow-forward-outline"></ion-icon>
                                 </span></span> &nbsp; <span

@@ -5293,9 +5293,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     // }).then(async (res) => {
                     //   await res.present();
                     // });
-
+                    this.event.destroy('menu_subcategory:select');
                     this.event.subscribe('menu_subcategory:select', (userEventData) => {
-                        this.event.destroy('menu_subcategory:select');
+                        //this.event.destroy('menu_subcategory:select');
                         if (userEventData.subgrid) {
                             this.addMenuToCart(userEventData.subgrid);
                         }
@@ -5518,9 +5518,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             // }).then(async (res) => {
                             //   await res.present();
                             // });
-
+                            this.event.destroy('menu_subcategory:select');
                             this.event.subscribe('menu_subcategory:select', (userEventData) => {
-                                this.event.destroy('menu_subcategory:select');
+                                //this.event.destroy('menu_subcategory:select');
                                 if (userEventData.subgrid) {
                                     const priceTypeId = this.stateEigSetting ?
                                         (this.patronDetails.StatePriceTypeId == null
@@ -6003,9 +6003,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             // }).then(async (res) => {
                             //   await res.present();
                             // });
-
+                            this.event.destroy('menu_subcategory:select');
                             this.event.subscribe('menu_subcategory:select', (userEventData) => {
-                                this.event.destroy('menu_subcategory:select');
+                                //this.event.destroy('menu_subcategory:select');
                                 console.log(userEventData.subgrid);
 
                                 if (userEventData.subgrid) {
