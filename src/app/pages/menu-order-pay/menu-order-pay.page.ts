@@ -41,10 +41,12 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     @Input() isSpecialAccount;
     @Input() isMealFormed;
     @Input() squareReferenceId;
+    @Input() isAlaCateByDebitAllowed;
 
     isEnterKey: boolean = false;
     public SquareSetting: boolean;
     private SquareTransactionStarted: boolean = false;
+    private alaCateByDebitAllowed: boolean = true;
     public countDown: Subscription;
     public interval = 3000;
     public counter = 300;
@@ -60,6 +62,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.navIsSpecialAccount = this.isSpecialAccount;
         this.navIsMealFormed = this.isMealFormed;
         this.amountDue = this.navOrderData.accountBalance;
+        this.alaCateByDebitAllowed = this.isAlaCateByDebitAllowed;
 
         this.changeDue = 0.00;
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
@@ -982,7 +985,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     }
     public setCashTendered() {
-        if (this.PARTIALPAY) {
+        if (this.PARTIALPAY && this.alaCateByDebitAllowed == true) {
             this.setCashTenderedBalanceFirst();
         } else {
             this.setCashTenderedCashFirst()
@@ -1442,6 +1445,10 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         if ((this.navPatronDetails.Balance > this.navOrderData.totalAmount) && this.patronDetails.CannotCharge) {
             this.saveInProgress = false;
             return false;
+        }
+
+        if (!this.navIsSpecialAccount && (cashtendered < this.navOrderData.totalAmount) && this.isAlaCateByDebitAllowed == false) {
+            return true;
         }
 
         if (this.navIsSpecialAccount && this.showSelectAccount && this.showPatron && (this.navPatronDetails.Balance < this.navOrderData.totalAmount) && (cashtendered > this.navOrderData.totalAmount)) {
