@@ -3245,6 +3245,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public showChargePopup() {
         this.event.publish('patronLargeImagehide', null);
+        let isAlaCateByDebitAllowed: boolean = true;
         if (this.orderData.items.length > 0) {
 
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
@@ -3253,6 +3254,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E06438);
                     // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                     return;
+                }
+
+                if (!this.patronDetails.IsAlaCateByDebitAllowed) {
+                    isAlaCateByDebitAllowed = false;
                 }
             }
 
@@ -3271,7 +3276,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'lastPatronDetails': this.lastPatron,
                     'selectedPatronDetails': this.utilService.selectAccountClick === true ? this.selectedAccountDetails : null,
                     'showPatron': this.utilService.selectAccountClick === true ? true : false,
-                    'squareReferenceId': this.deviceTransactionId
+                    'squareReferenceId': this.deviceTransactionId,
+                    'isAlaCateByDebitAllowed': isAlaCateByDebitAllowed
                 }
             }).then(async (res) => {
                 await res.present();
