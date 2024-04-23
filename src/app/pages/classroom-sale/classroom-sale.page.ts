@@ -231,7 +231,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.priceMode = parseInt(SettingService.getSettingValue('PRICEMODE'));
         this.GetGradesBySchool();
         this.getMealCategories();
-
+        //this.event.destroy('menu_subcategory:select');
         this.event.subscribe('menu_subcategory:select', (userEventData) => {
             this.event.destroy('menu_subcategory:select');
             if (userEventData.subgrid) {
@@ -1727,6 +1727,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             });
 
                         }
+                        //this.event.destroy('menu_subcategory:select');
                         this.callModalCtrl(buttons, categoryName, false);
                         this.event.subscribe('menu_subcategory:select', (userEventData) => {
                             this.event.destroy('menu_subcategory:select');

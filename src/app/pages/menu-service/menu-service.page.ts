@@ -2225,7 +2225,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'subMenuGridName': 'All Categories',
                                     'DefaultMenuItemId': 0,
                                     'PatronId': this.patronDetails.PersonId
-                                }, backdropDismiss: false
+                                }, backdropDismiss: true
                             }).then(async (res) => {
                                 await res.present();
                             });
@@ -2661,6 +2661,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public showChargePopup() {
         // this.deviceTransactionId = this.generateUUID();
         // this.event.publish('patronLargeImagehide', null);
+        let isAlaCateByDebitAllowed: boolean = true;
         if (this.orderData.items.length > 0) {
 
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
@@ -2671,6 +2672,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.popupMessageService.showMessage(PopupMessageCode.E05368);
                     // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
                     return;
+                }
+
+                if (!this.patronDetails.IsAlaCateByDebitAllowed) {
+                    isAlaCateByDebitAllowed = false;
                 }
             }
 
@@ -2688,7 +2693,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     'lastPatronDetails': this.lastPatron,
                     'selectedPatronDetails': this.utilService.selectAccountClick === true ? this.selectedAccountDetails : null,
                     'showPatron': this.utilService.selectAccountClick === true ? true : false,
-                    'squareReferenceId': this.deviceTransactionId
+                    'squareReferenceId': this.deviceTransactionId,
+                    'isAlaCateByDebitAllowed': isAlaCateByDebitAllowed
                 },
                 backdropDismiss: false,
                 cssClass: 'menu-order-pay-popup',
