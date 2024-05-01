@@ -2679,7 +2679,9 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 'DefaultMenuItemId': 0,
                 'PatronId': this.patronId,
                 'fromClassroomSale': true
-            }, backdropDismiss: flag
+            },
+            backdropDismiss: flag,
+            cssClass: 'custom-modal-content'
         })
         return await this.modal.present();
     }

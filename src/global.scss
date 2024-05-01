@@ -273,3 +273,8 @@ ion-button {
     padding: 0px !important;
   }
 }
+
+.custom-modal-content .ion-page {
+  padding: 10px 15px 10px 15px; /* top right bottom left */
+  background-color: #e0e0e0; /* #f8f8f8;*/
+}
