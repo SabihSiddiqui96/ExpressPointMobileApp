@@ -216,7 +216,8 @@ export class MenuGridComponent {
                                 'DefaultMenuItemId': 0,
                                 'PatronId': this.patronDetails.PersonId
                             },
-                            backdropDismiss: true
+                            backdropDismiss: true,
+                            cssClass: 'custom-modal-content'
                         }).then(async (res) => {
                             await res.present();
                         });

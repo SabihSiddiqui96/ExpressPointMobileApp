@@ -971,7 +971,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.ResetData();
         const date = new Date();
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
-
+        this.event.publish('clear-custom-keys', {});
 
         this.patronId = this.patronDetails['PersonId'];
 
@@ -4772,6 +4772,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.bonusAmount = 0;
             this.event.publish('patron-released', { 'patronDetails': null });
             this.event.publish('GotoLookup', {});
+            this.event.publish('clear-custom-keys', {});
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E06428);
             // this.utilService.showToast('Please complete the current transaction.');
@@ -4792,7 +4793,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.popupMessageService.showMessage(PopupMessageCode.E06428);
             // this.utilService.showToast('Please complete the current transaction.');
         }
-
+        this.event.publish('clear-custom-keys', {});
     }
 
     public getCategories() {
@@ -6545,7 +6546,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         const modal = await this.modalCtrl.create({
             component: MenuCategoryModelPage,
             componentProps: props,
-            backdropDismiss: backDismiss
+            backdropDismiss: backDismiss,
+            cssClass: 'custom-modal-content'
         });
         return await modal.present();
     }
