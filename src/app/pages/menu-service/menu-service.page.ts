@@ -932,6 +932,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.orderData.accountBalance = this.patronDetails.Balance;
         this.checkForBirthday(this.patronDetails);
         this.event.publish('patron-loaded', { 'patronDetails': this.patronDetails });
+        this.event.publish('clear-custom-keys', {});
         // Adding a fix for showing maximum height for menu list
         this.setTransactionListHeight();
         this.showAllergiesAndNotes(this.patronDetails);
@@ -2225,7 +2226,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'subMenuGridName': 'All Categories',
                                     'DefaultMenuItemId': 0,
                                     'PatronId': this.patronDetails.PersonId
-                                }, backdropDismiss: true
+                                },
+                                backdropDismiss: true,
+                                cssClass: 'custom-modal-content'
                             }).then(async (res) => {
                                 await res.present();
                             });
@@ -2237,7 +2240,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'subMenuGridName': 'All Categories',
                                     'DefaultMenuItemId': 0,
                                     'PatronId': this.patronDetails.PersonId
-                                }, backdropDismiss: true
+                                },
+                                backdropDismiss: true,
+                                cssClass: 'custom-modal-content'
                             }).then(async (res) => {
                                 await res.present();
                             });
@@ -3601,6 +3606,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             };
             this.bonusAmount = 0;
             this.event.publish('patron-released', { 'patronDetails': null });
+            this.event.publish('clear-custom-keys', {});
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E05427);
             // this.utilService.showToast('Please Complete the current transaction.');
@@ -3624,7 +3630,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.popupMessageService.showMessage(PopupMessageCode.E05427);
             // this.utilService.showToast('Please Complete the current transaction.');
         }
-
+        this.event.publish('clear-custom-keys', {});
     }
 
     public openTransactionViewer() {

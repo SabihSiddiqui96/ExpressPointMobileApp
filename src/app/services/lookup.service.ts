@@ -274,6 +274,7 @@ export class LookupService {
                 cssClass: 'patron-modal-popup'
             }).then(async (res) => {
                 this.isModelWindowOpened = true;
+                this.event.publish('clear-custom-keys', {});
                 await res.present().then(() => {
                     resolve('Success');
                 });

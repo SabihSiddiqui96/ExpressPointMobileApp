@@ -211,6 +211,11 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.patronSearch.keyword = null;
         });
 
+        this.event.subscribe('clear-custom-keys', (userEventData) => {
+            this.event.destroy("clear-custom-keys");
+            this.customKeys = '';
+        });
+
         PatronLookupPage.onKeyUpCallback = this.onPeripheralKey.bind(this);
         PatronLookupPage.onKeyDownCallback = this.onKeyDown.bind(this);
 

@@ -284,8 +284,8 @@
     <ion-buttons slot="primary">
       <ion-button size="large" color="slate" (click)="blurInputElement(); goToMenuService()" style="font-size: 135%;"
         [ngClass]="{'show':canUsePrincipalAccount == true,'ion-hide':canUsePrincipalAccount == false && disablePrincipalAcctButton == false}"
-        [disabled]="(canUsePrincipalAccount == false && disablePrincipalAcctButton == true) || (saveInProgress || isCompleteTransactionProcessing || ShowSquareRetry)">
-
+        [disabled]="canUsePrincipalAccount == false && disablePrincipalAcctButton == true">
+      
         Use Principal Account
       </ion-button>
       <ion-button size="large" color="slate" (click)="blurInputElement(); makeSale(ShowSquareRetry)" style="font-size: 135%;"
