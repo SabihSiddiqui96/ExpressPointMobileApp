@@ -2671,6 +2671,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     async callModalCtrl(buttons, categoryName, flag) {
+        let categoriesTapClose = true;
+        if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+            categoriesTapClose = AppStateService.get('categoriesTapClose');
+        }
         this.modal = await this.modalCtrl.create({
             component: MenuCategoryModelPage,
             componentProps: {
@@ -2680,8 +2684,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 'PatronId': this.patronId,
                 'fromClassroomSale': true
             },
-            backdropDismiss: flag,
-            cssClass: 'custom-modal-content'
+            backdropDismiss: categoriesTapClose
         })
         return await this.modal.present();
     }
