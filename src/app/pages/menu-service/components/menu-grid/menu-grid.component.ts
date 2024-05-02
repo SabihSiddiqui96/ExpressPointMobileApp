@@ -206,7 +206,10 @@ export class MenuGridComponent {
                                 }
                             }
                         }
-
+                        let categoriesTapClose = true;
+                        if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+                            categoriesTapClose = AppStateService.get('categoriesTapClose');
+                        }
 
                         const modal = this.modalCtrl.create({
                             component: MenuCategoryModelPage,
@@ -216,8 +219,7 @@ export class MenuGridComponent {
                                 'DefaultMenuItemId': 0,
                                 'PatronId': this.patronDetails.PersonId
                             },
-                            backdropDismiss: true,
-                            cssClass: 'custom-modal-content'
+                            backdropDismiss: categoriesTapClose
                         }).then(async (res) => {
                             await res.present();
                         });

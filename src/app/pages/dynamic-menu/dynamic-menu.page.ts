@@ -6543,11 +6543,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     async presentModal(props: any, backDismiss: boolean) {
+        let categoriesTapClose = true;
+        if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+            categoriesTapClose = AppStateService.get('categoriesTapClose');
+        }
         const modal = await this.modalCtrl.create({
             component: MenuCategoryModelPage,
             componentProps: props,
-            backdropDismiss: backDismiss,
-            cssClass: 'custom-modal-content'
+            backdropDismiss: categoriesTapClose
         });
         return await modal.present();
     }

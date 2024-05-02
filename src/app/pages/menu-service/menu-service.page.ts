@@ -2219,6 +2219,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     if (categoryButtons.length > 0) {
                         const catRemainOpen = AppStateService.get('AllCatRemainOpen');
                         if (catRemainOpen === true) {
+                            let categoriesTapClose = true;
+                            if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+                                categoriesTapClose = AppStateService.get('categoriesTapClose');
+                            }
                             this.modalCtrl.create({
                                 component: MenuCategoryModelPage,
                                 componentProps: {
@@ -2227,8 +2231,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'DefaultMenuItemId': 0,
                                     'PatronId': this.patronDetails.PersonId
                                 },
-                                backdropDismiss: true,
-                                cssClass: 'custom-modal-content'
+                                backdropDismiss: categoriesTapClose
                             }).then(async (res) => {
                                 await res.present();
                             });
@@ -2241,8 +2244,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'DefaultMenuItemId': 0,
                                     'PatronId': this.patronDetails.PersonId
                                 },
-                                backdropDismiss: true,
-                                cssClass: 'custom-modal-content'
+                                backdropDismiss: true
                             }).then(async (res) => {
                                 await res.present();
                             });
