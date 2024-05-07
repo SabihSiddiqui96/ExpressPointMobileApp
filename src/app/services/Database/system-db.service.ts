@@ -62,6 +62,11 @@ export class SystemDBService {
         SSOAuthDetails = AppStateService.get('SSOAuthDetails');
       }
 
+      let categoriesTapClose = true;
+      if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+        categoriesTapClose = AppStateService.get('categoriesTapClose');
+      }
+
       let lastLoggedInUser;
       if (AppStateService.get('login_details')) {
         lastLoggedInUser = JSON.parse(AppStateService.get('login_details')).Name;
@@ -97,7 +102,8 @@ export class SystemDBService {
         'SSOAuthDetails': SSOAuthDetails,
         'DeviceConnectionUrl': DeviceConnectionUrl,
         'TranDbDestroyedDate': TranDbDestroyedDate,
-        'LastLoggedInUser': lastLoggedInUser
+        'LastLoggedInUser': lastLoggedInUser,
+        'categoriesTapClose': categoriesTapClose
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';

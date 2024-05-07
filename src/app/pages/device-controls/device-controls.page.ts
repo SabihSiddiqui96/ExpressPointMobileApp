@@ -55,6 +55,7 @@ export class DeviceControlsPage implements OnInit {
   public openSession: boolean = false;
   public openOSK: boolean = false;
   public pnpPeripherals: boolean = true;
+  public categoriesTapClose: boolean = true;  
   public MULTIREAD: boolean = false;
   public LoginWithoutSetup: boolean = false;
 
@@ -109,6 +110,10 @@ export class DeviceControlsPage implements OnInit {
 
     if (AppStateService.get('pnpPeripherals') != undefined)
       this.pnpPeripherals = AppStateService.get('pnpPeripherals');
+
+    if (AppStateService.get('categoriesTapClose') != undefined) {
+      this.categoriesTapClose = AppStateService.get('categoriesTapClose');
+    }
 
   }
 
@@ -271,6 +276,10 @@ export class DeviceControlsPage implements OnInit {
   public configurePeripherals() {
     AppStateService.set('pnpPeripherals', this.pnpPeripherals);
   }
+
+  public categoriesTapCloseClick() {
+    AppStateService.set('categoriesTapClose', this.categoriesTapClose);
+  }  
 
   public showPeripheralApp() {
     this.electronService.ipcRenderer.send('configure-peripherals');

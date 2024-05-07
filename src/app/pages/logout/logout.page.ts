@@ -108,6 +108,11 @@ ngOnInit() {
 
       }
 
+      let categoriesTapClose = true;
+      if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+        categoriesTapClose = AppStateService.get('categoriesTapClose');
+      }
+
       // localStorage.clear();
       AppStateService.reset();
       AppStateService.set('selectedDistrict', selectedDistrict);
@@ -150,6 +155,7 @@ ngOnInit() {
       AppStateService.set('DeviceIpAddress', JSON.stringify(deviceIpAddress));
       AppStateService.set('OpenOSK', openOSK);
       AppStateService.set('TranDbDestroyedDate', TranDbDestroyedDate);
+      AppStateService.set('categoriesTapClose', categoriesTapClose);
 
       const dataforofflineUse = {
         '_id': 'dataforofflineUse',
@@ -173,7 +179,8 @@ ngOnInit() {
         'WindowsCredentials': windowsCredentials,
         'DeviceConnectionUrl': DeviceConnectionUrl,
         'TranDbDestroyedDate': TranDbDestroyedDate,
-        'AllSiteSettings': allSiteSettings
+        'AllSiteSettings': allSiteSettings,
+        'categoriesTapClose': categoriesTapClose
       }
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         resolve(null);

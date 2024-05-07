@@ -55,6 +55,12 @@
            <span style="color: #4d6168 !important;">Picture</span>
         </ion-item>
 
+        <ion-item lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Categories Click/Tap Outside to Close</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="categoriesTapClose" (ionChange)="categoriesTapCloseClick()">
+          </ion-toggle>
+        </ion-item>
+
         <ion-item *ngIf='isElectronApp && MULTIREAD' lines="none" class="bg-transparent" style="padding-top: 4px;">
           <ion-label class="ion-text-end" position="bottom">Use Plug and Play Peripherals</ion-label>
           <ion-toggle slot="end" color="slate" [(ngModel)]="pnpPeripherals" (ionChange)="configurePeripherals()">
