@@ -855,6 +855,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
     }
 
     public blurInputElement() {
@@ -873,6 +874,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
         if (!this.utilService.isElectronApp()) {
@@ -900,6 +902,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
     }
 
     public AdvancePatronSchoolList() {
