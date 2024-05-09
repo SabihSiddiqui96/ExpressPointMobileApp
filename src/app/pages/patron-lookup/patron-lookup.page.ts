@@ -661,7 +661,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed
-        const isPeripheralsInput = timeElapsed < 20 && this.isTyping;
+        const isPeripheralsInput = timeElapsed < 26 && this.isTyping;
         if (isPeripheralsInput) {
             // If the input is from a peripheral, restore the previous valid input
             (<HTMLInputElement>event.target).value = this.previousValidInput;
