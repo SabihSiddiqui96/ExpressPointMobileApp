@@ -499,12 +499,7 @@ export class HttpService {
         const deviceinfo = JSON.parse(AppStateService.get('DeviceInfo'));
         const selectedsite = JSON.parse(AppStateService.get('SelectedSite'));
         deviceinfo.SchoolId = selectedsite.SchoolId;
-        deviceinfo.Appversion = this.utilService.versionNumber;
-        if (this.currentExpressPointVersion != null && deviceinfo.Appversion != null) {
-            if (Number(this.currentExpressPointVersion.replace('.', '')) > Number(deviceinfo.Appversion.replace('.', ''))) {
-                deviceinfo.Appversion = this.currentExpressPointVersion;
-            }
-        }
+        deviceinfo.Appversion = this.currentExpressPointVersion;
         AppStateService.set('DeviceInfo', JSON.stringify(deviceinfo));
 
 
