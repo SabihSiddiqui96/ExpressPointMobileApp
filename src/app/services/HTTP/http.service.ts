@@ -546,11 +546,7 @@ export class HttpService {
     }
 
     public postHeartBeat(terminalId, pending, sent, heartBeatTime, appVersion): any {
-        if (this.currentExpressPointVersion != null && appVersion != null) {
-            if (Number(this.currentExpressPointVersion.replace('.', '')) > Number(appVersion.replace('.', ''))) {
-                appVersion = this.currentExpressPointVersion;
-            }
-        }
+        appVersion = this.currentExpressPointVersion;
         return this.http.post(API_URL + 'SaveDeviceHeartbeat',
             {
                 'TerminalId': terminalId,
