@@ -2756,8 +2756,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.principalId = JSON.parse(AppStateService.get('site_details')).PrincipalId;
             this.principalAccountId = JSON.parse(AppStateService.get('site_details')).PrincipalAccountId;
             const items = [];
+            let squareItemsNote = '';
 
             for (let i = 0; i < this.orderData.items.length; i++) {
+                if (squareItemsNote == '') {
+                    squareItemsNote = this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'].toString()) > 1 ? '(' + this.orderData.items[i]['Quantity'].toString() + ')' : '');
+                }
+                else {
+                    squareItemsNote = squareItemsNote + ', ' + this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'].toString()) > 1 ? '(' + this.orderData.items[i]['Quantity'].toString() + ')' : '');
+                }
                 for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
                     // Check if there are any cases where there are more than one first meal items and remove them promptly
                     let firstMeals = _.filter(items, ((o) =>
@@ -2822,8 +2829,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         let squarePaymentAmount = 0
                         squarePaymentAmount += Math.round(paymentAmnt * 100)
 
-
-                        this.CanCreateSaleTransaction(transactionType, paymentAmnt).then((res) => {
+                        let squareNote = this.selectedMealTypeName + " - ID: " + this.patronDetails.Identifier.trim() + " - " + squareItemsNote;
+                                        
+                        this.CanCreateSaleTransaction(transactionType, paymentAmnt, squareNote).then((res) => {
                             if (res === true) {
                                 let paymentData: TransactionDoc, paymentDoc;
                                 if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
@@ -3251,7 +3259,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         });
     }
 
-    public CanCreateSaleTransaction(transactionType, paymentAmnt) {
+    public CanCreateSaleTransaction(transactionType, paymentAmnt, squareNote) {
 
         return new Promise((resolve) => {
             // Setting here 
@@ -3270,7 +3278,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         "device_options": {
                             "device_id": this.squareDeviceId
                         },
-                        "reference_id": this.deviceTransactionId
+                        "reference_id": this.deviceTransactionId,
+                        "note": squareNote.substring(0, 490)
                     }
 
                 };
