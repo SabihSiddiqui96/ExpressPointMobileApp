@@ -1157,9 +1157,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         // Assuming peripherals input is faster than a typical human typing speed
         const isPeripheralInput = timeElapsed < 20 && this.isTyping;        
         this.isTyping = false; // Reset typing flag
-        if (isPeripheralInput) {
-            return false;
-        }
+        // if (isPeripheralInput) {
+        //     return false;
+        // }
         if (event.keyCode === 13) {
             setTimeout(() => {
                 /* code for checking the characters from periperal */
