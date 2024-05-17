@@ -661,7 +661,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed
-        const isPeripheralsInput = timeElapsed < 20 && this.isTyping;
+        const isPeripheralsInput = timeElapsed < 26 && this.isTyping;
         if (isPeripheralsInput) {
             // If the input is from a peripheral, restore the previous valid input
             (<HTMLInputElement>event.target).value = this.previousValidInput;
@@ -855,6 +855,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
     }
 
     public blurInputElement() {
@@ -873,6 +874,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
         this.AdvancePatronSchoolList();
         this.setActiveField('externalId');
         if (!this.utilService.isElectronApp()) {
@@ -900,6 +902,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.patronSearch.lastname = '';
         this.customKeys = '';
         this.keywordService.keyword = '';
+        this.previousValidInput = '';
     }
 
     public AdvancePatronSchoolList() {
@@ -1154,9 +1157,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         // Assuming peripherals input is faster than a typical human typing speed
         const isPeripheralInput = timeElapsed < 20 && this.isTyping;        
         this.isTyping = false; // Reset typing flag
-        if (isPeripheralInput) {
-            return false;
-        }
+        // if (isPeripheralInput) {
+        //     return false;
+        // }
         if (event.keyCode === 13) {
             setTimeout(() => {
                 /* code for checking the characters from periperal */

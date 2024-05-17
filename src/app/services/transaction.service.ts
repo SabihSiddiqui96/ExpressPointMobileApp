@@ -658,7 +658,8 @@ export class SquareTransactionDoc {
 export class Checkout {
     public amount_money: AmountMoney;
     public device_options: DeviceOptions;
-    public reference_id: string
+    public reference_id: string;
+    public note: string = "";
 }
 
 @Injectable()
