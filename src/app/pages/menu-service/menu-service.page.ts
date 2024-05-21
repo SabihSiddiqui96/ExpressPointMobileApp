@@ -2829,7 +2829,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         let squarePaymentAmount = 0
                         squarePaymentAmount += Math.round(paymentAmnt * 100)
 
-                        let squareNote = this.selectedMealTypeName + " - ID: " + this.patronDetails.Identifier.trim() + " - " + squareItemsNote;
+                        let squareDisplayId = "";
+                        squareDisplayId = (this.patronDetails.Identifier != undefined && this.patronDetails.Identifier != null) ? this.patronDetails.Identifier : ((this.patronDetails.PersonName != undefined && this.patronDetails.PersonName != null) ? this.patronDetails.PersonName : '');
+                        let squareNote = "";
+                            squareNote = this.selectedMealTypeName + " - ID: " + squareDisplayId.trim() + " - " + squareItemsNote;
                                         
                         this.CanCreateSaleTransaction(transactionType, paymentAmnt, squareNote).then((res) => {
                             if (res === true) {
