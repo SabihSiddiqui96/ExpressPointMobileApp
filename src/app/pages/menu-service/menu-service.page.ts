@@ -94,6 +94,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public toastAlert;
     public isPatronHavingImage = false;
     public priceTypeStatus: string = "";
+    public CheckBirthDayNotifications: boolean = true;
     // public squareRetry: boolean = false;
     public ngOnInit() {
         AppStateService.set("UnidentifiedPatronPopUp", "0");
@@ -153,6 +154,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         });
         this.pauseAutoServeWhenUnidentifiedPatron();
         this.subscribeToMenuServicePopupEvents();
+        this.CheckBirthDayNotifications = Boolean(parseInt(SettingService.getSettingValue('BIRTHSH')));
     }
 
     @ViewChild('displayImage') public canvasRef: ElementRef;
@@ -3861,7 +3863,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const currentDate = new Date();
         this.removeConfettiCanvas();
         this.isBirthDay = false;
-        if (currentDate.getUTCMonth() + 1 === birthDate.getUTCMonth() + 1
+        if (this.CheckBirthDayNotifications == true && currentDate.getUTCMonth() + 1 === birthDate.getUTCMonth() + 1
             && currentDate.getUTCDate() === birthDate.getUTCDate()) {
             this.isBirthDay = true;
             try {
