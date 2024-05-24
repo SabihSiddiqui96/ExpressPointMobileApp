@@ -49,5 +49,6 @@ export enum DefaultSettingValue {
     ENBLCCTR = 0,
     STATEEIG = '0',
     ALNUMPIN = '0',
-    PARTIALPAY = '0'
+    PARTIALPAY = '0',
+    BIRTHSH = '1'
 }
