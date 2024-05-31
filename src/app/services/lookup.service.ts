@@ -117,7 +117,7 @@ export class LookupService {
                 if (AppStateService.get('UnidentifiedPatronPopUp') == '1'){
                     return;
                 }
-                if (searchTextExists && this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false) {
+                if (searchTextExists && this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && AppStateService.get('CheckIfPinEntered') == true) {
                     return;
                 }
                 this.selectPatron(this.personsQ[0]);

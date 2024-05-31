@@ -113,6 +113,11 @@ ngOnInit() {
         categoriesTapClose = AppStateService.get('categoriesTapClose');
       }
 
+      let checkIfPinEntered = false;
+      if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
+        checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
+      }
+
       // localStorage.clear();
       AppStateService.reset();
       AppStateService.set('selectedDistrict', selectedDistrict);
@@ -156,6 +161,7 @@ ngOnInit() {
       AppStateService.set('OpenOSK', openOSK);
       AppStateService.set('TranDbDestroyedDate', TranDbDestroyedDate);
       AppStateService.set('categoriesTapClose', categoriesTapClose);
+      AppStateService.set('CheckIfPinEntered', checkIfPinEntered);
 
       const dataforofflineUse = {
         '_id': 'dataforofflineUse',
@@ -180,7 +186,8 @@ ngOnInit() {
         'DeviceConnectionUrl': DeviceConnectionUrl,
         'TranDbDestroyedDate': TranDbDestroyedDate,
         'AllSiteSettings': allSiteSettings,
-        'categoriesTapClose': categoriesTapClose
+        'categoriesTapClose': categoriesTapClose,
+        'CheckIfPinEntered': checkIfPinEntered
       }
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         resolve(null);
