@@ -324,10 +324,16 @@ export class LookupService {
             } else {
                 //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
                 this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result: any) => {
-                    this.publishEvents(result);
-                    //commented due to selecting a patron from list doesn't have lookup results
-                    //if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
+                    //Added this if condition to check any delay between loading patrons 
+                    if (AppStateService.get('patron_details') === undefined) {
+                        this.publishEvents(result);
+                        //commented due to selecting a patron from list doesn't have lookup results
+                        //if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
                         this.popPersonFromQ(result.Identifier);
+                    }
+                    else {
+                        this.pushPersonToQ(patron, this.personsQ.length);
+                    }
                     //}
                 })
             }
