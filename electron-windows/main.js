@@ -419,7 +419,16 @@ ipcMain.on('print', (evnt, arg) => {
     });
 });
 
-
+// Handle clear-cache event from renderer process
+ipcMain.on('clear-default-session-cookies', (event) => {
+    // Cache clear - cookies
+    const webSes = win.webContents.session;
+    webSes.clearStorageData({
+        storages: ['cookies']
+    }, () => {
+        console.log('Cookies cleared successfully.');
+    });
+});
 
 
 function print58m(printData) {
