@@ -353,6 +353,15 @@ ipcMain.on('ElectronAppClose', () => {
   app.quit();
 });
 
+// Handle clear-cache event from renderer process
+ipcMain.on('clear-default-session-cookies', (event) => {
+  // Cache clear
+  const webSes = win.webContents.session;
+  webSes.clearStorageData({
+    storages: ['cookies']
+  });
+});
+
 ipcMain.on('OpenOnScreenKeyboard', () => {
   const { spawn } = require('child_process');
   spawn('cmd.exe', ['/c', 'osk.exe']);

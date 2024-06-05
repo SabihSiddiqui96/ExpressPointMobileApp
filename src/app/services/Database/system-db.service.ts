@@ -67,6 +67,11 @@ export class SystemDBService {
         categoriesTapClose = AppStateService.get('categoriesTapClose');
       }
 
+      let checkIfPinEntered = false;
+      if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
+        checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
+      }
+
       let lastLoggedInUser;
       if (AppStateService.get('login_details')) {
         lastLoggedInUser = JSON.parse(AppStateService.get('login_details')).Name;
@@ -103,7 +108,8 @@ export class SystemDBService {
         'DeviceConnectionUrl': DeviceConnectionUrl,
         'TranDbDestroyedDate': TranDbDestroyedDate,
         'LastLoggedInUser': lastLoggedInUser,
-        'categoriesTapClose': categoriesTapClose
+        'categoriesTapClose': categoriesTapClose,
+        'CheckIfPinEntered': checkIfPinEntered
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';

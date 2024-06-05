@@ -51,7 +51,7 @@ export class DeviceControlsPage implements OnInit {
   public isUserLoggedIn: boolean = false;
 
   public canSetupTerminals: boolean = false;
-
+  public CheckIfPinEntered: boolean = false;
   public openSession: boolean = false;
   public openOSK: boolean = false;
   public pnpPeripherals: boolean = true;
@@ -113,6 +113,10 @@ export class DeviceControlsPage implements OnInit {
 
     if (AppStateService.get('categoriesTapClose') != undefined) {
       this.categoriesTapClose = AppStateService.get('categoriesTapClose');
+    }
+
+    if (AppStateService.get('CheckIfPinEntered') != undefined) {
+      this.CheckIfPinEntered = AppStateService.get('CheckIfPinEntered');
     }
 
   }
@@ -395,6 +399,10 @@ export class DeviceControlsPage implements OnInit {
         }
       })
     }
+  }
+
+  public OnChangeCheckIfPinEntered(event) {
+    AppStateService.set('CheckIfPinEntered', this.CheckIfPinEntered);
   }
 
   public OnChangePatronDisplay(event) {

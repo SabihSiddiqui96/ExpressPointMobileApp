@@ -2391,6 +2391,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
 
     }
+
+    public logIOSError(currentPatronId, errorMessage) {  
+        try {
+            let errorLogData = {
+                TerminalId: this.terminalId,
+                EventName: 0,
+                EventType: 0,
+                Data: currentPatronId + ' / ' +errorMessage,
+                QueueCount: 0,
+                ErrorLogTime: new Date().toISOString()
+            }
+            this.http.saveErrorLogs(errorLogData).subscribe((res) => console.log(res));
+        } catch(error) {
+            // Handle the error
+            console.error('An error occurred:', error.message);
+        }
+    }
+
     public ShowTransactionConflictPopover() {
         this.alertCtrl.create({
             header: 'Alert',
@@ -3079,6 +3097,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     PouchDBService.UpsertSingleDoc(transactionDoc, EXP_TRANSACTIONS).then((result) => {
                                         if (!(result && result.id)) {
                                             if (this.isIOS || this.isAndroid) {
+                                                if (this.isIOS) {
+                                                    this.utilService.isNetworkOnline().then((isNetworkOnline) => {
+                                                        if (isNetworkOnline) {
+                                                            try {
+                                                                this.logIOSError(this.patronDetails.Identifier, JSON.stringify(transactionDoc));
+                                                                this.logIOSError(this.patronDetails.Identifier, (result != null ? JSON.stringify(result) : 'NULL Result'));
+                                                            } catch (error) {
+                                                                // Handle the error
+                                                                console.error('An error occurred:', error.message);
+                                                            }
+                                                        }
+                                                    });
+                                                }
                                                 this.ShowTransactionConflictPopover();
                                             }
                                             else {
@@ -3090,6 +3121,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                                 PouchDBService.UpsertSingleDoc(paymentDoc, EXP_TRANSACTIONS).then((result) => {
                                                     if (!(result && result.id)) {
                                                         if (this.isIOS || this.isAndroid) {
+                                                            if (this.isIOS) {
+                                                                this.utilService.isNetworkOnline().then((isNetworkOnline) => {
+                                                                    if (isNetworkOnline) {
+                                                                        try {
+                                                                            this.logIOSError(this.patronDetails.Identifier, JSON.stringify(paymentDoc));
+                                                                            this.logIOSError(this.patronDetails.Identifier, (result != null ? JSON.stringify(result) : 'NULL Result'));
+                                                                        } catch (error) {
+                                                                            // Handle the error
+                                                                            console.error('An error occurred:', error.message);
+                                                                        }
+                                                                    }
+                                                                });
+                                                            }
                                                             this.ShowTransactionConflictPopover();
                                                         }
                                                         else {

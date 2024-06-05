@@ -71,7 +71,11 @@
             <ion-button default size="small" (click)='showPeripheralApp()'>Configure Peripherals</ion-button>
           </ion-label>
         </ion-item>
-
+        <ion-item *ngIf='this.utilService.isAppOnline ' lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Check for text in the PIN field ?</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="CheckIfPinEntered" (ionChange)="OnChangeCheckIfPinEntered($event)">
+          </ion-toggle>
+        </ion-item>
       </div>
     </ion-col>
   </ion-row>
