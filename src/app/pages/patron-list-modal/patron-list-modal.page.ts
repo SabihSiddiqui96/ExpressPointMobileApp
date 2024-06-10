@@ -21,7 +21,9 @@ export class PatronListModalPage implements OnInit {
     @Input() isFromQueue;
     @Input() isFromAdvPatronSearch;
     @Input() allowVisitingPatron;
-    isGridView:boolean;
+    isGridView: boolean;
+    isOnlyThisSite: boolean = false;
+    public selectedSiteName: string;
 
     ngOnInit() {    
         this.navPatronList = this.patron_list;
@@ -29,6 +31,7 @@ export class PatronListModalPage implements OnInit {
         if(this.navPatronList && this.navPatronList.length > 0) {
             this.isFromServer = this.navPatronList['0'].IsFromServer ? true : false;
         }
+        this.selectedSiteName = JSON.parse(AppStateService.get("SelectedSite")).SiteNameWithCode;
         const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
         const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
         this.isGridView = (gridViewPatronIsPic != null && gridViewPatronIsPic != undefined) ? Boolean(gridViewPatronIsPic) : isGridViewParent;
@@ -84,11 +87,12 @@ export class PatronListModalPage implements OnInit {
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
                 if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
                     if (patron['Image'] === null || patron['Image'] === undefined) {
-                        if (patron.PersonId) {
+                        if (patron.PersonId && (patron.ImageLoaded == null || patron.ImageLoaded == undefined || patron.ImageLoaded == false)) {
                             this.http.GetPersonImage(patron.PersonId).subscribe(data => {
                                 if (data != null) {
                                     patron.Image = data;
                                 }
+                                patron.ImageLoaded = true;
                             }, e => { console.log(e); }, () => {
                             });
                         }
@@ -135,6 +139,15 @@ export class PatronListModalPage implements OnInit {
         AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
 
+    toggleOnlyThisSite() {
+        setTimeout(() => {
+            (document.activeElement as HTMLElement).blur();
+        }, 0);
+        this.isOnlyThisSite = !this.isOnlyThisSite;
+        this.loadFirst20Patrons();
+        this.updateAdvLookupSortOrder();
+    }
+
     public updateAdvLookupSortOrder() {
         if (this.isNameSortOrder('FnLn')) {
             try {
@@ -173,26 +186,60 @@ export class PatronListModalPage implements OnInit {
         this.loadMoreCount = this.loadMoreCount + 20;
         this.loadMoreClicks = this.loadMoreClicks + 1;
         maxClicks = Math.floor(this.navPatronList.length / 20);
-        this.filteredPatronList = this.navPatronList.slice(0, this.loadMoreCount);
-        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
+        let navPatronListSiteFilter = [];
+        if (this.isOnlyThisSite == true) {
+            navPatronListSiteFilter = this.navPatronList.filter(item => item.SiteCode.toLowerCase().includes(this.selectedSiteName.toLowerCase()));
+        }
+        else {
+            navPatronListSiteFilter = this.navPatronList;
+        }
+        maxClicks = Math.floor(navPatronListSiteFilter.length / 20);
+        this.filteredPatronList = navPatronListSiteFilter.slice(0, this.loadMoreCount);
+        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);        
         this.updateAdvLookupSortOrder();
-        if (maxClicks === this.loadMoreClicks) {
+        if (this.loadMoreClicks >= maxClicks) {
             this.disableLoadMore = true;
-            this.utilService.showToast('All ' + this.navPatronList.length + ' Results Loaded...');
+            this.utilService.showToast('All ' + navPatronListSiteFilter.length + ' Results Loaded...');
         }
         this.utilService.setLoader(false);
     }
 
     public loadFirst20Patrons() {
+        if (this.isOnlyThisSite == true) {
+            let filteredNavPatronList = this.navPatronList.filter(item => item.SiteCode.toLowerCase().includes(this.selectedSiteName.toLowerCase()));
+            this.searchResultCount = filteredNavPatronList.length;
 
-        if (this.navPatronList.length > 20) {
-            this.filteredPatronList = this.navPatronList.slice(0, this.loadMoreCount);
+            if (this.searchResultCount > 20) {
+                this.filteredPatronList = filteredNavPatronList.slice(0, this.loadMoreCount);
+            }
+            else {
+                this.filteredPatronList = filteredNavPatronList;
+            }
+            const maxClicks = Math.floor(this.searchResultCount / 20);
+            if (this.loadMoreClicks >= maxClicks) {
+                this.disableLoadMore = true;
+            }
+            else {
+                this.disableLoadMore = false;
+            }
         }
         else {
-            this.filteredPatronList = this.navPatronList;
+            this.searchResultCount = this.navPatronList.length;
+            if (this.searchResultCount > 20) {
+                this.filteredPatronList = this.navPatronList.slice(0, this.loadMoreCount);
+            }
+            else {
+                this.filteredPatronList = this.navPatronList;
+            }
+            const maxClicks = Math.floor(this.searchResultCount / 20);
+            if (this.loadMoreClicks >= maxClicks) {
+                this.disableLoadMore = true;
+            }
+            else {
+                this.disableLoadMore = false;
+            }
         }
-        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
-
+        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);       
     }
 
     public blurInputElement() {

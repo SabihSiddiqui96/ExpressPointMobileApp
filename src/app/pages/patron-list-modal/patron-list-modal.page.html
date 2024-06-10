@@ -24,7 +24,7 @@
                         Student?
                     </ion-label>
                 </ion-col>
-                <ion-col lines="none" size="8" bold class="bg-transparent ion-no-padding" *ngIf="!navIsFromQueue">
+                <ion-col lines="none" [size]="(!navIsFromQueue && navIsFromAdvPatronSearch) ? 12 : 8" bold class="bg-transparent ion-no-padding" *ngIf="!navIsFromQueue">
                     <ion-grid lines="none" class="ion-no-padding">
                         <ion-row lines="none" bold class="bg-transparent ion-no-padding">
                             <ion-grid nlines="none" class="bg-transparent">
@@ -54,6 +54,10 @@
                                         <ion-toggle color="success" (ionChange)="toggleView()"
                                             [checked]="isGridView"></ion-toggle>
                                         <ion-label style="padding: 4px;">Picture</ion-label>
+                                    </ion-col>
+                                    <ion-col>
+                                        <ion-label style="padding: 4px;">Only this Site</ion-label>
+                                        <ion-toggle color="success" (ionChange)="toggleOnlyThisSite()" [checked]="isOnlyThisSite"></ion-toggle>
                                     </ion-col>
                                 </ion-row>
                             </ion-grid>
