@@ -292,6 +292,9 @@ electron_1.ipcMain.on('ElectronAppClose', () => {
     // Cache clear
     const ses = win.webContents.session;
     ses.clearCache();
+    ses.clearStorageData({
+        storages: ['cookies']
+    });
     appQuitCalledFromApp = true;
     electron_1.app.quit();
 });
