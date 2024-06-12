@@ -39,6 +39,8 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   @ViewChild("loginViewRoot", { read: ElementRef }) private el: ElementRef;
 
   ngOnInit() {
+    // Clear storage - cookies SSO
+    this.utilService.publishIpcEvent('clear-default-session-cookies');
   }
   public loginUrl = null;
   public versionNumber;

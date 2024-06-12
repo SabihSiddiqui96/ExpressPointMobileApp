@@ -86,7 +86,11 @@ ipcMain.on('ElectronAppClose', () => {
     const ses = win.webContents.session;
     ses.clearCache(() => {
 
-    })
+    });
+    // Cache storage - cookies SSO
+    ses.clearStorageData({
+        storages: ['cookies']
+    });
     appQuitCalledFromApp = true;
     app.quit();
 });
