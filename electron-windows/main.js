@@ -366,7 +366,7 @@ function openLogin(loginSSOUrl) {
         ADFSInfo = '';
         NameId = '';
         LoginError = '';
-        ssowin = new BrowserWindow({ width: 700, height: 700, show: true });
+        ssowin = new BrowserWindow({ width: 700, height: 700, show: true, autoHideMenuBar : true });
         ssowin.loadURL(loginSSOUrl);
         ssowin.webContents.on('did-finish-load', () => {
             const interval = setInterval(() => {
