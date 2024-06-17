@@ -672,6 +672,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.isTyping = false; // Reset typing flag   
         this.customKeys = this.keywordService.keyword = this.patronSearch.keyword = this.patronSearch.externalId = this.previousValidInput;
         if (isPeripheralsInput) {
+            this.patronSearchId.value = this.previousValidInput;
             return false;
         }
         // divide input char into char array
@@ -1165,6 +1166,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 /* code for checking the characters from periperal */
                 var localTimerSearchPatron_Device = AppStateService.get('localTimerSearchPatron_Device');             
                 if (localTimerSearchPatron_Device != undefined && (localTimerSearchPatron_Keyboard - localTimerSearchPatron_Device) <= 60) {
+                    this.patronSearch.firstname = this.patronSearch.firstname != null ? this.patronSearch.firstname.replace(/\d+/g, '') : '';
+                    this.patronSearch.lastname = this.patronSearch.lastname != null ? this.patronSearch.lastname.replace(/\d+/g, '') : '';
                     AppStateService.set("localTimerSearchPatron_Device", 200);                   
                 }
                 else {
