@@ -86,7 +86,11 @@ ipcMain.on('ElectronAppClose', () => {
     const ses = win.webContents.session;
     ses.clearCache(() => {
 
-    })
+    });
+    // Cache storage - cookies SSO
+    ses.clearStorageData({
+        storages: ['cookies']
+    });
     appQuitCalledFromApp = true;
     app.quit();
 });
@@ -362,7 +366,7 @@ function openLogin(loginSSOUrl) {
         ADFSInfo = '';
         NameId = '';
         LoginError = '';
-        ssowin = new BrowserWindow({ width: 700, height: 700, show: true });
+        ssowin = new BrowserWindow({ width: 700, height: 700, show: true, autoHideMenuBar : true });
         ssowin.loadURL(loginSSOUrl);
         ssowin.webContents.on('did-finish-load', () => {
             const interval = setInterval(() => {
