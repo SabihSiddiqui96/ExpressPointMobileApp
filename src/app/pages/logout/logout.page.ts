@@ -192,7 +192,9 @@ ngOnInit() {
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         resolve(null);
       });
-      this.utilService.publishIpcEvent('clear-default-session-cookies');
+      if (this.utilService.isElectronApp()) {
+        this.utilService.publishIpcEvent('clear-default-session-cookies');
+      }
     });
   }
 
