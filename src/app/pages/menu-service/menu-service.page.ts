@@ -960,6 +960,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             });
         }
+        
+        this.patronDetails.Payments = [];
+        if (this.utilService.isAppOnline) {
+            if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
+                this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
+                    this.patronDetails.Payments = data;
+                }, e => { console.log(e); }, () => {
+                });
+            }
+        }
 
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
             if (image) {                
@@ -2375,7 +2385,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public ShowsolditemsPopover(myEvent) {
         if (!this.utilService.isMenuSoldPopupOpen) {
-            if (this.patronDetails.soldItems_count > 0) {
+            if (this.patronDetails.soldItems_count > 0 || this.patronDetails.Payments.length > 0) {
                 this.modalCtrl.create({
                     component: MenuSoldPopupPage,
                     // event: myEvent,
@@ -4088,6 +4098,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.setPreviousSaleCounts(this.selectedAccountDetails);
         // this.setRestrictions(this.selectedAccountDetails);
         // this.showAllergiesAndNotes(this.selectedAccountDetails);
+        this.selectedAccountDetails.Payments = [];
+        if (this.utilService.isAppOnline) {
+            if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
+                this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
+                    this.selectedAccountDetails.Payments = data;
+                }, e => { console.log(e); }, () => {
+                });
+            }
+        }
         this.patronImage = null;
         this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
             if (image) {
