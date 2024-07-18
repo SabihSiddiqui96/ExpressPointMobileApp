@@ -215,16 +215,17 @@
                                         <canvas #displayImage id="displayImage"
                                             style="padding-right:3px!important; display: none;"></canvas>                                       
                                     </ion-avatar>
-                                    <div *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true)" style="position: absolute;top: 8.5rem;right:1rem;">
+                                    <div *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0" style="position: absolute;top: 8.5rem;right:1rem;">
                                         <ion-button
                                                         (click)="blurInputElement(); ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) ? ' ': 'none'">
+                                                        [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0 ? ' ': 'none'">
                                                         Previous
                                                         <span style="margin-left: 5px;"
-                                                            *ngIf="patronDetails.IsSecondMeal!=true">Item(s)</span>
+                                                            *ngIf="patronDetails.IsSecondMeal != true && patronDetails.Payments.length == 0">Item(s)</span>
                                                         <span style="margin-left: 5px;"
                                                             *ngIf="patronDetails.IsSecondMeal==true">Meal(s)</span>
+                                                        <span style="margin-left: 5px;" *ngIf="patronDetails.IsSecondMeal != true && patronDetails.Payments.length > 0">Payment(s)</span>
                                         </ion-button>
                                     </div>
                                 </ion-col>
@@ -308,16 +309,18 @@
                                                     </p>
                                                 </ion-col>
                                                 <ion-col size="5" style="align-self: flex-end;"
-                                                    *ngIf="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true)">
+                                                    *ngIf="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) || selectedAccountDetails.Payments.length > 0">
                                                     <ion-button default expand="block"
                                                         (click)="blurInputElement(); ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(selectedAccountDetails.IsSecondMeal!=true), 'btn_previous_meals':(selectedAccountDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) ? ' ': 'none'">
+                                                        [style.display]="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) || selectedAccountDetails.Payments.length > 0 ? ' ': 'none'">
                                                         Previous
                                                         <span style="margin-left: 5px;"
-                                                            *ngIf="selectedAccountDetails.IsSecondMeal!=true">Item(s)</span>
+                                                            *ngIf="selectedAccountDetails.IsSecondMeal != true && selectedAccountDetails.Payments.length == 0">Item(s)</span>
                                                         <span style="margin-left: 5px;"
-                                                            *ngIf="selectedAccountDetails.IsSecondMeal==true">Meal(s)</span>
+                                                            *ngIf="selectedAccountDetails.IsSecondMeal == true">Meal(s)</span>
+                                                        <span style="margin-left: 5px;"
+                                                                *ngIf="selectedAccountDetails.IsSecondMeal != true && selectedAccountDetails.Payments.length > 0">Payment(s)</span>
                                                     </ion-button>
                                                 </ion-col>
                                                 <ion-col size="2" style="padding: 5px;"

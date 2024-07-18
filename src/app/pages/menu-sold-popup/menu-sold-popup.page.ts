@@ -35,9 +35,32 @@ export class MenuSoldPopupPage implements OnInit {
       new Promise((resolve, reject) => {
         //const now = new Date();
         //const localOffset = (+1) * now.getTimezoneOffset() * 60000;
-        this.navPatronDetails = this.patronDetails;
+        this.navPatronDetails = JSON.parse(JSON.stringify(this.patronDetails));;
+        if (this.navPatronDetails.SoldItems == undefined) {
+          this.navPatronDetails.SoldItems = [];
+        }
+        if (this.navPatronDetails.Payments != undefined && this.navPatronDetails.Payments != null && this.navPatronDetails.Payments.length > 0) {
+          this.navPatronDetails.Payments.map(pmt => {
+            this.navPatronDetails.SoldItems.push(
+              {
+                'MenuItemDescription': pmt.PaymentTypeCd,
+                'Price': pmt.Amount,
+                'TerminalName': pmt.TerminalName,
+                'Date': pmt.PaymentDate,
+                'IsReimbursable': false,
+                'IsPartOfMeal': false,
+                'IsPayment': true
+              }
+            );
+          });
+        }
         this.navPatronDetails.SoldItems.map(sitem => {
-          sitem.OffsetDate = parseInt(sitem.Date);
+          if (sitem.IsPayment == undefined || sitem.IsPayment == false) {
+            sitem.OffsetDate = parseInt(sitem.Date);
+          }
+          else {
+            sitem.OffsetDate = new Date(sitem.Date);
+          }
         });
         console.log('Hello MenuSoldPopup Page');
 
