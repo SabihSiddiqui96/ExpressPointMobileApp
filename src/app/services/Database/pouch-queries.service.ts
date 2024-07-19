@@ -2319,6 +2319,29 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetPaymentsNotProcessedByAccountId(accountId) {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "Transaction",
+          $lt: "Transaction\uffff"
+        },
+        'saleData.IsProcessed': {
+          $eq: false
+        },
+        'saleData.AccountId': {
+          $eq: accountId
+        },
+        'saleData.MealType': {
+          $eq: 'Payment'
+        }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
 
   //#endregion: Sync
 }
