@@ -1013,10 +1013,43 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         this.patronDetails.Payments = [];
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.patronDetails.AccountId).then((res) => {
+            const transactions = res.docs;
+            if (transactions.length > 0) {
+                transactions.map(doc => {
+                    const result = this.patronDetails.Payments.filter(f =>
+                        f.TerminalName === doc.saleData.TerminalName.trim() &&
+                        f.Amount === doc.saleData.PaymentAmount &&
+                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)
+                    );
+                    if (result.length == 0) {
+                        this.patronDetails.Payments.push(
+                            {
+                                'TerminalName': doc.saleData.TerminalName.trim(),
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
+                                'PaymentTypeCd': "Payment"
+                            }
+                        );
+                    }
+                });
+            }
+        });
         if (this.utilService.isAppOnline) {
             if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
-                    this.patronDetails.Payments = data;
+                    if (data.length > 0) {
+                        data.map(doc => {
+                            const result = this.patronDetails.Payments.filter(f =>
+                                f.TerminalName === doc.TerminalName.trim() &&
+                                f.Amount === doc.Amount &&
+                                f.PaymentDate === doc.PaymentDate
+                            );
+                            if (result.length == 0) {
+                                this.patronDetails.Payments.push(doc);
+                            }
+                        });
+                    }
                 }, e => { console.log(e); }, () => {
                 });
             }
@@ -6824,10 +6857,43 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // this.setRestrictions(this.selectedAccountDetails);
         // this.showAllergiesAndNotes(this.selectedAccountDetails);
         this.selectedAccountDetails.Payments = [];
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.selectedAccountDetails.AccountId).then((res) => {
+            const transactions = res.docs;
+            if (transactions.length > 0) {
+                transactions.map(doc => {
+                    const result = this.selectedAccountDetails.Payments.filter(f =>
+                        f.TerminalName === doc.saleData.TerminalName.trim() &&
+                        f.Amount === doc.saleData.PaymentAmount &&
+                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)
+                    );
+                    if (result.length == 0) {
+                        this.selectedAccountDetails.Payments.push(
+                            {
+                                'TerminalName': doc.saleData.TerminalName.trim(),
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
+                                'PaymentTypeCd': "Payment"
+                            }
+                        );
+                    }
+                });
+            }
+        });
         if (this.utilService.isAppOnline) {
             if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
-                    this.selectedAccountDetails.Payments = data;
+                    if (data.length > 0) {
+                        data.map(doc => {
+                            const result = this.selectedAccountDetails.Payments.filter(f =>
+                                f.TerminalName === doc.TerminalName.trim() &&
+                                f.Amount === doc.Amount &&
+                                f.PaymentDate === doc.PaymentDate
+                            );
+                            if (result.length == 0) {
+                                this.selectedAccountDetails.Payments.push(doc);
+                            }
+                        });
+                    }
                 }, e => { console.log(e); }, () => {
                 });
             }
