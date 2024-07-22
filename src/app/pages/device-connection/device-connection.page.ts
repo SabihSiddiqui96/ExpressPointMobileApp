@@ -39,13 +39,12 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
   @ViewChild("deviceConnectionViewRoot", { read: ElementRef }) private el: ElementRef;
 
   ngOnInit() {
-    // Clear storage - cookies SSO
-    this.utilService.publishIpcEvent('clear-default-session-cookies');
     console.log('Hello DeviceConnection Page');
     this.event.publish('connection_changed');
     this.isElectronApp = this.utilService.isElectronApp();
     if (this.utilService.isElectronApp()) {
-
+      // Clear storage - cookies SSO
+      this.utilService.publishIpcEvent('clear-default-session-cookies');
       this.utilService.publishIpcEvent('GetWindowsCredentials');
 
       this.utilService.subscribeIpcEvent('WindowsCredentials').then((eventData) => {

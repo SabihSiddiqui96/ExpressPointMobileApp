@@ -960,6 +960,49 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             });
         }
+        
+        this.patronDetails.Payments = [];
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.patronDetails.AccountId).then((res) => {
+            const transactions = res.docs;
+            if (transactions.length > 0) {
+                transactions.map(doc => {                   
+                    const result = this.patronDetails.Payments.filter(f =>
+                        f.TerminalName === doc.saleData.TerminalName.trim() &&
+                        f.Amount === doc.saleData.PaymentAmount &&
+                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)                        
+                    );
+                    if (result.length == 0) {
+                        this.patronDetails.Payments.push(
+                            {
+                                'TerminalName': doc.saleData.TerminalName.trim(),
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
+                                'PaymentTypeCd': "Payment"
+                            }
+                        );
+                    }
+                });
+            }
+        });
+        if (this.utilService.isAppOnline) {
+            if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
+                this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
+                    if (data.length > 0) {
+                        data.map(doc => {
+                            const result = this.patronDetails.Payments.filter(f =>
+                                f.TerminalName === doc.TerminalName.trim() &&
+                                f.Amount === doc.Amount &&
+                                f.PaymentDate === doc.PaymentDate
+                            );
+                            if (result.length == 0) {
+                                this.patronDetails.Payments.push(doc);
+                            }
+                        });
+                    }                    
+                }, e => { console.log(e); }, () => {
+                });
+            }
+        }
 
         this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
             if (image) {                
@@ -2375,7 +2418,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public ShowsolditemsPopover(myEvent) {
         if (!this.utilService.isMenuSoldPopupOpen) {
-            if (this.patronDetails.soldItems_count > 0) {
+            if (this.patronDetails.soldItems_count > 0 || this.patronDetails.Payments.length > 0) {
                 this.modalCtrl.create({
                     component: MenuSoldPopupPage,
                     // event: myEvent,
@@ -4088,6 +4131,48 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.setPreviousSaleCounts(this.selectedAccountDetails);
         // this.setRestrictions(this.selectedAccountDetails);
         // this.showAllergiesAndNotes(this.selectedAccountDetails);
+        this.selectedAccountDetails.Payments = [];
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.selectedAccountDetails.AccountId).then((res) => {
+            const transactions = res.docs;
+            if (transactions.length > 0) {
+                transactions.map(doc => {
+                    const result = this.selectedAccountDetails.Payments.filter(f =>
+                        f.TerminalName === doc.saleData.TerminalName.trim() &&
+                        f.Amount === doc.saleData.PaymentAmount &&
+                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)
+                    );
+                    if (result.length == 0) {
+                        this.selectedAccountDetails.Payments.push(
+                            {
+                                'TerminalName': doc.saleData.TerminalName.trim(),
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
+                                'PaymentTypeCd': "Payment"
+                            }
+                        );
+                    }
+                });
+            }
+        });
+        if (this.utilService.isAppOnline) {
+            if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
+                this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
+                    if (data.length > 0) {
+                        data.map(doc => {
+                            const result = this.selectedAccountDetails.Payments.filter(f =>
+                                f.TerminalName === doc.TerminalName.trim() &&
+                                f.Amount === doc.Amount &&
+                                f.PaymentDate === doc.PaymentDate
+                            );
+                            if (result.length == 0) {
+                                this.selectedAccountDetails.Payments.push(doc);
+                            }
+                        });
+                    }
+                }, e => { console.log(e); }, () => {
+                });
+            }
+        }
         this.patronImage = null;
         this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
             if (image) {

@@ -259,6 +259,10 @@ export class HttpService {
         return this.http.get(API_URL + 'GetPersonImage/' + personId).pipe(map(res => res));
     }
 
+    public GetPersonTodaysPayments(accountId): any {
+        return this.http.get(API_URL + 'GetTodaysPaymentsByAccount/' + accountId).pipe(map(res => res));
+    }
+
     public GetPersonDetailsByPersonId(personId): any {
         return this.http.get(API_URL + 'SyncPersonDetailsByPersonId/' + personId).pipe(map(res => res));
     }

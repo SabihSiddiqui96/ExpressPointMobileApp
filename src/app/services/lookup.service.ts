@@ -324,8 +324,12 @@ export class LookupService {
             } else {
                 //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
                 this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result: any) => {
+                    let isSpecialAccountCheck = false;
+                    if (AppStateService.get('patron_details') != undefined) {
+                        isSpecialAccountCheck = JSON.parse(AppStateService.get('patron_details')).isSpecialAccount;
+                    }
                     //Added this if condition to check any delay between loading patrons 
-                    if (AppStateService.get('patron_details') === undefined) {
+                    if (AppStateService.get('patron_details') === undefined || isSpecialAccountCheck == true) {
                         this.publishEvents(result);
                         //commented due to selecting a patron from list doesn't have lookup results
                         //if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
