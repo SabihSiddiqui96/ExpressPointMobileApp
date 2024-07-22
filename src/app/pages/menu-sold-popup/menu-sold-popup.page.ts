@@ -49,7 +49,8 @@ export class MenuSoldPopupPage implements OnInit {
                 'Date': pmt.PaymentDate,
                 'IsReimbursable': false,
                 'IsPartOfMeal': false,
-                'IsPayment': true
+                'IsPayment': true,
+                'TransactionNo': 0
               }
             );
           });
