@@ -14,7 +14,9 @@
 
             <!-- Day of week -->
             <ion-col size="2">
-                <ion-button default expand="block" (click)="blurInputElement();showDayOfWeekPopup()">
+                <ion-button default expand="block" 
+                    [disabled]="servingLines.length > 0 && showDynamicEntreeServingLine == true && disableDynamicEntreeServingLine == false" 
+                    (click)="blurInputElement();showDayOfWeekPopup()">
                     <span>{{days[dayOfWeek].label}}</span>
                 </ion-button>
             </ion-col>
@@ -29,10 +31,17 @@
             </ion-col>
 
             <!-- Menu Type -->
-            <ion-col [size]="settingAutoServe ? '3' : '5'">
+            <ion-col [size]="settingAutoServe ? showDynamicEntreeServingLine == true ? '2' : '3' : showDynamicEntreeServingLine == true ? '4' : '5'">
                 <ion-button default expand="block" (click)="blurInputElement();showMenuTypePopup()">
                     <span *ngIf="selectedMenuType != -1">{{selectedMenuTypeName}}</span>
                     <span *ngIf="selectedMenuType == -1">Menu</span>
+                </ion-button>
+            </ion-col>
+            <ion-col size="1" *ngIf="showDynamicEntreeServingLine == true">
+                <ion-button class="btn-full-size-icon" [title]="'Serving Line - ' + selectedServingLineName" default expand="block" fill="clear" 
+                     [disabled]="disableDynamicEntreeServingLine" 
+                     (click)="blurInputElement();showServingLinesPopup()">
+                    <ion-icon slot="icon-only" name="restaurant"></ion-icon>
                 </ion-button>
             </ion-col>
 

@@ -32,6 +32,8 @@ export class MenuGridComponent {
     @Input() orderData: any;
     @Input() mealCount: any;
     @Input() isSecondMeal: any;
+    @Input() servingLines: any;
+    @Input() selectedServingLine: any;
     @Input() secondMealPriceType: any;
     @Input() stateEigSetting: boolean
     @Output() changes: EventEmitter<MenuGridEvent> = new EventEmitter();
@@ -56,7 +58,12 @@ export class MenuGridComponent {
             if (grid.IsCategory === false) {
                 this.addMenuToCart(grid, this.patronDetails, this.mealCount);
             } else {
-                this.showItemsInCategory(grid.RefId);
+                if (grid.ButtonDescription == "Dynamic Entrees" && grid.IsCategory === true) {
+                    this.showDynamicEntreeItemsInCategory(grid.RefId);
+                }
+                else {
+                    this.showItemsInCategory(grid.RefId);
+                }
             }
             // this.event.publish('patronLargeImagehide', null);
         }
@@ -242,6 +249,77 @@ export class MenuGridComponent {
                     return;
                 }
             });
+        } else {
+            this.popupMessageService.showMessage(PopupMessageCode.E05410);
+            // this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');
+            return;
+        }
+    }
+
+    public showDynamicEntreeItemsInCategory(dynamicEntreeCategoryId) {
+        if (this.patronDetails.PersonId) {
+            let menuItemsArray = this.servingLines.filter(f =>
+                f.ServingLineId === this.selectedServingLine
+            );
+            if (menuItemsArray.length > 0) {
+                let menuItems = menuItemsArray[0].MenuItems;
+               
+                if (menuItems != null && menuItems != undefined && menuItems.length > 0) {
+                    menuItems = menuItems.sort((a, b) => b.PlannedCount - a.PlannedCount);
+
+                    menuItems = menuItems.map(b => {                      
+                        b.CategoryId = dynamicEntreeCategoryId;
+                        b.ButtonDescription = b.MenuItemDescription;
+                        b.RefId = b.MenuItemId;
+                        return b;
+                    });
+
+                    if (this.patronDetails.RestrictedMenuItems != null) {
+                        for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
+                            for (let k = 0; k < menuItems.length; k++) {
+                                if (this.patronDetails.RestrictedMenuItems[i] === menuItems[k].RefId) {
+                                    menuItems[k]['restrictedItem'] = true;
+                                }
+                            }
+                        }
+                    }
+
+                    let categoriesTapClose = true;
+                    if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+                        categoriesTapClose = AppStateService.get('categoriesTapClose');
+                    }
+
+                    const modal = this.modalCtrl.create({
+                        component: MenuCategoryModelPage,
+                        componentProps: {
+                            'submenuGrid': menuItems,
+                            'subMenuGridName': "Dynamic Entrees",
+                            'DefaultMenuItemId': 0,
+                            'PatronId': this.patronDetails.PersonId
+                        },
+                        backdropDismiss: categoriesTapClose
+                    }).then(async (res) => {
+                        await res.present();
+                    });
+
+                    this.event.destroy('menu_subcategory:select');
+                    this.event.subscribe('menu_subcategory:select', (userEventData) => {
+                        if (userEventData.subgrid) {
+                            this.addMenuToCart(userEventData.subgrid, this.patronDetails, this.mealCount);
+                        }
+                    });
+                }
+                else {
+                    this.popupMessageService.showMessage(PopupMessageCode.E05408);
+                    // this.utilService.showToast('There are no items within this category.');
+                    return;
+                }
+            }
+            else {
+                this.popupMessageService.showMessage(PopupMessageCode.E05408);
+                // this.utilService.showToast('There are no items within this category.');
+                return;
+            }
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E05410);
             // this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');

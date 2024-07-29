@@ -1,9 +1,10 @@
 <div *ngIf="menuGrid.hasOwnProperty('Buttons')" class="menu-static">
     <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
         <ion-col *ngFor="let grid of grid_row; let j=index;" style="width:20%">
-            <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0">
+            <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0" 
+                [style.display]="grid.ButtonDescription.length >0 && grid.RefId > 0 ? (grid.ButtonDescription == 'Dynamic Entrees' && selectedServingLine == -1) ? 'none' : '': 'none'">
                 <ion-button [tabindex]="i+j" expand="block"
-                    [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor" [style.display]=""
+                    [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor"
                     [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"
                     [style.border]="grid.IsCategory==true ?  ('2px solid ' + grid.BackColor): (grid.RefId==menuGrid.DefaultMenuItemId ? '4px solid #b22222' : grid.BackColor)"
                     [ngClass]="{'menu-box-noborder': !grid.ButtonDescription , 'menu-box-hascategory' : grid.IsCategory==true}"
@@ -11,7 +12,7 @@
                     {{grid.ButtonDescription}}&ensp;
                     <ion-icon name="alert-circle-sharp" [style.display]="grid.restrictedItem==false? 'none' : ''">
                     </ion-icon>
-                    <ion-icon name="restaurant" [style.display]="grid.IsReimbursable==false? 'none' : ' '">
+                    <ion-icon name="restaurant" [style.display]="grid.IsReimbursable==false? 'none' : ''">
                     </ion-icon>
                 </ion-button>
             </div>

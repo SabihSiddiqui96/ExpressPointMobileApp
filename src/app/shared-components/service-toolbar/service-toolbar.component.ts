@@ -10,7 +10,8 @@ enum PopupType {
     DayOfWeek = "dayOfWeek",
     MealType = "mealType",
     MenuType = "menuType",
-    ReviewTypes = "ReviewTypes"
+    ReviewTypes = "ReviewTypes",
+    DynamicEntreeServingLines = "DynamicEntreeServingLines"
 }
 
 export enum ServiceToolbarEvent {
@@ -54,6 +55,12 @@ export class ServiceToolbarComponent implements OnInit {
     @Input() autoServeEnabled: boolean;
     @Input() impermanentAutoServePause: boolean = false;
 
+    @Input() servingLines: any;
+    @Input() selectedServingLine: any;
+    @Input() selectedServingLineName: string = "";
+    @Input() showDynamicEntreeServingLine: boolean;
+    @Input() disableDynamicEntreeServingLine: boolean;
+    
     public days = [
         { 'value': 0, 'label': 'Sunday' },
         { 'value': 1, 'label': 'Monday' },
@@ -111,6 +118,26 @@ export class ServiceToolbarComponent implements OnInit {
             type: PopupType.DayOfWeek,
             data: this.days,
             selectedValue: this.dayOfWeek
+        }
+
+        this.popoverCtrl.create({
+            component: AllPopupPage,
+            componentProps: postData
+            , cssClass: this.utilService.popupCenter.cssClass
+        }).then(async (res) => {
+            await res.present();
+        });
+    }
+
+    public showServingLinesPopup() {
+        if (this.isPersonIdValid()) {
+            this.displayPersonSelectedPopup();
+            return;
+        }
+        const postData = {
+            type: PopupType.DynamicEntreeServingLines,
+            data: this.servingLines,
+            selectedValue: this.selectedServingLine
         }
 
         this.popoverCtrl.create({

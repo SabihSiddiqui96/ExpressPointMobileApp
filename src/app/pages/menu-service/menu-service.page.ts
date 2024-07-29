@@ -86,6 +86,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     private ApiInterval;
     private squareDeviceId: null;
     public autoServeEnabled: boolean = false;
+    public showDynamicEntreeServingLine: boolean = false;
+    public disableDynamicEntreeServingLine: boolean = true;
     public impermanentAutoServePause: boolean = false;
     public canAutoServeDefaultItem: boolean = false;
     public settingAutoServe: boolean = false;
@@ -119,6 +121,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
         });
+        const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
+        if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
+            this.showDynamicEntreeServingLine = true;
+        }
+        const d = new Date();
+        let day = d.getDay();
+        if (Number(this.dayOfWeek) != day) {
+            this.showDynamicEntreeServingLine = false;
+        }
 
         this.personQSubscription = this.lookUpService.personsQSubject.subscribe(
             value => {
@@ -197,6 +208,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public defaultMenuGridId = 0;
     public mealTypes: any = [{ 'MealTypeId': -1, 'MealTypeDescription': 'Please Select' }];
     public menuTypes: any = [{ 'MenuGridId': -1, 'MenuGridDescription': 'Please Select' }];
+    public servingLines: any = [{ 'ServingLineId': -1, 'ServingLineDescription': 'Please Select' }];
     public menuGrid: any = {};
     public menuGridCount = 0;
     public defaultMenuItemId = 0;
@@ -230,6 +242,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public selectedMealTypeName = 'Meal Type';
     public selectedMenuType = -1;
     public selectedMenuTypeName = 'Menu Type';
+    public selectedServingLine = -1;
+    public selectedServingLineName = '';
 
     public mealCount: number = 0;
     public alacarteCount: number = 0;
@@ -454,7 +468,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         this.loadingID = LoadingService.generateLoadingID();
         this.loadingService.present(this.loadingID, null, false).then(() => {
-            Promise.all([this.setRegionSettingsForPayments(), this.getMealTypes(), this.getMealCategories()])
+            Promise.all([this.setRegionSettingsForPayments(), this.getMealTypes(), this.getMealCategories(), this.getServingLine()])
                 .then(result => {
                     this.loadingService.dismiss(this.loadingID);
                 });
@@ -1497,6 +1511,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public dayChange() {
+        const d = new Date();
+        let day = d.getDay();
+        this.showDynamicEntreeServingLine = false;
+        const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
+        if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
+            if (Number(this.dayOfWeek) == day) {
+                this.showDynamicEntreeServingLine = true;
+            }
+        }
         this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
     }
 
@@ -1513,7 +1536,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     AppStateService.set('mealType', defaultMealType[0].MealTypeId);
                     this.defaultMealTypeId = defaultMealType[0].MealTypeId;
                     this.selectedMealTypeName = this.defaultmealTypeName = defaultMealType[0].MealTypeDescription;
-                    this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
+                    this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);                    
                 } else {
                     this.menuTypes = [];
                     this.selectedMealType = -1;
@@ -1529,6 +1552,53 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 })
                 .catch((err) => { console.log(err); resolve(null); });
 
+        });
+
+    }
+
+    public getServingLine() {
+        return new Promise((resolve, reject) => {
+            this.servingLines = [];
+            if (this.selectedMealType != -1) {
+                PouchQueriesService.GetDynamicMenuCalendars().
+                    then((res) => {
+                        var menuCalendars = res.rows.map(row => row.doc);
+                        menuCalendars = menuCalendars.filter(m => {
+                            return (
+                                m.MealTypeId === this.selectedMealType && m.SchoolId === this.schoolId);
+                        });
+                        if (menuCalendars.length > 0) {
+                            menuCalendars.forEach((item) => {
+                                PouchQueriesService.GetDynamicMenuIsMealItems(item.MenuId).
+                                    then((res) => {
+                                        if (res.docs.length > 0) {
+                                            res.docs.forEach((sl) => {
+                                                var menuItemsFiltered = sl.MenuItems.filter(m => {
+                                                    return (
+                                                        m.IsReimbursable === true && m.PlannedCount > 0);
+                                                });
+                                                this.servingLines.push({
+                                                    "ServingLineDescription": item.ServingLineDescription,
+                                                    "label": item.ServingLineDescription,
+                                                    "ServingLineId": item.ServingLineId,
+                                                    "value": item.ServingLineId,
+                                                    "MenuId": item.MenuId,
+                                                    "MealTypeId": item.MealTypeId,                                                    
+                                                    "MenuItems": menuItemsFiltered
+                                                });
+                                            });
+                                        }
+                                    });
+                            });
+                            resolve(null);
+                        } else {
+                            resolve(null);
+                        }
+                    });
+            }
+            else {
+                resolve(null);
+            }
         });
 
     }
@@ -1575,8 +1645,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.impermanentAutoServePause = false;
                     this.loadMenuTypes(mealTypeId, this.schoolId, this.dayOfWeek, mealTypeName);
                 }
-            }
-
+            }            
         });
 
     }
@@ -1612,6 +1681,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public changeMenuType() {
         if (this.selectedMenuType !== -1) {
+            this.getServingLine();
             this.defaultMenuGridId = this.selectedMenuType;
             this.loadMenuGrid(this.defaultMenuGridId, this.schoolId);
         }
@@ -1641,6 +1711,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.selectedMenuType = -1;
                 // this.utilService.setLoader(false);
             }
+            this.getServingLine();
         });
 
     }
@@ -1670,9 +1741,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     const totalGrids = menuGridDetails.Columns * menuGridDetails.Rows;
                     let i = 0;
                     let diff = 1;
+                    this.selectedServingLine = -1;
+                    this.selectedServingLineName = "";
+                    this.disableDynamicEntreeServingLine = true;
                     if (menuGridDetails.Buttons) {
-                        this.itemsWithAlergies = [];
-                        while (i < menuGridDetails.Buttons.length) {
+                        const resultDEBtns = menuGridDetails.Buttons.filter(f =>
+                            f.RefId === 0
+                        );
+                        if (resultDEBtns.length > 0) {
+                            this.disableDynamicEntreeServingLine = false;
+                        }
+                        this.itemsWithAlergies = [];                        
+                        
+                        while (i < menuGridDetails.Buttons.length) {                           
                             this.getItemAllergies(menuGridDetails.Buttons[i].RefId);
                             if (i === 0) {
                                 if (menuGridDetails.Buttons[i].Position !== 1) {
@@ -1698,7 +1779,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 // Prices: menuGridDetails.Buttons[i].Prices,
                                 RefId: menuGridDetails.Buttons[i].RefId,
                                 IsTaxable: menuGridDetails.Buttons[i].IsTaxable,
-                                MealTypeId: menuGridDetails.Buttons[i].MealTypeId
+                                MealTypeId: menuGridDetails.Buttons[i].MealTypeId,
+                                DynEntree_Id: menuGridDetails.Buttons[i].DynEntree_Id
                             });
 
                             if ((i + 1) <= (menuGridDetails.Buttons.length - 1)) {
@@ -2298,7 +2380,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.event.subscribe('category_all:select', (userEventData) => {
                             // tslint:disable-next-line:max-line-length
                             // let category = _.find(this.menuItemCategories, { "CategoryId": userEventData.category.MenuItemCategoryId })
-                            this.menuGridComponent.showItemsInCategory(userEventData.category);
+                            if (userEventData.buttonDescription != undefined && userEventData.buttonDescription != null && userEventData.buttonDescription.includes('Dynamic Entrees') == true) {
+                                this.menuGridComponent.showDynamicEntreeItemsInCategory(userEventData.category);
+                            }
+                            else {
+                                this.menuGridComponent.showItemsInCategory(userEventData.category);
+                            }
                         });
                     } else {
                         this.popupMessageService.showMessage(PopupMessageCode.E05406);
@@ -2320,25 +2407,31 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let buttons = res.rows[0].doc.Buttons;
                     if (buttons === null) {
                         canClose = false;
+                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Dynamic Entrees') == true) {
+                            canClose = true;
+                        }
                         _thisRef.event.publish('category_all:select_check_done',
-                            { 'canClose': canClose, 'categoryId': category.MenuItemCategoryId });
+                            { 'canClose': canClose, 'categoryId': category.MenuItemCategoryId, 'buttonDescription': category.ButtonDescription });
                         return;
                     }
                     buttons = buttons.filter(mi => {
                         return mi.IsMealCombo !== true; // && mi.IsReimbursable == false
                     });
                     if (!(buttons.length > 0)) {
-                        canClose = false;
+                        canClose = false;                        
                     }
                 } else {
-                    canClose = false;
+                    canClose = false;                   
+                }
+                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Dynamic Entrees') == true) {
+                    canClose = true;
                 }
                 _thisRef.event.publish('category_all:select_check_done',
-                    { 'canClose': canClose, 'categoryId': category.MenuItemCategoryId });
+                    { 'canClose': canClose, 'categoryId': category.MenuItemCategoryId, 'buttonDescription': category.ButtonDescription });
             });
         } else {
-            canClose = false;
-            this.event.publish('category_all:select_check_done', { 'canClose': canClose, 'categoryId': category.MenuItemCategoryId });
+            canClose = false;           
+            this.event.publish('category_all:select_check_done', { 'canClose': canClose, 'categoryId': category.MenuItemCategoryId, 'buttonDescription': category.ButtonDescription });
         }
     }
 
@@ -4375,6 +4468,42 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         const reviewTypeDescription = selectedData.label;
                         const reviewTypeCd = selectedData.key;
                         this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
+                        break;
+                    
+                    case 'DynamicEntreeServingLines': this.selectedServingLine = selectedData.value;
+                        this.selectedServingLineName = selectedData.label;
+                        if (this.selectedMenuType != -1 && this.selectedServingLine != -1) {
+                            let menuItemsArray = this.servingLines.filter(f =>
+                                f.ServingLineId === this.selectedServingLine
+                            );
+                            if (menuItemsArray.length > 0) {
+                                let menuItems = menuItemsArray[0].MenuItems;
+                                menuItems = _.orderBy(menuItems, ['PlannedCount'], ['desc']);
+                                let refCount = 0;
+                                if (this.menuGrid['Buttons'].length > 0) {
+                                    this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
+                                    for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                                        if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
+                                            this.menuGrid['Buttons'][k]['RefId'] = 0;
+                                            this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
+                                            this.menuGrid['Buttons'][k]['IsTaxable'] = false;
+                                        }
+                                        if (menuItems[refCount] != undefined && menuItems[refCount] != null && this.menuGrid['Buttons'][k]['RefId'] == 0) {
+                                            this.menuGrid['Buttons'][k]['IsReimbursable'] = true;
+                                            this.menuGrid['Buttons'][k]['RefId'] = menuItems[refCount].MenuItemId;
+                                            this.menuGrid['Buttons'][k]['IsTaxable'] = menuItems[refCount].IsTaxable;
+                                            this.menuGrid['Buttons'][k]['OldDEText'] = this.menuGrid['Buttons'][k]['ButtonDescription'];
+                                            this.menuGrid['Buttons'][k]['ButtonDescription'] = menuItems[refCount].MenuItemDescription;
+                                            this.menuGrid['Buttons'][k]['IsCategory'] = false;     
+                                            this.menuGrid['Buttons'][k]['IsRefIdDE'] = true;   
+                                            menuItems[refCount].ForeColor = this.menuGrid['Buttons'][k]['ForeColor'];
+                                            menuItems[refCount].BackColor = this.menuGrid['Buttons'][k]['BackColor'];
+                                            refCount = refCount + 1;
+                                        }
+                                    }
+                                }
+                            }                                                 
+                        }
                         break;
                 }
             }
