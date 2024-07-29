@@ -48,7 +48,7 @@ export class MenuCategoryModelPage implements OnInit {
     if (!this.navFromClassroomSale) {
       this.event.destroy('category_all:select_check_done');
       this.event.subscribe('category_all:select_check_done', (userEventData) => {
-        this.event.publish('category_all:select', { 'category': userEventData.categoryId });
+        this.event.publish('category_all:select', { 'category': userEventData.categoryId, 'buttonDescription': userEventData.buttonDescription });
         if (!this.remainOpen || (this.remainOpen && userEventData.canClose)) {
           this.dismiss();
         }
@@ -139,10 +139,10 @@ export class MenuCategoryModelPage implements OnInit {
 
   public showCategoryItems(category) {
     if (!this.navFromClassroomSale) {
-      this.event.publish('category_all:select_check', { 'category': category });
+      this.event.publish('category_all:select_check', { 'category': category, 'buttonDescription': category.ButtonDescription });
       // this.dismiss();
     } else {
-      this.event.publish('category_all:select', { 'category': category });
+      this.event.publish('category_all:select', { 'category': category, 'buttonDescription': category.ButtonDescription });
       this.dismiss();
     }
 

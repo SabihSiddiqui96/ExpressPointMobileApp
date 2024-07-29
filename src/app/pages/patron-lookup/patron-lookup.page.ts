@@ -1547,6 +1547,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public async onPeripheralKey(event) {        
         if (event.keyCode === 13) {
+            this.blurInputElement();
             await this.delay(300);
         }
         let urlSubstringsArray = ["open-session", "payments", "login", "logout", "close-session", "classroom-sale"];
@@ -1592,6 +1593,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         incomingID = '';
                         this.inputBuffer = [];
                         //this.patronSearch.keyword = '';
+                        this.blurInputElement();
                     }
                 } else if (event['keyCode'] === 9) {
                     // setTimeout(() => {

@@ -80,6 +80,10 @@ export class AllPopupPage implements OnInit {
                 this.lists = this.rawList = navigatedData;
                 this.title = "Day";
                 break;
+            case "DynamicEntreeServingLines":
+                this.lists = this.rawList = navigatedData;
+                this.title = "Serving Line";
+                break;
             case "mealType":
                 this.lists = this.rawList = this.getInFormat(
                     navigatedData,

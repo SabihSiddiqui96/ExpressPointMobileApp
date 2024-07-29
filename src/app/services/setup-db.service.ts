@@ -110,7 +110,7 @@ export class SetupDbService {
                  * Fix for bug 126524 : Deleting Person information- > get person Information on each login
                  */
                 this.ResetDB(false).then(() => {
-                    if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
+                    if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) != 0) {
                         setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
                         this.dynamicMenusDB.SetupDynamicMenusDB(), this.personDB.SetupPersonDB()], this.usersDb.SetupUsersDB();
                         this.syncList['DynamicMenus'] = 'InProgress';
