@@ -77,12 +77,17 @@ ngOnInit() {
       const pnpPeripherals = AppStateService.get('pnpPeripherals');
       const openOSK = AppStateService.get('OpenOSK');
       const TranDbDestroyedDate = AppStateService.get('TranDbDestroyedDate')
-      const allSiteSettings = AppStateService.get('AllSiteSettings');
+      const allSiteSettings = AppStateService.get('AllSiteSettings');     
 
       let selectedSite = '';
       const tokenGoodBefore = AppStateService.get('TokenGoodBefore');
       if (AppStateService.get('SelectedSite')) {
         selectedSite = AppStateService.get('SelectedSite');
+      }
+
+      let dynamicEntreeServingLn = '';
+      if (AppStateService.get('DynamicEntreeServingLine')) {
+        dynamicEntreeServingLn = AppStateService.get('DynamicEntreeServingLine');
       }
 
       let windowsCredentials;
@@ -126,6 +131,7 @@ ngOnInit() {
       AppStateService.set('LastSyncDate_Account', lastSyncDateAccount);
       AppStateService.set('LastSyncDate_Person', lastSyncDatePerson);
       AppStateService.set('SetupComplete', setupComplete);
+      AppStateService.set('DynamicEntreeServingLine', dynamicEntreeServingLn);
       if (isNaN(transactionNumber)) {
         transactionNumber = 0;
       }
