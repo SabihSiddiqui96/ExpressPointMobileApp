@@ -4784,6 +4784,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
                 this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
             }
+            AppStateService.remove('patron_details');
             if (this.patronDetails !== null) {
                 this.logDBService.logData({
                     event: EventType.QUEUE,
