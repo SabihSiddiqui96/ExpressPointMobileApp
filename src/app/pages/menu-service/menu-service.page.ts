@@ -468,7 +468,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         this.loadingID = LoadingService.generateLoadingID();
         this.loadingService.present(this.loadingID, null, false).then(() => {
-            Promise.all([this.setRegionSettingsForPayments(), this.getMealTypes(), this.getMealCategories(), this.getServingLine()])
+            Promise.all([this.setRegionSettingsForPayments(), this.getMealTypes(), this.getMealCategories()])
                 .then(result => {
                     this.loadingService.dismiss(this.loadingID);
                 });
@@ -1519,6 +1519,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (Number(this.dayOfWeek) == day) {
                 this.showDynamicEntreeServingLine = true;
             }
+            else {               
+                this.selectedServingLine = -1;
+                this.selectedServingLineName = "";
+            }
+        }
+        else {            
+            this.selectedServingLine = -1;
+            this.selectedServingLineName = "";
         }
         this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
     }
@@ -1559,48 +1567,91 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public getServingLine() {
         return new Promise((resolve, reject) => {
             this.servingLines = [];
-            if (this.selectedMealType != -1) {
-                PouchQueriesService.GetDynamicMenuCalendars().
-                    then((res) => {
-                        var menuCalendars = res.rows.map(row => row.doc);
-                        menuCalendars = menuCalendars.filter(m => {
-                            return (
-                                m.MealTypeId === this.selectedMealType && m.SchoolId === this.schoolId);
-                        });
-                        if (menuCalendars.length > 0) {
-                            menuCalendars.forEach((item) => {
-                                PouchQueriesService.GetDynamicMenuIsMealItems(item.MenuId).
-                                    then((res) => {
-                                        if (res.docs.length > 0) {
-                                            res.docs.forEach((sl) => {
-                                                var menuItemsFiltered = sl.MenuItems.filter(m => {
-                                                    return (
-                                                        m.IsReimbursable === true && m.PlannedCount > 0);
-                                                });
-                                                this.servingLines.push({
-                                                    "ServingLineDescription": item.ServingLineDescription,
-                                                    "label": item.ServingLineDescription,
-                                                    "ServingLineId": item.ServingLineId,
-                                                    "value": item.ServingLineId,
-                                                    "MenuId": item.MenuId,
-                                                    "MealTypeId": item.MealTypeId,                                                    
-                                                    "MenuItems": menuItemsFiltered
-                                                });
-                                            });
-                                        }
-                                    });
-                            });
-                            resolve(null);
-                        } else {
-                            resolve(null);
-                        }
-                    });
+            this.selectedServingLineName = "";
+            const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
+            if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
+                const d = new Date();
+                let day = d.getDay();
+                if (Number(this.dayOfWeek) == day) {
+                    this.showDynamicEntreeServingLine = true;
+                }
+                else {
+                    resolve(null);
+                    return;
+                }
             }
             else {
                 resolve(null);
+                return;
+            }
+            if (this.selectedMealType != -1) {
+                PouchQueriesService.GetDynamicMenuCalendars().then((res) => {
+                    var menuCalendars = res.rows.map(row => row.doc);
+                    menuCalendars = menuCalendars.filter(m => {
+                        return (
+                            m.MealTypeId === this.selectedMealType && m.SchoolId === this.schoolId
+                        );
+                    });
+
+                    if (menuCalendars.length > 0) {
+                        let promises = menuCalendars.map((item) => {
+                            return PouchQueriesService.GetDynamicMenuIsMealItems(item.MenuId).then((res) => {
+                                if (res.docs.length > 0) {
+                                    res.docs.forEach((sl) => {
+                                        var menuItemsFiltered = sl.MenuItems.filter(m => {
+                                            return (
+                                                m.IsReimbursable === true && m.PlannedCount > 0
+                                            );
+                                        });
+                                        this.servingLines.push({
+                                            "ServingLineDescription": item.ServingLineDescription,
+                                            "label": item.ServingLineDescription,
+                                            "ServingLineId": item.ServingLineId,
+                                            "value": item.ServingLineId,
+                                            "MenuId": item.MenuId,
+                                            "MealTypeId": item.MealTypeId,
+                                            "MenuItems": menuItemsFiltered
+                                        });
+                                    });
+                                }
+                            });
+                        });
+
+                        Promise.all(promises).then(() => {
+                            this.bindDeafultServingLineByMealType();
+                            this.bindDynamicEntreeItemsByServingLine();
+                            resolve(null);
+                        }).catch((error) => {
+                            reject(error);
+                        });
+                    } else {
+                        resolve(null);
+                    }
+                }).catch((error) => {
+                    reject(error);
+                });
+            } else {
+                resolve(null);
             }
         });
+    }
 
+    public bindDeafultServingLineByMealType() {
+        if (AppStateService.get("DynamicEntreeServingLine") != undefined && AppStateService.get("DynamicEntreeServingLine") != null) {
+            let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
+            let servingLineFiltered = servingLines.filter(f =>
+                f.MealType === this.selectedMealType
+            );
+            if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
+                this.selectedServingLine = servingLineFiltered[0].ServingLine;
+                const servLine = this.servingLines.filter(f =>
+                    f.ServingLineId === this.selectedServingLine
+                );
+                if (servLine != null && servLine != undefined && servLine.length > 0) {
+                    this.selectedServingLineName = servLine[0].ServingLineDescription;
+                }
+            }
+        }        
     }
 
 
@@ -4472,42 +4523,64 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     
                     case 'DynamicEntreeServingLines': this.selectedServingLine = selectedData.value;
                         this.selectedServingLineName = selectedData.label;
-                        if (this.selectedMenuType != -1 && this.selectedServingLine != -1) {
-                            let menuItemsArray = this.servingLines.filter(f =>
-                                f.ServingLineId === this.selectedServingLine
+                        if (AppStateService.get("DynamicEntreeServingLine")) {
+                            let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
+                            let servingLineFiltered = servingLines.filter(f =>
+                                f.MealType === this.selectedMealType
                             );
-                            if (menuItemsArray.length > 0) {
-                                let menuItems = menuItemsArray[0].MenuItems;
-                                menuItems = _.orderBy(menuItems, ['PlannedCount'], ['desc']);
-                                let refCount = 0;
-                                if (this.menuGrid['Buttons'].length > 0) {
-                                    this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
-                                    for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
-                                        if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
-                                            this.menuGrid['Buttons'][k]['RefId'] = 0;
-                                            this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
-                                            this.menuGrid['Buttons'][k]['IsTaxable'] = false;
-                                        }
-                                        if (menuItems[refCount] != undefined && menuItems[refCount] != null && this.menuGrid['Buttons'][k]['RefId'] == 0) {
-                                            this.menuGrid['Buttons'][k]['IsReimbursable'] = true;
-                                            this.menuGrid['Buttons'][k]['RefId'] = menuItems[refCount].MenuItemId;
-                                            this.menuGrid['Buttons'][k]['IsTaxable'] = menuItems[refCount].IsTaxable;
-                                            this.menuGrid['Buttons'][k]['OldDEText'] = this.menuGrid['Buttons'][k]['ButtonDescription'];
-                                            this.menuGrid['Buttons'][k]['ButtonDescription'] = menuItems[refCount].MenuItemDescription;
-                                            this.menuGrid['Buttons'][k]['IsCategory'] = false;     
-                                            this.menuGrid['Buttons'][k]['IsRefIdDE'] = true;   
-                                            menuItems[refCount].ForeColor = this.menuGrid['Buttons'][k]['ForeColor'];
-                                            menuItems[refCount].BackColor = this.menuGrid['Buttons'][k]['BackColor'];
-                                            refCount = refCount + 1;
-                                        }
-                                    }
-                                }
-                            }                                                 
+                            if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
+                                servingLineFiltered[0].ServingLine = this.selectedServingLine;
+                                AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
+                            }
+                            else {
+                                servingLines.push({ "MealType": this.selectedMealType, "ServingLine": this.selectedServingLine });
+                                AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
+                            }
                         }
+                        else {
+                            let servingLine = [{ "MealType": this.selectedMealType , "ServingLine": this.selectedServingLine }];
+                            AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLine));
+                        }
+                        
+                        this.bindDynamicEntreeItemsByServingLine();
                         break;
                 }
             }
         });
+    }
+
+    private bindDynamicEntreeItemsByServingLine() {
+        if (this.selectedMenuType != -1 && this.selectedServingLine != -1) {
+            let menuItemsArray = this.servingLines.filter(f => f.ServingLineId === this.selectedServingLine
+            );
+            if (menuItemsArray.length > 0) {
+                let menuItems = menuItemsArray[0].MenuItems;
+                menuItems = _.orderBy(menuItems, ['PlannedCount'], ['desc']);
+                let refCount = 0;
+                if (this.menuGrid['Buttons'].length > 0) {
+                    this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
+                    for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                        if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
+                            this.menuGrid['Buttons'][k]['RefId'] = 0;
+                            this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
+                            this.menuGrid['Buttons'][k]['IsTaxable'] = false;
+                        }
+                        if (menuItems[refCount] != undefined && menuItems[refCount] != null && this.menuGrid['Buttons'][k]['RefId'] == 0) {
+                            this.menuGrid['Buttons'][k]['IsReimbursable'] = true;
+                            this.menuGrid['Buttons'][k]['RefId'] = menuItems[refCount].MenuItemId;
+                            this.menuGrid['Buttons'][k]['IsTaxable'] = menuItems[refCount].IsTaxable;
+                            this.menuGrid['Buttons'][k]['OldDEText'] = this.menuGrid['Buttons'][k]['ButtonDescription'];
+                            this.menuGrid['Buttons'][k]['ButtonDescription'] = menuItems[refCount].MenuItemDescription;
+                            this.menuGrid['Buttons'][k]['IsCategory'] = false;
+                            this.menuGrid['Buttons'][k]['IsRefIdDE'] = true;
+                            menuItems[refCount].ForeColor = this.menuGrid['Buttons'][k]['ForeColor'];
+                            menuItems[refCount].BackColor = this.menuGrid['Buttons'][k]['BackColor'];
+                            refCount = refCount + 1;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private unsubscribeToMenuServicePopupEvents() {
