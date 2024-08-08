@@ -1589,6 +1589,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length > 0);                                                      
                             this.utilService.showModalPopup = false;
                             this.patronSearch.keyword = null;
+                            this.customKeys = '';
                         }
                         incomingID = '';
                         this.inputBuffer = [];
@@ -1641,6 +1642,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         }
                         incomingID = '';
                         this.inputBuffer = [];
+                        this.customKeys = '';
                         //this.patronSearch.keyword = '';
                     }
                 } else if (event['keyCode'] === 9) {

@@ -1600,7 +1600,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     res.docs.forEach((sl) => {
                                         var menuItemsFiltered = sl.MenuItems.filter(m => {
                                             return (
-                                                m.IsReimbursable === true && m.PlannedCount > 0
+                                                m.IsReimbursable === true
                                             );
                                         });
                                         this.servingLines.push({
@@ -1637,7 +1637,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public bindDeafultServingLineByMealType() {
-        if (AppStateService.get("DynamicEntreeServingLine") != undefined && AppStateService.get("DynamicEntreeServingLine") != null) {
+        if (AppStateService.get("DynamicEntreeServingLine") != undefined && AppStateService.get("DynamicEntreeServingLine") != null && AppStateService.get("DynamicEntreeServingLine") != '') {
             let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
             let servingLineFiltered = servingLines.filter(f =>
                 f.MealType === this.selectedMealType
@@ -4555,7 +4555,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             );
             if (menuItemsArray.length > 0) {
                 let menuItems = menuItemsArray[0].MenuItems;
-                menuItems = _.orderBy(menuItems, ['PlannedCount'], ['desc']);
+                menuItems = _.orderBy(menuItems, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
                 let refCount = 0;
                 if (this.menuGrid['Buttons'].length > 0) {
                     this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
