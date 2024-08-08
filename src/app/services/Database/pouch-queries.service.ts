@@ -1167,8 +1167,7 @@ export class PouchQueriesService {
         },
         'MenuItems': {
           $elemMatch: {
-            IsReimbursable: true,
-            PlannedCount: { $gt: 0 }
+            IsReimbursable: true
           }
         }
       },
