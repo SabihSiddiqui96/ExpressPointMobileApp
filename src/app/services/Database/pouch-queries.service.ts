@@ -1158,6 +1158,26 @@ export class PouchQueriesService {
       include_docs: true
     });
   }
+
+  public static GetDynamicMenuIsMealItems(menuId) {
+    var promise = EXP_DYNAMIC_MENUS.find({
+      selector: {
+        _id: {        
+          $eq: 'dynamicMenuDetail--' + menuId
+        },
+        'MenuItems': {
+          $elemMatch: {
+            IsReimbursable: true
+          }
+        }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+
   public static GetCarryOverDetails() {
     return EXP_DYNAMIC_MENUS.allDocs({
       startkey: 'CarryOver',

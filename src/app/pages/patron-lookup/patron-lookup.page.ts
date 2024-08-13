@@ -1547,6 +1547,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public async onPeripheralKey(event) {        
         if (event.keyCode === 13) {
+            this.blurInputElement();
             await this.delay(300);
         }
         let urlSubstringsArray = ["open-session", "payments", "login", "logout", "close-session", "classroom-sale"];
@@ -1588,10 +1589,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                             this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length > 0);                                                      
                             this.utilService.showModalPopup = false;
                             this.patronSearch.keyword = null;
+                            this.customKeys = '';
                         }
                         incomingID = '';
                         this.inputBuffer = [];
                         //this.patronSearch.keyword = '';
+                        this.blurInputElement();
                     }
                 } else if (event['keyCode'] === 9) {
                     // setTimeout(() => {
@@ -1639,6 +1642,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                         }
                         incomingID = '';
                         this.inputBuffer = [];
+                        this.customKeys = '';
                         //this.patronSearch.keyword = '';
                     }
                 } else if (event['keyCode'] === 9) {
