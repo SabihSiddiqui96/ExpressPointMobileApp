@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="text-large">
+      Performance Options
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding class="performance-options-content ion-padding" style="height:fit-content;">
+  <ion-list>
+    <ion-item lines="none" class="bg-transparent pad-top" (click)="setBalanceAndPayment($event)">
+      <ion-label class="ion-text-left bold" position="bottom">Live Balance and Payments Check</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LiveBalancePayments">
+      </ion-toggle>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top" (click)="setLoadStudentImages($event)">
+      <ion-label class="ion-text-left bold" position="bottom">Load Student Images</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LoadStudentImages">
+      </ion-toggle>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top" (click)="setLiveDataFromOtherTerminals($event)">
+      <ion-label class="ion-text-left bold" position="bottom">Live Sales data from Other Terminals</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LiveDataFromOtherTerminals">
+      </ion-toggle>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Sync transaction data every</ion-label>
+      <ion-select [(ngModel)]="perfOptionDB.SyncTransactionData" (ionChange)="setSyncTransactionData($event)" aria-label="AutoServe Delay"
+        interface="action-sheet">
+        <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=15>15min</ion-select-option>
+        <ion-select-option value=30>30min</ion-select-option>
+        <ion-select-option value=60>1hour</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Sync student detail data every</ion-label>
+      <ion-select [(ngModel)]="perfOptionDB.SyncStudentDetail" (ionChange)="setSyncStudentDetailData($event)"
+        aria-label="AutoServe Delay" interface="action-sheet">
+        <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=15>15min</ion-select-option>
+        <ion-select-option value=30>30min</ion-select-option>
+        <ion-select-option value=60>1hour</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Sync terminal heartbeat every</ion-label>
+      <ion-select [(ngModel)]="perfOptionDB.SyncTerminalHeartbeat" (ionChange)="setSyncTerminalHeartbeat($event)"
+        aria-label="AutoServe Delay" interface="action-sheet">
+        <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=15>15min</ion-select-option>
+        <ion-select-option value=30>30min</ion-select-option>
+        <ion-select-option value=60>1hour</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <!-- Added this div, intentianally for height beween close and options -->
+    <div style="height:45px;"></div>
+  </ion-list>
+</ion-content>
+<ion-footer>
+  <ion-toolbar class="center" color="white">
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
