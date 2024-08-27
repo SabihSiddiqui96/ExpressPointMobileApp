@@ -901,14 +901,22 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         cepPriceApply = false;
                     }
                 }
-                
+                const today = new Date();
                 if (student.PreviousSales) {
                     student.PreviousSales.map(s => {
                         if (s.MealTypeId === this.filter.selected_mealtype) {
                             s.SalesByMealType.map(sales => {
                                 if (sales.IsReimbursable) {
-                                    student.HadMeal = true;
-                                    // studentsHadMeal.push(s)
+                                    let soldItemsByMealType = [];                                   
+                                    soldItemsByMealType = _.filter(s.SalesByMealType, (s) => {
+                                        let date = new Date(_.toInteger(s.Date));
+                                        return (date.getDate() === today.getDate()
+                                            && date.getMonth() === today.getMonth()
+                                            && date.getFullYear() === today.getFullYear())
+                                    });
+                                    if (soldItemsByMealType.length > 0) {
+                                        student.HadMeal = true;
+                                    }
                                 }
                             });
                         }
