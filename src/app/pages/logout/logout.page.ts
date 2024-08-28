@@ -122,6 +122,11 @@ ngOnInit() {
       if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
         checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
       }
+      
+      let performanceOptions = '';
+      if (AppStateService.get('performanceOptions') != undefined) {        
+        performanceOptions = AppStateService.get('performanceOptions');
+      }
 
       // localStorage.clear();
       AppStateService.reset();
@@ -168,6 +173,9 @@ ngOnInit() {
       AppStateService.set('TranDbDestroyedDate', TranDbDestroyedDate);
       AppStateService.set('categoriesTapClose', categoriesTapClose);
       AppStateService.set('CheckIfPinEntered', checkIfPinEntered);
+      if (performanceOptions != undefined && performanceOptions != '') {
+        AppStateService.set('performanceOptions', performanceOptions);
+      }
 
       const dataforofflineUse = {
         '_id': 'dataforofflineUse',
@@ -193,7 +201,8 @@ ngOnInit() {
         'TranDbDestroyedDate': TranDbDestroyedDate,
         'AllSiteSettings': allSiteSettings,
         'categoriesTapClose': categoriesTapClose,
-        'CheckIfPinEntered': checkIfPinEntered
+        'CheckIfPinEntered': checkIfPinEntered,
+        'performanceOptions': performanceOptions
       }
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         resolve(null);

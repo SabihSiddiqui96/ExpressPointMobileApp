@@ -85,6 +85,11 @@ export class SystemDBService {
 
       }
 
+      let performanceOptions = '';
+      if (AppStateService.get('performanceOptions') != undefined) {       
+        performanceOptions = AppStateService.get('performanceOptions');
+      }
+
       const dataforofflineUse = {
         '_id': 'dataforofflineUse',
         'selectedDistrict': selectedDistrict,
@@ -109,7 +114,8 @@ export class SystemDBService {
         'TranDbDestroyedDate': TranDbDestroyedDate,
         'LastLoggedInUser': lastLoggedInUser,
         'categoriesTapClose': categoriesTapClose,
-        'CheckIfPinEntered': checkIfPinEntered
+        'CheckIfPinEntered': checkIfPinEntered,
+        'performanceOptions': performanceOptions
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';

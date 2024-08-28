@@ -24,9 +24,23 @@
     </ion-item>
     <ion-item lines="none" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync transaction data every</ion-label>
-      <ion-select [(ngModel)]="perfOptionDB.SyncTransactionData" (ionChange)="setSyncTransactionData($event)" aria-label="AutoServe Delay"
-        interface="action-sheet">
+      <ion-select [(ngModel)]="perfOptionDB.SyncTransactionData" (ionChange)="setSyncTransactionData($event)" 
+        aria-label="Sync transaction data" interface="action-sheet">
         <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=5>5min</ion-select-option>
+        <ion-select-option value=10>10min</ion-select-option>
+        <ion-select-option value=15>15min</ion-select-option>
+        <ion-select-option value=30>30min</ion-select-option>
+        <ion-select-option value=60>1hour</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Sync transaction status every</ion-label>
+      <ion-select [(ngModel)]="perfOptionDB.SyncTransactionStatus" (ionChange)="setSyncTransactionStatus($event)"
+        aria-label="Sync transaction status" interface="action-sheet">
+        <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=5>5min</ion-select-option>
+        <ion-select-option value=10>10min</ion-select-option>
         <ion-select-option value=15>15min</ion-select-option>
         <ion-select-option value=30>30min</ion-select-option>
         <ion-select-option value=60>1hour</ion-select-option>
@@ -35,8 +49,23 @@
     <ion-item lines="none" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync student detail data every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncStudentDetail" (ionChange)="setSyncStudentDetailData($event)"
-        aria-label="AutoServe Delay" interface="action-sheet">
+        aria-label="Sync student detail" interface="action-sheet">
         <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=5>5min</ion-select-option>
+        <ion-select-option value=10>10min</ion-select-option>
+        <ion-select-option value=15>15min</ion-select-option>
+        <ion-select-option value=30>30min</ion-select-option>
+        <ion-select-option value=60>1hour</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Sync account detail data every</ion-label>
+      <ion-select [(ngModel)]="perfOptionDB.SyncAccountDetail" (ionChange)="setSyncAccountDetailData($event)"
+        aria-label="Sync account detail" interface="action-sheet">
+        <ion-select-option value=1>1min</ion-select-option>
+        <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=5>5min</ion-select-option>
+        <ion-select-option value=10>10min</ion-select-option>
         <ion-select-option value=15>15min</ion-select-option>
         <ion-select-option value=30>30min</ion-select-option>
         <ion-select-option value=60>1hour</ion-select-option>
@@ -45,8 +74,11 @@
     <ion-item lines="none" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync terminal heartbeat every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncTerminalHeartbeat" (ionChange)="setSyncTerminalHeartbeat($event)"
-        aria-label="AutoServe Delay" interface="action-sheet">
+        aria-label="Sync terminal heartbeat" interface="action-sheet">
+        <ion-select-option value=1>1min</ion-select-option>
         <ion-select-option value=2>2min</ion-select-option>
+        <ion-select-option value=5>5min</ion-select-option>
+        <ion-select-option value=10>10min</ion-select-option>
         <ion-select-option value=15>15min</ion-select-option>
         <ion-select-option value=30>30min</ion-select-option>
         <ion-select-option value=60>1hour</ion-select-option>

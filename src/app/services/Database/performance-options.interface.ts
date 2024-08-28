@@ -4,5 +4,7 @@ export interface PerformanceOptions {
     LiveDataFromOtherTerminals: boolean,
     SyncTransactionData: String,
     SyncStudentDetail: String,
-    SyncTerminalHeartbeat: String
+    SyncTerminalHeartbeat: String,
+    SyncAccountDetail: String,
+    SyncTransactionStatus: String
 }
