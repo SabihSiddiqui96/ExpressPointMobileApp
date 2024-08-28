@@ -38,7 +38,7 @@ import { TransactionService } from "./services/transaction.service";
 import { ElectronService } from './services/electron.service';
 import { PopupMessageService } from "./services/popup-message.service";
 import { PopupMessageCode } from "./services/enums/popup-message-codes";
-import { Observable, timer } from "rxjs";
+import { Observable, Subscription, timer } from "rxjs";
 import { BehaviorSubject } from "rxjs";
 import { NavigationExtras } from "@angular/router";
 import { distinctUntilChanged } from "rxjs/operators";
@@ -49,6 +49,7 @@ import { SignalRService } from './services/SignalR.service';
 import { SetupDbService } from "./services/setup-db.service";
 import { LocalTimerService } from "./services/local-timer.service";
 import { SessionType } from "./services/enums/session-types";
+import { SyncService } from "./services/syncService.service";
 
 declare var Fullscreen: any;
 @Component({
@@ -134,6 +135,16 @@ export class AppComponent {
   public isKeyboardOpen: boolean;
   public keyboardShowSubscription;
   public keyboardHideSubscription;
+  public performanceOptions: any = {
+    LiveBalancePayments: true,
+    LoadStudentImages: true,
+    LiveDataFromOtherTerminals: true,
+    SyncTransactionData: "2",
+    SyncStudentDetail: "2",
+    SyncTerminalHeartbeat: "1",
+    SyncAccountDetail: "1",
+    SyncTransactionStatus: "2"
+  }
 
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
 
@@ -160,6 +171,7 @@ export class AppComponent {
     private zone: NgZone,
     public deviceService: DeviceService,
     public pouchDBService: PouchDBService,
+    private syncService: SyncService,
     public switchHandsService: SwitchHandsService,
     private popoverCtrl: PopoverController,
     private http: HttpService,
@@ -179,6 +191,13 @@ export class AppComponent {
       // if (loginDetails.Settings && loginDetails.Settings.DIAGEN && loginDetails.Settings.DIAGEN === '1') {
       // Set error diagonostic service to true based on settings
       // }
+    }
+
+    if (AppStateService.get('performanceOptions') === undefined) {
+      AppStateService.set('performanceOptions', this.performanceOptions);
+    }
+    else {
+      this.performanceOptions = (AppStateService.get('performanceOptions'));
     }
 
     if (!utilService.isDevEnv()) {
@@ -219,45 +238,17 @@ export class AppComponent {
     });
 
     this.event.subscribe("pouchDBIntialized", (data) => {
-      /**
-       * Using observable
-       */
-      const delayPerson = 5000;
-      const delayAccount = 15000;
-      const delayTranStatus = 5000;
+      const dataToServer = 1000 * 60 * Number(this.performanceOptions.SyncTransactionData);
+      const personFromServer = 1000 * 60 * Number(this.performanceOptions.SyncStudentDetail);
+      const accountFromServer = 1000 * 60 * Number(this.performanceOptions.SyncAccountDetail);
+      const transactionStatusFromServer = 1000 * 60 * Number(this.performanceOptions.SyncTransactionData);
 
-      const delayToServer = 10000;
-      const toServer = 1000 * 60 * 1;
-      const personFromServer = 1000 * 60 * 2;
-      const accountFromServer = 1000 * 60 * 1;
-      const transactionStatusFromServer = 1000 * 60 * 2;
-
-      let personDataFromServer = timer(delayPerson, personFromServer);
-
-      personDataFromServer.subscribe(() => {
-        _thisRef.syncPersonFromServer();
-      });
-
-      let accountDataFromServer = timer(delayAccount, accountFromServer);
-
-      accountDataFromServer.subscribe(() => {
-        _thisRef.syncAccountFromServer();
-      });
-
-      let transactionStatusDataFromServer = timer(
-        delayTranStatus,
-        transactionStatusFromServer
+      this.syncService.initializeTimers(
+        personFromServer,
+        accountFromServer,
+        transactionStatusFromServer,
+        dataToServer
       );
-
-      transactionStatusDataFromServer.subscribe(() => {
-        _thisRef.transactionStatusFromServer();
-      });
-
-      let dataToServer = timer(delayToServer, toServer);
-
-      dataToServer.subscribe(() => {
-        _thisRef.syncDataToServer();
-      });
     });
 
     // setInterval(this.deleteDataFromdevice.bind(this), 1000 * 60*60*24);//1000 * 60*60*24
@@ -803,8 +794,8 @@ export class AppComponent {
 
         this.syncHeartbeatInterval = setInterval(
           this.checkHeartbeat.bind(this),
-          1000 * 40
-        ); // every 40 seconds
+          this.performanceOptions.SyncTerminalHeartbeat != null && this.performanceOptions.SyncTerminalHeartbeat != undefined ? 1000 * 60 * Number(this.performanceOptions.SyncTerminalHeartbeat) : 1000 * 40
+        );
       })
       .catch(function (e) {
         console.log(e);
