@@ -900,10 +900,9 @@ export class DoPayment {
     styleUrls: ['./payments.page.scss']
 })
 export class PaymentsPage extends DoPayment implements OnInit {
-
-
-
+    performanceOptions: any = null;
     ngOnInit() {
+        this.performanceOptions = AppStateService.get('performanceOptions');
         this.patronId = null;
         this.paymentOption = 'cash';
         this.event.destroy('patron:selected');
@@ -1040,11 +1039,10 @@ export class PaymentsPage extends DoPayment implements OnInit {
     public getPatronDetails(patronSelectedData) {
 
         this.patronSelectedData = JSON.parse(patronSelectedData);
-        if (this.patronSelectedData.PersonId) {
+        if (this.patronSelectedData.PersonId && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
             this.http.GetPersonImage(this.patronSelectedData.PersonId).subscribe(data => {
                 if (data != null) {
                     this.patronSelectedData['Image'] = data;
-
                 }
             }, e => { console.log(e); }, () => {
             });

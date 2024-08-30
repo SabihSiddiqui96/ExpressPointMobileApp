@@ -998,7 +998,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 });
             }
         });
-        if (this.utilService.isAppOnline) {
+        let performanceOptions = AppStateService.get('performanceOptions');
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LiveBalancePayments == true))) {
             if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
                     if (data.length > 0) {
@@ -1017,28 +1018,43 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 });
             }
         }
-
-        this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
-            if (image) {                
-                this.patronImageLoad(image);
-            } else {
+        
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LoadStudentImages == true)) {
+            this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
+                if (image) {
+                    this.patronImageLoad(image);
+                } else {
+                    this.largeImageToShow = false;
+                    this.largeImageIsShowing = false;
+                    this.isPatronHavingImage = false;
+                    setTimeout(() => {
+                        this.patronImageLoad();
+                    }, 100);
+                }
+                let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
+                if (inputDirId) {
+                    this.patronDetails.InputDirection = inputDirId;
+                    sessionStorage.removeItem(this.patronDetails.Identifier);
+                }
+            }).catch((err) => {
+                setTimeout(() => {
+                    this.patronImageLoad();
+                }, 100);
+                console.log('Error in gettng image ' + err);
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
                 this.isPatronHavingImage = false;
-                this.patronImageLoad();
-            }
-            let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
-            if (inputDirId) {
-                this.patronDetails.InputDirection = inputDirId;
-                sessionStorage.removeItem(this.patronDetails.Identifier);
-            }
-        }).catch((err) => {
-            this.patronImageLoad();
-            console.log('Error in gettng image ' + err);
+            });
+        }
+        else {
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
             this.isPatronHavingImage = false;
-        });
+            setTimeout(() => {
+                this.patronImageLoad();
+            }, 100);
+        }
+
         this.setCreditLimit();        
         /** ToDo: Probably not needed - verify and remove */
         if (this.patronDetails.isSpecialAccount === true) {
@@ -4298,7 +4314,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 });
             }
         });
-        if (this.utilService.isAppOnline) {
+        let performanceOptions = AppStateService.get('performanceOptions');
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LiveBalancePayments == true)) {
             if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
                     if (data.length > 0) {
@@ -4318,23 +4335,35 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
         }
         this.patronImage = null;
-        this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
-            if (image) {
-                this.patronImage = image;
-                this.largeImageToShow = true;
-                this.largeImageSrc = image;
-                if (this.selectedAccountDetails) {
-                    // this.showLargeImage(1000);
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LoadStudentImages == true))) {
+            this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
+                if (image) {
+                    this.patronImage = image;
+                    this.largeImageToShow = true;
+                    this.largeImageSrc = image;
+                    if (this.selectedAccountDetails) {
+                        // this.showLargeImage(1000);
+                    }
+                } else {
+                    this.largeImageToShow = false;
+                    this.largeImageIsShowing = false;
+                    setTimeout(() => {
+                        this.patronImageLoad();
+                    }, 100);
                 }
-            } else {
+            }).catch((err) => {
+                console.log('Error in gettng image ' + err);
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
-            }
-        }).catch((err) => {
-            console.log('Error in gettng image ' + err);
+            });
+        }
+        else {
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
-        });
+            setTimeout(() => {
+                this.patronImageLoad();
+            }, 100);
+        }
         this.setCreditLimit();
 
         /** ToDo: Probably not needed - verify and remove */

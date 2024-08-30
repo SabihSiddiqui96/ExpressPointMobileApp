@@ -36,7 +36,7 @@ export class AllPopupPage implements OnInit {
     @Input() selectedValue;
     isGridView : boolean;
     navOptionList = ['patronPatron','patronSpecialRosterPersonList','patronlist'];
-
+    performanceOptions = null;
     ngOnInit() {
         const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
         const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
@@ -49,7 +49,7 @@ export class AllPopupPage implements OnInit {
         this.popUpData = navigatedData;
         this.navPage = this.page;
         this.navSelectedValue = this.selectedValue;
-
+        this.performanceOptions = AppStateService.get('performanceOptions');
         if (this.navType === "keyboard") {
             this.showKeyboard = true;
             const postData = JSON.parse(JSON.stringify(this.keyData));
@@ -607,7 +607,7 @@ export class AllPopupPage implements OnInit {
         if (this.isPatronType && firstTime) {
             this.zone.run(() => {
                 this.rawList.map((student) => {
-                    if (student.Image === null) {
+                    if (student.Image === null && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
                         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
                             if (isNetworkOnline) {
                                 if (student.value) {

@@ -33,6 +33,7 @@ import { StudentWiseAlacarteComponent } from './student-alacarte/student-wise-al
     styleUrls: ['./classroom-sale.page.scss'],
 })
 export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit, OnDestroy {
+    performanceOptions: any = null;
 
 
 
@@ -40,7 +41,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         if (this.specialRosterList.length === 0) { // Saketh for Special SpecialRosters
             this.getSpecialRostersList();
         }
-
+        this.performanceOptions = AppStateService.get('performanceOptions');
         this.event.destroy('all_categories:show');
         this.event.subscribe('all_categories:show', (userEventData) => {
             // this.event.destroy('all_categories:show');
@@ -859,23 +860,22 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public getStudentsImage(students) {
         return new Promise((resolve) => {
-            students.map(student => {
-                this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                    if (isNetworkOnline && student.PersonId) { // this.network.type != 'none' || navigator.onLine
-                        this.http.GetPersonImage(student.PersonId).subscribe(data => {
-                            if (data != null) {
-                                student.Image = data;
-                            }
-                        }, e => { console.log(e); }, () => {
-                        });
-
-                    }
+            if (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true)) {
+                students.map(student => {
+                    this.utilService.isNetworkOnline().then((isNetworkOnline) => {
+                        if (isNetworkOnline && student.PersonId) { // this.network.type != 'none' || navigator.onLine
+                            this.http.GetPersonImage(student.PersonId).subscribe(data => {
+                                if (data != null) {
+                                    student.Image = data;
+                                }
+                            }, e => { console.log(e); }, () => {
+                            });
+                        }
+                    });
                 });
-            });
+            }
             resolve(students);
-
-        })
-
+        });
     }
 
 
