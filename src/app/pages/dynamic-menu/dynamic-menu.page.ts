@@ -156,7 +156,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     @ViewChild('confettiHolder')
     public elConfettiHolder: ElementRef;
 
-    @ViewChild('displayImage') public canvasRef: ElementRef;
+    @ViewChild('displayImage', { static: false }) public canvasRef: ElementRef;
 
     public type = 'DynamicMenus';
     public patronId = null;
@@ -1035,7 +1035,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 });
             }
         });
-        if (this.utilService.isAppOnline) {
+        let performanceOptions = AppStateService.get('performanceOptions');
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LiveBalancePayments == true))) {
             if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
                     if (data.length > 0) {
@@ -1056,23 +1057,27 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-            if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
+            if (this.utilService.isAppOnline) { // this.network.type != 'none' || navigator.onLine
                 if (this.patronId) {
-                    this.http.GetPersonImage(this.patronId).subscribe(data => {
+                    this.lookUpService.getPersonImage(this.patronId).then((data) => {
                         if (data) {
                             this.patronImageLoad(data);                            
                         } else {
                             this.isPatronHavingImage = false;
                             this.largeImageToShow = false;
                             this.largeImageIsShowing = false;
-                            this.patronImageLoad();
+                            setTimeout(() => {
+                                this.patronImageLoad();
+                            }, 100);                            
                         }
                     }, e => {
                         console.log(e);
                         this.isPatronHavingImage = false;
                         this.largeImageToShow = false;
                         this.largeImageIsShowing = false;
-                        this.patronImageLoad();
+                        setTimeout(() => {
+                            this.patronImageLoad();
+                        }, 100);
                     }, () => {
                     });
                 } else {
@@ -1083,7 +1088,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             else {
                 this.isPatronHavingImage = false;
-                this.patronImageLoad();
+                this.largeImageToShow = false;
+                this.largeImageIsShowing = false;
+                setTimeout(() => {
+                    this.patronImageLoad();
+                }, 100);
             }
             let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
             if (inputDirId) {
@@ -6880,7 +6889,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 });
             }
         });
-        if (this.utilService.isAppOnline) {
+        let performanceOptions = AppStateService.get('performanceOptions');
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LiveBalancePayments == true)) {
             if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
                     if (data.length > 0) {
@@ -6900,23 +6910,33 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         }
         this.patronImage = null;
-        this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
-            if (image) {
-                this.patronImage = image;
-                this.largeImageToShow = true;
-                this.largeImageSrc = image;
-                if (this.selectedAccountDetails) {
-                    this.showLargeImage(1000);
+        if (this.utilService.isAppOnline) {
+            this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
+                if (image) {
+                    this.patronImage = image;
+                    this.largeImageToShow = true;
+                    this.largeImageSrc = image;
+                    if (this.selectedAccountDetails) {
+                        this.showLargeImage(1000);
+                    }
+                } else {
+                    this.largeImageToShow = false;
+                    this.largeImageIsShowing = false;
                 }
-            } else {
+            }).catch((err) => {
+                console.log('Error in gettng image ' + err);
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
-            }
-        }).catch((err) => {
-            console.log('Error in gettng image ' + err);
+            });
+        }
+        else {
+            this.isPatronHavingImage = false;
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
-        });
+            setTimeout(() => {
+                this.patronImageLoad();
+            }, 100);
+        }
 
         /** ToDo: Probably not needed - verify and remove */
         if (this.selectedAccountDetails.isSpecialAccount === true) {
