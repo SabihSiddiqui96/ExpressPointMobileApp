@@ -1,8 +1,17 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title class="text-large">
-      Performance Options
-    </ion-title>
+    <ion-row>
+      <ion-col size="8">
+        <ion-title class="text-large" style="height: 100%;">
+          Performance Options
+        </ion-title>
+      </ion-col>
+      <ion-col size="4">
+        <ion-button expand="block" size="large" fill="clear" color="slate" (click)="restoreDefaults()">
+          Restore Defaults
+        </ion-button>
+      </ion-col>
+    </ion-row>
   </ion-toolbar>
 </ion-header>
 <ion-content padding class="performance-options-content ion-padding" style="height:fit-content;">
@@ -26,6 +35,7 @@
       <ion-label class="ion-text-left bold" position="bottom">Sync transaction data every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncTransactionData" (ionChange)="setSyncTransactionData($event)" 
         aria-label="Sync transaction data" interface="action-sheet">
+        <ion-select-option value=1>1min</ion-select-option>
         <ion-select-option value=2>2min</ion-select-option>
         <ion-select-option value=5>5min</ion-select-option>
         <ion-select-option value=10>10min</ion-select-option>

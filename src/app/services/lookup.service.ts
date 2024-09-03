@@ -54,6 +54,7 @@ export class LookupService {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
             if (userEventData.selected_patron) {
+                AppStateService.remove('patron_details');
                 if (userEventData.selected_patron.PersonId) {
                     this.lookupResults = [];
                     // If the Person is from the server lookup, make a call to get his Details

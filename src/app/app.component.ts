@@ -139,7 +139,7 @@ export class AppComponent {
     LiveBalancePayments: true,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
-    SyncTransactionData: "2",
+    SyncTransactionData: "1",
     SyncStudentDetail: "2",
     SyncTerminalHeartbeat: "1",
     SyncAccountDetail: "1",

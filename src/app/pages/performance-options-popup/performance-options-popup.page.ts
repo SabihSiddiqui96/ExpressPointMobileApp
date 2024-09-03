@@ -21,7 +21,7 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
     LiveBalancePayments: true,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
-    SyncTransactionData: "2",
+    SyncTransactionData: "1",
     SyncStudentDetail: "2",
     SyncTerminalHeartbeat: "1",
     SyncAccountDetail: "1",
@@ -92,6 +92,22 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
 
   public setSyncTerminalHeartbeat(event) {
     this.savePerformanceOptionSetting_PouchService(this.perfOptionDB);
+  }
+
+  public restoreDefaults() {
+    this.perfOptionDB = {
+      '_id': 'PerformanceOptionSetting',
+      'LiveBalancePayments': (this.performanceOptions.LiveBalancePayments),
+      'LoadStudentImages': (this.performanceOptions.LoadStudentImages),
+      'LiveDataFromOtherTerminals': (this.performanceOptions.LiveDataFromOtherTerminals),
+      'SyncStudentDetail': (this.performanceOptions.SyncStudentDetail),
+      'SyncTerminalHeartbeat': (this.performanceOptions.SyncTerminalHeartbeat),
+      'SyncTransactionData': (this.performanceOptions.SyncTransactionData),
+      'SyncAccountDetail': (this.performanceOptions.SyncAccountDetail),
+      'SyncTransactionStatus': (this.performanceOptions.SyncTransactionStatus)
+    };
+    PouchDBService.UpsertSingleDoc(this.perfOptionDB, EXP_SYSTEM);
+    AppStateService.set('performanceOptions', this.perfOptionDB);
   }
 
   public savePerformanceOptionSetting_PouchService(perfOptionSetting) {

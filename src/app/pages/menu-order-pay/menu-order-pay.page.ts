@@ -1150,6 +1150,21 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.utilService.showToast(message);
     }
 
+    public disablePrincipalAccountWhenAmountTendered() {
+        let amount = 0;
+        if (this.canUsePrincipalAccount == false && this.disablePrincipalAcctButton == true) {
+            return true;
+        } else {
+            if (this.cardAmount != null && this.cardAmount.indexOf('$') !== -1) {
+                amount = Number(this.cardAmount.replace('$', ''));
+            }
+            if (this.cashtendered != null && this.cashtendered.indexOf('$') !== -1) {
+                amount = amount + Number(this.cashtendered.replace('$', ''));
+            }
+            return (amount > 0) ? true : false;
+        }        
+    }
+
     public makeSale(retrySquareTransaction = false) {
 
         if (retrySquareTransaction) {
