@@ -1073,13 +1073,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         if (this.patronDetails['SchoolId'] !== this.schoolId) {
             if (this.patronDetails['SiteCode']) {
-                if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.visitingStudents)) {
+                if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) && (this.schoolId !== this.patronDetails['ServingSchoolId'])) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    }
+                    if (this.schoolId !== this.patronDetails['ServingSchoolId']) {
                         if (this.autoServeEnabled == true) {
                             this.impermanentAutoServePause = true;
                         }
-                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
-                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
                     }
                 }
                 // console.log('--patronDetails---');
@@ -4394,15 +4396,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (this.selectedAccountDetails['SchoolId'] !== this.schoolId) {
             if (this.selectedAccountDetails['SiteCode']) {
 
-
-                if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
-                    (this.schoolId !== this.selectedAccountDetails['ServingSchoolId'])) {
-                    if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.visitingStudents)) {
+                if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
+                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
+                        (this.schoolId !== this.selectedAccountDetails['ServingSchoolId'])) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    }
+                    if (this.schoolId !== this.selectedAccountDetails['ServingSchoolId']) {
                         if (this.autoServeEnabled == true) {
                             this.impermanentAutoServePause = true;
                         }
-                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
-                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
                     }
                 }
 
@@ -4773,11 +4776,26 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public forceAddDefaultItemForAutoServe() {
         return new Promise((resolve) => {
             if (this.patronDetails.PersonId) {
-                if (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents) {
+                if (this.settingAutoPause.visitingStudents) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
                         (this.schoolId !== this.patronDetails.ServingSchoolId)) {
-                        this.popupMessageService.showMessage(PopupMessageCode.E05364)
-                        this.popupMessageService.showMessage(PopupMessageCode.E05481)
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false);
+                    }
+                    if (this.schoolId !== this.patronDetails.ServingSchoolId) {                      
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false);
+                    }
+                }
+                if (this.impermanentAutoServePause == false && this.settingAutoPause.adultStudents) {
+                    if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
+                        (this.schoolId !== this.patronDetails.ServingSchoolId)) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
                         this.autoServeEnabled = true;
                         this.impermanentAutoServePause = true;
                         resolve(false);
@@ -4849,6 +4867,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     resolve(result);
                                 });
                             }
+                            else {
+                                this.autoServeEnabled = true;
+                                this.impermanentAutoServePause = true;
+                                resolve(false);
+                            }
                         }
                     } else {
                         this.mealCount = this.mealCount + 1;
@@ -4856,6 +4879,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
                                 resolve(result);
                             });
+                        }
+                        else {
+                            this.autoServeEnabled = true;
+                            this.impermanentAutoServePause = true;
+                            resolve(false);
                         }
                     }
                 } else {
