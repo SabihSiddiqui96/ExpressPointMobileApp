@@ -1970,6 +1970,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
             this.patronSearch.keyword = null;
             this.event.publish('peripheral:input', {});
             this.hideKeyboard();
+            AppStateService.remove('patron_details');
             if (!PatronLookupPage.canAccountSkipSync(this.lastPatron)) {
 
                 // Lookup if person is in PouchDB

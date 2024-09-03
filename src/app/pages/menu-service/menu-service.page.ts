@@ -117,7 +117,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     restrictions: false,
                     visitingStudents: false,
                     allergensAndNotes: false,
-                    unidentifiedPatron:false
+                    unidentifiedPatron: false,
+                    adultStudents:false
                 }
             }
         });
@@ -4035,6 +4036,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.utilService.selectAccountClick = false;
         this.lookUpService.menuPayselectAccountClick = false;
         if (!PatronLookupPage.canAccountSkipSync(JSON.parse(this.lastPatron))) {
+            const currentPatron = JSON.stringify(this.patronDetails);            
+            AppStateService.remove('patron_details');
             // Lookup if person is in PouchDB
             PouchQueriesService.GetStudentInfo(JSON.parse(this.lastPatron).PersonId).then((data) => {
                 let lookupResults;
@@ -4056,6 +4059,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     // Server fetch and load patron
                     this.fetchLastPatronFromServer();
                 }
+                if (currentPatron != null && currentPatron != undefined) {
+                    this.lookUpService.pushPersonToQ(JSON.parse(currentPatron), 0);    // putting the current patron in the queue at the top.
+                }
+                this.event.publish('patron:setLastPatronMenuService', currentPatron);
             });
         } else {
             this.continueLoadingPrevPatron();
@@ -4766,7 +4773,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public forceAddDefaultItemForAutoServe() {
         return new Promise((resolve) => {
             if (this.patronDetails.PersonId) {
-                if (this.settingAutoPause.visitingStudents) {
+                if (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
                         (this.schoolId !== this.patronDetails.ServingSchoolId)) {
                         this.popupMessageService.showMessage(PopupMessageCode.E05364)
@@ -4837,15 +4844,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         } else { // adult
                             priceTypeId = this.patronDetails['PriceTypeId'];
                             this.mealCount = this.mealCount + 1;
+                            if (this.settingAutoPause.adultStudents == undefined || this.settingAutoPause.adultStudents == false) {
+                                this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
+                                    resolve(result);
+                                });
+                            }
+                        }
+                    } else {
+                        this.mealCount = this.mealCount + 1;
+                        if (this.settingAutoPause.adultStudents == undefined || this.settingAutoPause.adultStudents == false) {
                             this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
                                 resolve(result);
                             });
                         }
-                    } else {
-                        this.mealCount = this.mealCount + 1;
-                        this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
-                            resolve(result);
-                        });;
                     }
                 } else {
                     this.forceCheckALCRestrictions(this.defaultMenuItemDetails, priceTypeId).then((result) => {

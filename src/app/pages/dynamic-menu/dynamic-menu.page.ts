@@ -6550,6 +6550,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.utilService.selectAccountClick = false;
         this.lookUpService.menuPayselectAccountClick = false;
         if (!PatronLookupPage.canAccountSkipSync(JSON.parse(this.lastPatron))) {
+            const currentPatron = JSON.stringify(this.patronDetails);            
+            AppStateService.remove('patron_details');
             // Lookup if person is in PouchDB
             PouchQueriesService.GetStudentInfo(JSON.parse(this.lastPatron).PersonId).then((data) => {
                 let lookupResults;
@@ -6571,6 +6573,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     // Server fetch and load patron
                     this.fetchLastPatronFromServer();
                 }
+                if (currentPatron != null && currentPatron != undefined) {
+                    this.lookUpService.pushPersonToQ(JSON.parse(currentPatron), 0);    // putting the current patron in the queue at the top.
+                }
+                this.event.publish('patron:setLastPatronMenuService', currentPatron);
+                //this.event.publish('enablePrevPatronPatronLookup', {});
             });
         } else {
             this.continueLoadingPrevPatron();
