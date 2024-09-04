@@ -54,6 +54,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     private ApiInterval;
     public disableCancelButton: boolean = false;
     public isContentDisabled: boolean = false;
+    performanceOptions: any = null;
     // public ShowRetrySubscription: Subscription;
 
     ngOnInit() {
@@ -63,7 +64,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.navIsMealFormed = this.isMealFormed;
         this.amountDue = this.navOrderData.accountBalance;
         this.alaCateByDebitAllowed = this.isAlaCateByDebitAllowed;
-
+        this.performanceOptions = AppStateService.get('performanceOptions');
         this.changeDue = 0.00;
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
@@ -1149,6 +1150,21 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.utilService.showToast(message);
     }
 
+    public disablePrincipalAccountWhenAmountTendered() {
+        let amount = 0;
+        if (this.canUsePrincipalAccount == false && this.disablePrincipalAcctButton == true) {
+            return true;
+        } else {
+            if (this.cardAmount != null && this.cardAmount.indexOf('$') !== -1) {
+                amount = Number(this.cardAmount.replace('$', ''));
+            }
+            if (this.cashtendered != null && this.cashtendered.indexOf('$') !== -1) {
+                amount = amount + Number(this.cashtendered.replace('$', ''));
+            }
+            return (amount > 0) ? true : false;
+        }        
+    }
+
     public makeSale(retrySquareTransaction = false) {
 
         if (retrySquareTransaction) {
@@ -1619,15 +1635,15 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.hideBalSetting = parseInt(SettingService.getSettingValue('hidebal'));
 
         this.patronImage = null;
-        this.lookUpService.getPersonImage(this.accountDetails.PersonId).then((image) => {
-            if (image) {
-                this.patronImage = image;
-
-            }
-        }).catch((err) => {
-            console.log('Error in gettng image ' + err);
-
-        });
+        if (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true)) {
+            this.lookUpService.getPersonImage(this.accountDetails.PersonId).then((image) => {
+                if (image) {
+                    this.patronImage = image;
+                }
+            }).catch((err) => {
+                console.log('Error in gettng image ' + err);
+            });
+        }
 
         /** ToDo: Probably not needed - verify and remove */
         if (this.accountDetails.isSpecialAccount === true) {

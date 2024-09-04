@@ -54,6 +54,7 @@ export class LookupService {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
             if (userEventData.selected_patron) {
+                AppStateService.remove('patron_details');
                 if (userEventData.selected_patron.PersonId) {
                     this.lookupResults = [];
                     // If the Person is from the server lookup, make a call to get his Details
@@ -291,21 +292,27 @@ export class LookupService {
         if (patron.PersonId !== undefined) { // Unique result: Person name displayed
             let checkForServer: boolean = false;
             let getbalanceFromServer: boolean = Boolean(parseInt(SettingService.getSettingValue("BALCHK")));
-            let Balance = null
+            let performanceOptions = AppStateService.get('performanceOptions');
+            let Balance = null;
             if (AppStateService.get('SiteSettings')) {
                 checkForServer = JSON.parse(AppStateService.get('SiteSettings'))[0].CheckOtherSiteSecMeal;
             }
-            if (getbalanceFromServer && !patron.IsFromServer && this.utilService.isAppOnline) {
-                this.personService.GetBalanceByAccountId(patron.AccountId).then(res => {
-                    if (res != null) {
-                        patron.Balance = res;
-                    }
-                })
+            if (getbalanceFromServer && !patron.IsFromServer && this.utilService.isAppOnline) {                
+                if (performanceOptions != undefined && performanceOptions.LiveBalancePayments == false) {   
+                    patron.Balance = patron.Balance;
+                }
+                else {
+                    this.personService.GetBalanceByAccountId(patron.AccountId).then(res => {
+                        if (res != null) {
+                            patron.Balance = res;
+                        }
+                    });
+                }
             }
             if (checkForServer && !patron.IsFromServer && this.utilService.isAppOnline) {
 
                 this.setPreviousSales(patron).then(hadMeal => {
-                    if (!hadMeal) {
+                    if (!hadMeal && (performanceOptions == undefined || performanceOptions == null || (performanceOptions != undefined && performanceOptions.LiveDataFromOtherTerminals == true))) {
                         this.GetPreviousSalesByAccountId(patron.AccountId).then((serverSales) => {
                             if (!patron.PreviousSales) {
                                 patron.PreviousSales = serverSales;
@@ -639,6 +646,10 @@ export class LookupService {
     public getPersonImage(personId): any {
         // tslint:disable-next-line:no-shadowed-variable
         return new Promise((resolve, reject) => {
+            let performanceOptions = AppStateService.get('performanceOptions');
+            if (this.utilService.isAppOnline && (performanceOptions != undefined && performanceOptions.LoadStudentImages == false)) {
+                resolve(null);
+            }
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
                 if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
                     if (personId) {

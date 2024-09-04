@@ -117,7 +117,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     restrictions: false,
                     visitingStudents: false,
                     allergensAndNotes: false,
-                    unidentifiedPatron:false
+                    unidentifiedPatron: false,
+                    adultStudents:false
                 }
             }
         });
@@ -998,7 +999,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 });
             }
         });
-        if (this.utilService.isAppOnline) {
+        let performanceOptions = AppStateService.get('performanceOptions');
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LiveBalancePayments == true))) {
             if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
                     if (data.length > 0) {
@@ -1017,28 +1019,43 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 });
             }
         }
-
-        this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
-            if (image) {                
-                this.patronImageLoad(image);
-            } else {
+        
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LoadStudentImages == true)) {
+            this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
+                if (image) {
+                    this.patronImageLoad(image);
+                } else {
+                    this.largeImageToShow = false;
+                    this.largeImageIsShowing = false;
+                    this.isPatronHavingImage = false;
+                    setTimeout(() => {
+                        this.patronImageLoad();
+                    }, 100);
+                }
+                let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
+                if (inputDirId) {
+                    this.patronDetails.InputDirection = inputDirId;
+                    sessionStorage.removeItem(this.patronDetails.Identifier);
+                }
+            }).catch((err) => {
+                setTimeout(() => {
+                    this.patronImageLoad();
+                }, 100);
+                console.log('Error in gettng image ' + err);
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
                 this.isPatronHavingImage = false;
-                this.patronImageLoad();
-            }
-            let inputDirId = sessionStorage.getItem(this.patronDetails.Identifier);
-            if (inputDirId) {
-                this.patronDetails.InputDirection = inputDirId;
-                sessionStorage.removeItem(this.patronDetails.Identifier);
-            }
-        }).catch((err) => {
-            this.patronImageLoad();
-            console.log('Error in gettng image ' + err);
+            });
+        }
+        else {
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
             this.isPatronHavingImage = false;
-        });
+            setTimeout(() => {
+                this.patronImageLoad();
+            }, 100);
+        }
+
         this.setCreditLimit();        
         /** ToDo: Probably not needed - verify and remove */
         if (this.patronDetails.isSpecialAccount === true) {
@@ -1056,13 +1073,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         if (this.patronDetails['SchoolId'] !== this.schoolId) {
             if (this.patronDetails['SiteCode']) {
-                if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.visitingStudents)) {
+                if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) && (this.schoolId !== this.patronDetails['ServingSchoolId'])) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    }
+                    if (this.schoolId !== this.patronDetails['ServingSchoolId']) {
                         if (this.autoServeEnabled == true) {
                             this.impermanentAutoServePause = true;
                         }
-                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
-                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
                     }
                 }
                 // console.log('--patronDetails---');
@@ -4019,6 +4038,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.utilService.selectAccountClick = false;
         this.lookUpService.menuPayselectAccountClick = false;
         if (!PatronLookupPage.canAccountSkipSync(JSON.parse(this.lastPatron))) {
+            const currentPatron = JSON.stringify(this.patronDetails);            
+            AppStateService.remove('patron_details');
             // Lookup if person is in PouchDB
             PouchQueriesService.GetStudentInfo(JSON.parse(this.lastPatron).PersonId).then((data) => {
                 let lookupResults;
@@ -4040,6 +4061,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     // Server fetch and load patron
                     this.fetchLastPatronFromServer();
                 }
+                if (currentPatron != null && currentPatron != undefined) {
+                    this.lookUpService.pushPersonToQ(JSON.parse(currentPatron), 0);    // putting the current patron in the queue at the top.
+                }
+                this.event.publish('patron:setLastPatronMenuService', currentPatron);
             });
         } else {
             this.continueLoadingPrevPatron();
@@ -4298,7 +4323,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 });
             }
         });
-        if (this.utilService.isAppOnline) {
+        let performanceOptions = AppStateService.get('performanceOptions');
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LiveBalancePayments == true)) {
             if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
                 this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
                     if (data.length > 0) {
@@ -4318,23 +4344,35 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
         }
         this.patronImage = null;
-        this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
-            if (image) {
-                this.patronImage = image;
-                this.largeImageToShow = true;
-                this.largeImageSrc = image;
-                if (this.selectedAccountDetails) {
-                    // this.showLargeImage(1000);
+        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LoadStudentImages == true))) {
+            this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
+                if (image) {
+                    this.patronImage = image;
+                    this.largeImageToShow = true;
+                    this.largeImageSrc = image;
+                    if (this.selectedAccountDetails) {
+                        // this.showLargeImage(1000);
+                    }
+                } else {
+                    this.largeImageToShow = false;
+                    this.largeImageIsShowing = false;
+                    setTimeout(() => {
+                        this.patronImageLoad();
+                    }, 100);
                 }
-            } else {
+            }).catch((err) => {
+                console.log('Error in gettng image ' + err);
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
-            }
-        }).catch((err) => {
-            console.log('Error in gettng image ' + err);
+            });
+        }
+        else {
             this.largeImageToShow = false;
             this.largeImageIsShowing = false;
-        });
+            setTimeout(() => {
+                this.patronImageLoad();
+            }, 100);
+        }
         this.setCreditLimit();
 
         /** ToDo: Probably not needed - verify and remove */
@@ -4358,15 +4396,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (this.selectedAccountDetails['SchoolId'] !== this.schoolId) {
             if (this.selectedAccountDetails['SiteCode']) {
 
-
-                if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
-                    (this.schoolId !== this.selectedAccountDetails['ServingSchoolId'])) {
-                    if (!this.autoServeEnabled || (this.autoServeEnabled && this.settingAutoPause.visitingStudents)) {
+                if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
+                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
+                        (this.schoolId !== this.selectedAccountDetails['ServingSchoolId'])) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                    }
+                    if (this.schoolId !== this.selectedAccountDetails['ServingSchoolId']) {
                         if (this.autoServeEnabled == true) {
                             this.impermanentAutoServePause = true;
                         }
-                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
-                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
                     }
                 }
 
@@ -4740,8 +4779,23 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 if (this.settingAutoPause.visitingStudents) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
                         (this.schoolId !== this.patronDetails.ServingSchoolId)) {
-                        this.popupMessageService.showMessage(PopupMessageCode.E05364)
-                        this.popupMessageService.showMessage(PopupMessageCode.E05481)
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false);
+                    }
+                    if (this.schoolId !== this.patronDetails.ServingSchoolId) {                      
+                        this.autoServeEnabled = true;
+                        this.impermanentAutoServePause = true;
+                        resolve(false);
+                    }
+                }
+                if (this.impermanentAutoServePause == false && this.settingAutoPause.adultStudents) {
+                    if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
+                        (this.schoolId !== this.patronDetails.ServingSchoolId)) {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05364);
+                        this.popupMessageService.showMessage(PopupMessageCode.E05481);
                         this.autoServeEnabled = true;
                         this.impermanentAutoServePause = true;
                         resolve(false);
@@ -4808,15 +4862,29 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         } else { // adult
                             priceTypeId = this.patronDetails['PriceTypeId'];
                             this.mealCount = this.mealCount + 1;
+                            if (this.settingAutoPause.adultStudents == undefined || this.settingAutoPause.adultStudents == false) {
+                                this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
+                                    resolve(result);
+                                });
+                            }
+                            else {
+                                this.autoServeEnabled = true;
+                                this.impermanentAutoServePause = true;
+                                resolve(false);
+                            }
+                        }
+                    } else {
+                        this.mealCount = this.mealCount + 1;
+                        if (this.settingAutoPause.adultStudents == undefined || this.settingAutoPause.adultStudents == false) {
                             this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
                                 resolve(result);
                             });
                         }
-                    } else {
-                        this.mealCount = this.mealCount + 1;
-                        this.forceConfirmed_CartMenuItem(this.defaultMenuItemDetails, priceTypeId).then((result) => {
-                            resolve(result);
-                        });;
+                        else {
+                            this.autoServeEnabled = true;
+                            this.impermanentAutoServePause = true;
+                            resolve(false);
+                        }
                     }
                 } else {
                     this.forceCheckALCRestrictions(this.defaultMenuItemDetails, priceTypeId).then((result) => {

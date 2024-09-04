@@ -19,6 +19,7 @@ import { DeviceConfigurationPage } from '../device-configuration/device-configur
 import { SetupDbService } from '../../services/setup-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { AutoServePauseOptionsPopUpComponent } from '../auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
+import { PerformanceOptionsPopUpComponent } from '../performance-options-popup/performance-options-popup.page';
 
 @Component({
   selector: 'app-device-controls',
@@ -425,6 +426,18 @@ export class DeviceControlsPage implements OnInit {
   public openAutoServePopup(event) {
     this.popoverCtrl.create({
       component: AutoServePauseOptionsPopUpComponent,
+      event: event,
+      componentProps: {},
+      backdropDismiss: false,
+      cssClass: this.utilService.popupCenter.cssClass
+    }).then(async (res) => {
+      await res.present();
+    });
+  }
+
+  public openPerformanceOptionsPopup(event) {
+    this.popoverCtrl.create({
+      component: PerformanceOptionsPopUpComponent,
       event: event,
       componentProps: {},
       backdropDismiss: false,

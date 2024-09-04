@@ -44,6 +44,11 @@
       </ion-toggle>
     </ion-item>
     <ion-item *ngIf="autoServeEnabled && autoPauseEnabled" lines="none" class="bg-transparent pause-padding">
+      <ion-label class="ion-text-left" position="bottom">Pause Auto-Serve for Adults</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="autoPauseOptions.adultStudents" (ionChange)="setAutoPauseOptions($event)">
+      </ion-toggle>
+    </ion-item>
+    <ion-item *ngIf="autoServeEnabled && autoPauseEnabled" lines="none" class="bg-transparent pause-padding">
       <ion-label class="ion-text-left" position="bottom">Pause Auto-Serve for Allergens & Special
         Instructions</ion-label>
       <ion-toggle color="slate" [(ngModel)]="autoPauseOptions.allergensAndNotes"

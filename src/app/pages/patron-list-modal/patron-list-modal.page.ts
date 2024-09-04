@@ -24,8 +24,9 @@ export class PatronListModalPage implements OnInit {
     isGridView: boolean;
     isOnlyThisSite: boolean = false;
     public selectedSiteName: string;
-
+    public performanceOptions: any = null;
     ngOnInit() {    
+        this.performanceOptions = AppStateService.get('performanceOptions');
         this.navPatronList = this.patron_list;
         this.searchResultCount = this.navPatronList.length;
         if(this.navPatronList && this.navPatronList.length > 0) {
@@ -83,26 +84,25 @@ export class PatronListModalPage implements OnInit {
       }
 
     public getPatronImages(list) {
-        return list.map((patron) => {
-            this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
-                    if (patron['Image'] === null || patron['Image'] === undefined) {
-                        if (patron.PersonId && (patron.ImageLoaded == null || patron.ImageLoaded == undefined || patron.ImageLoaded == false)) {
-                            this.http.GetPersonImage(patron.PersonId).subscribe(data => {
-                                if (data != null) {
-                                    patron.Image = data;
-                                }
-                                patron.ImageLoaded = true;
-                            }, e => { console.log(e); }, () => {
-                            });
+        return list.map((patron) => {            
+            if (this.utilService.isAppOnline && (this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
+                this.utilService.isNetworkOnline().then((isNetworkOnline) => {
+                    if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
+                        if (patron['Image'] === null || patron['Image'] === undefined) {
+                            if (patron.PersonId && (patron.ImageLoaded == null || patron.ImageLoaded == undefined || patron.ImageLoaded == false)) {
+                                this.http.GetPersonImage(patron.PersonId).subscribe(data => {
+                                    if (data != null) {
+                                        patron.Image = data;
+                                    }
+                                    patron.ImageLoaded = true;
+                                }, e => { console.log(e); }, () => {
+                                });
+                            }
                         }
-
                     }
-                }
-
-            });
-
-            patron['Image'] = patron.Image;
+                });
+                patron['Image'] = patron.Image;
+            }            
             return patron;
         });
     }

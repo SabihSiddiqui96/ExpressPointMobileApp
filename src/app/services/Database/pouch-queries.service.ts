@@ -379,6 +379,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetPerformanceOptionSetting() {
+    return EXP_SYSTEM.allDocs({
+      startkey: 'PerformanceOptionSetting',
+      endkey: 'PerformanceOptionSetting' + '\uffff',
+      include_docs: true
+    });
+  }
+
   public static GetStudentInfo(personId) {
 
     const args = {

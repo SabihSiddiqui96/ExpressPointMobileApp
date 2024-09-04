@@ -107,6 +107,7 @@ import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-ala
 import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
 import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup-popup.page';
 import { UnidentifiedPatronPopupPage } from './pages/menu-service/components/unidentified-patron-popup/unidentified-patron-popup.page';
+import { PerformanceOptionsPopUpComponent } from './pages/performance-options-popup/performance-options-popup.page';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -160,7 +161,8 @@ import { UnidentifiedPatronPopupPage } from './pages/menu-service/components/uni
         TimerComponent,
         UnidentifiedPatronPopupPage,
         StudentWiseAlacarteComponent,
-        AutoServePauseOptionsPopUpComponent
+        AutoServePauseOptionsPopUpComponent,
+        PerformanceOptionsPopUpComponent
     ],    
     imports: [
         BrowserModule,
