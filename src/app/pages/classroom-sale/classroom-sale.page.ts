@@ -1284,8 +1284,10 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
                             const studentAlaCartItems = this.studentWiseAlaCarte;
                             if (person.PreviousSales) {
+                                let found = false; // Flag to check if MealTypeId exists
                                 person.PreviousSales.map(s => {
                                     if (s.MealTypeId === this.filter.selected_mealtype) {
+                                        found = true; // Mark as found
                                         if (student.HadMeal === false && student.isSelected === true) { // check if meal is selected
                                             s.SalesByMealType.push({
                                                 'Price': student.Price, // TO DO
@@ -1315,15 +1317,22 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                                 });
                                             }
                                         });
-
-
-                                    } else {
-                                        person.PreviousSales.push({
-                                            'MealTypeId': this.filter.selected_mealtype,
-                                            'SalesByMealType': items
-                                        });
                                     }
+                                    //Removed this becuase The new entry is added only once after the loop has finished
+                                    // else {
+                                    //     person.PreviousSales.push({
+                                    //         'MealTypeId': this.filter.selected_mealtype,
+                                    //         'SalesByMealType': items
+                                    //     });
+                                    // }
                                 });
+                                // If MealTypeId was not found, add a new entry
+                                if (!found) {
+                                    person.PreviousSales.push({
+                                        'MealTypeId': this.filter.selected_mealtype,
+                                        'SalesByMealType': items
+                                    });
+                                }
                             } else {
                                 person.PreviousSales = [{ 'MealTypeId': this.filter.selected_mealtype, 'SalesByMealType': items }];
                             }
