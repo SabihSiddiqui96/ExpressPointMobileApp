@@ -2,7 +2,7 @@
     <ion-row *ngFor="let grid_row of menuGrid['Buttons_Array']; let i=index">
         <ion-col *ngFor="let grid of grid_row; let j=index;" style="width:20%">
             <div class="menu-item-static" *ngIf="grid.ButtonDescription.length >0" 
-                [style.display]="grid.ButtonDescription.length >0 && grid.RefId > 0 ? (grid.ButtonDescription == 'Dynamic Entrees' && selectedServingLine == -1) ? 'none' : '': 'none'">
+                [style.display]="grid.ButtonDescription.length >0 && grid.RefId > 0 ? (grid.ButtonDescription == 'Planned Entrees' && selectedServingLine == -1) ? 'none' : '': 'none'">
                 <ion-button [tabindex]="i+j" expand="block"
                     [style.color]="grid.IsCategory==true ? 'black' : grid.ForeColor"
                     [style.backgroundColor]="grid.IsCategory==true ? '' : grid.BackColor"

@@ -2450,7 +2450,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.event.subscribe('category_all:select', (userEventData) => {
                             // tslint:disable-next-line:max-line-length
                             // let category = _.find(this.menuItemCategories, { "CategoryId": userEventData.category.MenuItemCategoryId })
-                            if (userEventData.buttonDescription != undefined && userEventData.buttonDescription != null && userEventData.buttonDescription.includes('Dynamic Entrees') == true) {
+                            if (userEventData.buttonDescription != undefined && userEventData.buttonDescription != null && userEventData.buttonDescription.includes('Planned Entrees') == true) {
                                 this.menuGridComponent.showDynamicEntreeItemsInCategory(userEventData.category);
                             }
                             else {
@@ -2477,7 +2477,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let buttons = res.rows[0].doc.Buttons;
                     if (buttons === null) {
                         canClose = false;
-                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Dynamic Entrees') == true) {
+                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
                             canClose = true;
                         }
                         _thisRef.event.publish('category_all:select_check_done',
@@ -2493,7 +2493,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 } else {
                     canClose = false;                   
                 }
-                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Dynamic Entrees') == true) {
+                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
                     canClose = true;
                 }
                 _thisRef.event.publish('category_all:select_check_done',
