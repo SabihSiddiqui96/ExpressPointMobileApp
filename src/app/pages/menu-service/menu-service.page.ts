@@ -2450,7 +2450,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.event.subscribe('category_all:select', (userEventData) => {
                             // tslint:disable-next-line:max-line-length
                             // let category = _.find(this.menuItemCategories, { "CategoryId": userEventData.category.MenuItemCategoryId })
-                            if (userEventData.buttonDescription != undefined && userEventData.buttonDescription != null && userEventData.buttonDescription.includes('Dynamic Entrees') == true) {
+                            if (userEventData.buttonDescription != undefined && userEventData.buttonDescription != null && userEventData.buttonDescription.includes('Planned Entrees') == true) {
                                 this.menuGridComponent.showDynamicEntreeItemsInCategory(userEventData.category);
                             }
                             else {
@@ -2477,7 +2477,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let buttons = res.rows[0].doc.Buttons;
                     if (buttons === null) {
                         canClose = false;
-                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Dynamic Entrees') == true) {
+                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
                             canClose = true;
                         }
                         _thisRef.event.publish('category_all:select_check_done',
@@ -2493,7 +2493,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 } else {
                     canClose = false;                   
                 }
-                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Dynamic Entrees') == true) {
+                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
                     canClose = true;
                 }
                 _thisRef.event.publish('category_all:select_check_done',
@@ -3222,10 +3222,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                                 if (transactionType !== 0) {
                                     if (updatedPatronDetails.PreviousSales) {
+                                        let found = false; // Flag to check if MealTypeId exists
                                         updatedPatronDetails.PreviousSales.map(s => {
                                             if (s.MealTypeId === this.saleData['MealTypeId']) {
-
-                                                console.log(this.orderData.items);
+                                                found = true; // Mark as found
                                                 for (let i = 0; i < this.orderData.items.length; i++) {
                                                     for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
                                                         s.SalesByMealType.push({
@@ -3238,15 +3238,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                                             'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
                                                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                                                             'IsPartOfMeal': false, // this.orderData.items[i]['IsPartOfMeal']
-
                                                             'TerminalName': this.terminalName
                                                         });
                                                     }
                                                 }
-                                            } else {
-                                                updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
                                             }
+                                            //Removed this becuase The new entry is added only once after the loop has finished
+                                            // else {
+                                            //     updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
+                                            // }
                                         });
+                                        // If MealTypeId was not found, add a new entry
+                                        if (!found) {
+                                            updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
+                                        }
                                     } else {
                                         updatedPatronDetails.PreviousSales = [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }];
                                     }

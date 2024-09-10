@@ -3666,8 +3666,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                         if (transactionType !== 0) {
                             if (updatedPatronDetails.PreviousSales) {
+                                let found = false; // Flag to check if MealTypeId exists
                                 updatedPatronDetails.PreviousSales.map(s => {
                                     if (s.MealTypeId === this.saleData['MealTypeId']) {
+                                        found = true; // Mark as found
                                         for (let i = 0; i < this.orderData.items.length; i++) {
                                             // tslint:disable-next-line:variable-name
                                             const ItemAddedAt = this.orderData.items[i]['ItemAddedAt'] ? this.orderData.items[i]['ItemAddedAt'] :
@@ -3685,10 +3687,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                                 'TerminalName': this.terminalName
                                             });
                                         }
-                                    } else {
-                                        updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
                                     }
+                                    //Removed this becuase The new entry is added only once after the loop has finished
+                                    // else {
+                                    //     updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
+                                    // }
                                 });
+                                // If MealTypeId was not found, add a new entry
+                                if (!found) {
+                                    updatedPatronDetails.PreviousSales.push({ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items });
+                                }
                             } else {
                                 updatedPatronDetails.PreviousSales = [{ 'MealTypeId': this.saleData['MealTypeId'], 'SalesByMealType': items }];
                             }

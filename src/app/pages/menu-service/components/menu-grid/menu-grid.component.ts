@@ -58,7 +58,7 @@ export class MenuGridComponent {
             if (grid.IsCategory === false) {
                 this.addMenuToCart(grid, this.patronDetails, this.mealCount);
             } else {
-                if (grid.ButtonDescription == "Dynamic Entrees" && grid.IsCategory === true) {
+                if (grid.ButtonDescription == "Planned Entrees" && grid.IsCategory === true) {
                     this.showDynamicEntreeItemsInCategory(grid.RefId);
                 }
                 else {
@@ -293,7 +293,7 @@ export class MenuGridComponent {
                         component: MenuCategoryModelPage,
                         componentProps: {
                             'submenuGrid': menuItems,
-                            'subMenuGridName': "Dynamic Entrees",
+                            'subMenuGridName': "Planned Entrees",
                             'DefaultMenuItemId': 0,
                             'PatronId': this.patronDetails.PersonId
                         },
