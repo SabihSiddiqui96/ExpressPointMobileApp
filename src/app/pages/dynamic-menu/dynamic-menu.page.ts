@@ -1840,6 +1840,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             // const price = item.Price;
             this.deleteALCItems(index);
             this.orderData.items.splice(index, 1);
+            //Added to calculate alacrte count
+            this.calALaCarteCount(this.orderData.items);
             // this.orderData.tax = this.menuGridService.calculateTax(this.orderData.items, this.patronDetails.IsSaleTaxable)
             this.changeMealFormedStatus();
             this.calculateTotals();
@@ -1871,10 +1873,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
                 this.deleteALCItems(index);
                 this.Confirm_DeleteFormCart(index, false);
+                //Added to calculate alacrte count
+                this.calALaCarteCount(this.orderData.items);
             }
         } else {
             this.deleteALCItems(index);
             this.Confirm_DeleteFormCart(index, false);
+            //Added to calculate alacrte count
+            this.calALaCarteCount(this.orderData.items);
         }
     }
 
@@ -1886,7 +1892,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         const refId = this.orderData.items[index].RefId;
         const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(refId);
-        this.alacarteCount = this.alacarteCount - this.orderData.items[index].Quantity;
+        this.alacarteCount = this.alacarteCount - (this.orderData.items[index].Quantity != undefined && this.orderData.items[index].Quantity != null ? this.orderData.items[index].Quantity : 1);
 
         if ((isRestrictedItem !== -1 || isRestrictedCategory !== -1) &&
             this.patronDetails.isSpecialAccount === false &&
@@ -7031,6 +7037,18 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             return this.alacarteTotal;
         } else {
             return this.alacarteTotal;
+        }
+    }
+
+    private calALaCarteCount(items) {       
+        const aLCItems = items.filter(i => {
+            return !i.IsPartOfMeal
+        });
+
+        if (this.mealCount >= 1) {
+            this.alacarteCount = aLCItems.length;
+        } else {
+            this.alacarteCount = items.length;
         }
     }
 }
