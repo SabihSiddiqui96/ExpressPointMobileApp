@@ -2776,6 +2776,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.disableCharge = this.enableCharge()
             this.disablePay = this.enablePay()
         }, 50)
+        this.calALaCarteCount(this.orderData.items);
     }
 
 
@@ -3114,7 +3115,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['alaCount'] = this.alacarteCount;
                 ordDetails['mealCount'] = this.mealCount;
                 ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
-                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['restAlCcount'] = this.calculateRestrictedCount(this.orderData['items']); //this.restrictedAlacarteCount;
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
@@ -3246,7 +3247,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['alaCount'] = this.alacarteCount;
                 ordDetails['mealCount'] = this.mealCount;
                 ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
-                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['restAlCcount'] = this.calculateRestrictedCount(this.orderData['items']); //this.restrictedAlacarteCount;
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = this.orderData.TransactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
@@ -3307,8 +3308,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.event.publish('patronLargeImagehide', null);
         let isAlaCateByDebitAllowed: boolean = true;
         if (this.orderData.items.length > 0) {
-
-            if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
+            let restrictedAlacarteCount = this.calculateRestrictedCount(this.orderData.items);
+            if (this.alacarteCount > 0 && restrictedAlacarteCount > 0) {
 
                 if (!this.patronDetails.IsAlaCarteByCashAllowed) {
                     this.popupMessageService.showMessage(PopupMessageCode.E06438);
@@ -5762,10 +5763,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (canAdd === true) {
                 if (menuItem.IsReimbursable === false) {
                     secondmeal = false;
+                    let isRestrictedCategory = -1;
+                    if (menuItem.CategoryId) {
+                        isRestrictedCategory = this.restrictableCategories.indexOf(menuItem.CategoryId);
+                    }
                     const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(refId);
 
                     // if (is_restricted_item != -1 && this.isSpecialAccount == false && this.patronDetails['GradeId']) { //IsStudent Check
-                    if (isRestrictedItem !== -1 && this.isSpecialAccount === false && this.patronDetails.IsStudent === true) { // IsStudent Check
+                    if ((isRestrictedItem != -1 || isRestrictedCategory != -1) && this.isSpecialAccount === false && this.patronDetails.IsStudent === true) { // IsStudent Check
                         /////////////////////////////////////////////////////////////////
 
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
@@ -5883,7 +5888,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                     this.itemIndex++;
                 }
-
+                this.calALaCarteCount(this.orderData.items);
             } else {
 
                 // this.utilService.showToast('Prices for '
@@ -7049,6 +7054,34 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.alacarteCount = aLCItems.length;
         } else {
             this.alacarteCount = items.length;
+        }
+    }
+
+    private calculateRestrictedCount(items) {
+        let restrictedAlacarteCount = 0;
+        const alaCarteItems = _.filter(items, (o) => {
+            return (o.IsReimbursable === false ||
+                (o.IsReimbursable === true && o.IsSecondMeal === true))
+        });
+
+        if (alaCarteItems.length > 0) {
+            const alaItems = _.filter(alaCarteItems, item => {
+                const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);
+                if (isRestrictedItem === -1) {
+                    const menuItem = this.checkForCategory(item.RefId);
+                    if (menuItem) {
+                        item.CategoryId = menuItem['CategoryId'];
+                    }
+                }
+                const isRestrictedCategory = this.restrictableCategories.indexOf(item.CategoryId);
+                if (isRestrictedItem !== -1 || isRestrictedCategory !== -1) {
+                    return item;
+                }
+            });
+            if (alaItems.length > 0) {
+                restrictedAlacarteCount += alaItems.length;
+            }
+            return restrictedAlacarteCount;
         }
     }
 }

@@ -2711,7 +2711,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 ordDetails['alaCount'] = this.alacarteCount;
                 ordDetails['mealCount'] = this.mealCount;
                 ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
-                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['restAlCcount'] = this.calculateRestrictedCount(this.orderData['items']); //this.restrictedAlacarteCount;
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashtendAmount;
@@ -2832,7 +2832,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 ordDetails['alaCount'] = this.alacarteCount;
                 ordDetails['mealCount'] = this.mealCount;
                 ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']); // this.alacarteTotal;
-                ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+                ordDetails['restAlCcount'] = this.calculateRestrictedCount(this.orderData['items']); //this.restrictedAlacarteCount;
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = this.orderData.TransactionType;
                 ordDetails['cashTendAmt'] = this.cashtendAmount;
@@ -2896,8 +2896,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.event.publish('patronLargeImagehide', null);
         let isAlaCateByDebitAllowed: boolean = true;
         if (this.orderData.items.length > 0) {
-
-            if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0) {
+            let restrictedAlacarteCount = this.calculateRestrictedCount(this.orderData.items);
+            if (this.alacarteCount > 0 && restrictedAlacarteCount > 0) {
 
                 if (!this.patronDetails.IsAlaCarteByCashAllowed) {
                     this.transactionInProgress = false;
@@ -5266,7 +5266,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             ordDetails['alaCount'] = this.alacarteCount;
             ordDetails['mealCount'] = this.mealCount;
             ordDetails['alaTotal'] = this.calcAlaTotal(this.orderData['items']);
-            ordDetails['restAlCcount'] = this.restrictedAlacarteCount;
+            ordDetails['restAlCcount'] = this.calculateRestrictedCount(this.orderData['items']); //this.restrictedAlacarteCount;
             ordDetails['patronDetails'] = this.patronDetails;
             ordDetails['transactionType'] = TransactionTypes.CHARGE;
             ordDetails['cashTendAmt'] = this.cashtendAmount;
@@ -5403,6 +5403,34 @@ export class MenuServicePage implements OnInit, OnDestroy {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private calculateRestrictedCount(items) {
+        let restrictedAlacarteCount = 0;
+        const alaCarteItems = _.filter(items, (o) => {
+            return (o.IsReimbursable === false ||
+                (o.IsReimbursable === true && o.IsSecondMeal === true))
+        });
+
+        if (alaCarteItems.length > 0) {
+            const alaItems = _.filter(alaCarteItems, item => {
+                const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);
+                if (isRestrictedItem === -1) {
+                    const menuItem = this.checkForCategory(item.RefId);
+                    if (menuItem) {
+                        item.CategoryId = menuItem['CategoryId'];
+                    }
+                }
+                const isRestrictedCategory = this.restrictableCategories.indexOf(item.CategoryId);
+                if (isRestrictedItem !== -1 || isRestrictedCategory !== -1) {
+                    return item;
+                }
+            });
+            if (alaItems.length > 0) {
+                restrictedAlacarteCount += alaItems.length;
+            }
+            return restrictedAlacarteCount;
         }
     }
 }
