@@ -408,7 +408,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       let notSentTransactions: any = [];
       this.transactions = transactions;
       if (transactions.length > 0) {
-        notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsProcessed === false);
+        notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsSynced === false);
         if (notSentTransactions.length > 0) {
           this.hasNotSentTransactions = true;
         } else {
@@ -417,22 +417,23 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       } else {
         this.hasNotSentTransactions = false;
       }
-    });
-
-    this.transactionService.getAllPendingSummarySale().then((summary) => {
-      let notSentSummaryTransaction: any = [];
-      this.summaryTransactions = summary;
-      if(this.summaryTransactions.length > 0){
-        notSentSummaryTransaction = summary.filter((doc) => doc.IsSynced === false);
-        if (notSentSummaryTransaction.length > 0) {
-          this.hasNotSentTransactions = true;
-        } else {
-          this.hasNotSentTransactions = false;
-        }
-      }else{
-        this.hasNotSentTransactions = false;
+      if (this.hasNotSentTransactions == false) {
+        this.transactionService.getAllPendingSummarySale().then((summary) => {
+          let notSentSummaryTransaction: any = [];
+          this.summaryTransactions = summary;
+          if(this.summaryTransactions.length > 0){
+            notSentSummaryTransaction = summary.filter((doc) => doc.IsSynced === false);
+            if (notSentSummaryTransaction.length > 0) {
+              this.hasNotSentTransactions = true;
+            } else {
+              this.hasNotSentTransactions = false;
+            }
+          }else{
+            this.hasNotSentTransactions = false;
+          }
+        });
       }
-    })
+    });
   }
 
   /** iOS Methods */
