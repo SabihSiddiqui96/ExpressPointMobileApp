@@ -2649,7 +2649,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (menuItem.IsPartOfMeal === undefined) {
             menuItem.IsPartOfMeal = false;
         }
-        if (menuItem.IsReimbursable === undefined) {
+        if (menuItem.IsReimbursable === undefined || menuItem.IsReimbursable === null) {
             menuItem.IsReimbursable = false;
         }
 
@@ -5251,7 +5251,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public GetSystemMenuItemsPriceByPatron() {
-        let cepPriceApply: boolean = false
+        let cepPriceApply: boolean = false;
         let priceTypeId = this.stateEigSetting ?
             (this.patronDetails.StatePriceTypeId == null
                 || this.patronDetails.StatePriceTypeId == undefined) ?
@@ -5263,7 +5263,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 priceTypeId = this.secondMealPriceType;
 
             }
-            if (!this.nonCEPMealTypes.has(this.systemMenuItem != undefined ? this.systemMenuItem.MealTypeId : '')) {
+            if (this.patronDetails.IsSecondMeal == false && !this.nonCEPMealTypes.has(this.systemMenuItem != undefined ? this.systemMenuItem.MealTypeId : '')) {
                 if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
                     cepPriceApply = true;
                 } else { // student is not CEP => Check CHRGNCEP setting to charge or not
