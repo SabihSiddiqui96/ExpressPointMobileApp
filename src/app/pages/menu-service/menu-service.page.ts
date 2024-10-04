@@ -243,7 +243,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public selectedMealTypeName = 'Meal Type';
     public selectedMenuType = -1;
     public selectedMenuTypeName = 'Menu Type';
-    public selectedServingLine = -1;
+    public selectedServingLines: any = [];
     public selectedServingLineName = '';
 
     public mealCount: number = 0;
@@ -1539,12 +1539,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.showDynamicEntreeServingLine = true;
             }
             else {               
-                this.selectedServingLine = -1;
+                this.selectedServingLines = [];
                 this.selectedServingLineName = "";
             }
         }
         else {            
-            this.selectedServingLine = -1;
+            this.selectedServingLines = [];
             this.selectedServingLineName = "";
         }
         this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
@@ -1662,13 +1662,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 f.MealType === this.selectedMealType
             );
             if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
-                this.selectedServingLine = servingLineFiltered[0].ServingLine;
-                const servLine = this.servingLines.filter(f =>
-                    f.ServingLineId === this.selectedServingLine
-                );
-                if (servLine != null && servLine != undefined && servLine.length > 0) {
-                    this.selectedServingLineName = servLine[0].ServingLineDescription;
-                }
+                this.selectedServingLines = servingLineFiltered[0].ServingLines;               
             }
         }        
     }
@@ -1811,7 +1805,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     const totalGrids = menuGridDetails.Columns * menuGridDetails.Rows;
                     let i = 0;
                     let diff = 1;
-                    this.selectedServingLine = -1;
+                    this.selectedServingLines = [];
                     this.selectedServingLineName = "";
                     this.disableDynamicEntreeServingLine = true;
                     if (menuGridDetails.Buttons) {
@@ -2477,7 +2471,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let buttons = res.rows[0].doc.Buttons;
                     if (buttons === null) {
                         canClose = false;
-                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
+                        if (this.selectedServingLines.length > 0 && category.ButtonDescription.includes('Planned Entrees') == true) {
                             canClose = true;
                         }
                         _thisRef.event.publish('category_all:select_check_done',
@@ -2493,7 +2487,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 } else {
                     canClose = false;                   
                 }
-                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
+                if (this.selectedServingLines.length > 0 && category.ButtonDescription.includes('Planned Entrees') == true) {
                     canClose = true;
                 }
                 _thisRef.event.publish('category_all:select_check_done',
@@ -4538,7 +4532,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     private subscribeToMenuServicePopupEvents() {
-        this.popupSubscription = this.event.subscribe('menu-service-popup', (userEventData) => {
+        this.event.subscribe('menu-service-popup', (userEventData) => {            
             if (userEventData.selectedData) {
                 const selectedData = userEventData.selectedData;
                 console.log(selectedData);
@@ -4565,24 +4559,25 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
                         break;
                     
-                    case 'DynamicEntreeServingLines': this.selectedServingLine = selectedData.value;
-                        this.selectedServingLineName = selectedData.label;
+                    case 'DynamicEntreeServingLines':
+                        this.selectedServingLines = selectedData;
+                        this.selectedServingLineName = '';
                         if (AppStateService.get("DynamicEntreeServingLine")) {
                             let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
                             let servingLineFiltered = servingLines.filter(f =>
                                 f.MealType === this.selectedMealType
                             );
                             if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
-                                servingLineFiltered[0].ServingLine = this.selectedServingLine;
+                                servingLineFiltered[0].ServingLines = this.selectedServingLines;
                                 AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
                             }
                             else {
-                                servingLines.push({ "MealType": this.selectedMealType, "ServingLine": this.selectedServingLine });
+                                servingLines.push({ "MealType": this.selectedMealType, "ServingLines": this.selectedServingLines });
                                 AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
                             }
                         }
                         else {
-                            let servingLine = [{ "MealType": this.selectedMealType , "ServingLine": this.selectedServingLine }];
+                            let servingLine = [{ "MealType": this.selectedMealType , "ServingLines": this.selectedServingLines }];
                             AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLine));
                         }
                         
@@ -4591,14 +4586,58 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
         });
+
+        this.event.destroy('dynamic-entree-menu-service-popup');
+        this.event.subscribe('dynamic-entree-menu-service-popup', (userEventData) => {
+            if (userEventData.selectedData) {
+                this.selectedServingLines = userEventData.selectedData;
+                this.selectedServingLineName = '';
+                if (AppStateService.get("DynamicEntreeServingLine")) {
+                    let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
+                    let servingLineFiltered = servingLines.filter(f =>
+                        f.MealType === this.selectedMealType
+                    );
+                    if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
+                        servingLineFiltered[0].ServingLines = this.selectedServingLines;
+                        AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
+                    }
+                    else {
+                        servingLines.push({ "MealType": this.selectedMealType, "ServingLines": this.selectedServingLines });
+                        AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
+                    }
+                }
+                else {
+                    let servingLine = [{ "MealType": this.selectedMealType, "ServingLines": this.selectedServingLines }];
+                    AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLine));
+                }
+
+                this.bindDynamicEntreeItemsByServingLine();
+            }
+        });
     }
 
     private bindDynamicEntreeItemsByServingLine() {
-        if (this.selectedMenuType != -1 && this.selectedServingLine != -1) {
-            let menuItemsArray = this.servingLines.filter(f => f.ServingLineId === this.selectedServingLine
-            );
-            if (menuItemsArray.length > 0) {
-                let menuItems = menuItemsArray[0].MenuItems;
+        if (this.selectedMenuType != -1 && this.selectedServingLines.length > 0) {
+            let menuItems = this.servingLines
+                .filter(f => this.selectedServingLines.includes(f.ServingLineId))  // Filter by selectedServingLines
+                .map(f => f.MenuItems)                                              // Extract MenuItems from each
+                .flat()                                                             // Flatten the array
+                .reduce((acc, item) => {                                            // Ensure uniqueness by menuItemId and keep max PlannedCount
+                    const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
+                    if (existingItemIndex !== -1) {
+                        // If item already exists, check if we need to replace it with the one with max PlannedCount
+                        if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
+                            // Replace the existing item with the current item
+                            acc[existingItemIndex] = item;
+                        }
+                    } else {
+                        // If item doesn't exist, push it to the accumulator
+                        acc.push(item);
+                    }
+                    return acc;
+                }, []);
+            
+            if (menuItems.length > 0) {
                 menuItems = _.orderBy(menuItems, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
                 let refCount = 0;
                 if (this.menuGrid['Buttons'].length > 0) {
@@ -4624,12 +4663,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }
                 }
             }
+            else {
+                this.setBackGridButtons();
+            }
+        }
+        else {
+            this.setBackGridButtons();
         }
     }
 
-    private unsubscribeToMenuServicePopupEvents() {
-        if (this.popupSubscription) {
-            this.popupSubscription.unsubscribe();
+    public setBackGridButtons() {
+        if (this.menuGrid['Buttons'] != undefined) {
+            for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
+                    this.menuGrid['Buttons'][k]['RefId'] = 0;
+                    this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
+                    this.menuGrid['Buttons'][k]['IsTaxable'] = false;
+                }
+            }
         }
     }
 

@@ -5,7 +5,7 @@
             [selectedMealType]="selectedMealType" [selectedMealTypeName]="selectedMealTypeName" [menuTypes]="menuTypes"
             [selectedMenuType]="selectedMenuType" [selectedMenuTypeName]="selectedMenuTypeName"
             [reviewReasons]="reviewReasons" [reviewType]="reviewType" [swapRight]="swapRight"
-            [servingLines]="servingLines" [selectedServingLine]="selectedServingLine" [selectedServingLineName]="selectedServingLineName"
+            [servingLines]="servingLines" [selectedServingLines]="selectedServingLines" [selectedServingLineName]="selectedServingLineName"
             [showDynamicEntreeServingLine] = "showDynamicEntreeServingLine"
             [disableDynamicEntreeServingLine] = "disableDynamicEntreeServingLine"
             [settingAutoServe]="settingAutoServe" [impermanentAutoServePause]="impermanentAutoServePause" [autoServeEnabled]="autoServeEnabled"
@@ -13,7 +13,7 @@
         </app-service-toolbar>
         <ion-content vh-100 top-margin style="position:absolute">
             <app-menu-grid [menuGrid]="menuGrid" [patronDetails]="patronDetails" [orderData]="orderData"
-                [servingLines]="servingLines" [selectedServingLine]="selectedServingLine"
+                [servingLines]="servingLines" [selectedServingLines]="selectedServingLines"
                 [mealCount]="mealCount" [isSecondMeal]="isSecondMeal" [secondMealPriceType]="secondMealPriceType" [stateEigSetting] = "stateEigSetting"
                 (changes)="onMenuGridEvent($event)">
             </app-menu-grid>

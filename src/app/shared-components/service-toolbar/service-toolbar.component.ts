@@ -55,8 +55,8 @@ export class ServiceToolbarComponent implements OnInit {
     @Input() autoServeEnabled: boolean;
     @Input() impermanentAutoServePause: boolean = false;
 
-    @Input() servingLines: any;
-    @Input() selectedServingLine: any;
+    @Input() servingLines: any = [];
+    @Input() selectedServingLines: any = [];
     @Input() selectedServingLineName: string = "";
     @Input() showDynamicEntreeServingLine: boolean;
     @Input() disableDynamicEntreeServingLine: boolean;
@@ -134,10 +134,13 @@ export class ServiceToolbarComponent implements OnInit {
             this.displayPersonSelectedPopup();
             return;
         }
+        
         const postData = {
             type: PopupType.DynamicEntreeServingLines,
-            data: this.servingLines,
-            selectedValue: this.selectedServingLine
+            data: this.servingLines.length > 0
+                ? [{ value: -1, label: 'All Lines' }, ...this.servingLines]
+                : this.servingLines,
+            selectedServingLines : this.selectedServingLines
         }
 
         this.popoverCtrl.create({
