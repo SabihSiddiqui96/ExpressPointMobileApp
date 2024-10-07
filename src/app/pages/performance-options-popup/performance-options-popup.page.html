@@ -16,9 +16,14 @@
 </ion-header>
 <ion-content padding class="performance-options-content ion-padding" style="height:fit-content;">
   <ion-list>
-    <ion-item lines="none" class="bg-transparent pad-top" (click)="setBalanceAndPayment($event)">
-      <ion-label class="ion-text-left bold" position="bottom">Live Balance and Payments Check</ion-label>
+    <ion-item lines="none" class="bg-transparent pad-top" (click)="setBalanceForPatron($event)">
+      <ion-label class="ion-text-left bold" position="bottom">Live Balance Check</ion-label>
       <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LiveBalancePayments">
+      </ion-toggle>
+    </ion-item>
+    <ion-item lines="none" class="bg-transparent pad-top" (click)="setPaymentForPatron($event)">
+      <ion-label class="ion-text-left bold" title="Checking this for each patron may cause slowness" position="bottom">Live Payments Check(Preferred: Do not select this)</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LivePaymentsForPatron">
       </ion-toggle>
     </ion-item>
     <ion-item lines="none" class="bg-transparent pad-top" (click)="setLoadStudentImages($event)">

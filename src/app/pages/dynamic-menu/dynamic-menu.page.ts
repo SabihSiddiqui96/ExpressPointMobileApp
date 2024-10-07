@@ -1013,48 +1013,66 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         this.patronDetails.Payments = [];
-        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.patronDetails.AccountId).then((res) => {
-            const transactions = res.docs;
-            if (transactions.length > 0) {
-                transactions.map(doc => {
-                    const result = this.patronDetails.Payments.filter(f =>
-                        f.TerminalName === doc.saleData.TerminalName.trim() &&
-                        f.Amount === doc.saleData.PaymentAmount &&
-                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)
-                    );
-                    if (result.length == 0) {
-                        this.patronDetails.Payments.push(
-                            {
-                                'TerminalName': doc.saleData.TerminalName.trim(),
-                                'Amount': doc.saleData.PaymentAmount,
-                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
-                                'PaymentTypeCd': "Payment"
-                            }
+        const performanceOptions = AppStateService.get('performanceOptions');
+        // Step 1: Fetch payments not processed by AccountId from PouchQueriesService
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.patronDetails.AccountId)
+            .then(res => {
+                const transactions = res.docs;
+
+                if (transactions.length > 0) {
+                    transactions.forEach(doc => {
+                        const paymentDate = new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19);
+                        const terminalName = doc.saleData.TerminalName ? doc.saleData.TerminalName.trim() : null;
+
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.patronDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.saleData.PaymentAmount &&
+                            f.PaymentDate === paymentDate
                         );
+
+                        if (!existingPayment) {
+                            this.patronDetails.Payments.push({
+                                'TerminalName': terminalName,
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': paymentDate,
+                                'PaymentTypeCd': "Payment"
+                            });
+                        }
+                    });
+                }
+
+                // Step 2: Check for live balance payments after fetching unprocessed payments                
+                if (this.utilService.isAppOnline &&
+                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
+                    if (this.patronDetails.AccountId) {
+                        return this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).toPromise(); // Return the promise to chain
                     }
-                });
-            }
-        });
-        let performanceOptions = AppStateService.get('performanceOptions');
-        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LiveBalancePayments == true))) {
-            if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
-                this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
-                    if (data.length > 0) {
-                        data.map(doc => {
-                            const result = this.patronDetails.Payments.filter(f =>
-                                f.TerminalName === doc.TerminalName.trim() &&
-                                f.Amount === doc.Amount &&
-                                f.PaymentDate === doc.PaymentDate
-                            );
-                            if (result.length == 0) {
-                                this.patronDetails.Payments.push(doc);
-                            }
-                        });
-                    }
-                }, e => { console.log(e); }, () => {
-                });
-            }
-        }
+                }
+                return Promise.resolve([]);  // Return a resolved promise if the condition is false
+            })
+            .then(data => {
+                // Process today's payments after the previous promise resolves
+                if (data.length > 0) {
+                    data.forEach(doc => {
+                        const terminalName = doc.TerminalName ? doc.TerminalName.trim() : null;
+
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.patronDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.Amount &&
+                            f.PaymentDate === doc.PaymentDate
+                        );
+
+                        if (!existingPayment) {
+                            this.patronDetails.Payments.push(doc);
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);  // Handle errors
+            });
 
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (this.utilService.isAppOnline) { // this.network.type != 'none' || navigator.onLine
@@ -6892,49 +6910,67 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // this.setPreviousSaleCounts(this.selectedAccountDetails);
         // this.setRestrictions(this.selectedAccountDetails);
         // this.showAllergiesAndNotes(this.selectedAccountDetails);
+        
         this.selectedAccountDetails.Payments = [];
-        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.selectedAccountDetails.AccountId).then((res) => {
-            const transactions = res.docs;
-            if (transactions.length > 0) {
-                transactions.map(doc => {
-                    const result = this.selectedAccountDetails.Payments.filter(f =>
-                        f.TerminalName === doc.saleData.TerminalName.trim() &&
-                        f.Amount === doc.saleData.PaymentAmount &&
-                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)
-                    );
-                    if (result.length == 0) {
-                        this.selectedAccountDetails.Payments.push(
-                            {
-                                'TerminalName': doc.saleData.TerminalName.trim(),
-                                'Amount': doc.saleData.PaymentAmount,
-                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
-                                'PaymentTypeCd': "Payment"
-                            }
-                        );
-                    }
-                });
-            }
-        });
         let performanceOptions = AppStateService.get('performanceOptions');
-        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LiveBalancePayments == true)) {
-            if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
-                this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
-                    if (data.length > 0) {
-                        data.map(doc => {
-                            const result = this.selectedAccountDetails.Payments.filter(f =>
-                                f.TerminalName === doc.TerminalName.trim() &&
-                                f.Amount === doc.Amount &&
-                                f.PaymentDate === doc.PaymentDate
-                            );
-                            if (result.length == 0) {
-                                this.selectedAccountDetails.Payments.push(doc);
-                            }
-                        });
+        // Step 1: Fetch payments not processed by AccountId from PouchQueriesService
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.selectedAccountDetails.AccountId)
+            .then(res => {
+                const transactions = res.docs;
+                if (transactions.length > 0) {
+                    transactions.forEach(doc => {
+                        const paymentDate = new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19);
+                        const terminalName = doc.saleData.TerminalName ? doc.saleData.TerminalName.trim() : null;
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.selectedAccountDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.saleData.PaymentAmount &&
+                            f.PaymentDate === paymentDate
+                        );
+
+                        if (!existingPayment) {
+                            this.selectedAccountDetails.Payments.push({
+                                'TerminalName': terminalName,
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': paymentDate,
+                                'PaymentTypeCd': "Payment"
+                            });
+                        }
+                    });
+                }
+
+                // Step 2: Check for live balance payments after fetching unprocessed payments                
+                if (this.utilService.isAppOnline &&
+                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
+                    if (this.selectedAccountDetails.AccountId) {
+                        return this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).toPromise(); // Return the promise to chain
                     }
-                }, e => { console.log(e); }, () => {
-                });
-            }
-        }
+                }
+                return Promise.resolve([]);  // Return a resolved promise if the condition is false
+            })
+            .then(data => {
+                // Process today's payments after the previous promise resolves
+                if (data.length > 0) {
+                    data.forEach(doc => {
+                        const terminalName = doc.TerminalName ? doc.TerminalName.trim() : null;
+
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.selectedAccountDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.Amount &&
+                            f.PaymentDate === doc.PaymentDate
+                        );
+
+                        if (!existingPayment) {
+                            this.selectedAccountDetails.Payments.push(doc);
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);  // Handle errors
+            });
+        
         this.patronImage = null;
         if (this.utilService.isAppOnline) {
             this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {

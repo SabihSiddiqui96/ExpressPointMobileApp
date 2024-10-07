@@ -19,6 +19,7 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
 
   public performanceOptions: PerformanceOptions = {
     LiveBalancePayments: true,
+    LivePaymentsForPatron: false,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
     SyncTransactionData: "1",
@@ -30,6 +31,7 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
   public perfOptionDB = {
     '_id': 'PerformanceOptionSetting',
     'LiveBalancePayments': (this.performanceOptions.LiveBalancePayments),
+    'LivePaymentsForPatron': (this.performanceOptions.LivePaymentsForPatron),
     'LoadStudentImages': (this.performanceOptions.LoadStudentImages),
     'LiveDataFromOtherTerminals': (this.performanceOptions.LiveDataFromOtherTerminals),
     'SyncStudentDetail': (this.performanceOptions.SyncStudentDetail),
@@ -58,7 +60,11 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
     });
   }   
 
-  public setBalanceAndPayment(event) {
+  public setBalanceForPatron(event) {
+    this.savePerformanceOptionSetting_PouchService(this.perfOptionDB);
+  }
+
+  public setPaymentForPatron(event) {
     this.savePerformanceOptionSetting_PouchService(this.perfOptionDB);
   }
 
@@ -98,6 +104,7 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
     this.perfOptionDB = {
       '_id': 'PerformanceOptionSetting',
       'LiveBalancePayments': (this.performanceOptions.LiveBalancePayments),
+      'LivePaymentsForPatron': (this.performanceOptions.LivePaymentsForPatron),
       'LoadStudentImages': (this.performanceOptions.LoadStudentImages),
       'LiveDataFromOtherTerminals': (this.performanceOptions.LiveDataFromOtherTerminals),
       'SyncStudentDetail': (this.performanceOptions.SyncStudentDetail),
