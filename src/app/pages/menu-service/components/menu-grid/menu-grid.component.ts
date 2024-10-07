@@ -34,7 +34,7 @@ export class MenuGridComponent {
     @Input() mealCount: any;
     @Input() isSecondMeal: any;
     @Input() servingLines: any;
-    @Input() selectedServingLines: any;
+    @Input() selectedServingLines: any = [];
     @Input() secondMealPriceType: any;
     @Input() stateEigSetting: boolean
     @Output() changes: EventEmitter<MenuGridEvent> = new EventEmitter();
