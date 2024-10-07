@@ -4654,7 +4654,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     private bindDynamicEntreeItemsByServingLine() {
-        if (this.selectedMenuType != -1 && this.selectedServingLines.length > 0) {
+        if (this.selectedMenuType != -1 && this.selectedServingLines != undefined && this.selectedServingLines.length > 0) {
             let menuItems = this.servingLines
                 .filter(f => this.selectedServingLines.includes(f.ServingLineId))  // Filter by selectedServingLines
                 .map(f => f.MenuItems)                                              // Extract MenuItems from each
