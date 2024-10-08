@@ -128,6 +128,20 @@ export class PopupMessageService {
         });
     }
 
+    public showCustomMessage(popupMessageDoc = []) {
+        this.event.publish('patronLargeImagehide', null);
+        return new Promise((resolve, reject) => { 
+            if (popupMessageDoc != undefined && popupMessageDoc[0].MessageType === 'Toast') {
+                this.showToast(popupMessageDoc, popupMessageDoc[0].MessageCode, []);
+                resolve(null);
+            } else {
+                this.showDialog(popupMessageDoc, popupMessageDoc[0].MessageCode, [], true).then((input) => {
+                    resolve(input);
+                });
+            }
+        });
+    }
+
     public showDialog(popupMessageDoc, messageCode, params?: string[], enableBackdropDismiss?: boolean) {
         this.event.publish('patronLargeImagehide', null);
         return new Promise((resolve, reject) => {

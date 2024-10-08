@@ -9,6 +9,7 @@ import { SystemService } from '../../services/system.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { EXP_SYSTEM, PouchDBService } from '../../services/pouch-db.service';
 import { SyncService } from '../../services/syncService.service';
+import { PopupMessageService } from '../../services/popup-message.service';
 
 @Component({
   selector: 'performance-options-popup-popup',
@@ -16,7 +17,7 @@ import { SyncService } from '../../services/syncService.service';
   styleUrls: ['./performance-options-popup.page.scss'],
 })
 export class PerformanceOptionsPopUpComponent implements OnInit {
-
+  public popupMessageDoc = [];
   public performanceOptions: PerformanceOptions = {
     LiveBalancePayments: true,
     LivePaymentsForPatron: false,
@@ -42,6 +43,7 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
   };
   constructor(public navCtrl: NavController, public event: Events, public router: Router, private systemService: SystemService,
     public appStateService: AppStateService, public settingService: SettingService, public popoverCtrl: PopoverController,
+    public popupMessageService: PopupMessageService,
     private syncService: SyncService) {
   }
 
@@ -58,6 +60,21 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
         this.perfOptionDB = AppStateService.get('performanceOptions');  
       }
     });
+
+    this.popupMessageDoc[0] = {      
+      'MessageCode': 'E99999',
+      'MessageDescription': 'Are you sure you want to restore defaults?',
+      'Header': 'CONFIRM',
+      'FootNote': '',
+      'MessageType': 'CONFIRM',
+      'ShowOk': 0,
+      'ShowCancel': 0,
+      'ShowYes': 1,
+      'ShowNo': 1,
+      'ShowNoThanks': 0,
+      'DontShowMe': 0,
+      'ChkShowValue': false
+    };
   }   
 
   public setBalanceForPatron(event) {
@@ -101,20 +118,24 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
   }
 
   public restoreDefaults() {
-    this.perfOptionDB = {
-      '_id': 'PerformanceOptionSetting',
-      'LiveBalancePayments': (this.performanceOptions.LiveBalancePayments),
-      'LivePaymentsForPatron': (this.performanceOptions.LivePaymentsForPatron),
-      'LoadStudentImages': (this.performanceOptions.LoadStudentImages),
-      'LiveDataFromOtherTerminals': (this.performanceOptions.LiveDataFromOtherTerminals),
-      'SyncStudentDetail': (this.performanceOptions.SyncStudentDetail),
-      'SyncTerminalHeartbeat': (this.performanceOptions.SyncTerminalHeartbeat),
-      'SyncTransactionData': (this.performanceOptions.SyncTransactionData),
-      'SyncAccountDetail': (this.performanceOptions.SyncAccountDetail),
-      'SyncTransactionStatus': (this.performanceOptions.SyncTransactionStatus)
-    };
-    PouchDBService.UpsertSingleDoc(this.perfOptionDB, EXP_SYSTEM);
-    AppStateService.set('performanceOptions', this.perfOptionDB);
+    this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((bool) => {
+      if (bool) {
+        this.perfOptionDB = {
+          '_id': 'PerformanceOptionSetting',
+          'LiveBalancePayments': (this.performanceOptions.LiveBalancePayments),
+          'LivePaymentsForPatron': (this.performanceOptions.LivePaymentsForPatron),
+          'LoadStudentImages': (this.performanceOptions.LoadStudentImages),
+          'LiveDataFromOtherTerminals': (this.performanceOptions.LiveDataFromOtherTerminals),
+          'SyncStudentDetail': (this.performanceOptions.SyncStudentDetail),
+          'SyncTerminalHeartbeat': (this.performanceOptions.SyncTerminalHeartbeat),
+          'SyncTransactionData': (this.performanceOptions.SyncTransactionData),
+          'SyncAccountDetail': (this.performanceOptions.SyncAccountDetail),
+          'SyncTransactionStatus': (this.performanceOptions.SyncTransactionStatus)
+        };
+        PouchDBService.UpsertSingleDoc(this.perfOptionDB, EXP_SYSTEM);
+        AppStateService.set('performanceOptions', this.perfOptionDB);
+      }
+    });
   }
 
   public savePerformanceOptionSetting_PouchService(perfOptionSetting) {
