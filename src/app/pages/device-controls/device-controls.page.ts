@@ -57,6 +57,7 @@ export class DeviceControlsPage implements OnInit {
   public openOSK: boolean = false;
   public pnpPeripherals: boolean = true;
   public categoriesTapClose: boolean = true;  
+  public AllCatRemainOpen: boolean = true;  
   public MULTIREAD: boolean = false;
   public LoginWithoutSetup: boolean = false;
 
@@ -114,6 +115,10 @@ export class DeviceControlsPage implements OnInit {
 
     if (AppStateService.get('categoriesTapClose') != undefined) {
       this.categoriesTapClose = AppStateService.get('categoriesTapClose');
+    }
+
+    if (AppStateService.get('AllCatRemainOpen') != undefined) {
+      this.AllCatRemainOpen = AppStateService.get('AllCatRemainOpen');
     }
 
     if (AppStateService.get('CheckIfPinEntered') != undefined) {
@@ -285,6 +290,10 @@ export class DeviceControlsPage implements OnInit {
   public categoriesTapCloseClick() {
     AppStateService.set('categoriesTapClose', this.categoriesTapClose);
   }  
+
+  public AllCatRemainOpenClick() {
+    AppStateService.set('AllCatRemainOpen', this.AllCatRemainOpen);
+  } 
 
   public showPeripheralApp() {
     this.electronService.ipcRenderer.send('configure-peripherals');

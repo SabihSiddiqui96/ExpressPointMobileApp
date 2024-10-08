@@ -55,8 +55,6 @@ export class GoLogin implements OnDestroy {
         public settingService: SettingService, public signalRService: SignalRService
         , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
 
-
-        AppStateService.set('AllCatRemainOpen', true);
     }
 
 

@@ -6,6 +6,7 @@ import { PouchQueriesService } from '../../../../services/Database/pouch-queries
 import { Events } from '../../../../services/events.service';
 import { MenuCategoryModelPage } from '../../../menu-category-model/menu-category-model.page';
 import { AppStateService } from '../../../../services/app-state.service';
+import * as _ from 'lodash';
 
 export enum MenuGridEventType {
     ClearItemsInCart,
@@ -33,7 +34,7 @@ export class MenuGridComponent {
     @Input() mealCount: any;
     @Input() isSecondMeal: any;
     @Input() servingLines: any;
-    @Input() selectedServingLine: any;
+    @Input() selectedServingLines: any = [];
     @Input() secondMealPriceType: any;
     @Input() stateEigSetting: boolean
     @Output() changes: EventEmitter<MenuGridEvent> = new EventEmitter();
@@ -258,16 +259,32 @@ export class MenuGridComponent {
 
     public showDynamicEntreeItemsInCategory(dynamicEntreeCategoryId) {
         if (this.patronDetails.PersonId) {
-            let menuItemsArray = this.servingLines.filter(f =>
-                f.ServingLineId === this.selectedServingLine
-            );
+            let menuItemsArray = this.servingLines
+                .filter(f => this.selectedServingLines.includes(f.ServingLineId))  // Filter by selectedServingLines
+                .map(f => f.MenuItems)                                              // Extract MenuItems from each
+                .flat();
+            menuItemsArray = menuItemsArray.reduce((acc, item) => {                // Ensure uniqueness by menuItemId and keep max PlannedCount
+                const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
+                if (existingItemIndex !== -1) {
+                    // If item already exists, check if we need to replace it with the one with max PlannedCount
+                    if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
+                        // Replace the existing item with the current item
+                        acc[existingItemIndex] = item;
+                    }
+                } else {
+                    // If item doesn't exist, push it to the accumulator
+                    acc.push(item);
+                }
+                return acc;
+            }, []); // Initialize accumulator as an empty array
+            
             if (menuItemsArray.length > 0) {
-                let menuItems = menuItemsArray[0].MenuItems;
+                menuItemsArray = _.orderBy(menuItemsArray, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
                
-                if (menuItems != null && menuItems != undefined && menuItems.length > 0) {
-                    menuItems = menuItems.sort((a, b) => b.PlannedCount - a.PlannedCount);
+                if (menuItemsArray != null && menuItemsArray != undefined && menuItemsArray.length > 0) {
+                    menuItemsArray = menuItemsArray.sort((a, b) => b.PlannedCount - a.PlannedCount);
 
-                    menuItems = menuItems.map(b => {                      
+                    menuItemsArray = menuItemsArray.map(b => {                      
                         b.CategoryId = dynamicEntreeCategoryId;
                         b.ButtonDescription = b.MenuItemDescription;
                         b.RefId = b.MenuItemId;
@@ -276,9 +293,9 @@ export class MenuGridComponent {
 
                     if (this.patronDetails.RestrictedMenuItems != null) {
                         for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
-                            for (let k = 0; k < menuItems.length; k++) {
-                                if (this.patronDetails.RestrictedMenuItems[i] === menuItems[k].RefId) {
-                                    menuItems[k]['restrictedItem'] = true;
+                            for (let k = 0; k < menuItemsArray.length; k++) {
+                                if (this.patronDetails.RestrictedMenuItems[i] === menuItemsArray[k].RefId) {
+                                    menuItemsArray[k]['restrictedItem'] = true;
                                 }
                             }
                         }
@@ -292,7 +309,7 @@ export class MenuGridComponent {
                     const modal = this.modalCtrl.create({
                         component: MenuCategoryModelPage,
                         componentProps: {
-                            'submenuGrid': menuItems,
+                            'submenuGrid': menuItemsArray,
                             'subMenuGridName': "Planned Entrees",
                             'DefaultMenuItemId': 0,
                             'PatronId': this.patronDetails.PersonId

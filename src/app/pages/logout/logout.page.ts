@@ -118,6 +118,11 @@ ngOnInit() {
         categoriesTapClose = AppStateService.get('categoriesTapClose');
       }
 
+      let AllCatRemainOpen = true;
+      if (AppStateService.get('AllCatRemainOpen') != undefined && AppStateService.get('AllCatRemainOpen') != null) {
+        AllCatRemainOpen = AppStateService.get('AllCatRemainOpen');
+      }
+
       let checkIfPinEntered = false;
       if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
         checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
@@ -172,6 +177,7 @@ ngOnInit() {
       AppStateService.set('OpenOSK', openOSK);
       AppStateService.set('TranDbDestroyedDate', TranDbDestroyedDate);
       AppStateService.set('categoriesTapClose', categoriesTapClose);
+      AppStateService.set('AllCatRemainOpen', AllCatRemainOpen);
       AppStateService.set('CheckIfPinEntered', checkIfPinEntered);
       if (performanceOptions != undefined && performanceOptions != '') {
         AppStateService.set('performanceOptions', performanceOptions);
@@ -201,6 +207,7 @@ ngOnInit() {
         'TranDbDestroyedDate': TranDbDestroyedDate,
         'AllSiteSettings': allSiteSettings,
         'categoriesTapClose': categoriesTapClose,
+        'AllCatRemainOpen': AllCatRemainOpen,
         'CheckIfPinEntered': checkIfPinEntered,
         'performanceOptions': performanceOptions
       }

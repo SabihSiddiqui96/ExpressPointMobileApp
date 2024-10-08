@@ -10,12 +10,12 @@
           (click)="openAutoServePopup($event)">
           <ion-label text-large>Auto Serve</ion-label>
         </ion-button>
-        <ion-button default expand="block" color="primary" slot="icon-only" [disabled]="disableButtons"
+        <ion-button default expand="block" style="display: none;" color="primary" slot="icon-only" [disabled]="disableButtons"
           (click)="SyncPersonData()">
           <ion-label text-large>Sync latest Person info</ion-label>
           <ion-icon name="checkmark-circle" color="secondary" *ngIf="syncedPersonData"></ion-icon>
         </ion-button>
-        <ion-button default expand="block" slot="icon-only" color="primary" [disabled]="disableButtons"
+        <ion-button default expand="block" style="display: none;" slot="icon-only" color="primary" [disabled]="disableButtons"
           (click)="SyncMenusData()">
           <ion-label text-large>Sync latest Menu info</ion-label>
           <ion-icon name="checkmark-circle" color="secondary" *ngIf="syncedMenusData"></ion-icon>
@@ -57,6 +57,12 @@
           <ion-toggle color="slate" [checked]="isGridView" (ionChange)="OnChangePatronDisplay($event)">          
           </ion-toggle>
            <span style="color: #4d6168 !important;">Picture</span>
+        </ion-item>
+
+        <ion-item lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Categories Remain Open</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="AllCatRemainOpen" (ionChange)="AllCatRemainOpenClick()">
+          </ion-toggle>
         </ion-item>
 
         <ion-item lines="none" class="bg-transparent" style="padding-top: 4px;">

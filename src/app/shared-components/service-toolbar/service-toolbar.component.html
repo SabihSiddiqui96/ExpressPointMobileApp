@@ -38,7 +38,7 @@
                 </ion-button>
             </ion-col>
             <ion-col size="1" *ngIf="showDynamicEntreeServingLine == true">
-                <ion-button class="btn-full-size-icon" [title]="'Serving Line - ' + selectedServingLineName" default expand="block" fill="clear" 
+                <ion-button class="btn-full-size-icon" title="Serving Line" default expand="block" fill="clear" 
                      [disabled]="disableDynamicEntreeServingLine" 
                      (click)="blurInputElement();showServingLinesPopup()">
                     <ion-icon slot="icon-only" name="restaurant"></ion-icon>

@@ -2646,18 +2646,15 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     }
 
     public checkForCategory(menuItemId) {
-        const menuItem = {};
-        this.allCategories.forEach((item) => {
-            if (item['Buttons'] !== null && item['Buttons'].length > 0) {
-                item['Buttons'].forEach(function (menu) {
-                    if (menu.RefId === menuItemId) {
-                        menuItem['CategoryId'] = item['MenuItemCategoryId'];
-                        return menuItem;
-                    }
-                });
+        for (const category of this.allCategories) {
+            if (category.Buttons && category.Buttons.length > 0) {
+                const button = category.Buttons.find(menu => menu.RefId === menuItemId);
+                if (button) {
+                    return { CategoryId: category.MenuItemCategoryId };
+                }
             }
-        });
-        return menuItem;
+        }
+        return null; // Return null if no category is found
     }
 
     public getAvailableAmountForALCPurchases() {
