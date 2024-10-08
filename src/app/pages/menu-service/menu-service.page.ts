@@ -5506,13 +5506,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         if (alaCarteItems.length > 0) {
             const alaItems = _.filter(alaCarteItems, item => {
-                const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);
-                if (isRestrictedItem === -1) {
-                    const menuItem = this.checkForCategory(item.RefId);
-                    if (menuItem) {
-                        item.CategoryId = menuItem['CategoryId'];
-                    }
-                }
+                const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);                
                 const isRestrictedCategory = this.restrictableCategories.indexOf(item.CategoryId);
                 if (isRestrictedItem !== -1 || isRestrictedCategory !== -1) {
                     return item;
