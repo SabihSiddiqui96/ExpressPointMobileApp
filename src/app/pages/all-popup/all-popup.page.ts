@@ -125,7 +125,7 @@ export class AllPopupPage implements OnInit {
                 this.title = "Menu Type";
                 break;
             case "homeSites":
-                this.lists = this.rawList = this.getInFormat(
+                this.lists = this.rawList = this.getInSitesFormat(
                     navigatedData,
                     "SiteNameWithCode",
                     "SiteNameWithCode"
@@ -460,6 +460,13 @@ export class AllPopupPage implements OnInit {
         this.popoverCtrl.dismiss();
     }
 
+    public getInSitesFormat(data, label, value) {
+        let newArray = [];
+        for (const item of data) {           
+            newArray.push({ value: item[value], label: item[label] });           
+        }
+        return newArray;
+    }
     public getInFormat(data, label, value) {
         let newArray = [];
         for (const item of data) {

@@ -2627,8 +2627,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.mealFormed = false;
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
-            if ((this.BREAKFAST_CASE_1) || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3
-                && totalContribution >= 2 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2)) {
+            if (totalContribution >= 2 && fulfilledComponentCount >= 3 &&
+                (this.BREAKFAST_CASE_1 || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2))) {
                 this.mealFormed = true;
                 this.mealCount = 1;
             } else {
