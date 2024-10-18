@@ -249,14 +249,7 @@
                     </ion-button>
                     
                   </ion-item>
-                </ion-col>
-                <ion-col size="3" size-md="3" size-sm="3" *ngIf="!hidePrevPatron">
-                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
-                    *ngIf="canLoadPrevPatron" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
-                    [disabled]="!canLoadPrevPatron">
-                    &lt;&lt; &nbsp;Previous
-                  </ion-button>
-                </ion-col>
+                </ion-col>                
               </ion-row>
             </ion-grid>
 
@@ -457,13 +450,7 @@
                       <ion-icon slot="icon-only" name="keypad"></ion-icon>
                     </ion-button>
                   </ion-item>
-                </ion-col>
-                <ion-col size="3" size-md="3" size-sm="3">
-                  <ion-button expand="block" (click)="loadPrevPatron()" class="previous_patron_btn"
-                    [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}" [disabled]="!canLoadPrevPatron">
-                    &lt; &lt; &nbsp;Previous
-                  </ion-button>
-                </ion-col>
+                </ion-col>               
               </ion-row>
             </ion-grid>
             <ion-digit-keyboard *ngIf="patronAccount == 'patron_pin'" [align]="keyboardSettings.align"
@@ -510,12 +497,7 @@
                       <ion-item lines="none">
                         <ion-label class="ion-text-center">
                           Selected Site
-                        </ion-label>
-                        <ion-button slot="end" (click)="loadPrevPatron()" class="previous_patron_btn"
-                          style="height: 40px;" [ngClass]="{'previous_patron_btn_mobile': !isElectronApp}"
-                          [disabled]="!canLoadPrevPatron">
-                          &lt; &lt; &nbsp;Previous
-                        </ion-button>
+                        </ion-label>                        
                       </ion-item>
                       <ion-list class="ion-no-padding ion-no-margin">
                         <ion-radio-group [(ngModel)]="selectedSite">

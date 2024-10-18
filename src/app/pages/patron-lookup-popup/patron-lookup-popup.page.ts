@@ -256,93 +256,89 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
         if (this.page === 'MenuService' || this.page === 'DynamicMenus') {
             this.specialAccountHide = false;
         }
-
-        if (this.page === 'Payments') {
-            this.hidePrevPatron = true;
-        } else {
-            this.hidePrevPatron = false;
-        }
+        
         this.getAllSiteSettings();
         this.GetSpecialAccounts();
 
         this.isCharAllowedInPin = Boolean(parseInt(SettingService.getSettingValue('ALNUMPIN')));
-
-        this.event.destroy('patronLookup:ready');
-        this.event.subscribe('patronLookup:ready', (userEventData) => {
-            // this.event.destroy('patronLookup:ready');
-            this.returnToWhatPage = userEventData.returnToWhatPage;
-            // this.ngzone.run(() => {
-            this.patronSearch.keyword = '';
-            // })1
-            const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
-            console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
-            if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
-                this.patronAccount = 'patron_pin';
-                this.patronPinClick();
-                if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
-                    setTimeout(() => {
-                        if (this.patronSearchId != null && this.patronSearchId != undefined) {
-                            this.patronSearchId.setFocus();
-                        }
-                    }, 500);
-                }
-
-            } else {
-                //  this.resetPatronData()
-                setTimeout(() => {
-                    AppStateService.set('currentTab', this.patronAccount);
-                    AppStateService.remove('patron_details');
-                    // this.patron_search_id.setFocus();
-                    if (this.lookUpService.getQ().length === 0) {
-
-                        if (userEventData.returnToWhatPage === 'SpecialRoster' && this.selectedSpecialRosterId !== undefined) {
-                            this.patronAccount = 'patron_pin';
-                            this.patronAccount = 'advanced';
-                            this.advancedPatron = 'by_specialroster';
-                            this.onChangeSpecialRoster(userEventData.patronRoomSelected);
-                            this.getSpecialRostersList();
-                            this.GetGradesBySchool();
-                            this.AdvancePatronSchoolList();
-                        } else if (this.returnToWhatPage === 'HomeRoom' && this.selectedHomeroom !== undefined) {
-                            // this.patron_account = "patron_pin"
-                            this.patronAccount = 'advanced';
-                            this.advancedPatron = 'by_homeroom';
-
-                            this.GetGradesBySchool();
-                            this.selectedGrade = userEventData.patronGradeSelected;
-                            this.GetHomeRoomsByGrade();
-                            this.selectedHomeroom = userEventData.patronRoomSelected;
-                            this.getPatronList();
-                            // this.showPopup('patronlist')
-                            this.getSpecialRostersList();
-                            this.AdvancePatronSchoolList();
-
-                        } else {
-
-                            this.getSpecialRostersList();
-                            this.GetGradesBySchool();
-                            this.AdvancePatronSchoolList();
-
-                            if (changeFocus === 0 && this.patronAccount === 'advanced') {
-                                this.setActiveField('externalId');
-                                this.patronAccount = 'advanced';
-                                this.advancedPatron = 'by_patron';
-                            } else {
-                                this.patronAccount = 'patron_pin';
+        if (this.page === 'Payments') {
+            this.event.destroy('patronLookup:ready');
+            this.event.subscribe('patronLookup:ready', (userEventData) => {
+                // this.event.destroy('patronLookup:ready');
+                this.returnToWhatPage = userEventData.returnToWhatPage;
+                // this.ngzone.run(() => {
+                this.patronSearch.keyword = '';
+                // })1
+                const changeFocus = parseInt(SettingService.getSiteSettingValue('CHGFOCTPIN'));
+                console.log('Change Focus Setting Value----------------' + changeFocus + '------------------ Return to Page' + this.returnToWhatPage);
+                if (changeFocus === 1 && userEventData.returnToWhatPage === undefined) {
+                    this.patronAccount = 'patron_pin';
+                    this.patronPinClick();
+                    if (!this.utilService.isElectronApp()) { // add auto focus if its not an electron app 
+                        setTimeout(() => {
+                            if (this.patronSearchId != null && this.patronSearchId != undefined) {
+                                this.patronSearchId.setFocus();
                             }
-                            if (!this.utilService.isElectronApp()) {
-                                setTimeout(() => {
-                                    if (this.patronPinId != undefined)
-                                        this.patronPinId.setFocus();
-                                }, 500);
-                            }
-
-                        }
+                        }, 500);
                     }
+
+                } else {
+                    //  this.resetPatronData()
+                    setTimeout(() => {
+                        AppStateService.set('currentTab', this.patronAccount);
+                        AppStateService.remove('patron_details');
+                        // this.patron_search_id.setFocus();
+                        if (this.lookUpService.getQ().length === 0) {
+
+                            if (userEventData.returnToWhatPage === 'SpecialRoster' && this.selectedSpecialRosterId !== undefined) {
+                                this.patronAccount = 'patron_pin';
+                                this.patronAccount = 'advanced';
+                                this.advancedPatron = 'by_specialroster';
+                                this.onChangeSpecialRoster(userEventData.patronRoomSelected);
+                                this.getSpecialRostersList();
+                                this.GetGradesBySchool();
+                                this.AdvancePatronSchoolList();
+                            } else if (this.returnToWhatPage === 'HomeRoom' && this.selectedHomeroom !== undefined) {
+                                // this.patron_account = "patron_pin"
+                                this.patronAccount = 'advanced';
+                                this.advancedPatron = 'by_homeroom';
+
+                                this.GetGradesBySchool();
+                                this.selectedGrade = userEventData.patronGradeSelected;
+                                this.GetHomeRoomsByGrade();
+                                this.selectedHomeroom = userEventData.patronRoomSelected;
+                                this.getPatronList();
+                                // this.showPopup('patronlist')
+                                this.getSpecialRostersList();
+                                this.AdvancePatronSchoolList();
+
+                            } else {
+
+                                this.getSpecialRostersList();
+                                this.GetGradesBySchool();
+                                this.AdvancePatronSchoolList();
+
+                                if (changeFocus === 0 && this.patronAccount === 'advanced') {
+                                    this.setActiveField('externalId');
+                                    this.patronAccount = 'advanced';
+                                    this.advancedPatron = 'by_patron';
+                                } else {
+                                    this.patronAccount = 'patron_pin';
+                                }
+                                if (!this.utilService.isElectronApp()) {
+                                    setTimeout(() => {
+                                        if (this.patronPinId != undefined)
+                                            this.patronPinId.setFocus();
+                                    }, 500);
+                                }
+
+                            }
+                        }
                    
-                }, 250);
-            }
-        });
+                    }, 250);
+                }
+            });
+        }
         if (this.gradeList.length === 0) {
             this.GetGradesBySchool();
         }
@@ -373,7 +369,9 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
 
             this.AdvancePatronSchoolList();
         } else {
-            AppStateService.remove('patron_details');
+            if (this.page === 'Payments') {
+                AppStateService.remove('patron_details');
+            }
         }
     }
 
@@ -972,7 +970,7 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
             this.loadingID = LoadingService.generateLoadingID();
             this.loadingService.present(this.loadingID, null, false).then(() => {
                 this.lookUpService.AdvancedPatronlookup(this.selectedSite, this.patronSearch.firstname,
-                    this.patronSearch.lastname, this.patronSearch.externalId, this.isServerLookup)
+                    this.patronSearch.lastname, this.patronSearch.externalId, this.isServerLookup, "ADV")
                     .then(() => {
                         this.loadingService.dismiss(this.loadingID);
                     }).catch((err) => {
@@ -1557,77 +1555,7 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
         } else {
             return false;
         }
-    }
-
-    public fetchLastPatronFromServer() {
-        if (this.utilService.isAppOnline) {
-            this.utilService.setLoader(true);
-            this.http.GetPersonDetailsByPersonId(this.lastPatron.PersonId).
-                subscribe
-                (
-                    data => {
-                        this.lastPatron = data.personDetails[0];
-                        this.utilService.setLoader(false);
-                        this.lookUpService.selectPatron(this.lastPatron);
-                    },
-                    error => {
-                        console.log(error);
-                        this.utilService.setLoader(false);
-                        // this.utilService.showToast('Could not fetch patron from server..');
-                    });
-        } else {
-            // Case when app was online and loaded a patron which was from server and then went offline.
-            // Loading by normal methods like pin lookup would fail in offline mode,
-            // so if user tries to load it using prev. patron. button
-            // it too would not load in offline mode as this is visiting patron from server, we could not
-            // get updated details like balance and served meals and load it.
-
-        }
-    }
-
-    public loadPrevPatron() {
-        if (!this.canLoadPrevPatron) {
-            return;
-        }
-
-        // this.lastPatron is an object
-        if ((this.lastPatron !== undefined && this.lastPatron !== null) && this.canLoadPrevPatron) {
-            this.patronSearch.keyword = '';
-            this.event.publish('peripheral:input', {});
-            this.hideKeyboard();
-            AppStateService.remove('patron_details');
-            if (!PatronLookupPopupPage.canAccountSkipSync(this.lastPatron)) {
-
-                // Lookup if person is in PouchDB
-                PouchQueriesService.GetStudentInfo(this.lastPatron.PersonId).then((data) => {
-                    let lookupResults;
-                    if (data.docs.length > 0) {
-                        lookupResults = JSON.parse(JSON.stringify(data.docs[0]));
-                    }
-
-                    if (lookupResults) {
-                        if (lookupResults.IsFromServer) {
-                            this.lastPatron = lookupResults;
-                            // Server fetch and load patron
-                            this.fetchLastPatronFromServer();
-                        } else {
-                            // Load patron locally
-                            this.lastPatron = lookupResults;
-                            this.lookUpService.selectPatron(this.lastPatron);
-                        }
-                    } else {
-                        // Server fetch and load patron
-                        this.fetchLastPatronFromServer();
-                    }
-                });
-            } else {
-                this.lookUpService.selectPatron(this.lastPatron);
-            }
-            if (this.selectAccuntClick || this.menuPayselectAcctClick) {
-                this.close(true);
-            }
-        }
-    }
+    }    
 
     public setActiveField(field) {
         this.activeField = field;

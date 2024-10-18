@@ -568,6 +568,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 } else {
                     this.countQ = 0;
                 }
+                // Manually trigger change detection to update the UI immediately
+                this.cdr.detectChanges();
             }
         );
 
@@ -4688,7 +4690,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.bonusAmount = 0;
         AppStateService.remove('patron_details');
         if (this.lookUpService.getQ().length !== 0) {
-            this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+            // Commented out because this logic is already used in GetMenuDetailForDynamicMenu method
+            //this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+
         } else {
             if (this.returnToWhatPage === 'SpecialRoster') {
                 this.event.publish('patronLookup:ready', {
@@ -4852,7 +4856,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             AppStateService.remove('patron_details');
             if (this.patronDetails !== null) {
@@ -4900,9 +4904,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         console.log(this.patronDetails);
 
         if (this.orderData.items.length === 0) {
+            this.displayDetails = false;
+            this.utilService.selectAccountClick = false;
+            this.lookUpService.menuPayselectAccountClick = false;
+            this.selectedAccountDetails = {};
             this.goToLookUp();
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             this.lookUpService.populatePersonsFromQ();
         } else {
@@ -6596,7 +6604,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.bonusAmount = 0;
         this.event.publish('patron:setLastPatronMenuService', currentPatron);
         this.lookUpService.pushPersonToQ(JSON.parse(currentPatron), 0);
-        this.event.publish('patronSelectedFromList', { 'selected_patron': JSON.parse(this.lastPatron) });
+        this.event.publish('patronSelectedFromList', { 'selected_patron': JSON.parse(this.lastPatron), 'pageFrom': '' });
     }
 
     public loadPrevPatron() {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, OnDestroy, Injectable } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, OnDestroy, Injectable, ChangeDetectorRef } from '@angular/core';
 
 import { NavController, PopoverController, ModalController, Platform, LoadingController, IonInput } from '@ionic/angular';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
@@ -184,6 +184,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         private popoverCtrl: PopoverController, public platform: Platform,
         public loadingCtrl: LoadingController, public electronService: ElectronService,
         public router: Router, public appStateService: AppStateService, public settingService: SettingService,
+        private cdr: ChangeDetectorRef,
         public pouchQuery: PouchQueriesService) {
         this.patronAccount = 'patron_pin';
         this.advancedPatron = 'by_patron';
@@ -452,6 +453,8 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 } else {
                     this.countQ = 0;
                 }
+                // Manually trigger change detection to update the UI immediately
+                this.cdr.detectChanges();
             }
         );
     }
@@ -1548,7 +1551,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     public async onPeripheralKey(event) {        
         if (event.keyCode === 13) {
             this.blurInputElement();
-            await this.delay(300);
+            if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false) {
+                await this.delay(300);
+            }
         }
         let urlSubstringsArray = ["open-session", "payments", "login", "logout", "close-session", "classroom-sale"];
         let routeToAvoidPeripheralKey = urlSubstringsArray.some(substring => this.router.url.toUpperCase().includes(substring.toUpperCase()))
@@ -1586,7 +1591,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length > 0);                                                      
+                            this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length);                                                      
                             this.utilService.showModalPopup = false;
                             this.patronSearch.keyword = null;
                             this.customKeys = '';
@@ -1636,7 +1641,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
-                            this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length > 0);                             
+                            this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length);                             
                             this.utilService.showModalPopup = false;
                             this.patronSearch.keyword = null;
                         }

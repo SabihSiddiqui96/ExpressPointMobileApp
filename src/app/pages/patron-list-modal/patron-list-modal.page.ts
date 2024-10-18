@@ -20,6 +20,7 @@ export class PatronListModalPage implements OnInit {
     @Input() patron_list;
     @Input() isFromQueue;
     @Input() isFromAdvPatronSearch;
+    @Input() pageFrom;
     @Input() allowVisitingPatron;
     isGridView: boolean;
     isOnlyThisSite: boolean = false;
@@ -114,7 +115,7 @@ export class PatronListModalPage implements OnInit {
     public selectPatron(value, index?) {
         this.dismiss();
         this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
-        this.event.publish('patronSelectedFromList', { 'selected_patron': value, 'index': index });
+        this.event.publish('patronSelectedFromList', { 'selected_patron': value, 'index': index, 'pageFrom': this.pageFrom });
     }
 
     public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
