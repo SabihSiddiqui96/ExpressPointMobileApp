@@ -147,7 +147,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public alacarteTotal = 0.00;
     public setting = {
         'Setting_ChargeReimbursableMealsOnly': null, 'Setting_ActionWhenBelowChargeLimit': null,
-        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null
+        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'PREFNAME': null
     };
     public showAddItemButton: boolean = false;
     public patronName: string = '';
@@ -187,7 +187,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         super(_nav, popoverCtrl, zone, http, event, network, utilService, modalCtrl, alertCtrl, router, appStateService,
             pouchDBService, settingService, pouchQuery, signalRService);
         this.patronAccount = 'by_homeroom';
-
+        this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
         if (AppStateService.get('SelectedSite')) {
             const selectedSite = JSON.parse(AppStateService.get('SelectedSite'));
             this.schoolId = selectedSite.SchoolId;
@@ -256,6 +256,46 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.filter.selected_menuitem = -1;
         this.selectedSpecialRosterId = -1;
         this.studentBtnDisable = true;
+    }
+
+    public getFormattedName(FirstName, LastName, PreferredName, gridOrList) {
+        const prefNameValue = this.setting.PREFNAME;
+
+        // Determine the separator based on gridOrList
+        const separator = gridOrList === 'G' ? '<br>' : '&nbsp;';
+
+        if (this.nameSortOrder === 'LnFn') {            
+            if (!PreferredName) {
+                return `${LastName}${separator}${FirstName}`;
+            }
+            if (prefNameValue === 1) {
+                return `${LastName}${separator}${FirstName}`;
+            } else if (prefNameValue === 2) {
+                return `${LastName}${separator}${PreferredName}`;
+            } else if (prefNameValue === 3) {
+                return `${LastName}${separator}${FirstName} (${PreferredName})`;
+            } else if (prefNameValue === 4) {
+                return `${LastName}${separator}${PreferredName} (${FirstName})`;
+            }
+
+            return `${LastName}${separator}${FirstName}`;  // Fallback to PersonName if no prefNameValue matches
+        }
+        else if (this.nameSortOrder === 'FnLn') {
+            if (!PreferredName) {
+                return `${FirstName}${separator}${LastName}`;
+            }
+            if (prefNameValue === 1) {
+                return `${FirstName}${separator}${LastName}`;
+            } else if (prefNameValue === 2) {
+                return `${PreferredName}${separator}${LastName}`;
+            } else if (prefNameValue === 3) {
+                return `${FirstName} (${PreferredName})${separator}${LastName}`;
+            } else if (prefNameValue === 4) {
+                return `${PreferredName} (${FirstName})${separator}${LastName}`;
+            }
+
+            return `${FirstName}${separator}${LastName}`;  // Fallback to PersonName if no prefNameValue matches
+        }
     }
 
     public resetSpecial() {
@@ -627,6 +667,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'FullName': doc.PersonName,
                             'LastName': doc.LastName,
                             'FirstName': doc.FirstName,
+                            'PreferredName': doc.PreferredName,
                             'Image': null, // TO DO
                             'Price': 0,
                             'ShowAlert': this.showAllergiesAndNotes(doc),
@@ -709,6 +750,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'FullName': doc.PersonName,
                             'LastName': doc.LastName,
                             'FirstName': doc.FirstName,
+                            'PreferredName': doc.PreferredName,
                             'Image': null, // TO DO
                             'Price': 0,
                             'ShowAlert': this.showAllergiesAndNotes(doc),
@@ -799,6 +841,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                 'FullName': doc.PersonName,
                                 'LastName': doc.LastName,
                                 'FirstName': doc.FirstName,
+                                'PreferredName': doc.PreferredName,
                                 'Image': null, // TO DO
                                 'Price': 0,
                                 'ShowAlert': this.showAllergiesAndNotes(doc),

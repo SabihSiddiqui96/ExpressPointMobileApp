@@ -195,7 +195,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public sessionId = null;
     public setting = {
         'Setting_ChargeReimbursableMealsOnly': null, 'Setting_ActionWhenBelowChargeLimit': null,
-        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null
+        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null, 'PREFNAME': null
     };
     // public setting={}
     public patronImageConditionCheck = '';
@@ -336,6 +336,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public displayDetails: boolean = false;
     public countQ;
     public personName: string;
+    public preferredNameDisplay: string;
     public loadingID;
     public disablePay: boolean = false;
     public disableCharge: boolean = false;
@@ -362,6 +363,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         private cdr: ChangeDetectorRef,
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
+        this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
         AppStateService.remove('patron_details');
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -936,13 +938,45 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }, 500);
     }
 
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.setting.PREFNAME;
+
+        if (!PreferredName) {
+            if (LastName && LastName.trim() !== '') {
+                return FirstName && FirstName.trim() !== ''
+                    ? `${LastName}, ${FirstName}`
+                    : LastName;
+            } else {
+                return PersonName; // Fallback if both LastName and PreferredName are empty
+            }  // Default to PersonName if PreferredName is undefined or empty
+        }
+
+        if (prefNameValue === 1) {
+            if (LastName && LastName.trim() !== '') {
+                return FirstName && FirstName.trim() !== ''
+                    ? `${LastName}, ${FirstName}`
+                    : LastName;
+            } else {
+                return PersonName; // Fallback if both LastName and PreferredName are empty
+            }
+        } else if (prefNameValue === 2) {
+            return `${LastName}, ${PreferredName}`;
+        } else if (prefNameValue === 3) {
+            return `${LastName}, ${FirstName} (${PreferredName})`;
+        } else if (prefNameValue === 4) {
+            return `${LastName}, ${PreferredName} (${FirstName})`;
+        }
+
+        return PersonName;  // Fallback to PersonName if no prefNameValue matches
+    }
+
     public getPatronDetails(patronSelectedData) {
         // Put this check in place to make sure duplicates doesnot happen on the same terminal at the same time. 
         // if (!this.patronSelectedData.PersonId) {
         this.isPatronHavingImage = false;
         this.patronDetails = JSON.parse(patronSelectedData);
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
-        this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName'];
+        this.preferredNameDisplay = this.getPreferredName(this.patronDetails['FirstName'], this.patronDetails['LastName'], this.patronDetails['PreferredName'], this.patronDetails['PersonName']);
         this.isStaffNVisitor = this.checkStaffNVisitor(this.patronDetails);
         this.largeImageToShow = false;
         this.ResetRestrictions();
@@ -5436,6 +5470,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     
                 }                
             }
+            else {               
+                popupShow = true;
+                this.modalCtrl.create({
+                    component: UnidentifiedPatronPopupPage,
+                    cssClass: 'customModal',
+                    componentProps: {
+                        'Message': userEventData.params[0].replace('for', '')
+                    }, backdropDismiss: false
+                }).then(async (res) => {
+                    await res.present();                    
+                });
+            }
             if (popupShow == false) {
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
                 this.popupMessageService.showMessage(PopupMessageCode.E24397, userEventData);
@@ -5452,6 +5498,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         console.log('GetQ   ' + this.lookUpService.getQ()[0]);
                         this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                     }
+                }
+            }
+            else {
+                this.impermanentAutoServePause = false;
+                this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
+                if (this.lookUpService.getQ().length !== 0) {
+                    console.log('GetQ   ' + this.lookUpService.getQ()[0]);
+                    this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                 }
             }
         });
