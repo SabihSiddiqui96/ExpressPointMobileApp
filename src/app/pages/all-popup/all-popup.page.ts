@@ -386,6 +386,7 @@ export class AllPopupPage implements OnInit {
     public isElectron: boolean = false;
     public isPatronType: boolean = false;
     public isElectronApp: boolean;
+    public PREFNAME: number = 1;
 
     constructor(
         public navCtrl: NavController,
@@ -400,6 +401,7 @@ export class AllPopupPage implements OnInit {
         public pouchDBService: PouchDBService
     ) {
         this.isElectronApp = this.utilService.isElectronApp();
+        this.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
     }
 
     public ionViewDidEnter() {
@@ -458,6 +460,70 @@ export class AllPopupPage implements OnInit {
     public menuSave() {
         this.event.publish("default-terminal-menu:save");
         this.popoverCtrl.dismiss();
+    }
+
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.PREFNAME;
+
+        // Determine the separator based on gridOrList
+        const separator = this.nameSortOrder === 'LnFn' ? ', ' : ' ';
+
+        if (this.nameSortOrder === 'LnFn') {
+            if (!PreferredName) {
+                if (LastName && LastName.trim() !== '') {
+                    return FirstName && FirstName.trim() !== ''
+                        ? `${LastName}${separator}${FirstName}`
+                        : LastName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            }
+            if (prefNameValue === 1) {
+                if (LastName && LastName.trim() !== '') {
+                    return FirstName && FirstName.trim() !== ''
+                        ? `${LastName}${separator}${FirstName}`
+                        : LastName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            } else if (prefNameValue === 2) {
+                return `${LastName}${separator}${PreferredName}`;
+            } else if (prefNameValue === 3) {
+                return `${LastName}${separator}${FirstName} (${PreferredName})`;
+            } else if (prefNameValue === 4) {
+                return `${LastName}${separator}${PreferredName} (${FirstName})`;
+            }
+
+            return PersonName;  // Fallback to PersonName if no prefNameValue matches
+        }
+        else if (this.nameSortOrder === 'FnLn') {
+            if (!PreferredName) {
+                if (FirstName && FirstName.trim() !== '') {
+                    return LastName && LastName.trim() !== ''
+                        ? `${FirstName}${separator}${LastName}`
+                        : FirstName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            }
+            if (prefNameValue === 1) {
+                if (FirstName && FirstName.trim() !== '') {
+                    return LastName && LastName.trim() !== ''
+                        ? `${FirstName}${separator}${LastName}`
+                        : FirstName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            } else if (prefNameValue === 2) {
+                return `${PreferredName}${separator}${LastName}`;
+            } else if (prefNameValue === 3) {
+                return `${FirstName} (${PreferredName})${separator}${LastName}`;
+            } else if (prefNameValue === 4) {
+                return `${PreferredName} (${FirstName})${separator}${LastName}`;
+            }
+
+            return PersonName;  // Fallback to PersonName if no prefNameValue matches
+        }
     }
 
     public getInSitesFormat(data, label, value) {
@@ -537,6 +603,10 @@ export class AllPopupPage implements OnInit {
                         sortKey: item[key1] ? "A" : "B",
                         Image: item[key2],
                         Gender: item["Gender"],
+                        FirstName: item["FirstName"],
+                        LastName: item["LastName"],
+                        PreferredName: item["PreferredName"],
+                        PersonName: item["PersonName"]
                     });
                 } else {
                     newArray.push({
@@ -550,6 +620,10 @@ export class AllPopupPage implements OnInit {
                         sortKey: item[key1] ? "A" : "B",
                         Image: item[key2],
                         Gender: item["Gender"],
+                        FirstName: item["FirstName"],
+                        LastName: item["LastName"],
+                        PreferredName: item["PreferredName"],
+                        PersonName: item["PersonName"]
                     });
                 }
             } else {
@@ -566,6 +640,10 @@ export class AllPopupPage implements OnInit {
                     Status: item["IsStudent"] ? "S" : "A",
                     ForeColor: item["ForeColor"],
                     BackColor: item["BackColor"],
+                    FirstName: item["FirstName"],
+                    LastName: item["LastName"],
+                    PreferredName: item["PreferredName"],
+                    PersonName: item["PersonName"]
                 });
             }
         }

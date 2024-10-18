@@ -170,7 +170,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         'canServeVisitingPatrons': null,
         'EXNEGBAL': null,
         'HIDELGBLTY': null,
-        'CHRGNCEP': null
+        'CHRGNCEP': null,
+        'PREFNAME': null
     };
 
     public dayOfWeek = '0';
@@ -306,7 +307,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public countQ;
     public patronImage;
     public transactionInProgress: boolean = false;
-    public personName;
+    public personName: string;
+    public preferredNameDisplay: string;
     public allCategories = []; // Used to store all menu item categories
     public nonCEPMealTypes = new Set();
     public selectedAccountDetails: any = {};
@@ -351,7 +353,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
-
+        this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
         AppStateService.remove('patron_details');
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isNaN(this.transactionNumber)) {
@@ -943,6 +945,31 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         //this.hideStudentId = true;
     }
 
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.setting.PREFNAME;
+
+        if (!PreferredName) {
+            return FirstName && FirstName.trim() !== ''
+                ? `${LastName}, ${FirstName}`
+                : LastName;  // Default to PersonName if PreferredName is undefined or empty
+        }
+
+        if (prefNameValue === 1) {
+            return FirstName && FirstName.trim() !== ''
+                ? `${LastName}, ${FirstName}`
+                : LastName;
+        } else if (prefNameValue === 2) {
+            return `${LastName}, ${PreferredName}`;
+        } else if (prefNameValue === 3) {
+            return `${LastName}, ${FirstName} (${PreferredName})`;
+        } else if (prefNameValue === 4) {
+            return `${LastName}, ${PreferredName} (${FirstName})`;
+        }
+
+        return PersonName;  // Fallback to PersonName if no prefNameValue matches
+    }
+
+
     public getPatronDetails(patronSelectedData) {
         // console.clear();
         this.isPatronHavingImage = null;
@@ -985,6 +1012,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.patronDetails = this.patronDetails;
         this.orderData.accountBalance = this.patronDetails.Balance;
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
+        this.preferredNameDisplay = this.getPreferredName(this.patronDetails['FirstName'], this.patronDetails['LastName'], this.patronDetails['PreferredName'], this.patronDetails['PersonName']);
         this.isStaffNVisitor = this.checkStaffNVisitor(this.patronDetails);
         this.checkForBirthday(this.patronDetails);
         if (this.isSpecialAccount === true || this.patronDetails.IsStudent === false) {

@@ -65,13 +65,14 @@ export class PatronListModalPage implements OnInit {
     public searchResultCount: number = 0;
     public loadMoreClicks = 0;
     public disableLoadMore: boolean = false;
+    public PREFNAME: number = 1;
 
     constructor(public navCtrl: NavController,
         public event: Events, public utilService: UtilService,
         public http: HttpService, public router: Router, public appStateService: AppStateService) {
         // , public lookUpService:LookUpServiceProvider
 
-
+        this.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
     }
 
     dismiss() {
@@ -114,6 +115,70 @@ export class PatronListModalPage implements OnInit {
         this.dismiss();
         this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
         this.event.publish('patronSelectedFromList', { 'selected_patron': value, 'index': index });
+    }
+
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.PREFNAME;
+
+        // Determine the separator based on gridOrList
+        const separator = this.nameSortOrder === 'LnFn' ? ', ' : ' ';
+
+        if (this.nameSortOrder === 'LnFn') {
+            if (!PreferredName) {
+                if (LastName && LastName.trim() !== '') {
+                    return FirstName && FirstName.trim() !== ''
+                        ? `${LastName}${separator}${FirstName}`
+                        : LastName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            }
+            if (prefNameValue === 1) {
+                if (LastName && LastName.trim() !== '') {
+                    return FirstName && FirstName.trim() !== ''
+                        ? `${LastName}${separator}${FirstName}`
+                        : LastName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            } else if (prefNameValue === 2) {
+                return `${LastName}${separator}${PreferredName}`;
+            } else if (prefNameValue === 3) {
+                return `${LastName}${separator}${FirstName} (${PreferredName})`;
+            } else if (prefNameValue === 4) {
+                return `${LastName}${separator}${PreferredName} (${FirstName})`;
+            }
+
+            return PersonName;  // Fallback to PersonName if no prefNameValue matches
+        }
+        else if (this.nameSortOrder === 'FnLn') {
+            if (!PreferredName) {
+                if (FirstName && FirstName.trim() !== '') {
+                    return LastName && LastName.trim() !== ''
+                        ? `${FirstName}${separator}${LastName}`
+                        : FirstName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            }
+            if (prefNameValue === 1) {
+                if (FirstName && FirstName.trim() !== '') {
+                    return LastName && LastName.trim() !== ''
+                        ? `${FirstName}${separator}${LastName}`
+                        : FirstName;
+                } else {
+                    return PersonName; // Fallback if both LastName and PreferredName are empty
+                }
+            } else if (prefNameValue === 2) {
+                return `${PreferredName}${separator}${LastName}`;
+            } else if (prefNameValue === 3) {
+                return `${FirstName} (${PreferredName})${separator}${LastName}` ;
+            } else if (prefNameValue === 4) {
+                return `${PreferredName} (${FirstName})${separator}${LastName}`;
+            }
+
+            return PersonName;  // Fallback to PersonName if no prefNameValue matches
+        }
     }
 
     public serverLookup() {

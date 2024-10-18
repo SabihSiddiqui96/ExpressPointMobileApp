@@ -112,6 +112,10 @@ export class DoPayment {
     public content_height;
     public printAllSetting: number = 0;
 
+    public setting = {
+        'PREFNAME': null
+    };
+
     constructor(public navCtrl: NavController, public alertCtrl: AlertController, public event: Events,
         public lookUpService: LookupService, public utilService: UtilService,
         public transactionService: TransactionService,
@@ -121,7 +125,7 @@ export class DoPayment {
         , public signalRService: SignalRService, public platform: Platform) {
 
         this.isIOS = this.platform.is('ios');
-
+        this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
 
         this.isCordovaApp = UtilService.isCordovaApp;
 
@@ -185,6 +189,38 @@ export class DoPayment {
             this.keyboardShowSubscription.unsubscribe();
             this.keyboardHideSubscription.unsubscribe();
         }
+    }
+
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.setting.PREFNAME;
+
+        if (!PreferredName) {
+            if (LastName && LastName.trim() !== '') {
+                return FirstName && FirstName.trim() !== ''
+                    ? `${LastName}, ${FirstName}`
+                    : LastName;
+            } else {
+                return PersonName; // Fallback if both LastName and PreferredName are empty
+            }  // Default to PersonName if PreferredName is undefined or empty
+        }
+
+        if (prefNameValue === 1) {
+            if (LastName && LastName.trim() !== '') {
+                return FirstName && FirstName.trim() !== ''
+                    ? `${LastName}, ${FirstName}`
+                    : LastName;
+            } else {
+                return PersonName; // Fallback if both LastName and PreferredName are empty
+            }
+        } else if (prefNameValue === 2) {
+            return `${LastName}, ${PreferredName}`;
+        } else if (prefNameValue === 3) {
+            return `${LastName}, ${FirstName} (${PreferredName})`;
+        } else if (prefNameValue === 4) {
+            return `${LastName}, ${PreferredName} (${FirstName})`;
+        }
+
+        return PersonName;  // Fallback to PersonName if no prefNameValue matches
     }
 
     public numberClick(key: any) {
@@ -1050,6 +1086,7 @@ export class PaymentsPage extends DoPayment implements OnInit {
 
         this.patronId = this.patronSelectedData['PersonId'];
         this.navPatronDetails = this.patronSelectedData;
+        this.navPatronDetails.preferredNameDisplay = this.getPreferredName(this.navPatronDetails['FirstName'], this.navPatronDetails['LastName'], this.navPatronDetails['PreferredName'], this.navPatronDetails['PersonName']);
         super.initVariables();
 
         if (this.navPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId) {
