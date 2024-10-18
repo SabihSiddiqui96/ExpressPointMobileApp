@@ -34,6 +34,7 @@ export class AllPopupPage implements OnInit {
     @Input() data;
     @Input() page;
     @Input() selectedValue;
+    @Input() selectedServingLines;
     isGridView : boolean;
     navOptionList = ['patronPatron','patronSpecialRosterPersonList','patronlist'];
     performanceOptions = null;
@@ -49,6 +50,7 @@ export class AllPopupPage implements OnInit {
         this.popUpData = navigatedData;
         this.navPage = this.page;
         this.navSelectedValue = this.selectedValue;
+        this.selectedEntreeItems = this.selectedServingLines;
         this.performanceOptions = AppStateService.get('performanceOptions');
         if (this.navType === "keyboard") {
             this.showKeyboard = true;
@@ -81,7 +83,29 @@ export class AllPopupPage implements OnInit {
                 this.title = "Day";
                 break;
             case "DynamicEntreeServingLines":
-                this.lists = this.rawList = navigatedData;
+                // Now check the lengths of lists and selectedEntreeItems (without -1)
+                const listsWithoutValueMinusOne = navigatedData.filter(item => item.value !== -1);
+                const selectedEntreesWithoutMinusOne = this.selectedEntreeItems.filter(item => item !== -1);
+
+                // If the length of lists and selectedEntreeItems without -1 is equal, remove -1 if it exists
+                if (listsWithoutValueMinusOne.length > 0 && selectedEntreesWithoutMinusOne.length > 0 &&
+                    listsWithoutValueMinusOne.length === selectedEntreesWithoutMinusOne.length) {
+                    // If -1 does not exist in selectedEntreeItems, add it
+                    if (!this.selectedEntreeItems.includes(-1)) {
+                        this.selectedEntreeItems.push(-1); // Insert -1 if lengths are equal and -1 is not already in the array
+                    }                    
+                } else {                    
+                    const index = this.selectedEntreeItems.indexOf(-1);
+
+                    if (index !== -1) {
+                        this.selectedEntreeItems.splice(index, 1); // Remove -1 if it exists in the array
+                    }
+                }
+                this.lists = this.rawList = this.getInFormat(
+                    navigatedData,
+                    "label",
+                    "value"
+                );
                 this.title = "Serving Line";
                 break;
             case "mealType":
@@ -101,7 +125,7 @@ export class AllPopupPage implements OnInit {
                 this.title = "Menu Type";
                 break;
             case "homeSites":
-                this.lists = this.rawList = this.getInFormat(
+                this.lists = this.rawList = this.getInSitesFormat(
                     navigatedData,
                     "SiteNameWithCode",
                     "SiteNameWithCode"
@@ -319,6 +343,7 @@ export class AllPopupPage implements OnInit {
     public title = "";
     public navType = "";
     public navSelectedValue = [];
+    public selectedEntreeItems: any[] = [];
     public showFullList: boolean = false;
     public navPage = "";
 
@@ -435,6 +460,13 @@ export class AllPopupPage implements OnInit {
         this.popoverCtrl.dismiss();
     }
 
+    public getInSitesFormat(data, label, value) {
+        let newArray = [];
+        for (const item of data) {           
+            newArray.push({ value: item[value], label: item[label] });           
+        }
+        return newArray;
+    }
     public getInFormat(data, label, value) {
         let newArray = [];
         for (const item of data) {
@@ -540,6 +572,56 @@ export class AllPopupPage implements OnInit {
         return newArray;
     }
 
+    public isEntreeSelected(listValue): boolean {
+        return this.selectedEntreeItems.includes(listValue);
+    }
+
+    public dynamicEntreeServingLineSelection(listValue) {
+        const index = this.selectedEntreeItems.findIndex(item => item === listValue);
+        if (index > -1) {
+            if (listValue == -1) {
+                this.selectedEntreeItems = [];
+            }
+            else {
+                // Item is already selected, so remove it
+                this.selectedEntreeItems.splice(index, 1);
+            }
+        } else {
+            if (listValue == -1) {
+                this.selectedEntreeItems = [];
+                this.lists.forEach(item => {
+                    if (!this.selectedEntreeItems.includes(item.value)) { // Check if value already exists
+                        this.selectedEntreeItems.push(item.value); // Push only if the value doesn't exist
+                    }
+                });
+            }
+            else {
+                // Item is not selected, so add it
+                this.selectedEntreeItems.push(listValue);
+            }
+        }
+        
+        // Check if the lengths are different, and if so, remove -1 from selectedEntreeItems
+        if (this.lists.length !== this.selectedEntreeItems.length) {
+            this.selectedEntreeItems = this.selectedEntreeItems.filter(item => item !== -1);
+        }
+
+        // Now check the lengths of lists and selectedEntreeItems (without -1)
+        const listsWithoutValueMinusOne = this.lists.filter(item => item.value !== -1);
+        const selectedEntreesWithoutMinusOne = this.selectedEntreeItems.filter(item => item !== -1);
+
+        // If the length of lists and selectedEntreeItems without -1 is equal, insert -1
+        if (listsWithoutValueMinusOne.length > 0 && selectedEntreesWithoutMinusOne.length > 0 &&
+            listsWithoutValueMinusOne.length === selectedEntreesWithoutMinusOne.length && !this.selectedEntreeItems.includes(-1)) {
+            this.selectedEntreeItems.push(-1); // Insert -1 if lengths are equal and -1 is not already in the array
+        }
+
+        this.event.publish("dynamic-entree-menu-service-popup", {
+            selectedData: this.selectedEntreeItems,
+            type: this.navType
+        });
+    }
+
     public select(data, fromPeripheral?) {
         // tslint:disable-next-line:no-empty
         // if (this.navType === 'ReviewTypes' && this.selectedValue !== (undefined)) {
@@ -568,11 +650,11 @@ export class AllPopupPage implements OnInit {
 
 
             if (parseInt(SettingService.getSettingValue('DYNMENU')) === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) === 1) {
-                if (navType !== "servingLine") {
+                if (navType !== "servingLine" && navType !== "DynamicEntreeServingLines") {
                     this.close();
                 }
             } else {
-                if (navType !== "menuType") {
+                if (navType !== "menuType" && navType !== "DynamicEntreeServingLines") {
                     this.close();
                 }
             }

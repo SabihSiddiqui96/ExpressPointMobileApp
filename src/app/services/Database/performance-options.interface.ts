@@ -1,5 +1,6 @@
 export interface PerformanceOptions {   
     LiveBalancePayments: boolean,
+    LivePaymentsForPatron : boolean,
     LoadStudentImages: boolean,
     LiveDataFromOtherTerminals: boolean,
     SyncTransactionData: String,

@@ -243,7 +243,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public selectedMealTypeName = 'Meal Type';
     public selectedMenuType = -1;
     public selectedMenuTypeName = 'Menu Type';
-    public selectedServingLine = -1;
+    public selectedServingLines: any = [];
     public selectedServingLineName = '';
 
     public mealCount: number = 0;
@@ -977,48 +977,67 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
         
         this.patronDetails.Payments = [];
-        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.patronDetails.AccountId).then((res) => {
-            const transactions = res.docs;
-            if (transactions.length > 0) {
-                transactions.map(doc => {                   
-                    const result = this.patronDetails.Payments.filter(f =>
-                        f.TerminalName === doc.saleData.TerminalName.trim() &&
-                        f.Amount === doc.saleData.PaymentAmount &&
-                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)                        
-                    );
-                    if (result.length == 0) {
-                        this.patronDetails.Payments.push(
-                            {
-                                'TerminalName': doc.saleData.TerminalName.trim(),
-                                'Amount': doc.saleData.PaymentAmount,
-                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
-                                'PaymentTypeCd': "Payment"
-                            }
+        const performanceOptions = AppStateService.get('performanceOptions');
+        // Step 1: Fetch payments not processed by AccountId from PouchQueriesService
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.patronDetails.AccountId)
+            .then(res => {
+                const transactions = res.docs;
+
+                if (transactions.length > 0) {
+                    transactions.forEach(doc => {
+                        const paymentDate = new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19);
+                        const terminalName = doc.saleData.TerminalName ? doc.saleData.TerminalName.trim() : null;
+
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.patronDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.saleData.PaymentAmount &&
+                            f.PaymentDate === paymentDate
                         );
+
+                        if (!existingPayment) {
+                            this.patronDetails.Payments.push({
+                                'TerminalName': terminalName,
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': paymentDate,
+                                'PaymentTypeCd': "Payment"
+                            });
+                        }
+                    });
+                }
+
+                // Step 2: Check for live balance payments after fetching unprocessed payments                
+                if (this.utilService.isAppOnline &&
+                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
+                    if (this.patronDetails.AccountId) {
+                        return this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).toPromise(); // Return the promise to chain
                     }
-                });
-            }
-        });
-        let performanceOptions = AppStateService.get('performanceOptions');
-        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LiveBalancePayments == true))) {
-            if (this.patronDetails.AccountId != undefined && this.patronDetails.AccountId != null) {
-                this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).subscribe(data => {
-                    if (data.length > 0) {
-                        data.map(doc => {
-                            const result = this.patronDetails.Payments.filter(f =>
-                                f.TerminalName === doc.TerminalName.trim() &&
-                                f.Amount === doc.Amount &&
-                                f.PaymentDate === doc.PaymentDate
-                            );
-                            if (result.length == 0) {
-                                this.patronDetails.Payments.push(doc);
-                            }
-                        });
-                    }                    
-                }, e => { console.log(e); }, () => {
-                });
-            }
-        }
+                }
+                return Promise.resolve([]);  // Return a resolved promise if the condition is false
+            })
+            .then(data => {
+                // Process today's payments after the previous promise resolves
+                if (data.length > 0) {
+                    data.forEach(doc => {
+                        const terminalName = doc.TerminalName ? doc.TerminalName.trim() : null;
+
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.patronDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.Amount &&
+                            f.PaymentDate === doc.PaymentDate
+                        );
+
+                        if (!existingPayment) {
+                            this.patronDetails.Payments.push(doc);
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);  // Handle errors
+            });
+
         
         if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LoadStudentImages == true)) {
             this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
@@ -1539,12 +1558,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.showDynamicEntreeServingLine = true;
             }
             else {               
-                this.selectedServingLine = -1;
+                this.selectedServingLines = [];
                 this.selectedServingLineName = "";
             }
         }
         else {            
-            this.selectedServingLine = -1;
+            this.selectedServingLines = [];
             this.selectedServingLineName = "";
         }
         this.loadMenuTypes(this.selectedMealType, this.schoolId, this.dayOfWeek, this.selectedMealTypeName);
@@ -1662,13 +1681,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 f.MealType === this.selectedMealType
             );
             if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
-                this.selectedServingLine = servingLineFiltered[0].ServingLine;
-                const servLine = this.servingLines.filter(f =>
-                    f.ServingLineId === this.selectedServingLine
-                );
-                if (servLine != null && servLine != undefined && servLine.length > 0) {
-                    this.selectedServingLineName = servLine[0].ServingLineDescription;
-                }
+                this.selectedServingLines = servingLineFiltered[0].ServingLines;               
             }
         }        
     }
@@ -1811,7 +1824,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     const totalGrids = menuGridDetails.Columns * menuGridDetails.Rows;
                     let i = 0;
                     let diff = 1;
-                    this.selectedServingLine = -1;
+                    this.selectedServingLines = [];
                     this.selectedServingLineName = "";
                     this.disableDynamicEntreeServingLine = true;
                     if (menuGridDetails.Buttons) {
@@ -2477,7 +2490,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let buttons = res.rows[0].doc.Buttons;
                     if (buttons === null) {
                         canClose = false;
-                        if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
+                        if (this.selectedServingLines.length > 0 && category.ButtonDescription.includes('Planned Entrees') == true) {
                             canClose = true;
                         }
                         _thisRef.event.publish('category_all:select_check_done',
@@ -2493,7 +2506,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 } else {
                     canClose = false;                   
                 }
-                if (this.selectedServingLine != -1 && category.ButtonDescription.includes('Planned Entrees') == true) {
+                if (this.selectedServingLines.length > 0 && category.ButtonDescription.includes('Planned Entrees') == true) {
                     canClose = true;
                 }
                 _thisRef.event.publish('category_all:select_check_done',
@@ -4230,15 +4243,15 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public checkForCategory(menuItemId) {
-        const menuItem = {};
-        this.allCategories.forEach((item) => {
-            if (item['Buttons'] !== null && item['Buttons'].length > 0) {
-                item['Buttons'].filter(function (menu) {
-                    if (menu.RefId === menuItemId) menuItem['CategoryId'] = item['MenuItemCategoryId'];
-                });
+        for (const category of this.allCategories) {
+            if (category.Buttons && category.Buttons.length > 0) {
+                const button = category.Buttons.find(menu => menu.RefId === menuItemId);
+                if (button) {
+                    return { CategoryId: category.MenuItemCategoryId };
+                }
             }
-        });
-        return menuItem;
+        }
+        return null; // Return null if no category is found
     }
 
     public selectAccount() {
@@ -4305,49 +4318,67 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.setPreviousSaleCounts(this.selectedAccountDetails);
         // this.setRestrictions(this.selectedAccountDetails);
         // this.showAllergiesAndNotes(this.selectedAccountDetails);
+
         this.selectedAccountDetails.Payments = [];
-        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.selectedAccountDetails.AccountId).then((res) => {
-            const transactions = res.docs;
-            if (transactions.length > 0) {
-                transactions.map(doc => {
-                    const result = this.selectedAccountDetails.Payments.filter(f =>
-                        f.TerminalName === doc.saleData.TerminalName.trim() &&
-                        f.Amount === doc.saleData.PaymentAmount &&
-                        f.PaymentDate === new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19)
-                    );
-                    if (result.length == 0) {
-                        this.selectedAccountDetails.Payments.push(
-                            {
-                                'TerminalName': doc.saleData.TerminalName.trim(),
-                                'Amount': doc.saleData.PaymentAmount,
-                                'PaymentDate': new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19),
-                                'PaymentTypeCd': "Payment"
-                            }
-                        );
-                    }
-                });
-            }
-        });
         let performanceOptions = AppStateService.get('performanceOptions');
-        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LiveBalancePayments == true)) {
-            if (this.selectedAccountDetails.AccountId != undefined && this.selectedAccountDetails.AccountId != null) {
-                this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).subscribe(data => {
-                    if (data.length > 0) {
-                        data.map(doc => {
-                            const result = this.selectedAccountDetails.Payments.filter(f =>
-                                f.TerminalName === doc.TerminalName.trim() &&
-                                f.Amount === doc.Amount &&
-                                f.PaymentDate === doc.PaymentDate
-                            );
-                            if (result.length == 0) {
-                                this.selectedAccountDetails.Payments.push(doc);
-                            }
-                        });
+        // Step 1: Fetch payments not processed by AccountId from PouchQueriesService
+        PouchQueriesService.GetPaymentsNotProcessedByAccountId(this.selectedAccountDetails.AccountId)
+            .then(res => {
+                const transactions = res.docs;
+                if (transactions.length > 0) {
+                    transactions.forEach(doc => {
+                        const paymentDate = new Date(doc.saleData.TransactionDate).toISOString().slice(0, 19);
+                        const terminalName = doc.saleData.TerminalName ? doc.saleData.TerminalName.trim() : null;
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.selectedAccountDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.saleData.PaymentAmount &&
+                            f.PaymentDate === paymentDate
+                        );
+                        
+                        if (!existingPayment) {
+                            this.selectedAccountDetails.Payments.push({
+                                'TerminalName': terminalName,
+                                'Amount': doc.saleData.PaymentAmount,
+                                'PaymentDate': paymentDate,
+                                'PaymentTypeCd': "Payment"
+                            });
+                        }
+                    });
+                }
+
+                // Step 2: Check for live balance payments after fetching unprocessed payments                
+                if (this.utilService.isAppOnline &&
+                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
+                    if (this.selectedAccountDetails.AccountId) {
+                        return this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).toPromise(); // Return the promise to chain
                     }
-                }, e => { console.log(e); }, () => {
-                });
-            }
-        }
+                }
+                return Promise.resolve([]);  // Return a resolved promise if the condition is false
+            })
+            .then(data => {
+                // Process today's payments after the previous promise resolves
+                if (data.length > 0) {
+                    data.forEach(doc => {
+                        const terminalName = doc.TerminalName ? doc.TerminalName.trim() : null;
+
+                        // Check if payment already exists, skip TerminalName check if it's null
+                        const existingPayment = this.selectedAccountDetails.Payments.some(f =>
+                            (terminalName ? f.TerminalName === terminalName : true) && // Skip TerminalName check if it's null
+                            f.Amount === doc.Amount &&
+                            f.PaymentDate === doc.PaymentDate
+                        );
+
+                        if (!existingPayment) {
+                            this.selectedAccountDetails.Payments.push(doc);
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);  // Handle errors
+            });
+        
         this.patronImage = null;
         if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LoadStudentImages == true))) {
             this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
@@ -4538,7 +4569,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     private subscribeToMenuServicePopupEvents() {
-        this.popupSubscription = this.event.subscribe('menu-service-popup', (userEventData) => {
+        this.event.subscribe('menu-service-popup', (userEventData) => {            
             if (userEventData.selectedData) {
                 const selectedData = userEventData.selectedData;
                 console.log(selectedData);
@@ -4565,24 +4596,25 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         this.onReviewTypeChange(this.reviewType, reviewTypeDescription, reviewTypeCd);
                         break;
                     
-                    case 'DynamicEntreeServingLines': this.selectedServingLine = selectedData.value;
-                        this.selectedServingLineName = selectedData.label;
+                    case 'DynamicEntreeServingLines':
+                        this.selectedServingLines = selectedData;
+                        this.selectedServingLineName = '';
                         if (AppStateService.get("DynamicEntreeServingLine")) {
                             let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
                             let servingLineFiltered = servingLines.filter(f =>
                                 f.MealType === this.selectedMealType
                             );
                             if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
-                                servingLineFiltered[0].ServingLine = this.selectedServingLine;
+                                servingLineFiltered[0].ServingLines = this.selectedServingLines;
                                 AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
                             }
                             else {
-                                servingLines.push({ "MealType": this.selectedMealType, "ServingLine": this.selectedServingLine });
+                                servingLines.push({ "MealType": this.selectedMealType, "ServingLines": this.selectedServingLines });
                                 AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
                             }
                         }
                         else {
-                            let servingLine = [{ "MealType": this.selectedMealType , "ServingLine": this.selectedServingLine }];
+                            let servingLine = [{ "MealType": this.selectedMealType , "ServingLines": this.selectedServingLines }];
                             AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLine));
                         }
                         
@@ -4591,14 +4623,61 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
         });
+
+        this.event.destroy('dynamic-entree-menu-service-popup');
+        this.event.subscribe('dynamic-entree-menu-service-popup', (userEventData) => {
+            if (userEventData.selectedData) {
+                this.selectedServingLines = userEventData.selectedData;
+                this.selectedServingLineName = '';
+                if (AppStateService.get("DynamicEntreeServingLine")) {
+                    let servingLines = JSON.parse(AppStateService.get("DynamicEntreeServingLine"));
+                    let servingLineFiltered = servingLines.filter(f =>
+                        f.MealType === this.selectedMealType
+                    );
+                    if (servingLineFiltered != undefined && servingLineFiltered != null && servingLineFiltered.length > 0) {
+                        servingLineFiltered[0].ServingLines = this.selectedServingLines;
+                        AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
+                    }
+                    else {
+                        servingLines.push({ "MealType": this.selectedMealType, "ServingLines": this.selectedServingLines });
+                        AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLines));
+                    }
+                }
+                else {
+                    let servingLine = [{ "MealType": this.selectedMealType, "ServingLines": this.selectedServingLines }];
+                    AppStateService.set('DynamicEntreeServingLine', JSON.stringify(servingLine));
+                }
+
+                this.bindDynamicEntreeItemsByServingLine();
+            }
+        });
     }
 
     private bindDynamicEntreeItemsByServingLine() {
-        if (this.selectedMenuType != -1 && this.selectedServingLine != -1) {
-            let menuItemsArray = this.servingLines.filter(f => f.ServingLineId === this.selectedServingLine
-            );
-            if (menuItemsArray.length > 0) {
-                let menuItems = menuItemsArray[0].MenuItems;
+        if (this.selectedServingLines == undefined) {
+            this.selectedServingLines = [];
+        }
+        if (this.selectedMenuType != -1 && this.selectedServingLines.length > 0) {
+            let menuItems = this.servingLines
+                .filter(f => this.selectedServingLines.includes(f.ServingLineId))  // Filter by selectedServingLines
+                .map(f => f.MenuItems)                                              // Extract MenuItems from each
+                .flat()                                                             // Flatten the array
+                .reduce((acc, item) => {                                            // Ensure uniqueness by menuItemId and keep max PlannedCount
+                    const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
+                    if (existingItemIndex !== -1) {
+                        // If item already exists, check if we need to replace it with the one with max PlannedCount
+                        if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
+                            // Replace the existing item with the current item
+                            acc[existingItemIndex] = item;
+                        }
+                    } else {
+                        // If item doesn't exist, push it to the accumulator
+                        acc.push(item);
+                    }
+                    return acc;
+                }, []);
+            
+            if (menuItems.length > 0) {
                 menuItems = _.orderBy(menuItems, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
                 let refCount = 0;
                 if (this.menuGrid['Buttons'].length > 0) {
@@ -4624,12 +4703,24 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     }
                 }
             }
+            else {
+                this.setBackGridButtons();
+            }
+        }
+        else {
+            this.setBackGridButtons();
         }
     }
 
-    private unsubscribeToMenuServicePopupEvents() {
-        if (this.popupSubscription) {
-            this.popupSubscription.unsubscribe();
+    public setBackGridButtons() {
+        if (this.menuGrid['Buttons'] != undefined) {
+            for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
+                    this.menuGrid['Buttons'][k]['RefId'] = 0;
+                    this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
+                    this.menuGrid['Buttons'][k]['IsTaxable'] = false;
+                }
+            }
         }
     }
 
@@ -5415,13 +5506,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         if (alaCarteItems.length > 0) {
             const alaItems = _.filter(alaCarteItems, item => {
-                const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);
-                if (isRestrictedItem === -1) {
-                    const menuItem = this.checkForCategory(item.RefId);
-                    if (menuItem) {
-                        item.CategoryId = menuItem['CategoryId'];
-                    }
-                }
+                const isRestrictedItem = this.restrictableAlaCarteItems.indexOf(item.RefId);                
                 const isRestrictedCategory = this.restrictableCategories.indexOf(item.CategoryId);
                 if (isRestrictedItem !== -1 || isRestrictedCategory !== -1) {
                     return item;

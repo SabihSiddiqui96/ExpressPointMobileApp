@@ -68,23 +68,24 @@
     </ion-content>
     <ion-content *ngIf="isDynamicMenuSelected" vh-100 top-margin (click)="emptySpaceClick()">
       <ion-row *ngIf="selectedServingLine != -1" class="menu-dynamic">
-        <ion-col style="width:20%" *ngFor="let category of menuItemCategories; let i=index">
-          <!-- <div class="category_text">{{category.CategoryName}}</div> -->
-          <div class="menu-item-category">
-            <ion-button [tabindex]="i" expand="block" (click)="blurInputElement(); showcategoryPopup(category)">
+        <ng-container *ngFor="let category of menuItemCategories; let i=index">
+          <ion-col style="width:20%" *ngIf="category.DisplayCategoryName !== 'Planned Entrees'"><!-- <div class="category_text">{{category.CategoryName}}</div> -->
+            <div class="menu-item-category">
+              <ion-button [tabindex]="i" expand="block" (click)="blurInputElement(); showcategoryPopup(category)">
 
-              {{category.DisplayCategoryName}}
-            </ion-button>
-          </div>
-          <div *ngFor="let menuItem of itemsByCategory[i]; let j=index" class="menu-item-dynamic"
-            [style.background]="category.BackColor">
-            <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor"
-              (click)="blurInputElement(); gridClick($event, menuItem)">
-              {{menuItem.MenuItemDescription}}
-              <ion-icon name="alert-circle-sharp" *ngIf="menuItem.restrictedItem"></ion-icon>
-            </ion-button>
-          </div>
-        </ion-col>
+                {{category.DisplayCategoryName}}
+              </ion-button>
+            </div>
+            <div *ngFor="let menuItem of itemsByCategory[i]; let j=index" class="menu-item-dynamic"
+              [style.background]="category.BackColor">
+              <ion-button [tabindex]="i+j" expand="block" [style.color]="category.ForeColor"
+                (click)="blurInputElement(); gridClick($event, menuItem)">
+                {{menuItem.MenuItemDescription}}
+                <ion-icon name="alert-circle-sharp" *ngIf="menuItem.restrictedItem"></ion-icon>
+              </ion-button>
+            </div>
+          </ion-col>
+        </ng-container>
       </ion-row>
     </ion-content>
   </ion-col>

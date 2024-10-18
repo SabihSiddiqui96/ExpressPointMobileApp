@@ -16,22 +16,27 @@
 </ion-header>
 <ion-content padding class="performance-options-content ion-padding" style="height:fit-content;">
   <ion-list>
-    <ion-item lines="none" class="bg-transparent pad-top" (click)="setBalanceAndPayment($event)">
-      <ion-label class="ion-text-left bold" position="bottom">Live Balance and Payments Check</ion-label>
+    <ion-item lines="none" title="Retrieves latest balance update from server on patron load" class="bg-transparent pad-top" (click)="setBalanceForPatron($event)">
+      <ion-label class="ion-text-left bold" position="bottom">Live Balance Check</ion-label>
       <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LiveBalancePayments">
       </ion-toggle>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top" (click)="setLoadStudentImages($event)">
+    <ion-item lines="none" title="Retrieves latest payments made on patron load" class="bg-transparent pad-top" (click)="setPaymentForPatron($event)">
+      <ion-label class="ion-text-left bold" position="bottom">Live Payments Check(Preferred: Do not select this)</ion-label>
+      <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LivePaymentsForPatron">
+      </ion-toggle>
+    </ion-item>
+    <ion-item lines="none" title="Determines if patron images are displayed" class="bg-transparent pad-top" (click)="setLoadStudentImages($event)">
       <ion-label class="ion-text-left bold" position="bottom">Load Student Images</ion-label>
       <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LoadStudentImages">
       </ion-toggle>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top" (click)="setLiveDataFromOtherTerminals($event)">
+    <ion-item lines="none" title="Checks Server for transactions on other terminals" class="bg-transparent pad-top" (click)="setLiveDataFromOtherTerminals($event)">
       <ion-label class="ion-text-left bold" position="bottom">Live Sales data from Other Terminals</ion-label>
       <ion-toggle color="slate" [(ngModel)]="perfOptionDB.LiveDataFromOtherTerminals">
       </ion-toggle>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top">
+    <ion-item lines="none" title="Background process to sync transactions to server" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync transaction data every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncTransactionData" (ionChange)="setSyncTransactionData($event)" 
         aria-label="Sync transaction data" interface="action-sheet">
@@ -44,7 +49,7 @@
         <ion-select-option value=60>1hour</ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top">
+    <ion-item lines="none" title="Background process to verify transactions were received by server" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync transaction status every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncTransactionStatus" (ionChange)="setSyncTransactionStatus($event)"
         aria-label="Sync transaction status" interface="action-sheet">
@@ -56,7 +61,7 @@
         <ion-select-option value=60>1hour</ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top">
+    <ion-item lines="none" title="Receives patron allergens, restrictions, name, balance, pictures, and more..." class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync student detail data every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncStudentDetail" (ionChange)="setSyncStudentDetailData($event)"
         aria-label="Sync student detail" interface="action-sheet">
@@ -68,7 +73,7 @@
         <ion-select-option value=60>1hour</ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top">
+    <ion-item lines="none" title="Receives patron transaction details from the server" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync account detail data every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncAccountDetail" (ionChange)="setSyncAccountDetailData($event)"
         aria-label="Sync account detail" interface="action-sheet">
@@ -81,7 +86,7 @@
         <ion-select-option value=60>1hour</ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-item lines="none" class="bg-transparent pad-top">
+    <ion-item lines="none" title="Sends last active and versioning status used for ExpressPoint monitor" class="bg-transparent pad-top">
       <ion-label class="ion-text-left bold" position="bottom">Sync terminal heartbeat every</ion-label>
       <ion-select [(ngModel)]="perfOptionDB.SyncTerminalHeartbeat" (ionChange)="setSyncTerminalHeartbeat($event)"
         aria-label="Sync terminal heartbeat" interface="action-sheet">

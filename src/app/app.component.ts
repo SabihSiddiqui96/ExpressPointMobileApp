@@ -137,6 +137,7 @@ export class AppComponent {
   public keyboardHideSubscription;
   public performanceOptions: any = {
     LiveBalancePayments: true,
+    LivePaymentsForPatron: false,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
     SyncTransactionData: "1",

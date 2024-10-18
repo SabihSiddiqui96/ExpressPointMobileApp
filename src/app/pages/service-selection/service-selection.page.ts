@@ -114,8 +114,6 @@ export class ServiceSelectionPage implements OnInit {
     });
     //  const settings = JSON.parse(AppStateService.get("login_details")).Settings;
 
-    AppStateService.set("AllCatRemainOpen", true);
-
     const isTeacher = SettingService.isUserPermitted('CSQUICK');
     if (isTeacher && !this.canOpenPOS) {
       PouchQueriesService.GetSchoolDetails(

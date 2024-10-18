@@ -67,6 +67,11 @@ export class SystemDBService {
         categoriesTapClose = AppStateService.get('categoriesTapClose');
       }
 
+      let AllCatRemainOpen = true;
+      if (AppStateService.get('AllCatRemainOpen') != undefined && AppStateService.get('AllCatRemainOpen') != null) {
+        AllCatRemainOpen = AppStateService.get('AllCatRemainOpen');
+      }
+
       let checkIfPinEntered = false;
       if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
         checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
@@ -114,6 +119,7 @@ export class SystemDBService {
         'TranDbDestroyedDate': TranDbDestroyedDate,
         'LastLoggedInUser': lastLoggedInUser,
         'categoriesTapClose': categoriesTapClose,
+        'AllCatRemainOpen': AllCatRemainOpen,
         'CheckIfPinEntered': checkIfPinEntered,
         'performanceOptions': performanceOptions
       };
