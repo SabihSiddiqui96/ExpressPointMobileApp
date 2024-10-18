@@ -34,7 +34,6 @@ export class LookupService {
     public serverResultSet = null;
     public personsQ = [];
     public lookupResults = [];
-    public lookupPatronIdResults = [];
     public lookupPinResults = [];
     public personDetails: any;
     public studentPin;
@@ -54,7 +53,9 @@ export class LookupService {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
             if (userEventData.selected_patron) {
-                AppStateService.remove('patron_details');
+                if (userEventData.pageFrom != undefined && userEventData.pageFrom == '') {
+                    AppStateService.remove('patron_details');
+                }
                 if (userEventData.selected_patron.PersonId) {
                     this.lookupResults = [];
                     // If the Person is from the server lookup, make a call to get his Details
@@ -89,41 +90,119 @@ export class LookupService {
         // this.event.unsubscribe('getServerResults')
 
         if (this.utilService.isElectronApp() && this.utilService.showModalPopup) {
-            this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+            const handleQueueInput = async (event, queueInput) => {
                 this.localtimer_device = new Date().getTime();
-                AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);     
+                AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);
                 const keywordSearchLength = this.keywordService.keywordSearchLength;
-                this.setQ(queueInput, keywordSearchLength > 0);
+                this.setQ(queueInput, keywordSearchLength);
                 this.utilService.showModalPopup = false;
+            };
+            this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
+                handleQueueInput(event, queueInput); // Call the async handler for each event
             });
         }
     }
 
-    public setQ(queueInput, searchTextExists: boolean = false) {
+    private inputQueue: any[] = []; // Queue for inputs
+    private isProcessingQueue: boolean = false; // Lock to ensure sequential processing
+
+    public async setQ(queueInput, searchTextLength: number = 0) {
+        // Your existing setQ logic goes here
         this.getSettingValuesRequired(); // Added this to get the setting values in lookup using peripherals
 
-        this.logDBService.logData({
-            event: EventType.QUEUE,
-            patronId: queueInput.PIN,
-            type: LogType.INFO,
-            data: queueInput
-        });
+        // Check for duplicates in the inputQueue based on the PIN
+        const duplicateIndex = this.inputQueue.findIndex(item => item.queueInput.PIN === queueInput.PIN);
+        const personInQ = _.findIndex(this.personsQ, p => p.Identifier === queueInput.PIN);
+        const storedPatronDetails = AppStateService.get('patron_details');
 
-        this.lookupAndPushPersonToQ(queueInput).then(() => {
-            if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
-                AppStateService.get('currentTab') !== 'advanced') {                
-                if (this.isModelWindowOpened) {
-                    return;
-                }
-                if (AppStateService.get('UnidentifiedPatronPopUp') == '1'){
-                    return;
-                }
-                if (searchTextExists && this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && AppStateService.get('CheckIfPinEntered') == true) {
-                    return;
-                }
-                this.selectPatron(this.personsQ[0]);
+        // If the stored patron details exist and match the incoming PIN, we ignore this request
+        if (storedPatronDetails !== undefined) {
+            const storedPatron = JSON.parse(storedPatronDetails);
+            if (storedPatron.Identifier === queueInput.PIN) {
+                return; // Early exit if already processed
             }
-        });
+        }
+
+        // If a duplicate is found, do not add it to the inputQueue
+        if (duplicateIndex !== -1 || personInQ !== -1) {
+            // Optionally log that a duplicate was found
+            console.log(`Duplicate entry for PIN: ${queueInput.PIN}. Skipping insertion.`);
+            return; // Skip adding a new entry if it's a duplicate
+        }
+
+        // If not found, add to the internal queue
+        this.inputQueue.push({ queueInput, searchTextLength });
+
+        // Start processing if not already doing so
+        if (!this.isProcessingQueue) {
+            await this.processQueue(); // Process the queue
+        }
+    }
+
+    private async addInputToPersonsQ(queueInput) {
+        // Create a temporary person object to be added to personsQ
+        const person = {
+            'PersonName': queueInput.PIN,
+            'Identifier': queueInput.PIN,
+            'FirstName': '',
+            'LastName': '',
+            'InputDirection': queueInput.InputDirection
+        };
+
+        // Push the person into personsQ using pushPersonToQ
+        await this.pushPersonToQ(person, this.personsQ.length);
+
+        // Now perform the lookup to possibly update this entry
+        await this.lookupAndPushPersonToQ(queueInput);
+    }
+
+    private async processQueue() {
+        // Set the processing lock
+        this.isProcessingQueue = true;
+
+        // Process each input in the queue
+        while (this.inputQueue.length > 0) {
+            const { queueInput, searchTextLength } = this.inputQueue.shift(); // Get the next input
+
+            // Log the queue processing for the current input
+            this.logDBService.logData({
+                event: EventType.QUEUE,
+                patronId: queueInput.PIN,
+                type: LogType.INFO,
+                data: queueInput
+            });
+
+            // Immediately insert the queueInput into personsQ first
+            await this.addInputToPersonsQ(queueInput); // Wait for the input to be added
+
+            // Additional processing checks and actions
+            if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
+                AppStateService.get('currentTab') !== 'advanced') {
+
+                // Logic to determine if a modal should be shown or if processing should be skipped
+                if (this.isModelWindowOpened || AppStateService.get('UnidentifiedPatronPopUp') == '1') {
+                    continue; // Skip if conditions prevent showing the modal
+                }
+
+                if (searchTextLength > 0 && this.utilService.isElectronApp() &&
+                    AppStateService.get('pnpPeripherals') !== undefined &&
+                    AppStateService.get('pnpPeripherals') === false &&
+                    AppStateService.get('CheckIfPinEntered') === true) {
+                    continue; // Skip if peripherals check fails
+                }
+
+                // Select the first person in the queue if patron details are undefined
+                if (AppStateService.get('patron_details') === undefined) {
+                    await this.selectPatron(this.personsQ[0]); // Select the first person in the queue
+                }
+            }
+        }
+
+        // Update the subject with the latest personsQ state
+        this.personsQSubject.next(this.personsQ);
+
+        // Release the processing lock when the queue is empty
+        this.isProcessingQueue = false;
     }
 
     public getQ() {
@@ -188,87 +267,117 @@ export class LookupService {
         this.personsQSubject.next(this.personsQ);
     }
 
-    public pushPersonToQ(person, atIndex) {
-        this.logDBService.logData({
-            event: EventType.QUEUE,
-            personId: person.PersonId,
-            type: LogType.INFO,
-            data: person
+    public pushPersonToQ(person, atIndex, fromQueue = false) {
+        return new Promise<void>((resolve, reject) => {
+            this.logDBService.logData({
+                event: EventType.QUEUE,
+                personId: person.PersonId,
+                type: LogType.INFO,
+                data: person
+            });
+            person.InputDirection = person.InputDirection ? person.InputDirection : Direction.None;
+
+            let personInQ = person.Identifier !== undefined
+                ? _.findIndex(this.personsQ, p => p.Identifier === person.Identifier)
+                : -1; // If Identifier is not defined, set personInQ to -1
+            const specialPersonsinQ = _.findIndex(this.personsQ, q => q.PersonName === person.PersonName);
+
+            if (personInQ === -1 && fromQueue == false) {
+                if (AppStateService.get('patron_details') != undefined) {
+                    if (JSON.parse(AppStateService.get('patron_details')).Identifier === person.Identifier) {
+                        personInQ = 0;
+                    }
+                }
+            }
+
+            // Allow adding the person if they are not already in the queue
+            if (personInQ === -1 && (person.isSpecialAccount && specialPersonsinQ === -1 || !person.isSpecialAccount)) {
+                this.personsQ.splice(atIndex, 0, person);
+            }
+            // Notify subscribers about the updated personsQ
+            this.personsQSubject.next(this.personsQ);
+
+            // Resolve the promise once the operation is done
+            resolve();
         });
-        person.InputDirection = person.InputDirection ? person.InputDirection : Direction.None;
-        const personInQ = _.findIndex(this.personsQ, p => p.Identifier === person.Identifier);
-        const specialPersonsinQ = _.findIndex(this.personsQ, q => q.PersonName === person.PersonName);
-        if ((person.isSpecialAccount && specialPersonsinQ === -1) || personInQ === -1) {
-            this.personsQ.splice(atIndex, 0, person);
+    }
+
+    private updatePersonInQ(person) {
+        return new Promise<void>((resolve) => {
+            // Find the index of the person to update
+            const index = _.findIndex(this.personsQ, p => p.PersonName === person.Identifier);
+            if (index !== -1) {
+                // Update the existing person in personsQ
+                this.personsQ[index] = { ...this.personsQ[index], ...person };
+                this.personsQSubject.next(this.personsQ);
+            }
+            resolve(); // Resolve the promise after the update
+        });
+    }
+
+    public async lookupAndPushPersonToQ(queueInput): Promise<void> {
+        try {
+            const results = await this.pouchDBLookup(queueInput.PIN); // Await the result of pouchDBLookup
+
+            if (results.length === 1) { // Unique result
+                const person = results[0];
+                person.InputDirection = queueInput.InputDirection;
+                await this.updatePersonInQ(person); // Update the person entry in personsQ
+            } else {
+                console.log(`Added ${queueInput.PIN} without a unique lookup result.`);
+            }
+
+            // Log the lookup result
+            if (results.length > 0 && results[0] !== null) { // Check if results is not empty
+                await this.logDBService.logData({
+                    event: EventType.LOOKUP,
+                    patronId: queueInput.PIN,
+                    type: LogType.INFO,
+                    data: results[0],
+                    queueCount: this.personsQ.length
+                });
+            }
+        } catch (error) {
+            // Handle error logging
+            await this.logDBService.logError({
+                event: EventType.LOOKUP,
+                patronId: queueInput.PIN,
+                type: LogType.ERROR,
+                data: queueInput,
+                queueCount: this.personsQ.length
+            });
         }
-        this.personsQSubject.next(this.personsQ);
-    }
-
-    public lookupAndPushPersonToQ(queueInput) {
-        return new Promise((resolve) => {
-            this.pouchDBLookup(queueInput.PIN).then(results => { // changed this to local pin look up to not
-                // lookup the students when they are from peripheral
-                if ((<any>results).length === 1) { // Unique result: Person Can be inserted in the Q without further processing
-                    const person = results[0];
-                    person.InputDirection = queueInput.InputDirection;
-                    this.pushPersonToQ(person, this.personsQ.length);
-                } else { // non-unique results or 0 results: Insert the PIN in the Q.
-                    this.personsQ.push({
-                        'PersonName': queueInput.PIN,
-                        'FirstName': '',
-                        'LastName': '',
-                        'InputDirection': queueInput.InputDirection
-                    });
-                    this.personsQSubject.next(this.personsQ);
-                } // to display PIN in the modal
-                if (results[0] !== null) {
-                    this.logDBService.logData({
-                        event: EventType.LOOKUP,
-                        patronId: queueInput.PIN,
-                        type: LogType.INFO,
-                        data: results[0],
-                        queueCount: this.personsQ.length
-                    });
-                }
-                resolve(null);
-            }, (error) => {
-                if (queueInput !== null) {
-                    this.logDBService.logError({
-                        event: EventType.LOOKUP,
-                        patronId: queueInput.PIN,
-                        type: LogType.ERROR,
-                        data: queueInput,
-                        queueCount: this.personsQ.length
-                    });
-                }
-            });
-        });
     }
 
 
-    public lookupFromNonUniquePIN(queueInput, index?, enablePinSchool = true) {   // Second lookup, requiring cashier interaction: On server
-        return new Promise((resolve) => {
-            this.lookupByPIN(queueInput.PersonName, queueInput.InputDirection, enablePinSchool).then(() => {
 
-                // this.handlePersonResults()
-                if (index) {
-                    this.popPersonFromQ(queueInput.PersonName, index);
-                } else {
-                    this.popPersonFromQ(queueInput.PersonName);
-                }
-                resolve(null);
-            });
-        });
+    public async lookupFromNonUniquePIN(queueInput, index?, enablePinSchool = true) {
+        try {
+            // Perform the lookup using await for cleaner flow
+            await this.lookupByPIN(queueInput.PersonName, queueInput.InputDirection, enablePinSchool);
+
+            // Handle the person result and pop them from the queue
+            if (index !== undefined) {
+                this.popPersonFromQ(queueInput.PersonName, index);
+            } else {
+                this.popPersonFromQ(queueInput.PersonName);
+            }
+        } catch (error) {
+            console.error('Error during lookupFromNonUniquePIN:', error);
+            // Handle or log the error as needed
+        }
     }
 
-    public showPatronModel(patronList, isFromQueue, isFromAdvPatronSearch: boolean) {
+
+    public showPatronModel(patronList, isFromQueue, isFromAdvPatronSearch: boolean, pageFrom = '') {
         return new Promise((resolve) => {
             const isVisitingPatronAllowed = (this.canServeVisitingPatrons && (parseInt(SettingService.getSiteSettingValue('ENVIS')) > 0)) ? true : false;
             this.modalCtrl.create({
                 component: PatronListModalPage,
                 componentProps: {
                     'modalController': this.modalCtrl, 'patron_list': patronList, 'isFromQueue': isFromQueue,
-                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed
+                    'isFromAdvPatronSearch': isFromAdvPatronSearch, 'allowVisitingPatron': isVisitingPatronAllowed,
+                    'pageFrom': pageFrom
                 },
                 showBackdrop: true,
                 backdropDismiss: false,
@@ -288,73 +397,71 @@ export class LookupService {
 
     }
 
-    public selectPatron(patron) {
+    public async selectPatron(patron) {
         if (patron.PersonId !== undefined) { // Unique result: Person name displayed
             let checkForServer: boolean = false;
-            let getbalanceFromServer: boolean = Boolean(parseInt(SettingService.getSettingValue("BALCHK")));
+            let getBalanceFromServer: boolean = Boolean(parseInt(SettingService.getSettingValue("BALCHK")));
             let performanceOptions = AppStateService.get('performanceOptions');
-            let Balance = null;
+
             if (AppStateService.get('SiteSettings')) {
                 checkForServer = JSON.parse(AppStateService.get('SiteSettings'))[0].CheckOtherSiteSecMeal;
             }
-            if (getbalanceFromServer && !patron.IsFromServer && this.utilService.isAppOnline) {                
-                if (performanceOptions != undefined && performanceOptions.LiveBalancePayments == false) {   
+
+            // Get balance from server if necessary and online
+            if (getBalanceFromServer && !patron.IsFromServer && this.utilService.isAppOnline) {
+                if (performanceOptions && !performanceOptions.LiveBalancePayments) {
                     patron.Balance = patron.Balance;
-                }
-                else {
-                    this.personService.GetBalanceByAccountId(patron.AccountId).then(res => {
-                        if (res != null) {
-                            patron.Balance = res;
-                        }
-                    });
+                } else {
+                    patron.Balance = await this.personService.GetBalanceByAccountId(patron.AccountId);
                 }
             }
+
+            // Retrieve local sales and merge with previous sales
+            const localSalesByMealType = await PouchQueriesService.GetAllLocalTransactions_ByAccount(patron.AccountId);
+            patron.PreviousSales = await this.mergePreviousSales(patron.PreviousSales, localSalesByMealType);
+
+            // Check server for previous sales if needed
             if (checkForServer && !patron.IsFromServer && this.utilService.isAppOnline) {
+                const hadMeal = await this.setPreviousSales(patron);
 
-                this.setPreviousSales(patron).then(hadMeal => {
-                    if (!hadMeal && (performanceOptions == undefined || performanceOptions == null || (performanceOptions != undefined && performanceOptions.LiveDataFromOtherTerminals == true))) {
-                        this.GetPreviousSalesByAccountId(patron.AccountId).then((serverSales) => {
-                            if (!patron.PreviousSales) {
-                                patron.PreviousSales = serverSales;
-                                this.publishEvents(patron);
-                            } else {
-                                this.mergePreviousSales(patron.PreviousSales, serverSales).then((mergedSales) => {
-                                    patron.PreviousSales = mergedSales;
-                                    this.publishEvents(patron);
-                                });
-                            }
-                        });
+                if (!hadMeal && (!performanceOptions || performanceOptions.LiveDataFromOtherTerminals)) {
+                    const serverSales = await this.GetPreviousSalesByAccountId(patron.AccountId);
+
+                    if (!patron.PreviousSales) {
+                        patron.PreviousSales = serverSales;
                     } else {
-                        this.publishEvents(patron);
+                        patron.PreviousSales = await this.mergePreviousSales(patron.PreviousSales, serverSales);
                     }
-                });
+                    this.publishEvents(patron);
+                } else {
+                    this.publishEvents(patron);
+                }
             } else {
-                //This is added to check if the data in In-memory Database is latest or in EXP_Person DB
-                this.CheckPreviousSalesOnInMemoryDBByDate(patron).then((result: any) => {
-                    let isSpecialAccountCheck = false;
-                    if (AppStateService.get('patron_details') != undefined) {
-                        isSpecialAccountCheck = JSON.parse(AppStateService.get('patron_details')).isSpecialAccount;
-                    }
-                    //Added this if condition to check any delay between loading patrons 
-                    if (AppStateService.get('patron_details') === undefined || isSpecialAccountCheck == true) {
-                        this.publishEvents(result);
-                        //commented due to selecting a patron from list doesn't have lookup results
-                        //if (this.lookupResults.find(f => f.PersonId === result.PersonId)) {
-                        this.popPersonFromQ(result.Identifier);
-                    }
-                    else {
-                        this.pushPersonToQ(patron, this.personsQ.length);
-                    }
-                    //}
-                })
-            }
-        } else { // lookup from peripheral yielded non-unique results / no results
-            this.lookupFromNonUniquePIN(patron).then(() => {
-                // this.popPersonFromQ(patron.PersonName);//Commenting as causing multiple pop calls in case of similar non unique id list in queue
-            });
-            // will actually contain PIN (using the name to work around the existing logic)
+                // Check in-memory DB for previous sales
+                const result: any = await this.CheckPreviousSalesOnInMemoryDBByDate(patron);
 
-            // this.popPersonFromQ(patron.PersonName);
+                let isSpecialAccountCheck = false;
+                let checkSameId = false;
+                const storedPatronDetails = AppStateService.get('patron_details');
+
+                if (storedPatronDetails) {
+                    const pdetails = JSON.parse(storedPatronDetails);
+                    isSpecialAccountCheck = pdetails.isSpecialAccount;
+                    checkSameId = pdetails.Identifier === result.Identifier;
+                }
+
+                if (!checkSameId) {
+                    if (!storedPatronDetails || isSpecialAccountCheck) {
+                        this.publishEvents(result);
+                        this.popPersonFromQ(result.Identifier);
+                    } else {
+                        await this.pushPersonToQ(patron, this.personsQ.length);
+                    }
+                }
+            }
+        } else {
+            // Handle non-unique results from peripheral lookup
+            await this.lookupFromNonUniquePIN(patron);
         }
     }
 
@@ -400,115 +507,124 @@ export class LookupService {
     }
 
 
-    public lookupByPIN(pin, inputDirection = Direction.None, enablePinSchool) {
+    public async lookupByPIN(pin, inputDirection = Direction.None, enablePinSchool) {
         this.studentPin = pin;
-
         this.localResultSet = this.serverResultSet = null;
 
         this.getSettingValuesRequired();
 
-        if (this.canServeVisitingPatrons == true && this.CanServeVisitingAdults == true) {
+        if (this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
             this.canServeVisitingPatrons = true;
             this.CanServeVisitingAdults = false;
         }
-        return new Promise((resolve) => {
 
-            this.pouchDBLookup(pin).then(() => {
+        try {
+            // Perform local lookup first
+            await this.pouchDBLookup(pin);
 
-                if (this.lookupResults.length > 0) {
-                    // this.lookupResults.push({'label':1,'value':'not the thing you are looking for ?'})
-                    this.handlePersonResults(false, inputDirection);
-                    // resolve(this.lookupResults);
+            if (this.lookupResults.length > 0) {
+                await this.handlePersonResults(false, inputDirection);
+                return; // Resolve the function early if local lookup returns results
+            }
+
+            // If no results from local, check server lookup (only if enabled)
+            if (enablePinSchool) {
+                let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
+                    await this.serverLookup(pin, selectedSite);
+                    await this.handlePersonResults(false, inputDirection);
                 } else {
-                    if (enablePinSchool) {
-                        let selectedSite = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
-                        if (this.canServeVisitingPatrons || this.CanServeVisitingAdults) {
-                            this.serverLookup(pin, selectedSite).then(() => {
-                                this.handlePersonResults(false, inputDirection);
-                                // resolve(this.lookupResults);
-                            }, (error) => {
-
-                            });
-                        } else {
-                            this.lookupResults = [];
-                            this.handlePersonResults(false, inputDirection);
-                        }
-                    } else {
-                        this.popupMessageService.showMessage(PopupMessageCode.E24518);
-                    }
-
+                    this.lookupResults = [];
+                    await this.handlePersonResults(false, inputDirection);
                 }
-                resolve(null);
-            });
-        });
+            } else {
+                this.popupMessageService.showMessage(PopupMessageCode.E24518);
+            }
+        } catch (error) {
+            console.error('Error during lookupByPIN:', error);
+            // You can handle or throw the error if needed, e.g., reject with a custom message
+        }
     }
 
 
-    public pouchDBLookup(pin) {
-        return new Promise((resolve) => {
-            this.lookupPatronIdResults = [];
-            let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
+
+    public async pouchDBLookup(pin: string): Promise<any[]> {
+        let lookupPatronIdResults = [];
+        const SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
+
+        try {
             if (SearchByPin === '-1') {
-                PouchQueriesService.PatronSearchByName('', '', pin).
-                    then((res) => {
-                        const docs = res.docs.map((patron) => {
-                            if (!patron.isSpecialAccount) {
-                                patron['value'] = patron.PersonId;
-                                patron['label'] = patron.PersonName;
-                                patron['Image'] = patron.Image;
-                                return patron;
-                            }
-                        });
-                        this.lookupPatronIdResults = docs;
-                        //Method added due to Promise is returned before executing this step and 
-                        //previously it was called after search by pin - 1 if condition 
-                        this.pouchDBLookup_PINLookup(pin, SearchByPin, resolve);
-                    });
+                const res = await PouchQueriesService.PatronSearchByName('', '', pin);
+                const docs = res.docs
+                    .map((patron) => {
+                        if (!patron.isSpecialAccount) {
+                            patron['value'] = patron.PersonId;
+                            patron['label'] = patron.PersonName;
+                            patron['Image'] = patron.Image;
+                            return patron;
+                        }
+                    })
+                    .filter(Boolean);
+
+                lookupPatronIdResults = docs;
+                // Proceed with the PIN lookup after searching by name
+                return await this.pouchDBLookup_PINLookup(pin, SearchByPin, lookupPatronIdResults);
+            } else {
+                // Perform direct PIN lookup if SearchByPin is not -1
+                return await this.pouchDBLookup_PINLookup(pin, SearchByPin, []);
             }
-            else {
-                //Method added due to Promise is returned before executing this step and
-                //previously it was called after search by pin - 1 if condition now moved to else part
-                this.pouchDBLookup_PINLookup(pin, SearchByPin, resolve);
-            }
-        });
+        } catch (error) {
+            console.error('Error during pouchDBLookup:', error);
+            return []; // Return empty array in case of error
+        }
     }
 
-    private pouchDBLookup_PINLookup(pin: any, SearchByPin: any, resolve: (value: unknown) => void) {
-        // fetching all partial PIN results and filtering here is 'useExactPIN' is set to true
-        PouchQueriesService.PINLookup(pin).then((data) => {
+
+    private async pouchDBLookup_PINLookup(pin: any, SearchByPin: any, lookupPatronIdResults: any[]): Promise<any[]> {
+        try {
+            const data = await PouchQueriesService.PINLookup(pin);
             this.lookupResults = data.rows.map(row => row.doc);
-            if (SearchByPin == null || SearchByPin == undefined) {
-                SearchByPin = '1';
+
+            if (!SearchByPin) {
+                SearchByPin = '1'; // Default to '1' if SearchByPin is null/undefined
             }
+
+            // Filter results based on useExactPIN flag
             if (this.useExactPIN === 1) {
                 if (SearchByPin === '1') {
                     this.lookupResults = this.lookupResults.filter(r => r.Identifier === pin);
-
                 } else {
                     this.lookupResults = this.lookupResults.filter(r => r.PersonIdentifier === pin);
                 }
             }
 
+            // Handle SearchByPin === '-1': Merge with lookupPatronIdResults and filter duplicates
             if (SearchByPin === '-1') {
                 if (this.lookupResults.length === 0) {
-                    this.lookupResults = (this.lookupPatronIdResults);
-                }
-                else if (this.lookupResults.length > 0 && this.lookupPatronIdResults.length > 0) {
-                    this.lookupResults = this.lookupResults.concat(this.lookupPatronIdResults);
+                    this.lookupResults = this.lookupResults.concat(lookupPatronIdResults);
+                } else if (this.lookupResults.length > 0 && lookupPatronIdResults.length > 0) {
+                    this.lookupResults = this.lookupResults.concat(lookupPatronIdResults);
+
+                    // Filter out duplicates based on Identifier and PersonIdentifier
                     const keys = ['Identifier', 'PersonIdentifier'];
-                    const filteredData = this.lookupResults.filter((value, index, self) =>
+                    this.lookupResults = this.lookupResults.filter((value, index, self) =>
                         self.findIndex(v => keys.every(k => v[k] === value[k])) === index
                     );
-                    this.lookupResults = filteredData;
                 }
             }
 
+            // Exclude inactive students if required
             if (this.serveInactiveStudents === 0) {
                 this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
             }
-            // this.localResultSet = this.lookupResults
-            resolve(this.lookupResults);
-        });
+
+            // Return the final lookup results
+            return this.lookupResults;
+
+        } catch (error) {
+            console.error('Error during PIN lookup:', error);
+            return []; // Return an empty array on error
+        }
     }
 
     public serverLookup(pin, schoolId) {
@@ -543,8 +659,8 @@ export class LookupService {
 
 
     // Added in Lookup refactor
-    public handlePersonResults(fromAdvPatronSearch?: boolean, inputDirection = Direction.None) {
-        return new Promise((resolve) => {
+    public async handlePersonResults(fromAdvPatronSearch?: boolean, inputDirection = Direction.None, pageFrom = '') {
+        return new Promise(async (resolve) => {
             if (this.lookupResults.length === 0) {
                 let params = []
                 if (fromAdvPatronSearch) {
@@ -566,15 +682,15 @@ export class LookupService {
                 // this.utilService.showToast('No results found.');
             } else if (this.lookupResults.length === 1) {
                 if (this.lookupResults[0].IsFromServer) {
-                    this.getPersonInfoByPersonId(this.lookupResults[0].PersonId).then(() => {
+                    this.getPersonInfoByPersonId(this.lookupResults[0].PersonId).then(async () => {
                         this.personDetails.InputDirection = inputDirection;
                         resolve('Success');
-                        this.selectPatron(this.personDetails);
+                        await this.selectPatron(this.personDetails);
                     });
                 } else {
                     this.lookupResults[0].InputDirection = inputDirection;
                     resolve('Success');
-                    this.selectPatron(this.lookupResults[0]);
+                    await this.selectPatron(this.lookupResults[0]);
                 }
                 this.utilService.setLoader(false);
             } else if (this.lookupResults.length > 1) { // && this.lookupResults.length <= 20
@@ -582,7 +698,7 @@ export class LookupService {
                     if (PL !== undefined)
                         PL.InputDirection = inputDirection;
                 });
-                this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch).then(() => {
+                await this.showPatronModel(this.lookupResults, false, fromAdvPatronSearch, pageFrom).then(() => {
                     resolve('Success');
                 });
                 this.utilService.setLoader(false);
@@ -673,7 +789,7 @@ export class LookupService {
   
      */
     public AdvancedPatronlookup(selectedsite, firstname,
-        lastname, externalId, isServerLookup) {
+        lastname, externalId, isServerLookup, pageFrom = '') {
         let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');
         this.canServeVisitingPatrons = SettingService.isUserPermitted('OTHRSCHSAL');
         this.CanServeVisitingAdults = SettingService.isUserPermitted('OTHRSADLT');
@@ -713,24 +829,24 @@ export class LookupService {
                         let searchServer: number = 0;
                         if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.CanServeVisitingAdults)) {
                             searchServer = 1;
-                            this.patronFromServer(firstname, lastname, externalId, selectedsite);
+                            this.patronFromServer(firstname, lastname, externalId, selectedsite, pageFrom);
                         }
                         if (searchServer == 0) {
-                            this.handlePersonResults(true).then(() => {
+                            this.handlePersonResults(true, Direction.None, pageFrom).then(() => {
                                 this.utilService.setLoader(false);
                             }).catch(() => this.utilService.setLoader(false));
                         }
                         resolve(this.lookupResults);
                     }).catch((err) => {
                         this.lookupResults = [];
-                        this.handlePersonResults(true).then(() => {
+                        this.handlePersonResults(true, Direction.None, pageFrom).then(() => {
                             this.utilService.setLoader(false);
                         }).catch(() => this.utilService.setLoader(false));
                         resolve([]); console.log(err);
                     });
             } else {
                 this.utilService.setLoader(false);
-                this.patronFromServer(firstname, lastname, externalId, selectedsite);
+                this.patronFromServer(firstname, lastname, externalId, selectedsite, pageFrom);
             }
 
         });
@@ -743,7 +859,7 @@ export class LookupService {
         this.loader.dismiss();
     }
 
-    public patronFromServer(firstname, lastname, externalId, selectedsite) {
+    public patronFromServer(firstname, lastname, externalId, selectedsite, pageFrom = '') {
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (!isNetworkOnline) {
                 this.popupMessageService.showMessage(PopupMessageCode.E24399);
@@ -781,7 +897,7 @@ export class LookupService {
                             }
 
 
-                            this.handlePersonResults(true);
+                            this.handlePersonResults(true, Direction.None, pageFrom);
                         },
                         error => { console.log(error); this.loader.dismiss(); });
             }
@@ -883,22 +999,34 @@ export class LookupService {
                         let data = patron.SyncedFromServerAt > result.docs[0].SyncedFromServerAt ? patron : result.docs[0];
                         data.InputDirection = inputDirectionVal;
                         // this.utilService.showToast(patron.SyncedFromServerAt + ' ' + result.docs[0].SyncedFromServerAt)
+                        this.mergePreviousSales(patron.PreviousSales, result.docs[0].PreviousSales).then((mergedLocalSales) => {
+                            patron.PreviousSales = mergedLocalSales;
+                        });
                         resolve(data);
                     } else {
                         if (patron.SyncedFromServerAt) {
                             // this.utilService.showToast(patron.SyncedFromServerAt + ' EXPPerson')
-                            resolve(patron)
+                            this.mergePreviousSales(patron.PreviousSales, result.docs[0].PreviousSales).then((mergedLocalSales) => {
+                                patron.PreviousSales = mergedLocalSales;
+                            });
+                            resolve(patron);
                         } else if (result.docs[0].SyncedFromServerAt) {
                             // this.utilService.showToast(result.docs[0].SyncedFromServerAt + ' Inmemory')
                             result.docs[0].InputDirection = inputDirectionVal;
-                            resolve(result.docs[0])
+                            this.mergePreviousSales(patron.PreviousSales, result.docs[0].PreviousSales).then((mergedLocalSales) => {
+                                result.docs[0].PreviousSales = mergedLocalSales;
+                            });
+                            resolve(result.docs[0]);
                         } else {
                             result.docs[0].InputDirection = inputDirectionVal;
-                            resolve(result.docs[0])
+                            this.mergePreviousSales(patron.PreviousSales, result.docs[0].PreviousSales).then((mergedLocalSales) => {
+                                result.docs[0].PreviousSales = mergedLocalSales;
+                            });
+                            resolve(result.docs[0]);
                         }
                     }
                 } else {
-                    resolve(patron)
+                    resolve(patron);
                 }
             })
         })

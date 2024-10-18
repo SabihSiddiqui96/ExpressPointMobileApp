@@ -1366,6 +1366,58 @@ export class PouchQueriesService {
     return (promise);
   }
 
+  public static async GetAllLocalTransactions_ByAccount(AccountId) {
+    const dateOnlyEpoch = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+
+    // Fetch transactions for the given account and date
+    const transactions = await EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "Transaction",
+          $lt: "Transaction\uffff"
+        },
+        'saleData.TransactionDate': {
+          $gt: dateOnlyEpoch
+        },
+        'saleData.AccountId': {
+          $eq: AccountId
+        }
+      },
+      include_docs: true
+    });
+
+    // Initialize an array to store sales grouped by MealTypeId
+    const salesByMealType = [];
+
+    // Process each transaction document
+    transactions.docs.forEach(doc => {
+      const sale = doc.saleData;
+
+      // Ensure MenuItems exists and is an array
+      if (Array.isArray(sale.MenuItems)) {
+        sale.MenuItems.forEach(menuItem => {
+          const mealTypeId = sale.MealTypeId; // Access MealTypeId from MenuItem
+
+          // Find if the meal type already exists in the salesByMealType array
+          let mealTypeGroup = salesByMealType.find(group => group.MealTypeId === mealTypeId);
+
+          if (!mealTypeGroup) {
+            // If it doesn't exist, initialize a new group for this MealTypeId
+            mealTypeGroup = {
+              MealTypeId: mealTypeId,
+              SalesByMealType: []
+            };
+            salesByMealType.push(mealTypeGroup);
+          }
+          // Add the MenuItem to the SalesByMealType array
+          mealTypeGroup.SalesByMealType.push(menuItem);
+        });
+      }
+    });
+
+    return salesByMealType; // Return the grouped results as an array
+  }
+
   public static GetAllPendingClassRoomSales() {
     return EXP_TRANSACTIONS.allDocs({
       startkey: 'ClassRoomSale',
