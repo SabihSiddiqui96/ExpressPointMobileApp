@@ -75,6 +75,12 @@ ion-header {
   box-shadow: none;
   --opacity: 1;
 }
+
+.panel-main ion-header ion-menu-toggle ion-button:hover { 
+  --background-hover-opacity : 0.6 !important;  
+  --background: transparent;
+}
+
 .center-text {
   display: block;
   text-align: center;

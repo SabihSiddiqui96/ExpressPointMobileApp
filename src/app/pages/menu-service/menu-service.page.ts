@@ -139,6 +139,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 } else {
                     this.countQ = 0;
                 }
+                // Manually trigger change detection to update the UI immediately
+                this.cdr.detectChanges();
             }
         );
         this.event.destroy('patron:selected');
@@ -195,7 +197,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public sessionId = null;
     public setting = {
         'Setting_ChargeReimbursableMealsOnly': null, 'Setting_ActionWhenBelowChargeLimit': null,
-        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null
+        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null, 'PREFNAME': null
     };
     // public setting={}
     public patronImageConditionCheck = '';
@@ -336,6 +338,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public displayDetails: boolean = false;
     public countQ;
     public personName: string;
+    public preferredNameDisplay: string;
     public loadingID;
     public disablePay: boolean = false;
     public disableCharge: boolean = false;
@@ -362,6 +365,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         private cdr: ChangeDetectorRef,
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
+        this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
         AppStateService.remove('patron_details');
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -936,13 +940,45 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }, 500);
     }
 
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.setting.PREFNAME;
+
+        if (!PreferredName) {
+            if (LastName && LastName.trim() !== '') {
+                return FirstName && FirstName.trim() !== ''
+                    ? `${LastName}, ${FirstName}`
+                    : LastName;
+            } else {
+                return PersonName; // Fallback if both LastName and PreferredName are empty
+            }  // Default to PersonName if PreferredName is undefined or empty
+        }
+
+        if (prefNameValue === 1) {
+            if (LastName && LastName.trim() !== '') {
+                return FirstName && FirstName.trim() !== ''
+                    ? `${LastName}, ${FirstName}`
+                    : LastName;
+            } else {
+                return PersonName; // Fallback if both LastName and PreferredName are empty
+            }
+        } else if (prefNameValue === 2) {
+            return `${LastName}, ${PreferredName}`;
+        } else if (prefNameValue === 3) {
+            return `${LastName}, ${FirstName} (${PreferredName})`;
+        } else if (prefNameValue === 4) {
+            return `${LastName}, ${PreferredName} (${FirstName})`;
+        }
+
+        return PersonName;  // Fallback to PersonName if no prefNameValue matches
+    }
+
     public getPatronDetails(patronSelectedData) {
         // Put this check in place to make sure duplicates doesnot happen on the same terminal at the same time. 
         // if (!this.patronSelectedData.PersonId) {
         this.isPatronHavingImage = false;
         this.patronDetails = JSON.parse(patronSelectedData);
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
-        this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName'];
+        this.preferredNameDisplay = this.getPreferredName(this.patronDetails['FirstName'], this.patronDetails['LastName'], this.patronDetails['PreferredName'], this.patronDetails['PersonName']);
         this.isStaffNVisitor = this.checkStaffNVisitor(this.patronDetails);
         this.largeImageToShow = false;
         this.ResetRestrictions();
@@ -2134,7 +2170,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // this.setMealCount(this.mealCount);
     }
 
-    public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
+    public async Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
+
+        // Helper: Normalize boolean values that may be strings ('true', 'false')
+        const normalizeBoolean = (value: any): boolean => {
+            if (typeof value === 'boolean') return value;
+            if (typeof value === 'string') return value.toLowerCase() === 'true';
+            return false; // Default fallback for non-boolean values
+        };
+
+        // Normalize patron details
+        const isStudent = normalizeBoolean(this.patronDetails.IsStudent);
 
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         let priceTypeId_State = priceTypeId;
@@ -2165,16 +2211,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         this.menuItemsArr.push(menuItemNo);
 
-        PouchQueriesService.GetPrice(menuItem.RefId, this.paidMealPriceType, this.patronDetails.RDAGroupId,
-            this.patronDetails.IsStudent, this.priceMode).then((paidPrice) => {
-                if (paidPrice != null && paidPrice.rows.length > 0) {
-                    this.paidMealPrice = paidPrice.rows[0].doc.Price;
-                    this.currPaidMealPrice = paidPrice.rows[0].doc.Price;
-                }
-            });
+        // First price retrieval
+        const paidPrice = await PouchQueriesService.GetPrice(menuItem.RefId, this.paidMealPriceType, this.patronDetails.RDAGroupId, isStudent, this.priceMode);
+        if (paidPrice && paidPrice.rows.length > 0) {
+            this.paidMealPrice = paidPrice.rows[0].doc.Price;
+            this.currPaidMealPrice = paidPrice.rows[0].doc.Price;
+        }
 
-
-        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, this.patronDetails.IsStudent, this.priceMode).then((price) => {
+        PouchQueriesService.GetPrice(menuItem.RefId, priceTypeId_State, this.patronDetails.RDAGroupId, isStudent, this.priceMode).then((price) => {
 
 
             let secondmeal = false;
@@ -2191,31 +2235,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
             let paidMealPrice = this.paidMealPrice;
             currPaidMealPrice = this.paidMealPrice;
 
-            if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                if (this.patronDetails.IsStudent
-                    && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
-
-                    if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
+            // Determine if CEP price applies
+            if (this.mealCount <= 1 && normalizeBoolean(menuItem.IsReimbursable)) {
+                if (isStudent && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
+                    if (normalizeBoolean(this.patronDetails.isStudentCEP)) {
                         cepPriceApply = true;
-                    } else { // student is not CEP => Check CHRGNCEP setting to charge or not
-                        if (this.isSiteCEP === true) {
-                            if (this.setting.CHRGNCEP === false) {
-                                cepPriceApply = true;
-                            } else if (this.setting.CHRGNCEP === true) {
-                                cepPriceApply = false;
-                            }
-                        } else {
-                            cepPriceApply = false;
-                        }
+                    } else if (normalizeBoolean(this.isSiteCEP) && !normalizeBoolean(this.setting.CHRGNCEP)) {
+                        cepPriceApply = true;
                     }
                 }
             }
 
-            if (cepPriceApply) {
-                if (price.rows.length > 0) {
-                    currPrice = 0;
-                    canAdd = true;
-                }
+            if (cepPriceApply && price.rows.length > 0) {
+                currPrice = 0;
+                canAdd = true;
             } else {
                 if (price.rows.length > 0) {
                     itemPrice = price.rows[0].doc.Price;
@@ -2241,7 +2274,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     // if (is_restricted_item != -1 && this.patronDetails.isSpecialAccount == false && this.patronDetails['GradeId']) { //IsStudent Check
                     if ((isRestrictedItem != -1 || isRestrictedCategory != -1) &&
                         this.patronDetails.isSpecialAccount === false &&
-                        this.patronDetails.IsStudent === true) { // IsStudent Check
+                        isStudent === true) { // IsStudent Check
                         if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                             this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
@@ -2290,7 +2323,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
 
                 if (secondmeal == false) { // (this.patronDetails.PriceTypeStatus === "111" || this.patronDetails.PriceTypeStatus === "112") &&
-                    if (this.setting.HIDELGBLTY === 1 && this.patronDetails.IsStudent === true) {
+                    if (this.setting.HIDELGBLTY === 1 && isStudent === true) {
                         this.showPaidPrice = true;
                     } else {
                         this.showPaidPrice = false;
@@ -2338,7 +2371,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'Quantity': quantity,
                         'CurrentPrice': currPrice,
                         'IniTotalPrice': itemPrice,
-                        'IsStudent': this.patronDetails.IsStudent,
+                        'IsStudent': isStudent,
                         'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
                         'ItemAddedAt': LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
                         'IsTaxable': menuItem.IsTaxable,
@@ -3851,7 +3884,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             AppStateService.remove('patron_details');
             if (this.patronDetails.PersonId !== null) {
@@ -3904,9 +3937,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.popupMessageService.showMessage(PopupMessageCode.E05427);
                 return;
             }
+            this.displayDetails = false;
+            this.utilService.selectAccountClick = false;
+            this.lookUpService.menuPayselectAccountClick = false;
+            this.selectedAccountDetails = {};
             this.goToLookUp();
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             this.lookUpService.populatePersonsFromQ();
 
@@ -4010,7 +4047,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         this.event.publish('patron:setLastPatronMenuService', currentPatron);
         this.lookUpService.pushPersonToQ(JSON.parse(currentPatron), 0);
-        this.event.publish('patronSelectedFromList', { 'selected_patron': JSON.parse(this.lastPatron) });
+        this.event.publish('patronSelectedFromList', { 'selected_patron': JSON.parse(this.lastPatron), 'pageFrom': '' });
     }
 
     public fetchLastPatronFromServer() {
@@ -5019,7 +5056,17 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public forceConfirmed_CartMenuItem(menuItem, priceTypeId) {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
+            // Helper: Normalize boolean values that may be strings ('true', 'false')
+            const normalizeBoolean = (value: any): boolean => {
+                if (typeof value === 'boolean') return value;
+                if (typeof value === 'string') return value.toLowerCase() === 'true';
+                return false; // Default fallback for non-boolean values
+            };
+
+            // Normalize patron details
+            const isStudent = normalizeBoolean(this.patronDetails.IsStudent);
+
             let menuItemNo = 0;
             this.showPaidPrice = false;
 
@@ -5035,13 +5082,12 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.transactionInProgress = false;
             }
 
-            PouchQueriesService.GetPrice(menuItemNo, this.paidMealPriceType, this.patronDetails.RDAGroupId,
-                this.patronDetails.IsStudent, this.priceMode).then((paidPrice) => {
-                    if (paidPrice != null && paidPrice.length > 0) {
-                        this.paidMealPrice = paidPrice[0].Price;
-                        this.currPaidMealPrice = paidPrice[0].Price;
-                    }
-                });
+            // First price retrieval
+            const paidPrice = await PouchQueriesService.GetPrice(menuItemNo, this.paidMealPriceType, this.patronDetails.RDAGroupId, isStudent, this.priceMode);
+            if (paidPrice && paidPrice.rows.length > 0) {
+                this.paidMealPrice = paidPrice.rows[0].doc.Price;
+                this.currPaidMealPrice = paidPrice.rows[0].doc.Price;
+            }
             
             let secondmeal = false;
             (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
@@ -5057,7 +5103,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             }
 
             PouchQueriesService.GetPrice(menuItemNo, priceTypeId_State, this.patronDetails.RDAGroupId,
-                this.patronDetails.IsStudent, this.priceMode).then((price) => {
+                isStudent, this.priceMode).then((price) => {
                     if (price.length > 0 && price[0].isSaleAllowed !== undefined && !price[0].isSaleAllowed) {
                         this.popupMessageService.showMessage("Selected item is not allowed for sale")
                         this.autoServeEnabled = true;
@@ -5080,31 +5126,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     let paidMealPrice = this.paidMealPrice;
                     currPaidMealPrice = this.paidMealPrice;
 
-                    if (this.mealCount === 1 && menuItem.IsReimbursable) {
-                        if (this.patronDetails.IsStudent
-                            && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
-
-                            if (this.patronDetails.isStudentCEP === true) { // student is CEP => CEP price no matter with school
+                    // Determine if CEP price applies
+                    if (this.mealCount <= 1 && normalizeBoolean(menuItem.IsReimbursable)) {
+                        if (isStudent && !this.nonCEPMealTypes.has(menuItem.MealTypeId)) {
+                            if (normalizeBoolean(this.patronDetails.isStudentCEP)) {
                                 cepPriceApply = true;
-                            } else { // student is not CEP => Check CHRGNCEP setting to charge or not
-                                if (this.isSiteCEP === true) {
-                                    if (this.setting.CHRGNCEP === false) {
-                                        cepPriceApply = true;
-                                    } else if (this.setting.CHRGNCEP === true) {
-                                        cepPriceApply = false;
-                                    }
-                                } else {
-                                    cepPriceApply = false;
-                                }
+                            } else if (normalizeBoolean(this.isSiteCEP) && !normalizeBoolean(this.setting.CHRGNCEP)) {
+                                cepPriceApply = true;
                             }
                         }
                     }
 
-                    if (cepPriceApply) {
-                        if (price.rows.length > 0) {
-                            currPrice = 0;
-                            canAdd = true;
-                        }
+                    if (cepPriceApply && price.rows.length > 0) {
+                        currPrice = 0;
+                        canAdd = true;
                     } else {
                         if (price.rows.length > 0) {
                             itemPrice = price.rows[0].doc.Price;
@@ -5126,7 +5161,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             }
                             if (
                                 this.patronDetails.isSpecialAccount === false &&
-                                this.patronDetails.IsStudent === true) { // IsStudent Check
+                                isStudent === true) { // IsStudent Check
                                 if (this.settingAutoPause.restrictions) {
                                     if (((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                                         this.patronDetails['AvailableAmountForALCPurchases'] != null) && this.ALACASREST) {
@@ -5150,7 +5185,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         }
 
                         if (secondmeal === false) {
-                            if (this.setting.HIDELGBLTY === 1 && this.patronDetails.IsStudent === true) {
+                            if (this.setting.HIDELGBLTY === 1 && isStudent === true) {
                                 this.showPaidPrice = true;
                             } else {
                                 this.showPaidPrice = false;
@@ -5230,7 +5265,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'Quantity': quantity,
                                     'CurrentPrice': currPrice,
                                     'IniTotalPrice': itemPrice,
-                                    'IsStudent': this.patronDetails.IsStudent,
+                                    'IsStudent': isStudent,
                                     'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
                                     'ItemAddedAt': LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
                                     'IsTaxable': menuItem.IsTaxable,
@@ -5436,6 +5471,18 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     
                 }                
             }
+            else {               
+                popupShow = true;
+                this.modalCtrl.create({
+                    component: UnidentifiedPatronPopupPage,
+                    cssClass: 'customModal',
+                    componentProps: {
+                        'Message': userEventData.params[0].replace('for', '')
+                    }, backdropDismiss: false
+                }).then(async (res) => {
+                    await res.present();                    
+                });
+            }
             if (popupShow == false) {
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
                 this.popupMessageService.showMessage(PopupMessageCode.E24397, userEventData);
@@ -5452,6 +5499,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         console.log('GetQ   ' + this.lookUpService.getQ()[0]);
                         this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                     }
+                }
+            }
+            else {
+                this.impermanentAutoServePause = false;
+                this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
+                if (this.lookUpService.getQ().length !== 0) {
+                    console.log('GetQ   ' + this.lookUpService.getQ()[0]);
+                    this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
                 }
             }
         });

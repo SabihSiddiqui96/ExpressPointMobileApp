@@ -170,7 +170,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         'canServeVisitingPatrons': null,
         'EXNEGBAL': null,
         'HIDELGBLTY': null,
-        'CHRGNCEP': null
+        'CHRGNCEP': null,
+        'PREFNAME': null
     };
 
     public dayOfWeek = '0';
@@ -306,7 +307,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public countQ;
     public patronImage;
     public transactionInProgress: boolean = false;
-    public personName;
+    public personName: string;
+    public preferredNameDisplay: string;
     public allCategories = []; // Used to store all menu item categories
     public nonCEPMealTypes = new Set();
     public selectedAccountDetails: any = {};
@@ -351,7 +353,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public pouchQuery: PouchQueriesService, public loadingService: LoadingService, public signalRService: SignalRService) {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
-
+        this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
         AppStateService.remove('patron_details');
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isNaN(this.transactionNumber)) {
@@ -566,6 +568,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 } else {
                     this.countQ = 0;
                 }
+                // Manually trigger change detection to update the UI immediately
+                this.cdr.detectChanges();
             }
         );
 
@@ -943,6 +947,31 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         //this.hideStudentId = true;
     }
 
+    public getPreferredName(FirstName, LastName, PreferredName, PersonName) {
+        const prefNameValue = this.setting.PREFNAME;
+
+        if (!PreferredName) {
+            return FirstName && FirstName.trim() !== ''
+                ? `${LastName}, ${FirstName}`
+                : LastName;  // Default to PersonName if PreferredName is undefined or empty
+        }
+
+        if (prefNameValue === 1) {
+            return FirstName && FirstName.trim() !== ''
+                ? `${LastName}, ${FirstName}`
+                : LastName;
+        } else if (prefNameValue === 2) {
+            return `${LastName}, ${PreferredName}`;
+        } else if (prefNameValue === 3) {
+            return `${LastName}, ${FirstName} (${PreferredName})`;
+        } else if (prefNameValue === 4) {
+            return `${LastName}, ${PreferredName} (${FirstName})`;
+        }
+
+        return PersonName;  // Fallback to PersonName if no prefNameValue matches
+    }
+
+
     public getPatronDetails(patronSelectedData) {
         // console.clear();
         this.isPatronHavingImage = null;
@@ -985,6 +1014,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.patronDetails = this.patronDetails;
         this.orderData.accountBalance = this.patronDetails.Balance;
         this.personName = this.patronDetails['LastName'] + ', ' + this.patronDetails['FirstName']; // this.patronDetails['PersonName'].split(" ").join(", ");
+        this.preferredNameDisplay = this.getPreferredName(this.patronDetails['FirstName'], this.patronDetails['LastName'], this.patronDetails['PreferredName'], this.patronDetails['PersonName']);
         this.isStaffNVisitor = this.checkStaffNVisitor(this.patronDetails);
         this.checkForBirthday(this.patronDetails);
         if (this.isSpecialAccount === true || this.patronDetails.IsStudent === false) {
@@ -4660,7 +4690,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.bonusAmount = 0;
         AppStateService.remove('patron_details');
         if (this.lookUpService.getQ().length !== 0) {
-            this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+            // Commented out because this logic is already used in GetMenuDetailForDynamicMenu method
+            //this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+
         } else {
             if (this.returnToWhatPage === 'SpecialRoster') {
                 this.event.publish('patronLookup:ready', {
@@ -4821,10 +4853,15 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
 
         if (this.orderData.items.length === 0) {
+            //checking for special account doesnot have any items
+            if (this.patronDetails.isSpecialAccount == true) {
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                return;
+            }
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             AppStateService.remove('patron_details');
             if (this.patronDetails !== null) {
@@ -4872,9 +4909,18 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         console.log(this.patronDetails);
 
         if (this.orderData.items.length === 0) {
+            //checking for special account doesnot have any items
+            if (this.patronDetails.isSpecialAccount == true) {
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                return;
+            }
+            this.displayDetails = false;
+            this.utilService.selectAccountClick = false;
+            this.lookUpService.menuPayselectAccountClick = false;
+            this.selectedAccountDetails = {};
             this.goToLookUp();
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
-                this.lookUpService.pushPersonToQ(this.patronDetails, 0);    // putting the current patron in the queue at the top.
+                this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             this.lookUpService.populatePersonsFromQ();
         } else {
@@ -6568,7 +6614,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.bonusAmount = 0;
         this.event.publish('patron:setLastPatronMenuService', currentPatron);
         this.lookUpService.pushPersonToQ(JSON.parse(currentPatron), 0);
-        this.event.publish('patronSelectedFromList', { 'selected_patron': JSON.parse(this.lastPatron) });
+        this.event.publish('patronSelectedFromList', { 'selected_patron': JSON.parse(this.lastPatron), 'pageFrom': '' });
     }
 
     public loadPrevPatron() {
