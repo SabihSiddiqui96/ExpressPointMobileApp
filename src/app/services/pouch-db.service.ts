@@ -349,23 +349,67 @@ export class PouchDBService {
     //     });
     // }
 
-    public static UpsertDocs(docs, db) {
-        return db.allDocs({ include_docs: true })
-            .then(res => docs.map(doc => {
-                const row = res.rows.find(r => r.id === doc._id);
+    // Helper function to reopen the database
+    public static reopenDatabase(dbName: string, version: number = 1): Promise<IDBDatabase> {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(dbName, version);
+
+            request.onerror = (event) => {
+                console.error('Failed to reopen the database', event);
+                reject(event);
+            };
+
+            request.onsuccess = (event) => {
+                console.log('Database reopened successfully');
+                resolve(request.result as IDBDatabase);
+            };
+
+            request.onupgradeneeded = (event) => {
+                console.log('Upgrade needed during reopen');
+                // Add schema upgrade logic if necessary
+                resolve(request.result as IDBDatabase);
+            };
+        });
+    }
+
+    public static async UpsertDocs(docs: any[], db: any, retries: number = 3): Promise<any> {
+        try {
+            // Fetch all existing docs in the database
+            const res = await db.allDocs({ include_docs: true });
+
+            // Map through docs and update them with _rev if found in the database
+            const updatedDocs = docs.map(doc => {
+                const row = res.rows.find((r: any) => r.id === doc._id);
                 if (!row || row.error) {
                     return doc;
                 }
                 return Object.assign({}, doc, {
                     _rev: row.value.rev
                 });
-            }))
-            .then((doc) => {
-                db.bulkDocs(doc);
-                if (db.name === 'EXP_PERSON') {
-                    EXP_PERSON_IN_MEMORY.upsert(doc);
-                }
             });
+
+            // Try bulk updating the docs in the database
+            await db.bulkDocs(updatedDocs);
+
+            // If database is EXP_PERSON, upsert in memory as well
+            if (db.name === 'EXP_PERSON') {
+                EXP_PERSON_IN_MEMORY.upsert(updatedDocs);
+            }
+
+        } catch (err) {
+            console.error('Error during bulk upsert:', err);
+
+            // If the error is related to a closed database connection, attempt to retry
+            if (retries > 0 && err.message.includes('IDBDatabase')) {
+                console.warn('Retrying bulk upsert due to closed connection, remaining attempts:', retries);
+                // Reopen the database and retry the upsert
+                db = await this.reopenDatabase(db.name);
+                return this.UpsertDocs(docs, db, retries - 1);
+            } else {
+                // Return or throw the error if retries are exhausted
+                return Promise.reject(err);
+            }
+        }
     }
 
     public static UpsertLogs(docs, db) {
@@ -403,22 +447,35 @@ export class PouchDBService {
                 .then(() => {
                 }));
     }
-    public static UpsertSingleDoc(doc, db) {
-        if (db.name === 'EXP_PERSON') {
-            EXP_PERSON_IN_MEMORY.upsert(doc);
-            return db.upsert(doc._id, () => doc).catch(
-                (err) => {
-                    console.log(err);
-                    return err
-                });
-        } else {
-            return db.upsert(doc._id, () => doc).catch(
-                (err) => {
-                    console.log(err);
-                    return err
-                });
+    
+    public static async UpsertSingleDoc(doc: any, db: any, retries: number = 3): Promise<any> {
+        // Helper function to retry upsert operation
+        async function retryUpsert(doc: any, db: any, retries: number = 3): Promise<any> {
+            try {
+                return await db.upsert(doc._id, () => doc);
+            } catch (err) {
+                console.error('Error during upsert:', err);
+                if (retries > 0 && err.message.includes('IDBDatabase')) {
+                    console.warn('Retrying upsert due to closing connection, remaining attempts:', retries);
+                    // Reopen the database before retrying
+                    db = await this.reopenDatabase(db.name);
+                    return retryUpsert(doc, db, retries - 1);
+                } else {
+                    return Promise.reject(err);
+                }
+            }
         }
+
+        // Upsert logic with retry
+        if (db.name === 'EXP_PERSON') {
+            // In-memory upsert
+            EXP_PERSON_IN_MEMORY.upsert(doc);
+        }
+
+        // Perform upsert with retry handling
+        return retryUpsert(doc, db, retries);
     }
+
     // public setupPersonData() {
 
     //     let setupPromises = [];
