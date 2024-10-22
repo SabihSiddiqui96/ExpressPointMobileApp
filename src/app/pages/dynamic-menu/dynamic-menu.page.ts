@@ -4853,6 +4853,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         /**************************keep this?****************************** */
 
         if (this.orderData.items.length === 0) {
+            //checking for special account doesnot have any items
+            if (this.patronDetails.isSpecialAccount == true) {
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                return;
+            }
             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
             this.event.publish('enablePrevPatronPatronLookup', {});
             if (this.patronDetails != null && this.patronDetails != undefined && this.patronDetails.PersonId != null) {
@@ -4904,6 +4909,11 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         console.log(this.patronDetails);
 
         if (this.orderData.items.length === 0) {
+            //checking for special account doesnot have any items
+            if (this.patronDetails.isSpecialAccount == true) {
+                this.popupMessageService.showMessage(PopupMessageCode.E05427);
+                return;
+            }
             this.displayDetails = false;
             this.utilService.selectAccountClick = false;
             this.lookUpService.menuPayselectAccountClick = false;
