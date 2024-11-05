@@ -2657,7 +2657,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.mealFormed = false;
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
-            if (totalContribution >= 2 && fulfilledComponentCount >= 3 &&
+            if (((totalContribution >= 2 && fulfilledComponentCount >= 3) || (totalContribution > 2 && fulfilledComponentCount >= 2)) &&
                 (this.BREAKFAST_CASE_1 || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2))) {
                 this.mealFormed = true;
                 this.mealCount = 1;
@@ -5230,7 +5230,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public GetMenuDetailForDynamicMenu() {
         PouchQueriesService.GetDynamicMenuDetails().
             then((res) => {
-
+                const siteId = AppStateService.get('SiteId');                
                 const menuDetails = res.rows.filter(row => {
                     return (row.doc.MenuId === this.selectedServingLine);
                 });
@@ -5240,8 +5240,15 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const menuItems = menuDetails[0].doc.MenuItems;
                     if (menuItems.length > 0) {
                         for (let i = 0; i < menuItems.length; i++) {
-                            this.dynamicMenuItems.push(menuItems[i]);
-
+                            let siteIds_MenuItem = menuItems[i].SiteIds;
+                            if (siteIds_MenuItem.length == 0 || siteId == null || siteId == undefined) {
+                                this.dynamicMenuItems.push(menuItems[i]);
+                            }
+                            else {
+                                if (siteIds_MenuItem.includes(siteId.toString())) {
+                                    this.dynamicMenuItems.push(menuItems[i]);
+                                }
+                            }
                         }
                     }
                 }

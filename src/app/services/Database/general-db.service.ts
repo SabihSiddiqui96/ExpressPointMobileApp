@@ -665,6 +665,7 @@ export class GeneralDBService {
       if (AppStateService.get('SelectedSite')) {
         this.http.GetAllSiteSettings().subscribe(allSiteSettings => {
           AppStateService.set('AllSiteSettings', JSON.stringify(allSiteSettings));
+          AppStateService.set('SiteId', allSiteSettings[0].SiteId);
           this.syncStatus = 'Success';
           this.events.publish('data:syncDetails', { SiteSettings: { SyncAllSiteSettings: "D" } });
           resolve(null);
