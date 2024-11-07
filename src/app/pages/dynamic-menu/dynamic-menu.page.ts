@@ -5240,13 +5240,26 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const menuItems = menuDetails[0].doc.MenuItems;
                     if (menuItems.length > 0) {
                         for (let i = 0; i < menuItems.length; i++) {
-                            let siteIds_MenuItem = menuItems[i].SiteIds;
+                            let menuItem = menuItems[i];
+                            let siteIds_MenuItem = menuItem.SiteIds;
+
+                            // Check if an object with the same MenuItemId already exists
+                            let existingItem = this.dynamicMenuItems.find(item => item.MenuItemId === menuItem.MenuItemId);
+
+                            if (existingItem) {
+                                // If PlannedCount > 0, add it to the existing item's PlannedCount
+                                if (menuItem.PlannedCount && menuItem.PlannedCount > 0) {
+                                    existingItem.PlannedCount += menuItem.PlannedCount;
+                                }
+                                continue; // Skip adding a new entry since it already exists
+                            }
+
                             if (siteIds_MenuItem.length == 0 || siteId == null || siteId == undefined) {
-                                this.dynamicMenuItems.push(menuItems[i]);
+                                this.dynamicMenuItems.push(menuItem);
                             }
                             else {
                                 if (siteIds_MenuItem.includes(siteId.toString())) {
-                                    this.dynamicMenuItems.push(menuItems[i]);
+                                    this.dynamicMenuItems.push(menuItem);
                                 }
                             }
                         }
