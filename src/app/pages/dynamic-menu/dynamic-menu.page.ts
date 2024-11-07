@@ -5241,11 +5241,15 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if (menuItems.length > 0) {
                         for (let i = 0; i < menuItems.length; i++) {
                             let menuItem = menuItems[i];
-                            let siteIds_MenuItem = menuItem.SiteIds;
-
+                            let site_MenuItem = null;
+                            if (menuItem.SiteDetails) {
+                               site_MenuItem = menuItem.SiteDetails.find(item => item.SiteId === siteId);
+                            }
                             // Check if an object with the same MenuItemId already exists
                             let existingItem = this.dynamicMenuItems.find(item => item.MenuItemId === menuItem.MenuItemId);
-
+                            if (site_MenuItem) {
+                                menuItem.PlannedCount = site_MenuItem.PlannedCount;
+                            }
                             if (existingItem) {
                                 // If PlannedCount > 0, add it to the existing item's PlannedCount
                                 if (menuItem.PlannedCount && menuItem.PlannedCount > 0) {
@@ -5253,15 +5257,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 }
                                 continue; // Skip adding a new entry since it already exists
                             }
-
-                            if (siteIds_MenuItem.length == 0 || siteId == null || siteId == undefined) {
-                                this.dynamicMenuItems.push(menuItem);
-                            }
-                            else {
-                                if (siteIds_MenuItem.includes(siteId.toString())) {
-                                    this.dynamicMenuItems.push(menuItem);
-                                }
-                            }
+                            this.dynamicMenuItems.push(menuItem);
                         }
                     }
                 }
