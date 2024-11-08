@@ -4,7 +4,9 @@ trigger:
       - master  # Or the branch you want to trigger on
 
 pool:
-  vmImage: 'windows-latest'  # Or 'macos-latest' if you're using a Mac agent
+  name: PrimeroEdge
+  demands:
+    - Agent.Name -equals Agent-2
 
 variables:
   IONIC_CLI_VERSION: '5.4.16'
@@ -16,43 +18,6 @@ steps:
     inputs:
       versionSpec: '20.x'
     displayName: 'Use Node.js 20.x'
-
-  - script: |
-      SET JAVA_INSTALLED=false
-      SET JAVA_VERSION=""
-
-      REM Check if Java is installed and get the version
-      for /f "tokens=*" %%a in ('java -version 2^>^&1') do (
-          echo %%a
-          SET JAVA_VERSION=%%a
-      )
-
-      REM Check if JDK 11 is installed (looking for "11" in the version string)
-      echo %JAVA_VERSION% | findstr /i "11" >nul
-      if %ERRORLEVEL% NEQ 0 (
-          SET JAVA_INSTALLED=false
-      ) else (
-          SET JAVA_INSTALLED=true
-      )
-
-      REM If JDK 11 is not installed, download and install manually
-      if "%JAVA_INSTALLED%"=="false" (
-          echo JDK 11 is not installed. Downloading and installing...
-
-          REM Download OpenJDK using PowerShell
-          powershell -Command "Try {Invoke-WebRequest -Uri '%JDK_DOWNLOAD_URL%' -OutFile 'openjdk-11.zip' -ErrorAction Stop} Catch {Write-Host 'Error downloading JDK: $_'; exit 1}"
-
-          REM Extract OpenJDK to a specific directory
-          powershell -Command "Try {Expand-Archive -Path 'openjdk-11.zip' -DestinationPath 'C:\OpenJDK' -ErrorAction Stop} Catch {Write-Host 'Error extracting JDK: $_'; exit 1}"
-
-          REM Set JAVA_HOME and update PATH for current session
-          setx JAVA_HOME "C:\OpenJDK\jdk-11.0.11"
-          setx PATH "%PATH%;C:\OpenJDK\jdk-11.0.11\bin"
-      ) else (
-          echo JDK 11 is already installed.
-      )
-    displayName: 'Check and Install JDK 11'
-    condition: eq(variables['Agent.OS'], 'Windows_NT')
 
 
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
