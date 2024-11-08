@@ -22,14 +22,14 @@ steps:
     displayName: 'Install Ionic and Cordova CLI'
 
   - task: Npm@0
-  inputs:
-    command: 'install'
-    arguments: '-D -E @angular/cli'
+    inputs:
+      command: 'install'
+      arguments: '-D -E @angular/cli'
     displayName: 'Install npm packages'
 
-- task: CmdLine@2
-  inputs:
-    script: 'ionic build'
+  - task: CmdLine@2
+    inputs:
+      script: 'ionic build'
     displayName: 'Ionic Build'
 
   - script: |
