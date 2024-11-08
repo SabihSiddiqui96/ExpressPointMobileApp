@@ -21,8 +21,16 @@ steps:
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
     displayName: 'Install Ionic and Cordova CLI'
 
-  - script: npm ci
+  - task: Npm@0
+  inputs:
+    command: 'install'
+    arguments: '-D -E @angular/cli'
     displayName: 'Install npm packages'
+
+- task: CmdLine@2
+  inputs:
+    script: 'ionic build'
+    displayName: 'Ionic Build'
 
   - script: |
       ionic cordova platform add android
