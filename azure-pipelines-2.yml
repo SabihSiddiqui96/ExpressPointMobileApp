@@ -4,12 +4,12 @@ trigger:
       - master  # Or the branch you want to trigger on
 
 pool:
-  vmImage: 'ubuntu-latest'  # or 'macos-latest' if you need to use a Mac agent
+  vmImage: 'windows-latest'  # or 'macos-latest' if you need to use a Mac agent
 
 variables:
   # Define variables for Ionic and Cordova
-  IONIC_CLI_VERSION: '6.20.4'
-  CORDOVA_CLI_VERSION: '10.0.0'
+  IONIC_CLI_VERSION: '5.4.16'
+  CORDOVA_CLI_VERSION: '12.0.0'
   ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
 
 steps:
