@@ -13,10 +13,11 @@ variables:
   ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
 
 steps:
-  - task: UseNode@1
+  - task: NodeTool@0
     inputs:
-      versionSpec: '18.x'
-    displayName: 'Use Node.js 18.x'
+      versionSpec: '20.11.1'
+      checkLatest: true
+    displayName: 'Use Node.js 20.x'
 
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
     displayName: 'Install Ionic and Cordova CLI'
