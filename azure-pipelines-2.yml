@@ -19,15 +19,23 @@ steps:
 
   - script: |
       SET JAVA_INSTALLED=false
-      SET JDK_DOWNLOAD_URL=$(JDK_DOWNLOAD_URL)
+      SET JAVA_VERSION=""
 
-      REM Check if Java is installed
+      REM Check if Java is installed and get the version
       for /f "tokens=*" %%a in ('java -version 2^>^&1') do (
           echo %%a
+          SET JAVA_VERSION=%%a
+      )
+
+      REM Check if JDK 11 is installed (looking for "11" in the version string)
+      echo %JAVA_VERSION% | findstr /i "11" >nul
+      if %ERRORLEVEL% NEQ 0 (
+          SET JAVA_INSTALLED=false
+      ) else (
           SET JAVA_INSTALLED=true
       )
 
-      REM If JDK is not installed, download and install manually
+      REM If JDK 11 is not installed, download and install manually
       if "%JAVA_INSTALLED%"=="false" (
           echo JDK 11 is not installed. Downloading and installing...
 
@@ -45,6 +53,7 @@ steps:
       )
     displayName: 'Check and Install JDK 11'
     condition: eq(variables['Agent.OS'], 'Windows_NT')
+
 
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
     displayName: 'Install Ionic and Cordova CLI'
