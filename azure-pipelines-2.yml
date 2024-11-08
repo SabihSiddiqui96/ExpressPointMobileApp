@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - master  # Or the branch you want to trigger on
+
+pool:
+  vmImage: 'ubuntu-latest'  # or 'macos-latest' if you need to use a Mac agent
+
+variables:
+  # Define variables for Ionic and Cordova
+  IONIC_CLI_VERSION: '6.20.4'
+  CORDOVA_CLI_VERSION: '10.0.0'
+  ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
+
+steps:
+  - task: UseNode@1
+    inputs:
+      versionSpec: '14.x'
+    displayName: 'Use Node.js 14.x'
+
+  - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
+    displayName: 'Install Ionic and Cordova CLI'
+
+  - script: npm ci
+    displayName: 'Install npm packages'
+
+  - script: |
+      ionic cordova platform add android
+    displayName: 'Add Android platform'
+
+  - script: |
+      ionic cordova build android --prod --release
+    displayName: 'Build Android APK'
+
+  # Sign the APK
+  - script: |
+      jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $ANDROID_KEYSTORE_PATH \
+      -storepass $ANDROID_KEYSTORE_PASSWORD -keypass $ANDROID_KEY_PASSWORD \
+      platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk $ANDROID_KEY_ALIAS
+    displayName: 'Sign the APK'
+    env:
+      ANDROID_KEYSTORE_PATH: $(ANDROID_KEYSTORE_PATH)  # Secure file or pipeline variable
+      ANDROID_KEYSTORE_PASSWORD: $(ANDROID_KEYSTORE_PASSWORD)
+      ANDROID_KEY_PASSWORD: $(ANDROID_KEY_PASSWORD)
+      ANDROID_KEY_ALIAS: $(ANDROID_KEY_ALIAS)
+
+  # Zipalign the APK
+  - script: |
+      $ANDROID_SDK_ROOT/build-tools/30.0.3/zipalign -v 4 platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk platforms/android/app/build/outputs/apk/release/app-release-signed.apk
+    displayName: 'Align APK'
+
+  # Publish APK as artifact
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'platforms/android/app/build/outputs/apk/release/app-release-signed.apk'
+      ArtifactName: 'android-apk'
+      publishLocation: 'Container'
+    displayName: 'Publish APK Artifact'
