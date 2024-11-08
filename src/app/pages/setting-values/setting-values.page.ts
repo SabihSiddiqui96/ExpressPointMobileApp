@@ -102,6 +102,11 @@ export class SettingValuesPage implements OnInit {
                     let setText = setVal == 1 ? "Yes" : (setVal == 0 ? "No" : "Both")
                     setting['SettingValue'] = setText;
                 }
+                if (siteSetting.SiteSettingCode.trim() == "DYNSITE") {
+                    let setVal = parseInt(siteSetting.SiteSettingValue);
+                    let setText = setVal == 1 ? "Yes" : (setVal == 0 ? "No" : "Planned Entrees Only")
+                    setting['SettingValue'] = setText;
+                }
                 this.siteSettings.push(setting);
             });
             this.getDefaultRestrictions();
