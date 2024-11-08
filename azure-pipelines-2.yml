@@ -9,7 +9,7 @@ pool:
 variables:
   IONIC_CLI_VERSION: '5.4.16'
   CORDOVA_CLI_VERSION: '12.0.0'
-  JDK_DOWNLOAD_URL: 'https://download.java.net/openjdk/jdk11/ri/openjdk-11.0.11_windows-x64_bin.zip'
+  JDK_DOWNLOAD_URL: 'https://download.java.net/openjdk/jdk11.0.0.2/ri/openjdk-11.0.0.2_windows-x64.zip'
 
 steps:
   - task: UseNode@1
