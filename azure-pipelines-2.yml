@@ -22,7 +22,8 @@ steps:
   - task: JavaToolInstaller@0
     inputs:
       versionSpec: '11'
-      jdkArchitecture: 'x64'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'Preinstalled'
     displayName: 'Install Java 11'
 
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
