@@ -19,6 +19,12 @@ steps:
       checkLatest: true
     displayName: 'Use Node.js 20.x'
 
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitecture: 'x64'
+    displayName: 'Install Java 11'
+
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
     displayName: 'Install Ionic and Cordova CLI'
 
