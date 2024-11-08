@@ -14,9 +14,10 @@ variables:
   JDK_DOWNLOAD_URL: 'https://download.java.net/openjdk/jdk11.0.0.2/ri/openjdk-11.0.0.2_windows-x64.zip'
 
 steps:
-  - task: UseNode@1
+  - task: NodeTool@0
     inputs:
-      versionSpec: '20.x'
+      versionSpec: '20.11.1'
+      checkLatest: true
     displayName: 'Use Node.js 20.x'
 
 
