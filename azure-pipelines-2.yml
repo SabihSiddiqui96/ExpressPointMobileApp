@@ -19,12 +19,15 @@ steps:
       checkLatest: true
     displayName: 'Use Node.js 20.x'
 
-  - task: JavaToolInstaller@0
-    inputs:
-      versionSpec: '11'
-      jdkArchitectureOption: 'x64'
-      jdkSourceOption: 'Preinstalled'
-    displayName: 'Install Java 11'
+  - script: |
+      if (Get-Command java -ErrorAction SilentlyContinue) {
+        Write-Host "JDK 11 is already installed";
+      } else {
+        Write-Host "Installing JDK 11...";
+        choco install openjdk11 -y
+      }
+    displayName: 'Check and Install JDK 11'
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
 
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
     displayName: 'Install Ionic and Cordova CLI'
