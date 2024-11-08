@@ -15,8 +15,8 @@ variables:
 steps:
   - task: UseNode@1
     inputs:
-      versionSpec: '14.x'
-    displayName: 'Use Node.js 14.x'
+      versionSpec: '18.x'
+    displayName: 'Use Node.js 18.x'
 
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
     displayName: 'Install Ionic and Cordova CLI'
