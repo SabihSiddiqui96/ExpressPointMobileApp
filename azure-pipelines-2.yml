@@ -4,28 +4,45 @@ trigger:
       - master  # Or the branch you want to trigger on
 
 pool:
-  vmImage: 'windows-latest'  # or 'macos-latest' if you need to use a Mac agent
+  vmImage: 'windows-latest'  # Or 'macos-latest' if you're using a Mac agent
 
 variables:
-  # Define variables for Ionic and Cordova
   IONIC_CLI_VERSION: '5.4.16'
   CORDOVA_CLI_VERSION: '12.0.0'
-  ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
+  JDK_DOWNLOAD_URL: 'https://download.java.net/openjdk/jdk11/ri/openjdk-11.0.11_windows-x64_bin.zip'
 
 steps:
-  - task: NodeTool@0
+  - task: UseNode@1
     inputs:
-      versionSpec: '20.11.1'
-      checkLatest: true
+      versionSpec: '20.x'
     displayName: 'Use Node.js 20.x'
 
   - script: |
-      if (Get-Command java -ErrorAction SilentlyContinue) {
-        Write-Host "JDK 11 is already installed";
-      } else {
-        Write-Host "Installing JDK 11...";
-        choco install openjdk11 -y
-      }
+      SET JAVA_INSTALLED=false
+      SET JDK_DOWNLOAD_URL=$(JDK_DOWNLOAD_URL)
+
+      REM Check if Java is installed
+      for /f "tokens=*" %%a in ('java -version 2^>^&1') do (
+          echo %%a
+          SET JAVA_INSTALLED=true
+      )
+
+      REM If JDK is not installed, download and install manually
+      if "%JAVA_INSTALLED%"=="false" (
+          echo JDK 11 is not installed. Downloading and installing...
+
+          REM Download OpenJDK using PowerShell
+          powershell -Command "Try {Invoke-WebRequest -Uri '%JDK_DOWNLOAD_URL%' -OutFile 'openjdk-11.zip' -ErrorAction Stop} Catch {Write-Host 'Error downloading JDK: $_'; exit 1}"
+
+          REM Extract OpenJDK to a specific directory
+          powershell -Command "Try {Expand-Archive -Path 'openjdk-11.zip' -DestinationPath 'C:\OpenJDK' -ErrorAction Stop} Catch {Write-Host 'Error extracting JDK: $_'; exit 1}"
+
+          REM Set JAVA_HOME and update PATH for current session
+          setx JAVA_HOME "C:\OpenJDK\jdk-11.0.11"
+          setx PATH "%PATH%;C:\OpenJDK\jdk-11.0.11\bin"
+      ) else (
+          echo JDK 11 is already installed.
+      )
     displayName: 'Check and Install JDK 11'
     condition: eq(variables['Agent.OS'], 'Windows_NT')
 
