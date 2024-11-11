@@ -2657,7 +2657,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.mealFormed = false;
             }
         } else if (this.selectedMealTypeName === 'Breakfast') {
-            if (totalContribution >= 2 && fulfilledComponentCount >= 3 &&
+            if (((totalContribution >= 2 && fulfilledComponentCount >= 3) || (totalContribution > 2 && fulfilledComponentCount >= 2)) &&
                 (this.BREAKFAST_CASE_1 || (this.LUNCH_CASE_2 && this.LUNCH_CASE_3 && this.LUNCH_CASE_4 && this.BREAKFAST_CASE_2))) {
                 this.mealFormed = true;
                 this.mealCount = 1;
@@ -5230,7 +5230,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public GetMenuDetailForDynamicMenu() {
         PouchQueriesService.GetDynamicMenuDetails().
             then((res) => {
-
+                const siteId = AppStateService.get('SiteId');                
                 const menuDetails = res.rows.filter(row => {
                     return (row.doc.MenuId === this.selectedServingLine);
                 });
@@ -5240,8 +5240,24 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     const menuItems = menuDetails[0].doc.MenuItems;
                     if (menuItems.length > 0) {
                         for (let i = 0; i < menuItems.length; i++) {
-                            this.dynamicMenuItems.push(menuItems[i]);
-
+                            let menuItem = menuItems[i];
+                            let site_MenuItem = null;
+                            if (menuItem.SiteDetails) {
+                               site_MenuItem = menuItem.SiteDetails.find(item => item.SiteId === siteId);
+                            }
+                            // Check if an object with the same MenuItemId already exists
+                            let existingItem = this.dynamicMenuItems.find(item => item.MenuItemId === menuItem.MenuItemId);
+                            if (site_MenuItem) {
+                                menuItem.PlannedCount = site_MenuItem.PlannedCount;
+                            }
+                            if (existingItem) {
+                                // If PlannedCount > 0, add it to the existing item's PlannedCount
+                                if (menuItem.PlannedCount && menuItem.PlannedCount > 0) {
+                                    existingItem.PlannedCount += menuItem.PlannedCount;
+                                }
+                                continue; // Skip adding a new entry since it already exists
+                            }
+                            this.dynamicMenuItems.push(menuItem);
                         }
                     }
                 }
