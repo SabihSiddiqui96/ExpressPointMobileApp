@@ -7,7 +7,7 @@ variables:
 pool:
   name: PrimeroEdge
   demands:
-    - Agent.Name -equals Agent-2
+    - Agent.Name -equals Agent
 
 steps:
 - checkout: self
