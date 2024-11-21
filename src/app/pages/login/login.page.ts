@@ -414,10 +414,12 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     try {
       this.utilService.setLoader(true);
       await this.getTransactions();
-
-      // Check if transactions are fully synced
-      if (!this.hasNotSentTransactions) {
-        this.utilService.publishIpcEvent('backup-and-relaunch');
+      
+      if (this.utilService.isElectronApp() && this.utilService.isAppOnline) {
+        // Check if transactions are fully synced
+        if (!this.hasNotSentTransactions) {
+          this.utilService.publishIpcEvent('backup-and-relaunch');
+        }
       }
     } catch (error) {
       console.error('Error processing transactions:', error);
