@@ -363,7 +363,7 @@ ipcMain.on('backup-and-relaunch', async (event) => {
     var index = dialog.showMessageBoxSync({
       type: 'info',
       title: 'ExpressPoint App Backup',
-      message: `Backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 15 days or when a new version of ExpressPoint is installed.`,
+      message: `Transaction data backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 15 days or when a new version of ExpressPoint is installed.`,
       buttons: ["OK"],
       noLink: true, // Prevents link-styled buttons
     });
