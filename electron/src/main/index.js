@@ -13,6 +13,8 @@ const Splashscreen = require("@trodi/electron-splashscreen/index");
 const si = require("systeminformation");
 const net = require("net");
 const { localStorage } = require('electron-browser-storage');
+const fs = require('fs-extra');
+const { exec } = require('child_process');
 let mainWindow;
 let win;
 let appQuitCalledFromApp = false;
@@ -274,6 +276,119 @@ electron_1.ipcMain.on('ssologin', (event, loginSSOUrl) => {
             console.log('--login successful--');
         }
     });
+});
+const stateFilePath = path.join(process.env.PUBLIC, 'Documents', 'ExpressPoint', 'state.json');
+electron_1.ipcMain.on('backup-and-relaunch', async (event) => {
+    try {
+        const now = new Date();
+        // Read the state file if it exists
+        let lastState = {};
+        if (await fs.pathExists(stateFilePath)) {
+            lastState = await fs.readJson(stateFilePath);
+        }
+        // Check if the last backup was within a certain time frame (e.g., 2 minutes)
+        const lastBackup = new Date(lastState.lastBackup || 0);
+        // Difference in milliseconds
+        const diffMilliseconds = now.getTime() - lastBackup.getTime();
+        // 15 days in milliseconds (15 * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+        const fifteenDaysInMilliseconds = 15 * 24 * 60 * 60 * 1000;
+        // Check if the difference is less than 15 days (in milliseconds)
+        if (diffMilliseconds < fifteenDaysInMilliseconds) {
+            return;
+        }
+        // Show a modal dialog to inform the user
+        var index = electron_1.dialog.showMessageBoxSync({
+            type: 'info',
+            title: 'ExpressPoint App Backup',
+            message: `Backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 15 days or when a new version of ExpressPoint is installed.`,
+            buttons: ["OK"],
+            noLink: true, // Prevents link-styled buttons
+        });
+        // Update the state file with the current timestamp
+        const newState = { lastBackup: now.toISOString() };
+        await fs.writeJson(stateFilePath, newState, { spaces: 2 });
+        const appVersion = electron_1.app.getVersion(); // Get the app version dynamically
+        const documentsFolder = path.join(process.env.PUBLIC, 'Documents');
+        const expFolder = path.join(documentsFolder, 'ExpressPoint');
+        const appFolder = path.join(documentsFolder, 'ExpressPointData');
+        const backupFolder = path.join(documentsFolder, `ExpressPointData_backup_before_${appVersion}`);
+        const exePath = path.join(expFolder, 'ExpressPoint.exe');
+        // Step 2: Create the batch file content with dynamic paths
+        const batchFilePath = path.join(expFolder, 'cleanup_and_relaunch.bat');
+        const batchFileContent = `
+@echo off
+
+:: Define base folder using %PUBLIC%
+set "baseFolder=%PUBLIC%\\Documents"
+
+:: Define the app folder, backup folder, and executable path dynamically
+set "appFolder=%baseFolder%\\ExpressPointData"
+set "backupFolder=%baseFolder%\\ExpressPointData_backup_before_${appVersion}"
+set "exePath=%baseFolder%\\ExpressPoint\\ExpressPoint.exe"
+
+:: Step 1: Wait for a few seconds to ensure the app is fully closed
+echo Waiting for 3 seconds before proceeding...
+timeout /t 3 /nobreak > nul
+
+:: Step 2: Kill any lingering processes (optional)
+taskkill /f /im ExpressPoint.exe > nul 2>&1
+
+:: Step 3: Delete the backup folder if it already exists
+echo Checking if backup folder exists...
+if exist "%backupFolder%" (
+    echo Backup folder exists. Deleting it...
+    rd /s /q "%backupFolder%" >nul 2>&1
+)
+
+:: Step 4: Create a backup of the app folder
+echo Creating backup of the app folder...
+xcopy "%appFolder%" "%backupFolder%" /E /I /Y >nul 2>&1
+
+:: Step 5: Delete the app folder using RD /S /Q
+echo Deleting the ExpressPointData folder...
+rd /s /q "%appFolder%" >nul 2>&1
+
+:: Step 6: Create necessary directories (if not already created)
+echo Creating directories...
+mkdir "%appFolder%\\Local Storage" >nul 2>&1
+
+:: Step 7: Copy files from backup to app folder
+echo Copying files from backup folder...
+xcopy "%backupFolder%\\Local Storage\\*.log" "%appFolder%\\Local Storage\\" /E /I /Y > nul 2>&1
+
+:: Step 8: Check if ExpressPointDevices.db exists and copy it
+if exist "%backupFolder%\\ExpressPointDevices.db" (
+    echo Found ExpressPointDevices.db, copying...
+    copy "%backupFolder%\\ExpressPointDevices.db" "%appFolder%\\ExpressPointDevices.db" >nul 2>&1
+) else (
+    echo ExpressPointDevices.db not found in backup.
+)
+
+:: Step 9: Relaunch the app
+echo Relaunching the app...
+start "" "%exePath%"
+
+:: Step 10: Exit the batch script
+exit
+    `;
+        // Step 3: Write the batch file to the file system
+        await fs.writeFile(batchFilePath, batchFileContent, 'utf8');
+        // Step 4: Execute the batch file
+        exec(`cmd.exe /c start /min "" "${batchFilePath}"`, (error) => {
+            if (error) {
+                console.error('Error executing batch file:', error.message);
+            }
+            else {
+                console.log('Batch file executed successfully.');
+            }
+        });
+        // Step 5: Exit the app
+        console.log('Exiting the app...');
+        electron_1.app.exit();
+    }
+    catch (error) {
+        console.error('Error during backup-and-relaunch:', error.message);
+    }
 });
 electron_1.ipcMain.on('app-ready', () => {
     SystemUUID = UUID_os + ' ' + UUID_BlockDevices + ' ' + UUID_system + ' ' + deviceName;
