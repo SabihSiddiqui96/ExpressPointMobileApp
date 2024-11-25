@@ -192,25 +192,23 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
   public ionViewDidEnter() {
     this.utilService.setLoader(false);
-    if (EXP_TRANSACTIONS) {
 
-      this.getTransactions();
+    // Handle transactions if enabled
+    if (EXP_TRANSACTIONS) {
+      this.processTransactions();
     }
+    
     if (UtilService.isCordovaApp) {
       this.keyboard.onKeyboardShow().subscribe(() => { this.isNativeKeyboardOpen = true; });
       this.keyboard.onKeyboardHide().subscribe(() => { this.isNativeKeyboardOpen = false; });
     }
 
     /**Electron Windows: check for updates */
-    if (this.utilService.isElectronApp() && this.utilService.isAppOnline) {
-      if (AppStateService.get('DeploymentServerURL')) {
-        console.log('deploymnet server URL available');
-        this.utilService.publishIpcEvent('check-app-updates', AppStateService.get('DeploymentServerURL'));
-      }
-    }
+    this.handleElectronUpdates();
     /**Electron Windows: check for updates */
+
     // this.openOSK = AppStateService.get('OpenOSK');
-    this.openOSK = true;// Login Page to always show OSK
+    this.openOSK = true;// Login Page to always show OSK   
   }
 
   public ngOnDestroy() {
@@ -402,38 +400,62 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
   }
 
+  private handleElectronUpdates() {
+    if (this.utilService.isElectronApp() && this.utilService.isAppOnline) {
+      const deploymentServerURL = AppStateService.get('DeploymentServerURL');
+      if (deploymentServerURL) {
+        console.log('Deployment server URL available');
+        this.utilService.publishIpcEvent('check-app-updates', deploymentServerURL);
+      }
+    }
+  }
 
-  public getTransactions() {
-    this.transactionService.getAllTransactions().then((transactions) => {
-      let notSentTransactions: any = [];
-      this.transactions = transactions;
-      if (transactions.length > 0) {
-        notSentTransactions = this.transactions.filter((doc) => doc.saleData.IsSynced === false);
-        if (notSentTransactions.length > 0) {
-          this.hasNotSentTransactions = true;
-        } else {
-          this.hasNotSentTransactions = false;
+  private async processTransactions() {
+    try {
+      this.utilService.setLoader(true);
+      await this.getTransactions();
+      
+      if (this.utilService.isElectronApp() && this.utilService.isAppOnline) {
+        // Check if transactions are fully synced
+        if (!this.hasNotSentTransactions) {
+          this.utilService.publishIpcEvent('backup-and-relaunch');
         }
-      } else {
-        this.hasNotSentTransactions = false;
       }
-      if (this.hasNotSentTransactions == false) {
-        this.transactionService.getAllPendingSummarySale().then((summary) => {
-          let notSentSummaryTransaction: any = [];
-          this.summaryTransactions = summary;
-          if(this.summaryTransactions.length > 0){
-            notSentSummaryTransaction = summary.filter((doc) => doc.IsSynced === false);
-            if (notSentSummaryTransaction.length > 0) {
-              this.hasNotSentTransactions = true;
-            } else {
-              this.hasNotSentTransactions = false;
-            }
-          }else{
-            this.hasNotSentTransactions = false;
-          }
-        });
-      }
-    });
+    } catch (error) {
+      console.error('Error processing transactions:', error);
+    } finally {
+      this.utilService.setLoader(false);
+    }
+  }
+
+  private async getTransactions() {
+    this.utilService.setLoader(true);
+    try {
+      this.transactions = await this.transactionService.getAllTransactions();
+      this.checkUnsyncedTransactions();
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      this.utilService.setLoader(false);
+    }
+  }
+
+  private checkUnsyncedTransactions() {
+    const notSentTransactions = this.transactions.filter(doc => !doc.saleData.IsSynced);
+    this.hasNotSentTransactions = notSentTransactions.length > 0;
+
+    if (!this.hasNotSentTransactions) {
+      this.fetchPendingSummarySale();
+    }
+  }
+  private async fetchPendingSummarySale() {
+    try {
+      this.summaryTransactions = await this.transactionService.getAllPendingSummarySale();
+      const notSentSummaryTransaction = this.summaryTransactions.filter(doc => !doc.IsSynced);
+      this.hasNotSentTransactions = notSentSummaryTransaction.length > 0;
+    } catch (error) {
+      console.error('Error fetching pending summary sale:', error);
+    }
   }
 
   /** iOS Methods */
