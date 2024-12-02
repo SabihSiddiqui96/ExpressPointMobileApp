@@ -48,10 +48,11 @@
     }
   },
   "dependencies": {
-    "electron-browser-storage": "^1.0.7",
     "@trodi/electron-splashscreen": "^1.0.0",
+    "electron-browser-storage": "^1.0.7",
     "electron-log": "^4.3.1",
     "electron-updater": "4.3.9",
+    "fs-extra": "^11.2.0",
     "machine-uuid": "^1.2.0",
     "net": "^1.0.2",
     "os": "^0.1.1",
@@ -66,7 +67,7 @@
     "electron": "11.5.0",
     "electron-builder": "^22.9.1",
     "electron-builder-squirrel-windows": "^22.10.4",
-    "electron-rebuild": "^2.3.4",    
+    "electron-rebuild": "^2.3.4",
     "typescript": "^5.4.3",
     "webpack": "^5.87.0"
   }
