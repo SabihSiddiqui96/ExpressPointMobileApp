@@ -3977,6 +3977,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         else {
             this.hideBalSetting = 0;
         }
+        this.cdr.detectChanges();
         // this.event.publish('patronLargeImagehide', null);
     }
     public getReviews() {
@@ -4019,6 +4020,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public enablePrevPatron(value: boolean) {
         this.canLoadPrevPatron = value;
+        this.cdr.detectChanges();
     }
 
     public continueLoadingPrevPatron() {
@@ -4166,6 +4168,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     public showPatronPin() {
         this.showPin = !this.showPin;
+        this.cdr.detectChanges();
     }
 
     public checkForBirthday(patronData) {

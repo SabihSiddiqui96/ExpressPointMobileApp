@@ -45,6 +45,7 @@ import { LogsDBService } from '../../services/Database/logs-db.service';
 import { LogType } from '../../services/enums/log-type';
 import { EventType } from '../../services/enums/event-type';
 import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
+import { UnidentifiedPatronPopupPage } from '../menu-service/components/unidentified-patron-popup/unidentified-patron-popup.page';
 
 enum Contributors {
     Fruit = 1,
@@ -631,6 +632,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         /***Static MenuChanges end***/
         this.event.publish('on-menuservice', { 'currentPage': 'MenuService' });
         this.CheckBirthDayNotifications = Boolean(parseInt(SettingService.getSettingValue('BIRTHSH')));
+        this.UnidentifiedPatronPopUpShowHide();
     }
 
     public saveDefaultDynamicTerminalMenu() {
@@ -6532,6 +6534,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         else {
             this.hideBalSetting = 0;
         }
+        this.cdr.detectChanges();
     }
     
     public getReviews() {
@@ -6576,6 +6579,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public enablePrevPatron(value: boolean) {
         this.canLoadPrevPatron = value;
+        this.cdr.detectChanges();
     }
 
     public fetchLastPatronFromServer() {
@@ -6721,6 +6725,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     public showPatronPin() {
         this.showPin = !this.showPin;
+        this.cdr.detectChanges();
     }
 
     public checkForBirthday(patronData) {
@@ -7175,5 +7180,29 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
             return restrictedAlacarteCount;
         }
+    }
+
+    public UnidentifiedPatronPopUpShowHide() {
+        this.event.destroy('unidentifiedPatron:show');
+        this.event.subscribe('unidentifiedPatron:show', (userEventData) => {
+            this.modalCtrl.create({
+                component: UnidentifiedPatronPopupPage,
+                cssClass: 'customModal',
+                componentProps: {
+                    'Message': userEventData.params[0].replace('for', '')
+                }, backdropDismiss: false
+            }).then(async (res) => {
+                await res.present();
+            });
+        });
+
+        this.event.destroy('unidentifiedPatron:nextPatron');
+        this.event.subscribe('unidentifiedPatron:nextPatron', (userEventData) => {
+            this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
+            if (this.lookUpService.getQ().length !== 0) {
+                console.log('GetQ   ' + this.lookUpService.getQ()[0]);
+                this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+            }
+        });
     }
 }

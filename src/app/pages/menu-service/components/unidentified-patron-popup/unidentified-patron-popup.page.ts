@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { SettingService } from '../../../../services/setting.service';
 import { Events } from '../../../../services/events.service';
 import { AppStateService } from '../../../../services/app-state.service';
+import { LookupService } from '../../../../services/lookup.service';
 
 @Component({
   selector: 'app-unidentified-patron-popup',
@@ -18,11 +19,12 @@ export class UnidentifiedPatronPopupPage implements OnInit {
   @Input() Message;
 
   ngOnInit() {
-    
+
   }
 
   constructor(public navCtrl: NavController, public event: Events, public router: Router,
-    public appStateService: AppStateService, public settingService: SettingService) {
+    public appStateService: AppStateService, public settingService: SettingService,
+    public lookUpService: LookupService) {
   }
 
   public NextPatron() {
@@ -36,5 +38,5 @@ export class UnidentifiedPatronPopupPage implements OnInit {
     this.event.publish('unidentifiedPatronLookUp', {});
     this.modal.dismiss();
   }
-  
+
 }

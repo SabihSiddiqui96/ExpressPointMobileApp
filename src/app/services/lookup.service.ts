@@ -669,14 +669,14 @@ export class LookupService {
                     params.push(' for ' + this.studentPin.toString());
                 }
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
-                const routeURL = this.router.url.includes('dynamic-menu');
-                if (routeURL == true) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
-                }
-                else {
+                let popuptoshow = parseInt(SettingService.getSiteSettingValue('LAWRIDS'))
+                if (popuptoshow == 1) {
                     AppStateService.set("UnidentifiedPatronPopUp", "1");
                     this.event.publish('unidentifiedPatron:show', { params });
                 }
+                else {
+                    this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
+                } 
                 this.utilService.setLoader(false);
                 resolve('Success');
                 // this.utilService.showToast('No results found.');
