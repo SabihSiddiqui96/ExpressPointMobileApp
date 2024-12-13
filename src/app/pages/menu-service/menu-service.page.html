@@ -448,10 +448,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                         <ion-icon slot="icon-only" name="close-circle"></ion-icon>
                                     </ion-button>
                                     <ion-label align-left class="ion-no-padding ion-no-margin">
-                                        {{item.Name}}
-                                        <ion-note
-                                            [style.display]="item.isSecondMeal ? patronDetails.FullName =='Student' && patronDetails.isSpecialAccount ? '':'none' :'none'">
-                                            *</ion-note>
+                                        {{item.Name}}                                        
                                         <ion-note
                                             [style.display]="item.isSecondMeal ? patronDetails.IsStudent==true && !patronDetails.isSpecialAccount ? '':'none' :'none'">
                                             *</ion-note>
@@ -459,7 +456,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                 </ion-col>
                                 <ion-col size="3" class="ion-text-center" style="align-self: center;">
                                     <ion-label item-center
-                                        *ngIf="(item.IsReimbursable==false || item.isSecondMeal|| item.IsStudent==false )"
+                                        *ngIf="(item.IsReimbursable==false || item.isSecondMeal|| item.IsStudent==false || patronDetails.isSpecialAccount)"
                                         item-center text-underline
                                         (click)="ShowMenuItemQuantityPopover(orderData.items[i])">
                                         {{item.Quantity}}

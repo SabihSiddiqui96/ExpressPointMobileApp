@@ -481,10 +481,7 @@
               <ion-icon slot="icon-only" name="close-circle"></ion-icon>
             </ion-button>
             <ion-label>
-              {{item.Name}}
-              <ion-note
-                [style.display]="item.isSecondMeal ? patronDetails.FullName =='Student' && patronDetails.isSpecialAccount ? '':'none' :'none'">
-                *</ion-note>
+              {{item.Name}}              
               <ion-note
                 [style.display]="item.isSecondMeal ? patronDetails.IsStudent==true && !patronDetails.isSpecialAccount ? '':'none' :'none'">
                 *</ion-note>
