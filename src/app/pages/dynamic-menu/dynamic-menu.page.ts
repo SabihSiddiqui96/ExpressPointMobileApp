@@ -1907,6 +1907,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.mealCount >= 1) {
             if (this.orderData.items[index].price_type_id !== this.secondMealPriceType
                 && this.patronDetails.IsStudent === true
+                && this.patronDetails.isSpecialAccount === false
                 && this.orderData.items[index].IsReimbursable === true) { // IsStudent Check
                 // const message = 'This will clear all meals for this student. Are you sure?';
                 // this.showConfrim(message, 'clear_meal', { index: index, flag: true });
@@ -6030,9 +6031,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     //   if (this.patronDetails['GradeId'] ||
                     //     (this.isSpecialAccount == true &&
                     //      JSON.parse(AppStateService.get('patron_details')).FullName == 'Student')    //IsStudent Check
-                    if (this.patronDetails.IsStudent === true ||
-                        (this.isSpecialAccount === true &&
-                            JSON.parse(AppStateService.get('patron_details')).FullName === 'Student')
+                    if (this.patronDetails.IsStudent === true &&
+                        (this.isSpecialAccount === false)
                     ) {
 
                         priceTypeId = this.secondMealPriceType;

@@ -1990,6 +1990,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             // if (this.orderData.items[index].price_type_id != this.SecondMealPriceType && this.patronDetails.isSpecialAccount == false && this.patronDetails['GradeId']) { //IsStudent Check
             if (this.orderData.items[index].price_type_id !== this.secondMealPriceType
                 && this.patronDetails.IsStudent === true
+                && this.patronDetails.isSpecialAccount === false
                 && this.orderData.items[index].IsReimbursable === true) { // IsStudent Check
                 // const message = 'This will clear all meals for this student. Are you sure?';
                 // this.showConfrim(message, 'clear_meal', { index: index, flag: true });
@@ -3044,6 +3045,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         o.IsReimbursable === true
                     ))
                     if (this.orderData.items[i]['price_type_id'] === this.patronDetails.PriceTypeId &&
+                        this.patronDetails.isSpecialAccount == false &&
                         this.orderData.items[i]['IsReimbursable'] === true && this.patronDetails.IsStudent
                         && firstMeals.length > 0
                     ) {
@@ -4971,9 +4973,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 if (this.defaultMenuItemDetails.IsReimbursable === true) {
                     if (this.mealCount >= 1) {
-                        if ((this.patronDetails.IsStudent === true || this.patronDetails.IsStudent === 1) ||
-                            ((this.patronDetails.isSpecialAccount === true || this.patronDetails.isSpecialAccount === 1) &&
-                                AppStateService.get('patron_details').FullName === 'Student')
+                        if ((this.patronDetails.IsStudent === true || this.patronDetails.IsStudent === 1) &&
+                            (this.patronDetails.isSpecialAccount === false)
                         ) {
 
                             priceTypeId = this.secondMealPriceType;

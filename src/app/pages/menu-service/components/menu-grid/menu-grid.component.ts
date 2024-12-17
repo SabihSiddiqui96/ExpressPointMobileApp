@@ -114,9 +114,8 @@ export class MenuGridComponent {
                     //   if (this.patronDetails['GradeId'] ||
                     //     (this.patronDetails.isSpecialAccount == true &&
                     //         JSON.parse(AppStateService.get('patron_details')).FullName == 'Student') // IsStudent Check
-                    if (patronDetails.IsStudent === true ||
-                        (patronDetails.isSpecialAccount === true &&
-                            JSON.parse(AppStateService.get('patron_details')).FullName === 'Student')
+                    if (patronDetails.IsStudent === true &&
+                        (patronDetails.isSpecialAccount === false)
                     ) {
 
                         priceTypeId = this.secondMealPriceType;
