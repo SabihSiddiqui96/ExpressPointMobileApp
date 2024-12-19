@@ -403,8 +403,8 @@ export class LookupService {
             let getBalanceFromServer: boolean = Boolean(parseInt(SettingService.getSettingValue("BALCHK")));
             let performanceOptions = AppStateService.get('performanceOptions');
 
-            if (AppStateService.get('SiteSettings')) {
-                checkForServer = JSON.parse(AppStateService.get('SiteSettings'))[0].CheckOtherSiteSecMeal;
+            if (AppStateService.get('AllSiteSettings')) {
+                checkForServer = Boolean(parseInt(SettingService.getSiteSettingValue('CHKOTHML')));
             }
 
             // Get balance from server if necessary and online
