@@ -75,11 +75,15 @@ export class SettingService {
       } else {
         if (siteSettingCode === 'DYNSITE') // this setting has a default value of 1 
           return '1'
+        if (siteSettingCode === 'LAWRIDS') // this setting has a default value of 1 
+          return '1'
         const defaultValue = "0";
         return defaultValue;
       }
     } else {
       if (siteSettingCode === 'DYNSITE') // this setting has a default value of 1 
+        return '1'
+      if (siteSettingCode === 'LAWRIDS') // this setting has a default value of 1 
         return '1'
       const defaultValue = "0";
       return defaultValue;
@@ -99,7 +103,7 @@ export class SettingService {
         return '0';
       }
     }
-    else{
+    else {
       return '0';
     }
   }

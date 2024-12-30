@@ -403,8 +403,8 @@ export class LookupService {
             let getBalanceFromServer: boolean = Boolean(parseInt(SettingService.getSettingValue("BALCHK")));
             let performanceOptions = AppStateService.get('performanceOptions');
 
-            if (AppStateService.get('SiteSettings')) {
-                checkForServer = JSON.parse(AppStateService.get('SiteSettings'))[0].CheckOtherSiteSecMeal;
+            if (AppStateService.get('AllSiteSettings')) {
+                checkForServer = Boolean(parseInt(SettingService.getSiteSettingValue('CHKOTHML')));
             }
 
             // Get balance from server if necessary and online
@@ -669,14 +669,14 @@ export class LookupService {
                     params.push(' for ' + this.studentPin.toString());
                 }
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
-                const routeURL = this.router.url.includes('dynamic-menu');
-                if (routeURL == true) {
-                    this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
-                }
-                else {
+                let popuptoshow = parseInt(SettingService.getSiteSettingValue('LAWRIDS'))
+                if (popuptoshow == 1) {
                     AppStateService.set("UnidentifiedPatronPopUp", "1");
                     this.event.publish('unidentifiedPatron:show', { params });
                 }
+                else {
+                    this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
+                } 
                 this.utilService.setLoader(false);
                 resolve('Success');
                 // this.utilService.showToast('No results found.');

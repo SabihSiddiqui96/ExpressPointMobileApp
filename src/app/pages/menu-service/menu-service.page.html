@@ -123,18 +123,17 @@
                                 <ion-col size="8" class="ion-no-padding ion-no-margin">
                                     <ion-label>
                                         
-                                        <p *ngIf="!showPin" (click)="showPatronPin()">ID:
-                                           <span *ngIf="hideStudentId" class="hideStudent">********
-                                           </span> 
-                                           <span class="hide"> {{patronDetails.PersonIdentifier}}</span>
-                                           <span *ngIf="!hideStudentId">{{patronDetails.PersonIdentifier}}</span> 
-                                        </p>
-                                    
-                                        <p *ngIf="showPin" (click)="showPatronPin()">PIN:
-                                            <span *ngIf="hideStudentId" class="hideStudent">********
-                                            </span> 
-                                            <span class="hide"> {{patronDetails.Identifier}}</span>
-                                            <span *ngIf="!hideStudentId">{{patronDetails.Identifier}}</span> 
+                                        <p (click)="showPatronPin()" style="cursor: pointer;">
+                                            <ng-container *ngIf="!showPin">
+                                                ID: <span *ngIf="hideStudentId" class="hideStudent">********</span>
+                                                <span class="hide"> {{patronDetails.PersonIdentifier}}</span>
+                                                <span *ngIf="!hideStudentId">{{patronDetails.PersonIdentifier}}</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="showPin">
+                                                PIN: <span *ngIf="hideStudentId" class="hideStudent">********</span>
+                                                <span class="hide"> {{patronDetails.Identifier}}</span>
+                                                <span *ngIf="!hideStudentId">{{patronDetails.Identifier}}</span>
+                                            </ng-container>
                                         </p>
                                         <span id="startPatronPicture"></span>
                                         <p *ngIf="patronDetails.SchoolId!=schoolId">
@@ -258,11 +257,15 @@
                             <ion-row class="ion-no-padding ion-no-margin">
                                 <ion-col size="8" class="ion-no-padding ion-no-margin">
                                     <ion-label>
-                                        <p *ngIf="!showPin" (click)="showPatronPin()">ID:
-                                            {{selectedAccountDetails.PersonIdentifier}}
+                                        <p (click)="showPatronPin()" style="cursor: pointer;">
+                                            <ng-container *ngIf="!showPin">
+                                                ID: {{ selectedAccountDetails.PersonIdentifier }}
+                                            </ng-container>
+                                            <ng-container *ngIf="showPin">
+                                                PIN: {{ selectedAccountDetails.Identifier }}
+                                            </ng-container>
                                         </p>
-                                        <p *ngIf="showPin" (click)="showPatronPin()">PIN:
-                                            <span id="startPatronPicture"></span>
+                                        <span id="startPatronPicture"></span>
                                         <p *ngIf="selectedAccountDetails.SchoolId!=schoolId">
                                             <span class="center_text_content">Site:&nbsp;
                                                 <span class="color-orange">
@@ -445,10 +448,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                         <ion-icon slot="icon-only" name="close-circle"></ion-icon>
                                     </ion-button>
                                     <ion-label align-left class="ion-no-padding ion-no-margin">
-                                        {{item.Name}}
-                                        <ion-note
-                                            [style.display]="item.isSecondMeal ? patronDetails.FullName =='Student' && patronDetails.isSpecialAccount ? '':'none' :'none'">
-                                            *</ion-note>
+                                        {{item.Name}}                                        
                                         <ion-note
                                             [style.display]="item.isSecondMeal ? patronDetails.IsStudent==true && !patronDetails.isSpecialAccount ? '':'none' :'none'">
                                             *</ion-note>
@@ -456,7 +456,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                                 </ion-col>
                                 <ion-col size="3" class="ion-text-center" style="align-self: center;">
                                     <ion-label item-center
-                                        *ngIf="(item.IsReimbursable==false || item.isSecondMeal|| item.IsStudent==false )"
+                                        *ngIf="(item.IsReimbursable==false || item.isSecondMeal|| item.IsStudent==false || patronDetails.isSpecialAccount)"
                                         item-center text-underline
                                         (click)="ShowMenuItemQuantityPopover(orderData.items[i])">
                                         {{item.Quantity}}

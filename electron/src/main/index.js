@@ -290,10 +290,10 @@ electron_1.ipcMain.on('backup-and-relaunch', async (event) => {
         const lastBackup = new Date(lastState.lastBackup || 0);
         // Difference in milliseconds
         const diffMilliseconds = now.getTime() - lastBackup.getTime();
-        // 15 days in milliseconds (15 * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
-        const fifteenDaysInMilliseconds = 15 * 24 * 60 * 60 * 1000;
-        // Check if the difference is less than 15 days (in milliseconds)
-        if (diffMilliseconds < fifteenDaysInMilliseconds) {
+        // 30 days in milliseconds (30 * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+        const daysInMilliseconds = 30 * 24 * 60 * 60 * 1000;
+        // Check if the difference is less than 30 days (in milliseconds)
+        if (diffMilliseconds < daysInMilliseconds) {
             return;
         }
         // Show a modal dialog to inform the user
