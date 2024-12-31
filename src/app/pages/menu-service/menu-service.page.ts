@@ -3100,11 +3100,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         }
 
                         const sortedItems = this.sortMenuItems(items);
-                        let squarePaymentAmount = 0
-                        squarePaymentAmount += Math.round(paymentAmnt * 100)
+                        let squarePaymentAmount = 0;
+                        squarePaymentAmount += Math.round(paymentAmnt * 100);
 
                         let squareDisplayId = "";
-                        squareDisplayId = (this.patronDetails.Identifier != undefined && this.patronDetails.Identifier != null) ? this.patronDetails.Identifier : ((this.patronDetails.PersonName != undefined && this.patronDetails.PersonName != null) ? this.patronDetails.PersonName : '');
+                        squareDisplayId = (this.patronDetails.PersonIdentifier != undefined && this.patronDetails.PersonIdentifier != null) ? this.patronDetails.PersonIdentifier : ((this.patronDetails.PersonName != undefined && this.patronDetails.PersonName != null) ? this.patronDetails.PersonName : '');
                         let squareNote = "";
                             squareNote = this.selectedMealTypeName + " - ID: " + squareDisplayId.trim() + " - " + squareItemsNote;
                                         
