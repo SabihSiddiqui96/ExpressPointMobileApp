@@ -72,6 +72,11 @@ export class SystemDBService {
         AllCatRemainOpen = AppStateService.get('AllCatRemainOpen');
       }
 
+      let isOnlyThisSitePatrons = false;
+      if (AppStateService.get('isOnlyThisSitePatrons') != undefined && AppStateService.get('isOnlyThisSitePatrons') != null) {
+        isOnlyThisSitePatrons = AppStateService.get('isOnlyThisSitePatrons');
+      }
+
       let checkIfPinEntered = false;
       if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
         checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
@@ -121,7 +126,8 @@ export class SystemDBService {
         'categoriesTapClose': categoriesTapClose,
         'AllCatRemainOpen': AllCatRemainOpen,
         'CheckIfPinEntered': checkIfPinEntered,
-        'performanceOptions': performanceOptions
+        'performanceOptions': performanceOptions,
+        'isOnlyThisSitePatrons': isOnlyThisSitePatrons
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';
