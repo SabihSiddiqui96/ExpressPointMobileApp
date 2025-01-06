@@ -123,6 +123,11 @@ ngOnInit() {
         AllCatRemainOpen = AppStateService.get('AllCatRemainOpen');
       }
 
+      let isOnlyThisSitePatrons = false;
+      if (AppStateService.get('isOnlyThisSitePatrons') != undefined && AppStateService.get('isOnlyThisSitePatrons') != null) {
+        isOnlyThisSitePatrons = AppStateService.get('isOnlyThisSitePatrons');
+      }
+
       let checkIfPinEntered = false;
       if (AppStateService.get('CheckIfPinEntered') != undefined && AppStateService.get('CheckIfPinEntered') != null) {
         checkIfPinEntered = AppStateService.get('CheckIfPinEntered');
@@ -178,6 +183,7 @@ ngOnInit() {
       AppStateService.set('TranDbDestroyedDate', TranDbDestroyedDate);
       AppStateService.set('categoriesTapClose', categoriesTapClose);
       AppStateService.set('AllCatRemainOpen', AllCatRemainOpen);
+      AppStateService.set('isOnlyThisSitePatrons', isOnlyThisSitePatrons);
       AppStateService.set('CheckIfPinEntered', checkIfPinEntered);
       if (performanceOptions != undefined && performanceOptions != '') {
         AppStateService.set('performanceOptions', performanceOptions);
@@ -208,6 +214,7 @@ ngOnInit() {
         'AllSiteSettings': allSiteSettings,
         'categoriesTapClose': categoriesTapClose,
         'AllCatRemainOpen': AllCatRemainOpen,
+        'isOnlyThisSitePatrons': isOnlyThisSitePatrons,
         'CheckIfPinEntered': checkIfPinEntered,
         'performanceOptions': performanceOptions
       }
