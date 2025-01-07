@@ -3575,11 +3575,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             const items = [];
 
             for (let i = 0; i < this.orderData.items.length; i++) {
-                if (squareItemsNote == '') {
-                    squareItemsNote = this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'] ? this.orderData.items[i]['Quantity'].toString() : 1) > 1 ? '(' + this.orderData.items[i]['Quantity'].toString() + ')' : '');
-                }
-                else {
-                    squareItemsNote = squareItemsNote + ', ' + this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'] ? this.orderData.items[i]['Quantity'].toString() : 1) > 1 ? '(' + this.orderData.items[i]['Quantity'] ? this.orderData.items[i]['Quantity'].toString() : 1 + ')' : '');
+                if (squareItemsNote === '') {
+                    squareItemsNote = this.orderData.items[i]['Name'].trim() +
+                        (Number(this.orderData.items[i]['Quantity'] || 1) > 1
+                            ? '(' + this.orderData.items[i]['Quantity'].toString() + ')'
+                            : '');
+                } else {
+                    squareItemsNote += ', ' + this.orderData.items[i]['Name'].trim() +
+                        (Number(this.orderData.items[i]['Quantity'] || 1) > 1
+                            ? '(' + this.orderData.items[i]['Quantity'].toString() + ')'
+                            : '');
                 }
                 items.push({
                     'Price': this.orderData.items[i]['IsPartOfMeal'] && this.mealFormed ? 0 : this.orderData.items[i]['Price'],
@@ -3618,6 +3623,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'Name': systemMealName,
                     'IsPartOfMeal': false, // **verify
                     'Date': (new Date).getTime().toString(),
+                    'ItemAddedAt': LocalTimerService.getUTCTime(),
                     'TransactionNo': this.transactionNumber,
                     'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
                     'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
