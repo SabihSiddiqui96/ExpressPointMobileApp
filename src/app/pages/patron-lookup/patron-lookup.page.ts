@@ -696,7 +696,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         code = (isNaN(code)) ? 58 : code;
         if (event['keyCode'] == 13 && this.isElectronApp == true && isPeripheralsInput == false) {
             if (AppStateService.get('pnpPeripherals') == false) {
-                let localTimerSearchPatron_Keyboard: number = new Date().getTime();
+                let localTimerSearchPatron_Keyboard: number = new Date(this.utilService.getSessionDate()).getTime();
                 if (event.target.parentElement.id == "pinInput" && event.target.value != this.patronSearch.keyword && this.patronSearch.keyword != null) {
                     if (event.target.value.length > this.patronSearch.keyword.length)
                         event.target.value = this.patronSearch.keyword;
@@ -1155,7 +1155,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
 
     public handleKeyDown(event) {        
-        let localTimerSearchPatron_Keyboard: number = new Date().getTime();
+        let localTimerSearchPatron_Keyboard: number = new Date(this.utilService.getSessionDate()).getTime();
         const currentTime = performance.now();
         const timeElapsed = currentTime - this.lastInputTime;
         // Assuming peripherals input is faster than a typical human typing speed

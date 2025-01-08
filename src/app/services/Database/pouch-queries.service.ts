@@ -19,12 +19,12 @@ declare var require: any;
   providedIn: 'root'
 })
 export class PouchQueriesService {
+  static sessionDate: string | number | Date;
 
   constructor(private http: HttpService, public appStateService: AppStateService,
     public pouchDBService: PouchDBService, public settingService: SettingService, public utilService: UtilService) {
-
+    PouchQueriesService.sessionDate = this.utilService.getSessionDate();
   }
-
 
   /*
 
@@ -760,7 +760,7 @@ export class PouchQueriesService {
   }
 
   public static GetSessionChecks_PostNotSynced() {
-    var current_Date = new Date();
+    var current_Date = new Date(this.sessionDate);
     var numberOfDayToSubtract = 14;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionChecksGrThan = current_Date.getTime();
@@ -854,7 +854,7 @@ export class PouchQueriesService {
 
 
   public static GetSessionCards_PostNotSynced() {
-    var current_Date = new Date();
+    var current_Date = new Date(this.sessionDate);
     var numberOfDayToSubtract = 14;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionCardsGrThan = current_Date.getTime();
@@ -1367,7 +1367,7 @@ export class PouchQueriesService {
   }
 
   public static async GetAllLocalTransactions_ByAccount(AccountId) {
-    const dateOnlyEpoch = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+    const dateOnlyEpoch = Math.floor(new Date(this.sessionDate).setHours(0, 0, 0, 0) / 1000);
 
     // Fetch transactions for the given account and date
     const transactions = await EXP_TRANSACTIONS.find({
@@ -1847,7 +1847,7 @@ export class PouchQueriesService {
 
   public PostDeviceHeartBeat() {
 
-    const heartBeatTime = LocalTimerService.getCurrentTime();
+    const heartBeatTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
 
     let deviceInfo;
     if (AppStateService.get('DeviceInfo') !== undefined || AppStateService.get('DeviceInfo') != null) {

@@ -419,6 +419,10 @@ export class HttpService {
         }
     }
 
+    public GetPeriodClosedStatus(checkPOSPeriodPayload): any {
+        return this.http.post(API_URL + 'GetPeriodClosedStatus', checkPOSPeriodPayload).pipe(map(res => res));
+    }
+
     // public GetSiteSettings(): any {
     //   const schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
 

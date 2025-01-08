@@ -14,6 +14,7 @@ import { PouchDBService, EXP_TRANSACTIONS, EXP_COMMON } from '../../services/pou
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { UtilService } from '../../services/util.service';
 
 
 @Component({
@@ -34,6 +35,7 @@ export class CommentsPopupPage implements OnInit {
   public reView = {};
   constructor(private _nav: NavController, private popoverCtrl: PopoverController,
     public event: Events, private modalCtrl: ModalController, public router: Router,
+    public utilService: UtilService,
     public pouchDBService: PouchDBService, public pouchQuery: PouchQueriesService) {
 
     if (this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state && this.router.getCurrentNavigation().extras.state.navData) {
@@ -57,7 +59,7 @@ export class CommentsPopupPage implements OnInit {
     });
     this.reView[`Comments`] = this.comment;
     this.reViewReasonDoc = {
-      '_id': 'Review--' + LocalTimerService.getTime('time'),
+      '_id': 'Review--' + LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()),
       'Review': this.reView
     };
 
@@ -99,7 +101,7 @@ export class CommentsPopupPage implements OnInit {
     this.reView['Comments'] = '';
 
     this.reViewReasonDoc = {
-      '_id': 'Review--' + new Date().getTime(),
+      '_id': 'Review--' + new Date(this.utilService.getSessionDate()).getTime(),
       'Review': this.reView
     };
 

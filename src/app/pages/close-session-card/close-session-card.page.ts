@@ -84,7 +84,8 @@ export class CloseSessionCardPage implements OnInit {
       }
 
       amnt = parseFloat(amnt);
-      const createdDate = LocalTimerService.getTime('time');
+      //const createdDate = LocalTimerService.getTime('time');
+      const createdDate = new Date(this.utilService.getSessionDate()).getTime();
 
       const sessionCardDoc: SessionCardDoc = {
         '_id': 'SessionCard--' + createdDate,

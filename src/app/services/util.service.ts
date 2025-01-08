@@ -6,6 +6,7 @@ import { UrlsId } from './enums/environment-url-id';
 import { AppStateService } from './app-state.service';
 import { ElectronService } from './electron.service';
 import * as _ from 'lodash';
+import moment from 'moment';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +44,10 @@ export class UtilService {
   public isMenuSoldPopupOpen:boolean = false;
   showModalPopup: boolean = true;
   public static defaultAutoServeDelay: number = 2;
-  
+  public sessionPickedDate: string = '';
+  public summarySalePickedDate: string = '';
+  public datePickerDate: string = '';
+
   constructor(private loadingCtrl: LoadingController, private alertCtrl: AlertController,
     public toastCtrl: ToastController,
     private electron: ElectronService, private platform: Platform) {
@@ -112,6 +116,68 @@ export class UtilService {
     });
   }
 
+  public setSessionDate(value: string) {
+    const todayDate = moment(new Date()).format('YYYY-MM-DD');
+    const sessionDate = moment(new Date(value)).format('YYYY-MM-DD');
+    if (todayDate === sessionDate) {
+      this.sessionPickedDate = `${new Date().toISOString()}`;
+      // this.datePickerDate = `${new Date().toISOString()}`;
+    } else {
+      this.sessionPickedDate = value;
+      this.datePickerDate = value;
+    }
+    this.summarySalePickedDate = this.sessionPickedDate;
+    if (new Date(this.sessionPickedDate) > new Date()) {
+      this.summarySalePickedDate = `${new Date().toISOString()}`;
+    }
+  }
+
+  public setSummarySessionDate(value: string) {
+    const todayDate = moment(new Date()).format('YYYY-MM-DD');
+    const sessionDate = moment(new Date(value)).format('YYYY-MM-DD');
+    if (todayDate === sessionDate) {
+      this.summarySalePickedDate = `${new Date().toISOString()}`;
+    } else {
+      this.summarySalePickedDate = value;
+      this.datePickerDate = value;
+    }
+    if (new Date(this.summarySalePickedDate) > new Date()) {
+      this.summarySalePickedDate = `${new Date().toISOString()}`;
+    }
+  }
+
+  public getSessionDate() {
+    if (this.sessionPickedDate === '') {
+      if (AppStateService.get('session_id') && AppStateService.get('NewSessionDate')) {
+        this.setSessionDate(AppStateService.get('NewSessionDate'));
+      } else {
+        this.sessionPickedDate = `${new Date().toISOString()}`;
+      }
+      return this.sessionPickedDate;
+    } else {
+      const todayDate = moment(new Date()).format('YYYY-MM-DD');
+      const sessionDate = moment(new Date(this.sessionPickedDate)).format('YYYY-MM-DD');
+      const datePickerDate = moment(new Date(this.datePickerDate)).format('YYYY-MM-DD');
+      if (todayDate === sessionDate) {
+        this.sessionPickedDate = `${new Date().toISOString()}`;
+        return this.sessionPickedDate;
+      } else if (sessionDate === datePickerDate) {
+        this.sessionPickedDate = `${new Date(this.datePickerDate).toISOString()}`;
+        return this.sessionPickedDate;
+      } else {
+        this.sessionPickedDate = `${new Date().toISOString()}`;
+        return this.sessionPickedDate;
+      }
+    }
+  }
+
+  public get summarySaleDate(): string {
+    return this.summarySalePickedDate;
+  }
+
+  public set summarySaleDate(summaryDate: string) {
+    this.summarySalePickedDate = summaryDate;
+  }
 
   public async setLoader(type) {
     if (type === true) {
@@ -151,7 +217,7 @@ export class UtilService {
   }
 
   public generateUUID() {
-    let d = new Date().getTime();
+    let d = new Date(this.getSessionDate()).getTime();
     if (window.performance && typeof window.performance.now === 'function') {
       d += performance.now();
     }

@@ -126,7 +126,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
             this.showDynamicEntreeServingLine = true;
         }
-        const d = new Date();
+        const d = new Date(this.sessionDate);
         let day = d.getDay();
         if (Number(this.dayOfWeek) != day) {
             this.showDynamicEntreeServingLine = false;
@@ -351,6 +351,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
     public stateEigSetting: boolean = false;
+    public sessionDate: string;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -469,7 +470,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
         //this.hideStudentId = true;
         const wDay: string[] = ['0', '1', '2', '3', '4', '5', '6'];
         const day = new Date();
-        this.dayOfWeek = wDay[day.getUTCDay()];
+        const selectedDayofWeek = this.utilService.getSessionDate() ? new Date(this.utilService.getSessionDate()).getDay() : day.getUTCDay();
+        this.dayOfWeek = wDay[selectedDayofWeek];
+        this.sessionDate = this.utilService.getSessionDate();
 
         this.loadingID = LoadingService.generateLoadingID();
         this.loadingService.present(this.loadingID, null, false).then(() => {
@@ -1294,7 +1297,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         let previousALCCount = 0;
         let previousALCAmt = 0;
-        const today = new Date();
+        const today = new Date(this.sessionDate);
         if (previousSales) {
 
             /**
@@ -1416,7 +1419,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         pDetails.Allergies = pDetails.Allergies == null ? [] : pDetails.Allergies;
         pDetails.SpecialInstruction = pDetails.SpecialInstruction == null ? [] : pDetails.SpecialInstruction;
 
-        const todaysDate = new Date();
+        const todaysDate = new Date(this.sessionDate);
         this.currentDay = todaysDate.getDay();
         this.alaCarteCash = [], this.alaCarteCharge = [], this.allergenCount = 0;
         if (pDetails.ALCCashAllowedDays != null) {
@@ -1483,7 +1486,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
 
 
-        let today = new Date().getDay();
+        let today = new Date(this.sessionDate).getDay();
 
         const binaryALCDebit = this.padding_left(parseInt(this.patronDetails.ALCDebitAllowedDays, 10).toString(2), '0', 5);
         const binaryALCCash = this.padding_left(parseInt(this.patronDetails.ALCCashAllowedDays, 10).toString(2), '0', 5);
@@ -1585,7 +1588,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public dayChange() {
-        const d = new Date();
+        const d = new Date(this.sessionDate);
         let day = d.getDay();
         this.showDynamicEntreeServingLine = false;
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
@@ -1644,7 +1647,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.selectedServingLineName = "";
             const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
             if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
-                const d = new Date();
+                const d = new Date(this.sessionDate);
                 let day = d.getDay();
                 if (Number(this.dayOfWeek) == day) {
                     this.showDynamicEntreeServingLine = true;
@@ -2038,7 +2041,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const cartItems = [];
         let itemPrice = 0.00;
         let IsTaxable: boolean;
-
+        this.sessionDate = this.utilService.getSessionDate();
         if (deleteAllMeals) {
             for (let i = 0; i < this.orderData.items.length; i++) {
 
@@ -2179,6 +2182,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
             if (typeof value === 'string') return value.toLowerCase() === 'true';
             return false; // Default fallback for non-boolean values
         };
+
+        const now = new Date(this.sessionDate);
+        const UTC = now.getTime();
+        const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+        const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
         // Normalize patron details
         const isStudent = normalizeBoolean(this.patronDetails.IsStudent);
@@ -2374,7 +2382,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         'IniTotalPrice': itemPrice,
                         'IsStudent': isStudent,
                         'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
-                        'ItemAddedAt': LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
+                        'ItemAddedAt': UTC, //LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice, //this.paidMealPrice
                         'ShowPaidPrice': this.showPaidPrice,
@@ -2653,7 +2661,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 EventType: 0,
                 Data: currentPatronId + ' / ' +errorMessage,
                 QueueCount: 0,
-                ErrorLogTime: new Date().toISOString()
+                ErrorLogTime: new Date(this.sessionDate).toISOString()
             }
             this.http.saveErrorLogs(errorLogData).subscribe((res) => console.log(res));
         } catch(error) {
@@ -3080,7 +3088,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                         let paymentAmnt = this.transactionService.CalculatePaymentAmountMenuService(this.orderData, transactionType, this.PaymentAmount, this.selectedAccountDetails)
 
-                        const now = new Date();
+                        const now = new Date(this.sessionDate);
                         const UTC = now.getTime();
                         const localOffset = (-1) * now.getTimezoneOffset() * 60000;
                         const currentTime = Math.round(new Date(UTC + localOffset).getTime());
@@ -3836,7 +3844,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public generateUUID() {
-        let d = LocalTimerService.getTime('time');
+        let d = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }
@@ -3980,7 +3988,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.hideBalSetting = 0;
         }
         this.cdr.detectChanges();
-        // this.event.publish('patronLargeImagehide', null);
     }
     public getReviews() {
         // this.event.publish('patronLargeImagehide', null);
@@ -3998,7 +4005,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public onReviewTypeChange(reviewType, reviewTypeDescription, reviewTypeCd) {
-        const currentTime = LocalTimerService.getTime('time');
+        const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
         this.isMarked = true;
         const review = {
             'ReviewTypeCd': reviewTypeCd,
@@ -4176,7 +4183,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public checkForBirthday(patronData) {
         let selectedPatron = patronData;
         const birthDate = new Date(selectedPatron.BirthDate);
-        const currentDate = new Date();
+        const currentDate = new Date(this.sessionDate);
         this.removeConfettiCanvas();
         this.isBirthDay = false;
         if (this.CheckBirthDayNotifications == true && currentDate.getUTCMonth() + 1 === birthDate.getUTCMonth() + 1
@@ -4428,14 +4435,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.patronImage = image;
                     this.largeImageToShow = true;
                     this.largeImageSrc = image;
-                    if (this.selectedAccountDetails) {
-                        // this.showLargeImage(1000);
-                    }
+                    this.cdr.detectChanges();
                 } else {
                     this.largeImageToShow = false;
                     this.largeImageIsShowing = false;
                     setTimeout(() => {
                         this.patronImageLoad();
+                        this.cdr.detectChanges();
                     }, 100);
                 }
             }).catch((err) => {
@@ -4449,6 +4455,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.largeImageIsShowing = false;
             setTimeout(() => {
                 this.patronImageLoad();
+                this.cdr.detectChanges();
             }, 100);
         }
         this.setCreditLimit();
@@ -5068,6 +5075,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 return false; // Default fallback for non-boolean values
             };
 
+            const now = new Date(this.sessionDate);
+            const UTC = now.getTime();
+            const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+            const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+
             // Normalize patron details
             const isStudent = normalizeBoolean(this.patronDetails.IsStudent);
 
@@ -5271,7 +5283,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'IniTotalPrice': itemPrice,
                                     'IsStudent': isStudent,
                                     'CategoryId': menuItem.CategoryId ? menuItem.CategoryId : 0,
-                                    'ItemAddedAt': LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
+                                    'ItemAddedAt': UTC, //LocalTimerService.getUTCTime(),  // epoch timestamp at the time of adding item to the sale
                                     'IsTaxable': menuItem.IsTaxable,
                                     'PaidPrice': paidMealPrice,
                                     'ShowPaidPrice': this.showPaidPrice,

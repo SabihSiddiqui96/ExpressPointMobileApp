@@ -13,10 +13,24 @@
         <ion-icon name="menu" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-menu-toggle>
-    <ion-title class="ion-text-center">
-      {{pageTitle}}
-
-    </ion-title>
+    <ion-row>
+      <ion-title class="ion-text-center">
+        {{pageTitle}}
+      </ion-title>
+      <div class="ion-justify-content-end" style="transform: translate(-10px, 10px);">
+        <form [formGroup]="openSessionForm">
+          <mat-form-field appearance="outline">
+            <mat-label aria-hidden="true">{{ currentRoute === 'summarySales' ? 'Summary Sale Date':'Session Date'
+              }}</mat-label>
+            <input matInput [disabled]="sessionDateDisable" aria-label="Session Date" placeholder="Session Date" [max]="maxDate"
+              (dateChange)="changeSessionDate($event)" [formControl]="sessionDatePicker" [matDatepicker]="menuDatePicker"
+              [matDatepickerFilter]="menuDatePickerFilter" (click)="menuDatePicker.open()">
+            <mat-datepicker-toggle matSuffix [for]="menuDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #menuDatePicker [disabled]="sessionDateDisable"></mat-datepicker>
+          </mat-form-field>
+        </form>
+      </div>
+    </ion-row>
   </ion-toolbar>
 </ion-header>
 
@@ -129,13 +143,19 @@
       <!-- (ionFocus)="_appservice.inputFocus('focus');" -->
     </ion-col>
     <ion-col size="12" size-lg="3" push-lg="3" class="ion-align-self-center">
-      <ion-button expand="block" size="large" color="slate" (click)="openSession()" [disabled]="saveInProgress">
-        Open Service
+      <ion-button *ngIf="!posPeriodBlock" expand="block" size="large" color="slate" (click)="openSession()" [disabled]="saveInProgress || posPeriodCheckInProgress">
+        {{ currentRoute === 'summarySales' ? 'Go to Summary Sale':'Open Service' }}
         <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
         <div class="spinLogin" *ngIf="saveInProgress">
           <ion-spinner name="bubbles"></ion-spinner>
         </div>
       </ion-button>
+      <span *ngIf="posPeriodBlock" [matTooltip]="disabledHtml" positionV="top" leftOffset="-100">
+        <ion-button expand="block" size="large" color="slate" disabled="true">
+          {{ currentRoute === 'summarySales' ? 'Go to Summary Sale':'Open Service' }}
+          <ion-icon slot="end" name="arrow-round-forward"></ion-icon>
+        </ion-button>
+      </span>
     </ion-col>
     <ion-col size="12" size-lg="3" pull-lg="9" class="ion-align-self-center">
       <ion-button expand="block" size="large" (click)="clearQuantity()">

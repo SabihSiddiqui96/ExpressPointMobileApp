@@ -306,7 +306,7 @@ export class TransactionService {
 
                     let sessionDocs = data.rows.map(row => row.doc);
                     sessionDocs = sessionDocs.filter(s => {
-                        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+                        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
                             Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                             && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
                     });

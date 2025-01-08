@@ -121,8 +121,8 @@ export class QuickClassroomSalePage implements OnInit {
         // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
         // const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
-        const currentTime = LocalTimerService.getCurrentTime();
-        const currentDate = LocalTimerService.GetLocalDateAsString();
+        const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+        const currentDate = LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate());
         
         if (AppStateService.get('NewSessionDate') !== undefined) {
             if (currentDate !== AppStateService.get('NewSessionDate')) {
@@ -162,7 +162,7 @@ export class QuickClassroomSalePage implements OnInit {
         const sessionDenominations = [];
         const sessionCheck = [];
         const closeSessionDoc = {
-            '_id': 'CloseSession--' + new Date().getTime(),
+            '_id': 'CloseSession--' + new Date(this.utilService.getSessionDate()).getTime(),
             'SessionId': AppStateService.get('session_id'),
             'SessionDenominations': sessionDenominations,
             'SessionCheck': sessionCheck,
@@ -175,7 +175,7 @@ export class QuickClassroomSalePage implements OnInit {
 
             let sessionDocs = data.rows.map(row => row.doc);
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === new Date().setHours(0, 0, 0, 0) &&
+                return s.isStillOpen && s.OpenDate === new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) &&
                 Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             });
@@ -200,7 +200,7 @@ export class QuickClassroomSalePage implements OnInit {
     }
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = new Date(this.utilService.getSessionDate()).getTime();
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

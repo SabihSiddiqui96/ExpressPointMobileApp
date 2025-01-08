@@ -147,13 +147,13 @@ export class SetupDbService {
                 this.canDeleteTranDB().then((canDelete) => {
                     if (canDelete) {
                         destroyPromises.push(EXP_TRANSACTIONS.destroy());
-                        AppStateService.set('TranDbDestroyedDate', new Date().setHours(0, 0, 0, 0));
+                        AppStateService.set('TranDbDestroyedDate', new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0));
                     }
                 });
 
             }
         } else {
-            AppStateService.set('TranDbDestroyedDate', new Date().setHours(0, 0, 0, 0));
+            AppStateService.set('TranDbDestroyedDate', new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0));
         }
         return new Promise((resolve, reject) => {
             Promise.all(destroyPromises).then(() => {
@@ -216,7 +216,7 @@ export class SetupDbService {
                     // delete open sessions from previous day
                     openSessionDocs.forEach(doc => {
                         if (doc.isSentToServer === true
-                            && (doc.OpenDate !== LocalTimerService.GetLocalDateAsString() || doc.openDate <= LocalTimerService.getCurrentDate()))
+                            && (doc.OpenDate !== LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) || doc.openDate <= LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate())))
                             EXP_TRANSACTIONS.remove(doc);
                     });
 
@@ -224,7 +224,7 @@ export class SetupDbService {
                         openSessionDocs.length > 0 ? openSessionDocs.find((doc) => doc.isSentToServer === false) : true;
 
                     const hasOpenToday = openSessionDocs.length > 0 ? openSessionDocs.find((doc) =>
-                        doc.isStillOpen && doc.OpenDate === LocalTimerService.GetLocalDateAsString()) : true;
+                        doc.isStillOpen && doc.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate())) : true;
 
                     if (hasNotSentOpenSessions || hasOpenToday) {
                         canDeleteOpenSession = false;

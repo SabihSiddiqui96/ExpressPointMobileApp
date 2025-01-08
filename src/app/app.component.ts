@@ -214,10 +214,10 @@ export class AppComponent {
       .subscribe((value) => {
         let evenType;
         if (value == true) {
-          AppStateService.set("HeartBeatLastOfflineDate", LocalTimerService.getTime('time'));
+          AppStateService.set("HeartBeatLastOfflineDate", LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()));
           evenType = "disconnect";
         } else {
-          AppStateService.set("LastOnlineDate", LocalTimerService.getTime('time'));
+          AppStateService.set("LastOnlineDate", LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()));
           evenType = "connect";
         }
 
@@ -507,7 +507,7 @@ export class AppComponent {
           _thisRef.platform.pause.subscribe(() => {
             console.log("App paused");
             UtilService.isAppForeground = false;
-            UtilService.appBackgroundTime = LocalTimerService.getTime('time');
+            UtilService.appBackgroundTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
           });
 
           _thisRef.platform.resume.subscribe(() => {
@@ -845,7 +845,7 @@ export class AppComponent {
 
   public checkForInactivityTimeout(_thisRef) {
     const lastBgTime = UtilService.appBackgroundTime;
-    const currTime = LocalTimerService.getTime('time');
+    const currTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
     UtilService.appBackgroundTime = undefined;
     if (lastBgTime && typeof lastBgTime === "number" && lastBgTime > 0) {
       const value = SettingService.getSettingValue("TEROFFA");
@@ -1370,7 +1370,7 @@ export class AppComponent {
     const sessionDenominations = [];
     const sessionCheck = [];
     const closeSessionDoc = {
-      '_id': 'CloseSession--' + LocalTimerService.getTime('time'),
+      '_id': 'CloseSession--' + LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()),
       'SessionId': AppStateService.get('session_id'),
       'SessionDenominations': sessionDenominations,
       'SessionCheck': sessionCheck,
@@ -1384,7 +1384,7 @@ export class AppComponent {
 
       let sessionDocs = data.rows.map(row => row.doc);
       sessionDocs = sessionDocs.filter(s => {
-        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
           Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
           && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
           && s.SessionType === SessionType.EXPRESSPOINT;
@@ -1540,7 +1540,7 @@ export class AppComponent {
                 type: type,
               },
             },
-            queryParams: { refresh: LocalTimerService.getTime('time') }
+            queryParams: { refresh: LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()) }
           };
           this.navCtrl.navigateRoot("open-session", navigationExtras);
         }
@@ -1552,7 +1552,7 @@ export class AppComponent {
               type: type,
             },
           },
-          queryParams: { refresh: LocalTimerService.getTime('time') }
+          queryParams: { refresh: LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()) }
         };
         this.navCtrl.navigateRoot("open-session", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
@@ -1564,7 +1564,7 @@ export class AppComponent {
               type: type,
             },
           },
-          queryParams: { refresh: LocalTimerService.getTime('time') }
+          queryParams: { refresh: LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()) }
         };
         this.navCtrl.navigateRoot("open-session", navigationExtras);
       }
@@ -1933,7 +1933,7 @@ export class AppComponent {
         );
       }
 
-      const now = new Date();
+      const now = new Date(this.utilService.getSessionDate());
       const localOffset = -1 * now.getTimezoneOffset() * 60000;
 
       if (
@@ -1966,7 +1966,7 @@ export class AppComponent {
       }
 
       const heartBeatDetailsDoc = {
-        _id: "HeartBeatDetails--" + LocalTimerService.getTime('time'),
+        _id: "HeartBeatDetails--" + LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()),
         TerminalId: this.terminalId,
         LogErrorDescription: this.errDescription,
         AppOnlineLogTime: this.lastOnlineDate,

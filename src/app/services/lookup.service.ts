@@ -91,7 +91,7 @@ export class LookupService {
 
         if (this.utilService.isElectronApp() && this.utilService.showModalPopup) {
             const handleQueueInput = async (event, queueInput) => {
-                this.localtimer_device = new Date().getTime();
+                this.localtimer_device = new Date(this.utilService.getSessionDate()).getTime();
                 AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);
                 const keywordSearchLength = this.keywordService.keywordSearchLength;
                 this.setQ(queueInput, keywordSearchLength);

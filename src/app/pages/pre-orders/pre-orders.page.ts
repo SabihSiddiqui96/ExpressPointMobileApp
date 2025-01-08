@@ -146,7 +146,7 @@ export class PreOrdersPage implements OnInit {
 
     public getMealTypes() {
         PouchQueriesService.GetMealTypes().then((res) => {
-            const time = new Date();
+            const time = new Date(this.utilService.getSessionDate());
             const stime =
                 ('0' + time.getHours()).slice(-2) + ':' +
                 ('0' + time.getMinutes()).slice(-2) + ':' +
@@ -180,7 +180,7 @@ export class PreOrdersPage implements OnInit {
                 return row.doc;
             });
             if (studentDocs.length > 0) {
-                const currDate = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+                const currDate = new Date(this.utilService.getSessionDate()).toJSON().slice(0, 10).replace(/-/g, '/');
                 const updatedDoc = _.filter(studentDocs, { 'MealTypeId': mealTypeId, 'OrderDate': currDate });
                 // ['MealTypeId', mealTypeId]);
                 // let updatedDoc = studentDocs;
@@ -320,7 +320,7 @@ export class PreOrdersPage implements OnInit {
     public saveStudentData() {
         let siteTypeId = 0;
         let rdaGroupId = 0;
-        const date = new Date();
+        const date = new Date(this.utilService.getSessionDate());
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
             + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 
@@ -336,7 +336,7 @@ export class PreOrdersPage implements OnInit {
 
 
         for (const student of this.studentList) {
-            const now = new Date();
+            const now = new Date(this.utilService.getSessionDate());
             const UTC = now.getTime();
             const localOffset = (-1) * now.getTimezoneOffset() * 60000;
             const currentTime = Math.round(new Date(UTC + localOffset).getTime());
@@ -558,7 +558,7 @@ export class PreOrdersPage implements OnInit {
 
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = new Date(this.utilService.getSessionDate()).getTime();
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

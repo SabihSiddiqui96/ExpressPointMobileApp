@@ -156,8 +156,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     private squareDeviceId: null;
     private SquareSetting: boolean;
     interval = 3000;
-    public transactionDetails: CCTransactionStatus; 
-    
+    public transactionDetails: CCTransactionStatus;
+
     toggleName: string = 'Alacarte';
     public isPatronHavingImage = false;
 
@@ -459,8 +459,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         const wDays: string[] = ['0', '1', '2', '3', '4', '5', '6'];
-        const day = new Date();
-        this.dayOfWeek = wDays[day.getUTCDay()];
+        this.dayOfWeek = wDays[new Date(this.utilService.getSessionDate()).getDay()];
         this.event.subscribe('patron:invalid', (userEventData) => {
             this.goToLookUp();
         });
@@ -488,8 +487,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             this.GetDaySelection();
 
-            const now = new Date();
-            const UTC = LocalTimerService.getTime('time');
+            const now = new Date(this.utilService.getSessionDate());
+            const UTC = now.getTime();
             const localOffset = (-1) * now.getTimezoneOffset() * 60000;
             const currentDate = new Date(UTC + localOffset);
 
@@ -1014,8 +1013,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.deviceTransactionId = this.utilService.generateUUID();
         this.largeImageToShow = false;
         this.ResetData();
-        const date = new Date();
-        const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+        //const date = new Date();
+        //const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
         this.event.publish('clear-custom-keys', {});
 
         this.patronId = this.patronDetails['PersonId'];
@@ -1217,7 +1216,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.patronDetails.SpecialInstruction_count = 0;
         }
 
-        let today = new Date().getDay();
+        let today = new Date(this.utilService.getSessionDate()).getDay();
         const binaryALCDebit = this.padding_left(parseInt(this.patronDetails.ALCDebitAllowedDays, 10).toString(2), '0', 5);
         const binaryALCCash = this.padding_left(parseInt(this.patronDetails.ALCCashAllowedDays, 10).toString(2), '0', 5);
 
@@ -1402,7 +1401,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public setPreviousSalesCount() {
         const previousSales = this.patronDetails.PreviousSales;
         let previousALCAmt = 0;
-        const today = new Date();
+        const today = new Date(this.utilService.getSessionDate());
         if (previousSales) {
             // var SoldItemsByMealType = _.find(previousSales, (o) => { return o.MealTypeId === this.DefaultMealTypeId });
             const prevSalesByMealType = _.find(previousSales,
@@ -1529,7 +1528,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public showAllergiesAndNotes() {
         this.patronDetails.Allergies = this.patronDetails.Allergies == null ? [] : this.patronDetails.Allergies;
         this.patronDetails.SpecialInstruction = this.patronDetails.SpecialInstruction == null ? [] : this.patronDetails.SpecialInstruction;
-        const todaysDate = new Date();
+        const todaysDate = new Date(this.utilService.getSessionDate());
         this.currentDay = todaysDate.getDay();
         this.alaCarteCash = [], this.alaCarteCharge = [], this.allergenCount = 0; // reset the alertpopup conditions
 
@@ -2692,7 +2691,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
 
     public Confirmed_CartMenuItem(menuItem, priceTypeId, isSecondMeal = false) {
-
+        const now = new Date(this.utilService.getSessionDate());
+        const UTC = now.getTime();
         // This is added to make sure that the current students pricetype is added only and if its a second meal then we will keep the secondmealPricetype
         let priceTypeId_State = priceTypeId;
         if (!isSecondMeal) {
@@ -2765,7 +2765,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'ItemIndex': this.itemIndex,
                     'OriginalPrice': currPrice,
                     'TransactionNo': this.transactionNumber,
-                    'ItemAddedAt': LocalTimerService.getUTCTime(), // recording the item added time to track the item sale uniquely per terminal
+                    'ItemAddedAt': UTC, // recording the item added time to track the item sale uniquely per terminal
                     'IsTaxable': menuItem.IsTaxable,
                     'PaidPrice': currPrice,
                     'ShowPaidPrice': false,
@@ -3544,15 +3544,15 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (AppStateService.get('session_id')) {
                 this.sessionId = AppStateService.get('session_id');
             }
-            const date = new Date();
             let squareItemsNote = '';
 
-            const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
-                + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
             const personSaledetails: Array<PersonSaledetailsModel> = new Array<PersonSaledetailsModel>();
 
 
-            const currentTime = LocalTimerService.getTime('time');
+            const now = new Date(this.utilService.getSessionDate());
+            const UTC = now.getTime();
+            const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+            const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
             // to Take out pictures from device
             this.patronDetails.Image = null;
@@ -3620,12 +3620,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'IsReimbursable': true,
                     'Name': systemMealName,
                     'IsPartOfMeal': false, // **verify
-                    'Date': (new Date).getTime().toString(),
-                    'ItemAddedAt': LocalTimerService.getUTCTime(),
+                    'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
+                    'ItemAddedAt': UTC,
                     'TransactionNo': this.transactionNumber,
                     'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
                     'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
-                });               
+                });
             }
 
             this.menuGridService.hasDifferentPriceType(transactionType, constOrderItems,
@@ -3679,8 +3679,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         'IsReimbursable': true,
                                         'Name': systemMealName,
                                         'IsPartOfMeal': false, // **verify
-                                        'Date': (new Date).getTime().toString(),
-                                        'ItemAddedAt': LocalTimerService.getUTCTime(),
+                                        'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
+                                        'ItemAddedAt': UTC,
                                         'TransactionNo': this.transactionNumber,
                                         'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
                                         'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
@@ -3693,7 +3693,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         'IsReimbursable': true,
                                         'MenuItemDescription': this.systemMenuItem.MenuItemDescription,
                                         'IsPartOfMeal': false, // **verify
-                                        'Date': (new Date).getTime().toString(),
+                                        'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
                                         'TransactionNo': this.transactionNumber,
                                         'TerminalName': this.terminalName,
                                         'IsTaxable': this.systemMenuItem.IsTaxable,
@@ -3861,26 +3861,26 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 // }
 
                                 const sessionCheckDoc: SessionCheckDoc = {
-                                    '_id': 'SessionCheck--' + date.getTime(),
+                                    '_id': 'SessionCheck--' + currentTime,
                                     'SessionId': this.sessionId,
                                     'CheckNumber': this.orderData.CheckNumber,
                                     'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
                                     'IsDeleted': false,
                                     'SessionCheckId': this.utilService.generateUUID(),
                                     'IsSynced': false,
-                                    'CreatedDate': date.getTime()
+                                    'CreatedDate': currentTime
                                 };
 
 
                                 const sessionCardDoc: SessionCardDoc = {
-                                    '_id': 'SessionCard--' + date.getTime(),
+                                    '_id': 'SessionCard--' + currentTime,
                                     'SessionId': this.sessionId,
                                     'CardNumber': this.orderData.CardNumber,
                                     'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
                                     'IsDeleted': false,
                                     'SessionCardId': this.utilService.generateUUID(),
                                     'IsSynced': false,
-                                    'CreatedDate': date.getTime()
+                                    'CreatedDate': currentTime
                                 };
 
                                 if (transactionType !== 0) {
@@ -3926,7 +3926,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         && (this.printAllSetting === 1
                                             || (this.printAuto === 1
                                                 && (transactionType === TransactionTypes.CASH || transactionType === TransactionTypes.PREPAYMENT)))) {
-                                        const now = new Date();
+                                        const now = new Date(this.utilService.getSessionDate());
                                         const transactionReceiptData: TransactionDetailPrintFormat = {
                                             'PersonName': this.patronDetails.PersonName,
                                             'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
@@ -4482,7 +4482,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = new Date(this.utilService.getSessionDate()).getTime();
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }
@@ -5119,7 +5119,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             then((res) => {
                 this.menuCalendars = res.rows.map(row => row.doc);
                 this.menuCalendars = this.menuCalendars.filter(m => {
-                    return (new Date(m.ServingDate).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0) &&
+                    return (new Date(m.ServingDate).setHours(0, 0, 0, 0) === new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) &&
                         m.MealTypeId === this.selectedMealType && m.SchoolId === this.schoolId);
                 });
 
@@ -5928,7 +5928,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     // }
 
     public Confirmed_CartMenuItemForStaticMenus(menuItem, priceTypeId, isSecondMeal = false) {
-
+        const now = new Date(this.utilService.getSessionDate());
+        const UTC = now.getTime();
         let secondmeal = false;
         (this.mealCount > 1) ? secondmeal = true : secondmeal = false;
 
@@ -6124,7 +6125,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'ItemIndex': this.itemIndex,
                         'OriginalPrice': currPrice,
                         'TransactionNo': this.transactionNumber,
-                        'ItemAddedAt': LocalTimerService.getUTCTime(),
+                        'ItemAddedAt': UTC,
                         'IsTaxable': menuItem.IsTaxable,
                         'PaidPrice': paidMealPrice,
                         'ShowPaidPrice': this.showPaidPrice,
@@ -6721,7 +6722,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public onReviewTypeChange(reviewType, reviewTypeDescription, reviewTypeCd) {
-        const currentTime = LocalTimerService.getTime('time');
+        const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
         this.isMarked = true;
         const review = {
             'ReviewTypeCd': reviewTypeCd,
@@ -6897,7 +6898,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public checkForBirthday(patronData) {
         let selectedPatron = patronData;
         const birthDate = new Date(selectedPatron.BirthDate);
-        const currentDate = new Date();
+        const currentDate = new Date(this.utilService.getSessionDate());
         this.removeConfettiCanvas();
         this.isBirthDay = false;
         if (this.CheckBirthDayNotifications == true && currentDate.getUTCMonth() + 1 === birthDate.getUTCMonth() + 1

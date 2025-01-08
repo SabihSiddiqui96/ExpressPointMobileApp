@@ -406,7 +406,7 @@ export class ServiceSelectionPage implements OnInit {
           sessionDocs = sessionDocs.filter((s) => {
             return (
               s.isStillOpen &&
-              s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+              s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
               Number(s.OpenedBy) ===
               JSON.parse(AppStateService.get("login_details")).UserId &&
               s.SchoolId ===
@@ -509,7 +509,7 @@ export class ServiceSelectionPage implements OnInit {
               type: type,
             }
           },
-          queryParams: { refresh: new Date().getTime() }
+          queryParams: { refresh: new Date(this.utilService.getSessionDate()).getTime() }
         };
         this._nav.navigateRoot("open-session", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
@@ -520,7 +520,7 @@ export class ServiceSelectionPage implements OnInit {
               type: type
             }
           },
-          queryParams: { refresh: new Date().getTime() }
+          queryParams: { refresh: new Date(this.utilService.getSessionDate()).getTime() }
         };
         this._nav.navigateRoot("open-session", navigationExtras);
       }

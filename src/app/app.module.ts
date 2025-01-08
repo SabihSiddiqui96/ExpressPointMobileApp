@@ -108,6 +108,7 @@ import { AutoServePauseOptionsPopUpComponent } from './pages/auto-serve-pause-op
 import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup-popup.page';
 import { UnidentifiedPatronPopupPage } from './pages/menu-service/components/unidentified-patron-popup/unidentified-patron-popup.page';
 import { PerformanceOptionsPopUpComponent } from './pages/performance-options-popup/performance-options-popup.page';
+import { MaterialModule } from './material.module';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -176,7 +177,8 @@ import { PerformanceOptionsPopUpComponent } from './pages/performance-options-po
         NgIdleModule.forRoot(),
         IonicModule.forRoot({ mode: 'md' }),
         SharedComponentsModule,
-        MenuServiceModule
+        MenuServiceModule,
+        MaterialModule
     ],
     providers: [
         StatusBar,
