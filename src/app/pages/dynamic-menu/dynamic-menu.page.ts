@@ -3573,13 +3573,19 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             this.utilService.setLoader(true);
             const items = [];
-
+            const constOrderItems = [];
             for (let i = 0; i < this.orderData.items.length; i++) {
-                if (squareItemsNote == '') {
-                    squareItemsNote = this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'] ? this.orderData.items[i]['Quantity'].toString() : 1) > 1 ? '(' + this.orderData.items[i]['Quantity'].toString() + ')' : '');
-                }
-                else {
-                    squareItemsNote = squareItemsNote + ', ' + this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'] ? this.orderData.items[i]['Quantity'].toString() : 1) > 1 ? '(' + this.orderData.items[i]['Quantity'] ? this.orderData.items[i]['Quantity'].toString() : 1 + ')' : '');
+                constOrderItems.push(this.orderData.items[i]);
+                if (squareItemsNote === '') {
+                    squareItemsNote = this.orderData.items[i]['Name'].trim() +
+                        (Number(this.orderData.items[i]['Quantity'] || 1) > 1
+                            ? '(' + this.orderData.items[i]['Quantity'].toString() + ')'
+                            : '');
+                } else {
+                    squareItemsNote += ', ' + this.orderData.items[i]['Name'].trim() +
+                        (Number(this.orderData.items[i]['Quantity'] || 1) > 1
+                            ? '(' + this.orderData.items[i]['Quantity'].toString() + ')'
+                            : '');
                 }
                 items.push({
                     'Price': this.orderData.items[i]['IsPartOfMeal'] && this.mealFormed ? 0 : this.orderData.items[i]['Price'],
@@ -3604,13 +3610,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 let priceType = this.patronDetails.PriceTypeId;
                 let systemMealName = this.systemMenuItem.MenuItemDescription;
                 if (this.patronDetails.IsSecondMeal === true) {
-
-                    // isMeal = false;
                     priceType = this.secondMealPriceType;
                     systemMealName = 'Second ' + this.systemMenuItem.MenuItemDescription;
-
                 }
-                this.orderData.items.push({
+                constOrderItems.push({
                     'Price': this.systemMenuItem.Price,
                     'RefId': this.systemMenuItem.MenuItemId,
                     'price_type_id': priceType,
@@ -3618,30 +3621,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'Name': systemMealName,
                     'IsPartOfMeal': false, // **verify
                     'Date': (new Date).getTime().toString(),
+                    'ItemAddedAt': LocalTimerService.getUTCTime(),
                     'TransactionNo': this.transactionNumber,
                     'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
                     'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
-
-                });
-                items.push({
-                    'Price': this.systemMenuItem.Price,
-                    'MenuItemId': this.systemMenuItem.MenuItemId,
-                    'priceTypeId': priceType,
-                    'IsReimbursable': true,
-                    'MenuItemDescription': this.systemMenuItem.MenuItemDescription,
-                    'IsPartOfMeal': false, // **verify
-                    'Date': (new Date).getTime().toString(),
-                    'TransactionNo': this.transactionNumber,
-                    'TerminalName': this.terminalName,
-                    'IsTaxable': this.systemMenuItem.IsTaxable,
-                    'MenuId': null,
-                    'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
-                    'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
-                });
+                });               
             }
-            
 
-            this.menuGridService.hasDifferentPriceType(transactionType, this.orderData.items,
+            this.menuGridService.hasDifferentPriceType(transactionType, constOrderItems,
                 this.patronDetails.PriceTypeId,
                 this.patronDetails.StatePriceTypeId, this.secondMealPriceType, this.stateEigSetting).then((res) => {
                     if (res) {
@@ -3677,6 +3664,44 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         }
                         this.CanCreateSaleTransaction(transactionType, paymentAmnt, squareNote).then((res) => {
                             if (res === true) {
+                                // meal combo item
+                                if (this.mealFormed) {
+                                    let priceType = this.patronDetails.PriceTypeId;
+                                    let systemMealName = this.systemMenuItem.MenuItemDescription;
+                                    if (this.patronDetails.IsSecondMeal === true) {
+                                        priceType = this.secondMealPriceType;
+                                        systemMealName = 'Second ' + this.systemMenuItem.MenuItemDescription;
+                                    }
+                                    this.orderData.items.push({
+                                        'Price': this.systemMenuItem.Price,
+                                        'RefId': this.systemMenuItem.MenuItemId,
+                                        'price_type_id': priceType,
+                                        'IsReimbursable': true,
+                                        'Name': systemMealName,
+                                        'IsPartOfMeal': false, // **verify
+                                        'Date': (new Date).getTime().toString(),
+                                        'ItemAddedAt': LocalTimerService.getUTCTime(),
+                                        'TransactionNo': this.transactionNumber,
+                                        'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
+                                        'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
+
+                                    });
+                                    items.push({
+                                        'Price': this.systemMenuItem.Price,
+                                        'MenuItemId': this.systemMenuItem.MenuItemId,
+                                        'priceTypeId': priceType,
+                                        'IsReimbursable': true,
+                                        'MenuItemDescription': this.systemMenuItem.MenuItemDescription,
+                                        'IsPartOfMeal': false, // **verify
+                                        'Date': (new Date).getTime().toString(),
+                                        'TransactionNo': this.transactionNumber,
+                                        'TerminalName': this.terminalName,
+                                        'IsTaxable': this.systemMenuItem.IsTaxable,
+                                        'MenuId': null,
+                                        'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
+                                        'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
+                                    });
+                                }
                                 let paymentData: TransactionDoc, paymentDoc;
                                 if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
                                     && this.orderData.IsDeposit) {

@@ -33,6 +33,9 @@ export class PatronListModalPage implements OnInit {
         if(this.navPatronList && this.navPatronList.length > 0) {
             this.isFromServer = this.navPatronList['0'].IsFromServer ? true : false;
         }
+        if (AppStateService.get('isOnlyThisSitePatrons') != undefined && AppStateService.get('isOnlyThisSitePatrons') != null) {
+            this.isOnlyThisSite = AppStateService.get('isOnlyThisSitePatrons');
+        }
         this.selectedSiteName = JSON.parse(AppStateService.get("SelectedSite")).SiteNameWithCode;
         const gridViewPatronIsPic = AppStateService.get('GridViewPatronIsPic');
         const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
@@ -210,6 +213,7 @@ export class PatronListModalPage implements OnInit {
             (document.activeElement as HTMLElement).blur();
         }, 0);
         this.isOnlyThisSite = !this.isOnlyThisSite;
+        AppStateService.set('isOnlyThisSitePatrons', this.isOnlyThisSite);
         this.loadFirst20Patrons();
         this.updateAdvLookupSortOrder();
     }
