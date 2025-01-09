@@ -38,6 +38,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
 
     public ngOnInit() {
+        this.sessionDate = this.utilService.getSessionDate();
+        this.nextTransTime = `${new Date().toISOString()}`;
         if (this.specialRosterList.length === 0) { // Saketh for Special SpecialRosters
             this.getSpecialRostersList();
         }
@@ -131,6 +133,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public studentWiseAlaCarte: any = [];
     public transactionInProgress: boolean = false;
+    public nextTransTime = `${new Date().toISOString()}`;
+    public sessionDate: string;
 
     public alaCarteOrderData: any = {
         accountBalance: 0.00,
@@ -587,7 +591,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.getPriceByMenuItemId().then(() => { // Get menu Item Prices for the MenuItem selected
 
             this.selectAllSetting = parseInt(SettingService.getSettingValue('SSABICS'));
-            const date = new Date();
+            const date = new Date(this.utilService.getSessionDate());
             const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
             if (this.totalStudent > 0) {
                 this.popupMessageService.showMessage(PopupMessageCode.E04365);
@@ -794,7 +798,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public getStudentListForSpecialRoster() {
         this.getPriceByMenuItemId().then(() => {
             this.selectAllSetting = parseInt(SettingService.getSettingValue('SSABICS'));
-            const date = new Date();
+            const date = new Date(this.utilService.getSessionDate());
             const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
             if (this.totalStudent > 0) {
                 this.popupMessageService.showMessage(PopupMessageCode.E04365);
@@ -944,7 +948,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                         cepPriceApply = false;
                     }
                 }
-                const today = new Date();
+                const today = new Date(this.utilService.getSessionDate());
                 if (student.PreviousSales) {
                     student.PreviousSales.map(s => {
                         if (s.MealTypeId === this.filter.selected_mealtype) {
@@ -1097,7 +1101,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
             if (isNaN(this.transactionNumber)) {
                 this.transactionNumber = 0;
             }
-            const date = new Date();
+            const date = new Date(this.utilService.getSessionDate());
             const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
                 + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 
@@ -1124,8 +1128,8 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 // const UTC = now.getTime();
                 // const localOffset = (-1) * now.getTimezoneOffset() * 60000;
                 // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
-                const currentTime = LocalTimerService.getCurrentTime();
-                const itemAddedAt = (new Date).getTime().toString();
+                const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+                const itemAddedAt = (new Date(this.utilService.getSessionDate())).getTime().toString();
                 let studentExists: boolean = false;
 
                 // this.studentWiseAlaCarte.find(function(item,i){
@@ -1447,7 +1451,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
 
     public generateUUID() {
-        let d = LocalTimerService.getTime('time');
+        let d = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }
@@ -1816,7 +1820,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
     public getPatronDetails(patronSelectedData) {
         console.log('Patron Selected Data' + JSON.stringify(patronSelectedData));
-        const date = new Date();
+        const date = new Date(this.utilService.getSessionDate());
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
         this.restrictedAlacarteCount = 0;
         this.patronDetails = patronSelectedData;
@@ -1905,7 +1909,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         const binaryALCDebit = this.padding_left(parseInt(this.patronDetails.ALCDebitAllowedDays, 10).toString(2), '0', 5);
         const binaryALCCash = this.padding_left(parseInt(this.patronDetails.ALCCashAllowedDays, 10).toString(2), '0', 5);
 
-        let today = new Date().getDay();
+        let today = new Date(this.utilService.getSessionDate()).getDay();
 
         if (today === 0) {
             today = 6;
@@ -2046,7 +2050,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                 : this.patronDetails.PriceTypeId;
         }
 
-        const date = new Date();
+        const date = new Date(this.utilService.getSessionDate());
         const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear()
             + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
         console.log('Patron Details' + JSON.stringify(this.patronDetails));
@@ -2502,7 +2506,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.patronDetails.Allergies = this.patronDetails.Allergies == null ? [] : this.patronDetails.Allergies;
         this.patronDetails.SpecialInstruction = this.patronDetails.SpecialInstruction == null ? [] : this.patronDetails.SpecialInstruction;
 
-        const todaysDate = new Date();
+        const todaysDate = new Date(this.utilService.getSessionDate());
         const currentDay = todaysDate.getDay();
         let alaCarteCash = []; let alaCarteCharge = []; let allergenCount = 0;
         if (this.patronDetails.ALCCashAllowedDays != null) {
@@ -2544,7 +2548,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.setPatrondata().then(() => {
             this.patronDetails = this.patronSelectedData;
             this.setPreviousSaleCounts(this.patronDetails);
-            let today = new Date().getDay();
+            let today = new Date(this.utilService.getSessionDate()).getDay();
 
             const binaryALCDebit = this.padding_left(parseInt(this.patronDetails.ALCDebitAllowedDays, 10).toString(2), '0', 5);
             const binaryALCCash = this.padding_left(parseInt(this.patronDetails.ALCCashAllowedDays, 10).toString(2), '0', 5);
@@ -2582,7 +2586,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         pDetails = patronDetails;
         const previousSales = pDetails.PreviousSales;
 
-        const today = new Date();
+        const today = new Date(this.utilService.getSessionDate());
         // const day = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
         // const today = new Date().setHours(0, 0, 0, 0);
         const previousALCCount = 0;

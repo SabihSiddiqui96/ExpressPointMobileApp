@@ -25,6 +25,10 @@ import { SettingService } from '../../services/setting.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SessionType } from '../../services/enums/session-types';
 import { OpenSessionDoc } from '../../Interfaces/OpenSessionDoc';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import moment from 'moment';
+import { HttpService } from '../../services/HTTP/http.service';
 
 @Component({
   selector: 'app-open-session',
@@ -66,6 +70,34 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
     this.onKeyDownCallback = this.onKeyDown.bind(this);
     document.addEventListener('keydown', this.onKeyDownCallback, false);
+    this.sessionDatePicker = new FormControl(new Date());
+    this.maxDate = new Date(new Date(this.getNextWorkDate(this.minAdvanceDays))
+      .setHours(0, 0, 0, 0));
+    this.openSessionForm = this.fb.group({
+      sessionDatePicker: [new Date().toISOString()]
+    });
+    if (this.utilService.isAppOnline) {
+      this.sessionDateDisable = false;
+    }
+    else {
+      this.sessionDateDisable = true;
+    }
+    if (this.currentRoute == 'summarySales') {
+      if (this.utilService.summarySalePickedDate) {
+        this.openSessionForm = this.fb.group({
+          sessionDatePicker: [new Date(this.utilService.summarySalePickedDate)],
+        });
+        this.sessionDatePicker = new FormControl(new Date(this.utilService.summarySalePickedDate));
+      }
+      this.utilService.setSummarySessionDate(new Date().toISOString());
+      this.checkPOSPeriod(new Date().toISOString());
+      //this.getOpenSession();
+    }
+    else {
+      this.utilService.setSessionDate(new Date().toISOString());
+      this.checkPOSPeriod(new Date().toISOString());
+      //this.getOpenSession();
+    }
   }
 
   ngOnDestroy() {
@@ -89,6 +121,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public denominationTotalBills: number = 0;
   public useDynamicMenus = false;
   public terminalId;
+  public sessionDateDisable = false;
   public customKeys = '';
   public activeClass = 'active_input_label';
   public inactiveClass = 'input_label';
@@ -125,13 +158,26 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
   @ViewChild('KeyPadBox')
   public elKeyPadBox: ElementRef;
+  public openSessionForm: FormGroup;
+  public maxDate; // For Date Picker
+  public minDate;
+  public getMindate;
+  public minAdvanceDays: number = 14;
+  public maxAdvanceDays: number = 14;
+  public sessionDate;
+  public sessionDatePicker;
+  public posPeriodBlock: boolean;
+  public posPeriodCheckInProgress: boolean;
+  public posPeriodDisabledMsg = `This option is disabled because the POS Period is closed`;
+  public disabledHtml = `${this.posPeriodDisabledMsg}`;
 
   constructor(
     public _nav: NavController,
     private popoverCtrl: PopoverController,
     private alertCtrl: AlertController,
     private utilService: UtilService,
-
+    private fb: FormBuilder,
+    private httpService : HttpService,
     public events: Events,
     public popupMessageService: PopupMessageService, public router: Router,
     public appStateService: AppStateService, public pouchDBService: PouchDBService,
@@ -201,6 +247,110 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     this.getOpenSession();
   }
 
+  /**
+     * Returns working day (Mon - Fri) from number of advance days - advDays
+     */
+  public getNextWorkDate(advDays) {
+    const d = new Date(new Date(new Date().setDate(new Date().getDate() + advDays)));
+    d.setDate(d.getDate());    
+    return d;
+  }
+  
+
+  /**
+    * Returns working day from Minimum date to (Mon - Fri) from number of advance days
+    */
+  public getMaximumWorkDate(advDays) {
+    const d = this.getMindate;
+    if (advDays === 1) {
+      d.setDate(d.getDate() + 1);
+      if (d.getDay() === 0) {
+        d.setDate(d.getDate() + 1);
+      } else if (d.getDay() === 6) {
+        d.setDate(d.getDate() + 2);
+      }
+    } else {
+      let count = 0;
+      while (count < advDays) {
+        if (count !== 0) {
+          d.setDate(d.getDate() + 1);
+        }
+        if (d.getDay() !== 0 && d.getDay() !== 6) {
+          count++;
+        }
+      }
+    }
+    return d;
+  }
+
+  /**
+     * Disable weekend selection in date picker
+     */
+  // public menuDatePickerFilter = (d: Date): boolean => {
+  //   const day = d.getDay();
+  //   return day !== 7; // && day !== 6;
+  // }
+
+  public menuDatePickerFilter = (d: Date | null): boolean => {
+    if (!d) {
+      return false; // Return false if the date is null or undefined
+    }
+
+    const day = d.getDay();
+    return day !== 7; // && day !== 6;  // Uncomment this to exclude Saturdays
+  }
+
+  public changeSessionDate = (event: MatDatepickerInputEvent<Date>) => {
+    if (this.currentRoute == 'summarySales') {
+      const formattedDate = new Date(event.value).toISOString();
+      this.utilService.summarySalePickedDate = formattedDate;
+      this.openSessionForm.patchValue(
+        {
+          sessionDatePicker: formattedDate,
+        }
+      )
+      return;
+    }
+    const formattedDate = new Date(event.value).toISOString();
+    console.log('Changed date', formattedDate);
+    this.utilService.setSessionDate(formattedDate);
+    this.checkPOSPeriod(formattedDate);
+    this.openSessionForm.patchValue(
+      {
+        sessionDatePicker: formattedDate,
+
+      }
+    )
+  }
+
+  public checkPOSPeriod(inputDt) {
+    return new Promise((resolve, reject) => {
+      if (!AppStateService.get('SelectedSite') || !this.utilService.isAppOnline || !AppStateService.get('access_token')) {
+        resolve(false);
+      } else {
+        const checkPOSPeriodPayload = {
+          "RequestDateTime": moment.utc(inputDt).local().format().split('T')[0],
+          "SchoolId": JSON.parse(AppStateService.get('SelectedSite')).SchoolId
+        }
+        this.posPeriodCheckInProgress = true;
+
+        this.httpService.GetPeriodClosedStatus(checkPOSPeriodPayload).subscribe(data => {
+          this.posPeriodCheckInProgress = false;
+          if (data && data !== false) {
+            this.posPeriodBlock = true;
+          } else {
+            this.posPeriodBlock = false;
+          }
+          resolve(true);
+        },
+          error => {
+            this.posPeriodCheckInProgress = false;
+            this.posPeriodBlock = false;
+            resolve(false);
+          });
+      }
+    })
+  }
 
   public setGridSize(timeout) {
 
@@ -675,23 +825,24 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     // const UTC = now.getTime();
     // const localOffset = -1 * now.getTimezoneOffset() * 60000;
     // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+    const lastSessionDate = AppStateService.get('NewSessionDate') ?
+      moment(AppStateService.get('NewSessionDate')).format('YYYY-MM-DD') :
+      moment(new Date()).format('YYYY-MM-DD');
+    if (AppStateService.get('NewSessionDate') !== undefined) {
+      if (lastSessionDate !== moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD')) {
+        PouchQueriesService.ResetPreviousSaleData();
+      }
+    }
+    this.utilService.setSessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
+    // AppStateService.set('NewSessionDate', moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD'));
+    AppStateService.set('NewSessionDate', `${this.openSessionForm.get('sessionDatePicker').value}`);
 
-    // const currentDate = new Date().setHours(0, 0, 0, 0) / 1000;
-    const currentTime = LocalTimerService.getCurrentTime();
-    const currentDate = LocalTimerService.GetLocalDateAsString();
+    const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+    const currentDate = LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate());
 
     const sessionDate = AppStateService.get('NewSessionDate');
     const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
-
-    if (sessionDate !== undefined) {
-      if (currentDate !== sessionDate) {
-        AppStateService.set('NewSessionDate', currentDate);
-        PouchQueriesService.ResetPreviousSaleData();
-        console.log('delete');
-      }
-    } else {
-      AppStateService.set('NewSessionDate', currentDate);
-    }
+    
     let sessionDoc: OpenSessionDoc;
 
     if (this.router.url.includes('summary-sale')) {
@@ -774,7 +925,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   }
 
   public generateUUID() {
-    let d = LocalTimerService.getTime('time');
+    let d = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
     if (window.performance && typeof window.performance.now === 'function') {
       d += performance.now(); // use high-precision timer if available
     }

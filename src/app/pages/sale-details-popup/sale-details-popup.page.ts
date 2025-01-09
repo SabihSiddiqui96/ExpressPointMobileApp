@@ -74,7 +74,7 @@ export class SaleDetailsPopupPage implements OnInit {
         this.transactionDetails.type = 'PAYMENT';
       }
 
-      const now = new Date();
+      const now = new Date(this.utilService.getSessionDate());
       const localOffset = (+1) * now.getTimezoneOffset() * 60000;
       this.transactionDetails.dateTime = new Date(this.navSaleData.TransactionDate + localOffset).getDate();
       this.transactionDetails.PaymentAmt = this.navSaleData.PaymentAmount;
@@ -87,7 +87,7 @@ export class SaleDetailsPopupPage implements OnInit {
 
       }
 
-      this.transactionDetails.IsfromSameDay = ((this.transactionDetails.dateTime) === new Date().getDate()) ? true : false;
+      this.transactionDetails.IsfromSameDay = ((this.transactionDetails.dateTime) === new Date(this.utilService.getSessionDate()).getDate()) ? true : false;
       resolve(null);
     });
 
@@ -166,7 +166,7 @@ export class SaleDetailsPopupPage implements OnInit {
   }
 
   public printTransaction() {
-    const now = new Date();
+    const now = new Date(this.utilService.getSessionDate());
     if (this.utilService.isElectronApp()) { // && this.printAuto === 1) { 
       const transactionReceiptData: TransactionDetailPrintFormat = {
         'PersonName': this.navSaleData.PersonName,

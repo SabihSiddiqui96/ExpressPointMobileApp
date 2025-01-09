@@ -234,7 +234,7 @@ export class TransactionDetailsPopupPage implements OnInit {
     public GetTransactions() {
         this.transactionList = [];
         this.saleDataList = [];
-        const now = new Date();
+        const now = new Date(this.utilService.getSessionDate());
         const localOffset = (+1) * now.getTimezoneOffset() * 60000;
         let addOffset = true;
         this.transactionServiceProvider.getUpdatedTransactions().then((transactions) => {
@@ -242,7 +242,7 @@ export class TransactionDetailsPopupPage implements OnInit {
                 transactions.map(doc => {
                     if (doc.saleData.TransactionType !== 0) { // To not Show Void Transactions on the App
                         doc.saleData.TransactionDate = doc.saleData.TransactionDate + localOffset;
-                        doc.saleData.IsfromSameDay = (new Date(doc.saleData.TransactionDate).getDate() === new Date().getDate()) ? true : false;
+                        doc.saleData.IsfromSameDay = (new Date(doc.saleData.TransactionDate).getDate() === new Date(this.utilService.getSessionDate()).getDate()) ? true : false;
                         let personName = doc.saleData.PersonName
                         if (this.checkName(personName)) {
                             doc.saleData['PersonName'] = personName.trim();
@@ -460,7 +460,7 @@ export class TransactionDetailsPopupPage implements OnInit {
         // const now = new Date();
         // const UTC = now.getTime();
         // const localOffset = (-1) * now.getTimezoneOffset() * 60000;
-        const currentTime = LocalTimerService.getTime('time');
+        const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
 
         // for (let i = 0; i < this.reviewTypesList[0].length; i++) {
 

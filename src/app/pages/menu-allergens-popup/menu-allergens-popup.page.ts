@@ -5,6 +5,7 @@ import { SettingService } from '../../services/setting.service';
 import { AppStateService } from '../../services/app-state.service';
 import { Events } from '../../services/events.service';
 import { Router } from '@angular/router';
+import { UtilService } from '../../services/util.service';
 
 @Component({
   selector: 'app-menu-allergens-popup',
@@ -21,7 +22,7 @@ export class MenuAllergensPopupPage implements OnInit {
     this.navPatronDetails = this.patronDetails;
     this.navSpecialInstruction = this.SpecialInstruction;
 
-    const todaysDate = new Date();
+    const todaysDate = new Date(this.utilService.getSessionDate());
     this.currentDay = todaysDate.getDay();
     this.calcRemainingAmt(this.navPatronDetails);
     if (this.currentDay === 1) {
@@ -118,6 +119,7 @@ export class MenuAllergensPopupPage implements OnInit {
 
 
   constructor(public navCtrl: NavController, public event: Events, public router: Router,
+    public utilService: UtilService,
     public appStateService: AppStateService, public settingService: SettingService) {
 
 

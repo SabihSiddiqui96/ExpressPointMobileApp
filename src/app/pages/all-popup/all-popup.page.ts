@@ -759,7 +759,7 @@ export class AllPopupPage implements OnInit {
     }
 
     public showAll(show, firstTime?: boolean) {
-        const date = new Date();
+        const date = new Date(this.utilService.getSessionDate());
         const day =
             date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear();
 

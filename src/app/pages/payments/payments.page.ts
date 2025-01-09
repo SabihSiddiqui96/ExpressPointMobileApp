@@ -649,9 +649,9 @@ export class DoPayment {
             // const localOffset = (-1) * now.getTimezoneOffset() * 60000;
             // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
 
-            const currentTime = LocalTimerService.getCurrentTime();
-            const UTC = LocalTimerService.getUTCTime();
-            const currentDateTimeString = LocalTimerService.GetLocalDateTimeAsString()
+            const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+            const UTC = LocalTimerService.getCurrentSessionUTCTime(this.utilService.getSessionDate());
+            const currentDateTimeString = LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate())
             // this.transactionNumber = this.transactionService.getCurrentTransactionNo();
             AppStateService.set('TransactionNumber', this.transactionNumber);
 
@@ -744,7 +744,7 @@ export class DoPayment {
             };
 
             const transactionDoc = {
-                '_id': 'Transaction--' + LocalTimerService.getTime('time'),
+                '_id': 'Transaction--' + LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()),
                 'saleData': saleData
             };
 
@@ -752,7 +752,7 @@ export class DoPayment {
             this.utilService.setLoader(true);
 
             const paymentDoc = {
-                '_id': 'Payment--' + new Date().getTime(),
+                '_id': 'Payment--' + new Date(this.utilService.getSessionDate()).getTime(),
                 'paymentData': paymentPost
             };
 
@@ -892,7 +892,7 @@ export class DoPayment {
 
 
     public generateUUID() {
-        let d = LocalTimerService.getTime('time');
+        let d = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }

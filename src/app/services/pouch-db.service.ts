@@ -60,7 +60,7 @@ export class PouchDBService {
     //     public settingService: SettingService, public signalRService: SignalRService) {
     // }
 
-    constructor(private platform: Platform) {
+    constructor(private platform: Platform, public utilService : UtilService) {
     }
     private deviceId;
 
@@ -568,7 +568,7 @@ export class PouchDBService {
         return key;
     }
     public generateUUID() {
-        let d = new Date().getTime();
+        let d = new Date(this.utilService.getSessionDate()).getTime();
         if (window.performance && typeof window.performance.now === 'function') {
             d += performance.now(); // use high-precision timer if available
         }
