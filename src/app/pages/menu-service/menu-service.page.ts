@@ -1677,7 +1677,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     res.docs.forEach((sl) => {
                                         var menuItemsFiltered = sl.MenuItems.filter(m => {
                                             return (
-                                                m.IsReimbursable === true
+                                                m.IsReimbursable === true && m.IsPlannedCountZero === false
                                             );
                                         });
                                         this.servingLines.push({
