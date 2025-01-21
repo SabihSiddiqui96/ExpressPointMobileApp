@@ -4,6 +4,7 @@ import { PouchQueriesService } from '../services/Database/pouch-queries.service'
 import { AppStateService } from '../services/app-state.service';
 import * as _ from 'lodash';
 import { SettingService } from '../services/setting.service';
+import { UtilService } from './util.service';
 
 
 @Injectable({
@@ -14,13 +15,11 @@ export class MenugridService {
   // Variable declarations go here
   public taxPercent: number;
   public taxMeal: number;
-
   // Constructor
-  constructor() {
+  constructor(public utilService : UtilService) {
   }
   // tslint:disable-next-line:use-life-cycle-interface
   public ngOnInit() {
-
   }
   // #StartRegion Common methods
 
@@ -30,7 +29,7 @@ export class MenugridService {
       PouchQueriesService.GetMealTypes()
         .then((res) => {
 
-          const time = new Date();
+          const time = new Date(this.utilService.getSessionDate());
           const stime =
             ('0' + time.getHours()).slice(-2) + ':' +
             ('0' + time.getMinutes()).slice(-2) + ':' +
@@ -352,7 +351,7 @@ export class MenugridService {
   public CheckMealTypeByTime(mealTypes, mealTypeId) {
     return new Promise((resolve) => {
 
-      const time = new Date();
+      const time = new Date(this.utilService.getSessionDate());
       const stime =
         ('0' + time.getHours()).slice(-2) + ':' +
         ('0' + time.getMinutes()).slice(-2) + ':' +

@@ -55,7 +55,7 @@ export class SessionInfoPage implements OnInit {
             return s.isStillOpen &&
             Number(s.OpenedBy)=== JSON.parse(AppStateService.get('login_details')).UserId
               && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
-              && s.OpenDate === LocalTimerService.GetLocalDateAsString();
+              && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate());
 
           });
           console.log(sessionDocs);

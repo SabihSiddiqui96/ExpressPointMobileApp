@@ -316,7 +316,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 sessionId_from = this.sessionId;
             }
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
                     && s.SessionId === sessionId_from;
@@ -719,7 +719,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 sessionDenominations.push(denoArray);
             }
         }
-        const currentTime = LocalTimerService.getCurrentTime();
+        const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
 
         this.utilService.setLoader(true);
 
@@ -759,7 +759,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             let sid;
 
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
                     && s.SessionId === closeSessionDoc.SessionId;
@@ -828,7 +828,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         if (this.utilService.isElectronApp()) {
 
 
-            const now = new Date();
+            const now = new Date(this.utilService.getSessionDate());
             const CloseSessionPrintFormat: CloseSessionPrintFormat = {
                 'TerminalName': JSON.parse(AppStateService.get('DeviceInfo')).TerminalName,
                 'UserName': JSON.parse(AppStateService.get('login_details')).Name,

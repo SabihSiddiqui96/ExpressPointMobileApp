@@ -9,6 +9,39 @@
 .increment_decrement_btn {
   font-size: 2rem;
 }
+
 input:focus {
   outline: none !important;
+}
+
+.padd5 {
+  padding: 5px 20px 0px 0px;
+}
+
+.marginTop {
+  margin-top: 10px;
+}
+
+::ng-deep form {
+
+  /* Target basic input fields */
+  input,
+  textarea,
+  button {
+    color: white !important;
+    background: transparent !important;
+    /* Adjust background if needed */
+    border-color: white !important;
+  }
+
+  label {
+    color: white !important;
+    font-size: x-large !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: white !important;
+    /* Placeholder color */
+  }
 }

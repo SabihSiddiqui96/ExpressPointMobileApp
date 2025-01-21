@@ -560,7 +560,7 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
         code = (isNaN(code)) ? 58 : code;
         if (event['keyCode'] == 13 && this.isElectronApp == true) {
             if (AppStateService.get('pnpPeripherals') == false) {
-                let localTimerSearchPatron_Keyboard: number = new Date().getTime();
+                let localTimerSearchPatron_Keyboard: number = new Date(this.utilService.getSessionDate()).getTime();
                 if (event.target.parentElement.id == "pinInput" && event.target.value != this.patronSearch.keyword) {
                     if (event.target.value.length > this.patronSearch.keyword.length)
                         event.target.value = this.patronSearch.keyword;
@@ -995,7 +995,7 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
 
 
     public handleKeyDown(event) {        
-        let localTimerSearchPatron_Keyboard: number = new Date().getTime();
+        let localTimerSearchPatron_Keyboard: number = new Date(this.utilService.getSessionDate()).getTime();
         if (event.keyCode === 13) {
             setTimeout(() => {
                 /* code for checking the characters from periperal */
