@@ -25,7 +25,7 @@
         </ion-item> -->
           <ion-item>
             <ion-label>
-              <ion-segment color="slate" [(ngModel)]="paymentOption" (ionChange)="setCashPaymentOption()"
+              <ion-segment color="slate" [(ngModel)]="paymentOption" (ionChange)="blurInputElement(); setCashPaymentOption()"
                 class="pay_segment">
                 <ion-segment-button value="cash" (click)="changeActiveInput('amount')">
                   <ion-label>

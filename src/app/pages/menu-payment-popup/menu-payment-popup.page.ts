@@ -60,40 +60,6 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     }
 
     this.event.publish('patronLargeImagehide', null);
-    /*this.event.subscribe('numberClick', (userEventData) => {
-      const event = userEventData.event;
-      if (userEventData.number === 8) {
-        this.numberClick('X');
-      } else if (userEventData.number === 9 && event.shiftKey) {
-        if (userEventData.elementId === 'cash') {
-          this.changeActiveInput('check');
-        } else {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      } else if (userEventData.number === 9) { // Tab key is pressed
-        console.log('Tab key');
-        if (userEventData.elementId !== 'cash' && (this.activeInputField === 'check' || this.paymentOption === 'check')) {
-          document.getElementById('cash').focus();
-          this.changeActiveInput('amount');
-          event.preventDefault();
-          event.stopPropagation();
-        } else {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      } else if (userEventData.number === 13) { // Enter key is pressed
-        console.log('Enter key');
-        if (userEventData.elementId === 'check') {
-          document.getElementById('cash').focus();
-          this.changeActiveInput('amount');
-        }
-      }
-      else {
-        this.numberClick(parseInt(event['key']));
-      }
-
-    });*/
     this.changeActiveInput('amount');
 
     if (document.querySelector('button') !== null) {
@@ -339,6 +305,21 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     }
   }
 
+  public setCashPaymentOption() {
+    let value = this.cashpaymentOption;
+    let canUseCheck: boolean = true;
+    if (value === 'check' && !this.navPatronDetails['AcceptCheck']) { // && !this.isSpecialAccount
+      this.popupMessageService.showMessage(PopupMessageCode.E07354);
+      this.cashpaymentOption = value;
+      canUseCheck = false;
+    } else {
+      this.cashpaymentOption = value;
+    }
+    if (value === 'cash') {
+      value = 'amount';
+    }
+  }
+
   public setCashTopupAmount(amount, price) {
     this.customKeys = '';
     this.cashTopupAmount = amount;
@@ -457,10 +438,20 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
         this.amountClass = 'active_input_label';
         this.checkNoClass = 'input_label';
         // setTimeout(() => { document.getElementById('cash').focus() }, 500);
+        setTimeout(() => {
+          if (document.getElementById('cash') != null && document.getElementById('cash') != undefined) {
+            document.getElementById('cash').focus();
+          }
+        }, 500);      
       } else if (field === 'check') {
         this.amountClass = 'input_label';
         this.checkNoClass = 'active_input_label';
         // setTimeout(() => { document.getElementById('check').focus() }, 100);
+        setTimeout(() => {
+          if (document.getElementById('check') != null && document.getElementById('check') != undefined) {
+            document.getElementById('check').focus();
+          }
+        }, 500);       
       }
       // } else {
       //   this.amountClass = 'active_input_label';
