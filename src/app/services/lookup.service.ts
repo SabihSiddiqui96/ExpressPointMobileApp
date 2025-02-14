@@ -112,13 +112,23 @@ export class LookupService {
 
         // Check for duplicates in the inputQueue based on the PIN
         const duplicateIndex = this.inputQueue.findIndex(item => item.queueInput.PIN === queueInput.PIN);
-        const personInQ = _.findIndex(this.personsQ, p => p.Identifier === queueInput.PIN);
+        let personInQ = -1;
+        let SearchByPin = SettingService.getSiteSettingValue('SRCHBYPIN');        
+        if (SearchByPin === '1') {
+            personInQ = _.findIndex(this.personsQ, p => p.Identifier === queueInput.PIN);
+        }
+        else {
+            personInQ = _.findIndex(this.personsQ, p => p.PersonId == null && p.Identifier === queueInput.PIN);
+            if (personInQ == -1) {
+                personInQ = _.findIndex(this.personsQ, p => p.PersonIdentifier === queueInput.PIN);
+            }
+        }
         const storedPatronDetails = AppStateService.get('patron_details');
 
         // If the stored patron details exist and match the incoming PIN, we ignore this request
         if (storedPatronDetails !== undefined) {
             const storedPatron = JSON.parse(storedPatronDetails);
-            if (storedPatron.Identifier === queueInput.PIN) {
+            if (storedPatron.Identifier === queueInput.PIN || (SearchByPin !== '1' && storedPatron.PersonIdentifier === queueInput.PIN)) {
                 return; // Early exit if already processed
             }
         }
@@ -140,20 +150,52 @@ export class LookupService {
     }
 
     private async addInputToPersonsQ(queueInput) {
-        // Create a temporary person object to be added to personsQ
-        const person = {
-            'PersonName': queueInput.PIN,
-            'Identifier': queueInput.PIN,
-            'FirstName': '',
-            'LastName': '',
-            'InputDirection': queueInput.InputDirection
-        };
+        try {
+            // Perform lookup before adding to queue
+            const results = await this.pouchDBLookup(queueInput.PIN);
 
-        // Push the person into personsQ using pushPersonToQ
-        await this.pushPersonToQ(person, this.personsQ.length);
+            let person;
+            if (results.length === 1) {
+                // If found, use the database entry
+                person = {
+                    ...results[0],
+                    InputDirection: queueInput.InputDirection
+                };
+            } else {
+                console.log(`Adding ${queueInput.PIN} without a unique lookup result.`);
+                // Create a temporary placeholder entry
+                person = {
+                    'PersonName': queueInput.PIN,
+                    'Identifier': queueInput.PIN,
+                    'FirstName': '',
+                    'LastName': '',
+                    'InputDirection': queueInput.InputDirection
+                };
+            }
 
-        // Now perform the lookup to possibly update this entry
-        await this.lookupAndPushPersonToQ(queueInput);
+            // Add to queue after lookup
+            await this.pushPersonToQ(person, this.personsQ.length);
+
+            // Log lookup result
+            if (results.length > 0 && results[0] !== null) {
+                await this.logDBService.logData({
+                    event: EventType.LOOKUP,
+                    patronId: queueInput.PIN,
+                    type: LogType.INFO,
+                    data: results[0],
+                    queueCount: this.personsQ.length
+                });
+            }
+        } catch (error) {
+            console.error(`Lookup error for ${queueInput.PIN}:`, error);
+            await this.logDBService.logError({
+                event: EventType.LOOKUP,
+                patronId: queueInput.PIN,
+                type: LogType.ERROR,
+                data: queueInput,
+                queueCount: this.personsQ.length
+            });
+        }
     }
 
     private async processQueue() {
@@ -267,39 +309,48 @@ export class LookupService {
         this.personsQSubject.next(this.personsQ);
     }
 
-    public pushPersonToQ(person, atIndex, fromQueue = false) {
-        return new Promise<void>((resolve, reject) => {
-            this.logDBService.logData({
+    public async pushPersonToQ(person, atIndex, fromQueue = false): Promise<void> {
+        try {
+            // Ensure logging completes before proceeding
+            await this.logDBService.logData({
                 event: EventType.QUEUE,
-                personId: person.PersonId,
+                personId: person.Identifier,
                 type: LogType.INFO,
                 data: person
             });
-            person.InputDirection = person.InputDirection ? person.InputDirection : Direction.None;
 
-            let personInQ = person.Identifier !== undefined
-                ? _.findIndex(this.personsQ, p => p.Identifier === person.Identifier)
-                : -1; // If Identifier is not defined, set personInQ to -1
+            person.InputDirection = person.InputDirection || Direction.None;
+
+            let personInQ = _.findIndex(this.personsQ, p => p.Identifier === person.Identifier);
             const specialPersonsinQ = _.findIndex(this.personsQ, q => q.PersonName === person.PersonName);
 
+            // Check if the person is already in the queue
             if (personInQ === -1 && fromQueue == false) {
-                if (AppStateService.get('patron_details') != undefined) {
-                    if (JSON.parse(AppStateService.get('patron_details')).Identifier === person.Identifier) {
+                const patronDetails = AppStateService.get('patron_details');
+                if (patronDetails) {
+                    const parsedPatron = JSON.parse(patronDetails);
+                    if (parsedPatron.Identifier === person.Identifier) {
                         personInQ = 0;
                     }
                 }
             }
 
-            // Allow adding the person if they are not already in the queue
-            if (personInQ === -1 && (person.isSpecialAccount && specialPersonsinQ === -1 || !person.isSpecialAccount)) {
+            // Only add if they are not already in the queue
+            if (personInQ === -1 && (!person.isSpecialAccount || specialPersonsinQ === -1)) {
                 this.personsQ.splice(atIndex, 0, person);
             }
-            // Notify subscribers about the updated personsQ
-            this.personsQSubject.next(this.personsQ);
 
-            // Resolve the promise once the operation is done
-            resolve();
-        });
+            // Notify subscribers about the updated queue
+            this.personsQSubject.next(this.personsQ);
+        } catch (error) {
+            console.error(`Error adding person ${person.Identifier} to queue:`, error);
+            await this.logDBService.logError({
+                event: EventType.QUEUE,
+                personId: person.Identifier,
+                type: LogType.ERROR,
+                data: person
+            });
+        }
     }
 
     private updatePersonInQ(person) {
