@@ -1381,6 +1381,9 @@ export class PouchQueriesService {
         },
         'saleData.AccountId': {
           $eq: AccountId
+        },
+        'saleData.TransactionType': {
+          $gt: 0
         }
       },
       include_docs: true

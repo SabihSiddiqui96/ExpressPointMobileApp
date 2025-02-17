@@ -363,7 +363,7 @@ ipcMain.on('backup-and-relaunch', async (event) => {
     var index = dialog.showMessageBoxSync({
       type: 'info',
       title: 'ExpressPoint App Backup',
-      message: `Transaction data backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 15 days or when a new version of ExpressPoint is installed.`,
+      message: `Transaction data backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 30 days or when a new version of ExpressPoint is installed.`,
       buttons: ["OK"],
       noLink: true, // Prevents link-styled buttons
     });
@@ -393,49 +393,41 @@ set "appFolder=%baseFolder%\\ExpressPointData"
 set "backupFolder=%baseFolder%\\ExpressPointData_backup_before_${appVersion}"
 set "exePath=%baseFolder%\\ExpressPoint\\ExpressPoint.exe"
 
-:: Step 1: Wait for a few seconds to ensure the app is fully closed
-echo Waiting for 3 seconds before proceeding...
-timeout /t 3 /nobreak > nul
+:: Step 1: Kill any lingering ExpressPoint processes (if running)
+:kill_process
+tasklist | find /i "ExpressPoint.exe" >nul
+if %errorlevel%==0 (
+    echo Closing running ExpressPoint application...
+    taskkill /f /im ExpressPoint.exe > nul 2>&1
+    timeout /t 1 > nul  :: Wait briefly for the process to close
+    goto kill_process  :: Check again if it's still running
+) else (
+    echo ExpressPoint is not running.
+)
 
-:: Step 2: Kill any lingering processes (optional)
-taskkill /f /im ExpressPoint.exe > nul 2>&1
-
-:: Step 3: Delete the backup folder if it already exists
+:: Step 2: Delete the backup folder if it already exists
 echo Checking if backup folder exists...
 if exist "%backupFolder%" (
     echo Backup folder exists. Deleting it...
     rd /s /q "%backupFolder%" >nul 2>&1
 )
 
-:: Step 4: Create a backup of the app folder
+:: Step 3: Create a backup of the app folder
 echo Creating backup of the app folder...
 xcopy "%appFolder%" "%backupFolder%" /E /I /Y >nul 2>&1
 
-:: Step 5: Delete the app folder using RD /S /Q
-echo Deleting the ExpressPointData folder...
-rd /s /q "%appFolder%" >nul 2>&1
-
-:: Step 6: Create necessary directories (if not already created)
-echo Creating directories...
-mkdir "%appFolder%\\Local Storage" >nul 2>&1
-
-:: Step 7: Copy files from backup to app folder
-echo Copying files from backup folder...
-xcopy "%backupFolder%\\Local Storage\\*.log" "%appFolder%\\Local Storage\\" /E /I /Y > nul 2>&1
-
-:: Step 8: Check if ExpressPointDevices.db exists and copy it
-if exist "%backupFolder%\\ExpressPointDevices.db" (
-    echo Found ExpressPointDevices.db, copying...
-    copy "%backupFolder%\\ExpressPointDevices.db" "%appFolder%\\ExpressPointDevices.db" >nul 2>&1
-) else (
-    echo ExpressPointDevices.db not found in backup.
+:: Step 4: Delete the IndexedDB folder inside ExpressPointData if it exists
+if exist "%appFolder%\\IndexedDB\\" (
+    echo Deleting the IndexedDB folder...
+    attrib -h -s -r "%appFolder%\\IndexedDB" /S /D >nul 2>&1
+    rd /s /q "%appFolder%\\IndexedDB\\" >nul 2>&1
 )
 
-:: Step 9: Relaunch the app
+:: Step 5: Relaunch the app
 echo Relaunching the app...
 start "" "%exePath%"
 
-:: Step 10: Exit the batch script
+:: Step 6: Exit the batch script
 exit
     `;
 
