@@ -126,7 +126,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
             this.showDynamicEntreeServingLine = true;
         }
-        const d = new Date(this.sessionDate);
+        const d = new Date(this.utilService.getSessionDate());
         let day = d.getDay();
         if (Number(this.dayOfWeek) != day) {
             this.showDynamicEntreeServingLine = false;
@@ -351,7 +351,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
     public stateEigSetting: boolean = false;
-    public sessionDate: string;
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -472,7 +471,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const day = new Date();
         const selectedDayofWeek = this.utilService.getSessionDate() ? new Date(this.utilService.getSessionDate()).getDay() : day.getUTCDay();
         this.dayOfWeek = wDay[selectedDayofWeek];
-        this.sessionDate = this.utilService.getSessionDate();
 
         this.loadingID = LoadingService.generateLoadingID();
         this.loadingService.present(this.loadingID, null, false).then(() => {
@@ -1297,7 +1295,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
         let previousALCCount = 0;
         let previousALCAmt = 0;
-        const today = new Date(this.sessionDate);
+        const today = new Date(this.utilService.getSessionDate());
         if (previousSales) {
 
             /**
@@ -1419,7 +1417,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         pDetails.Allergies = pDetails.Allergies == null ? [] : pDetails.Allergies;
         pDetails.SpecialInstruction = pDetails.SpecialInstruction == null ? [] : pDetails.SpecialInstruction;
 
-        const todaysDate = new Date(this.sessionDate);
+        const todaysDate = new Date(this.utilService.getSessionDate());
         this.currentDay = todaysDate.getDay();
         this.alaCarteCash = [], this.alaCarteCharge = [], this.allergenCount = 0;
         if (pDetails.ALCCashAllowedDays != null) {
@@ -1486,7 +1484,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
 
 
-        let today = new Date(this.sessionDate).getDay();
+        let today = new Date(this.utilService.getSessionDate()).getDay();
 
         const binaryALCDebit = this.padding_left(parseInt(this.patronDetails.ALCDebitAllowedDays, 10).toString(2), '0', 5);
         const binaryALCCash = this.padding_left(parseInt(this.patronDetails.ALCCashAllowedDays, 10).toString(2), '0', 5);
@@ -1588,7 +1586,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public dayChange() {
-        const d = new Date(this.sessionDate);
+        const d = new Date(this.utilService.getSessionDate());
         let day = d.getDay();
         this.showDynamicEntreeServingLine = false;
         const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
@@ -1647,7 +1645,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             this.selectedServingLineName = "";
             const DYNMENU = parseInt(SettingService.getSettingValue('DYNMENU'));
             if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) == -1) {
-                const d = new Date(this.sessionDate);
+                const d = new Date(this.utilService.getSessionDate());
                 let day = d.getDay();
                 if (Number(this.dayOfWeek) == day) {
                     this.showDynamicEntreeServingLine = true;
@@ -2041,7 +2039,6 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const cartItems = [];
         let itemPrice = 0.00;
         let IsTaxable: boolean;
-        this.sessionDate = this.utilService.getSessionDate();
         if (deleteAllMeals) {
             for (let i = 0; i < this.orderData.items.length; i++) {
 
@@ -2183,7 +2180,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             return false; // Default fallback for non-boolean values
         };
 
-        const now = new Date(this.sessionDate);
+        const now = new Date(this.utilService.getSessionDate());
         const UTC = now.getTime();
         const localOffset = (-1) * now.getTimezoneOffset() * 60000;
         const currentTime = Math.round(new Date(UTC + localOffset).getTime());
@@ -2661,7 +2658,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 EventType: 0,
                 Data: currentPatronId + ' / ' +errorMessage,
                 QueueCount: 0,
-                ErrorLogTime: new Date(this.sessionDate).toISOString()
+                ErrorLogTime: new Date(this.utilService.getSessionDate()).toISOString()
             }
             this.http.saveErrorLogs(errorLogData).subscribe((res) => console.log(res));
         } catch(error) {
@@ -3088,7 +3085,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                         let paymentAmnt = this.transactionService.CalculatePaymentAmountMenuService(this.orderData, transactionType, this.PaymentAmount, this.selectedAccountDetails)
 
-                        const now = new Date(this.sessionDate);
+                        const now = new Date(this.utilService.getSessionDate());
                         const UTC = now.getTime();
                         const localOffset = (-1) * now.getTimezoneOffset() * 60000;
                         const currentTime = Math.round(new Date(UTC + localOffset).getTime());
@@ -4183,7 +4180,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public checkForBirthday(patronData) {
         let selectedPatron = patronData;
         const birthDate = new Date(selectedPatron.BirthDate);
-        const currentDate = new Date(this.sessionDate);
+        const currentDate = new Date(this.utilService.getSessionDate());
         this.removeConfettiCanvas();
         this.isBirthDay = false;
         if (this.CheckBirthDayNotifications == true && currentDate.getUTCMonth() + 1 === birthDate.getUTCMonth() + 1
@@ -5075,7 +5072,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 return false; // Default fallback for non-boolean values
             };
 
-            const now = new Date(this.sessionDate);
+            const now = new Date(this.utilService.getSessionDate());
             const UTC = now.getTime();
             const localOffset = (-1) * now.getTimezoneOffset() * 60000;
             const currentTime = Math.round(new Date(UTC + localOffset).getTime());

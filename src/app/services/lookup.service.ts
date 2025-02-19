@@ -49,6 +49,7 @@ export class LookupService {
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
         public router: Router,
+        public pouchQryService: PouchQueriesService,
         private electronService: ElectronService, private personService: PersonService) {
 
         this.event.subscribe('patronSelectedFromList', (userEventData) => {
@@ -94,7 +95,7 @@ export class LookupService {
                 this.localtimer_device = new Date(this.utilService.getSessionDate()).getTime();
                 AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);
                 const keywordSearchLength = this.keywordService.keywordSearchLength;
-                this.setQ(queueInput, keywordSearchLength);
+                await this.setQ(queueInput, keywordSearchLength);
                 this.utilService.showModalPopup = false;
             };
             this.electronService.ipcRenderer.on('queue-input', (event, queueInput) => {
@@ -468,7 +469,7 @@ export class LookupService {
             }
 
             // Retrieve local sales and merge with previous sales
-            const localSalesByMealType = await PouchQueriesService.GetAllLocalTransactions_ByAccount(patron.AccountId);
+            const localSalesByMealType = await this.pouchQryService.GetAllLocalTransactions_ByAccount(patron.AccountId);
             patron.PreviousSales = await this.mergePreviousSales(patron.PreviousSales, localSalesByMealType);
 
             // Check server for previous sales if needed
@@ -484,8 +485,10 @@ export class LookupService {
                         patron.PreviousSales = await this.mergePreviousSales(patron.PreviousSales, serverSales);
                     }
                     this.publishEvents(patron);
+                    this.popPersonFromQ(patron.Identifier);
                 } else {
                     this.publishEvents(patron);
+                    this.popPersonFromQ(patron.Identifier);
                 }
             } else {
                 // Check in-memory DB for previous sales
