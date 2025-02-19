@@ -33,7 +33,7 @@ export class PatronListModalPage implements OnInit {
         if(this.navPatronList && this.navPatronList.length > 0) {
             this.isFromServer = this.navPatronList['0'].IsFromServer ? true : false;
         }
-        if (AppStateService.get('isOnlyThisSitePatrons') != undefined && AppStateService.get('isOnlyThisSitePatrons') != null) {
+        if (AppStateService.get('isOnlyThisSitePatrons') != undefined && AppStateService.get('isOnlyThisSitePatrons') != null && this.isFromQueue == false) {
             this.isOnlyThisSite = AppStateService.get('isOnlyThisSitePatrons');
         }
         this.selectedSiteName = JSON.parse(AppStateService.get("SelectedSite")).SiteNameWithCode;
@@ -256,16 +256,15 @@ export class PatronListModalPage implements OnInit {
         this.loadMoreCount = this.loadMoreCount + 20;
         this.loadMoreClicks = this.loadMoreClicks + 1;
         maxClicks = Math.floor(this.navPatronList.length / 20);
-        let navPatronListSiteFilter = [];
-        if (this.isOnlyThisSite == true) {
-            navPatronListSiteFilter = this.navPatronList.filter(item => item.SiteCode.toLowerCase().includes(this.selectedSiteName.toLowerCase()));
-        }
-        else {
-            navPatronListSiteFilter = this.navPatronList;
-        }
+
+        let navPatronListSiteFilter = this.isOnlyThisSite && this.selectedSiteName
+            ? this.navPatronList.filter(item =>
+                (item.SiteCode?.toLowerCase() || "").includes(this.selectedSiteName.toLowerCase()))
+            : this.navPatronList;
+
         maxClicks = Math.floor(navPatronListSiteFilter.length / 20);
         this.filteredPatronList = navPatronListSiteFilter.slice(0, this.loadMoreCount);
-        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);        
+        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
         this.updateAdvLookupSortOrder();
         if (this.loadMoreClicks >= maxClicks) {
             this.disableLoadMore = true;
@@ -275,41 +274,21 @@ export class PatronListModalPage implements OnInit {
     }
 
     public loadFirst20Patrons() {
-        if (this.isOnlyThisSite == true) {
-            let filteredNavPatronList = this.navPatronList.filter(item => item.SiteCode.toLowerCase().includes(this.selectedSiteName.toLowerCase()));
-            this.searchResultCount = filteredNavPatronList.length;
+        let filteredNavPatronList = this.isOnlyThisSite && this.selectedSiteName
+            ? this.navPatronList.filter(item => (item.SiteCode?.toLowerCase() || "").includes(this.selectedSiteName.toLowerCase()))
+            : this.navPatronList;
 
-            if (this.searchResultCount > 20) {
-                this.filteredPatronList = filteredNavPatronList.slice(0, this.loadMoreCount);
-            }
-            else {
-                this.filteredPatronList = filteredNavPatronList;
-            }
-            const maxClicks = Math.floor(this.searchResultCount / 20);
-            if (this.loadMoreClicks >= maxClicks) {
-                this.disableLoadMore = true;
-            }
-            else {
-                this.disableLoadMore = false;
-            }
-        }
-        else {
-            this.searchResultCount = this.navPatronList.length;
-            if (this.searchResultCount > 20) {
-                this.filteredPatronList = this.navPatronList.slice(0, this.loadMoreCount);
-            }
-            else {
-                this.filteredPatronList = this.navPatronList;
-            }
-            const maxClicks = Math.floor(this.searchResultCount / 20);
-            if (this.loadMoreClicks >= maxClicks) {
-                this.disableLoadMore = true;
-            }
-            else {
-                this.disableLoadMore = false;
-            }
-        }
-        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);       
+        this.searchResultCount = filteredNavPatronList.length;
+
+        this.filteredPatronList = this.searchResultCount > 20
+            ? filteredNavPatronList.slice(0, this.loadMoreCount)
+            : filteredNavPatronList;
+
+        const maxClicks = Math.floor(this.searchResultCount / 20);
+
+        this.disableLoadMore = this.loadMoreClicks >= maxClicks;
+
+        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
     }
 
     public blurInputElement() {
