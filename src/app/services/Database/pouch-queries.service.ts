@@ -19,11 +19,9 @@ declare var require: any;
   providedIn: 'root'
 })
 export class PouchQueriesService {
-  static sessionDate: string | number | Date;
 
   constructor(private http: HttpService, public appStateService: AppStateService,
     public pouchDBService: PouchDBService, public settingService: SettingService, public utilService: UtilService) {
-    PouchQueriesService.sessionDate = this.utilService.getSessionDate();
   }
 
   /*
@@ -759,8 +757,8 @@ export class PouchQueriesService {
     });
   }
 
-  public static GetSessionChecks_PostNotSynced() {
-    var current_Date = new Date(this.sessionDate);
+  public static GetSessionChecks_PostNotSynced(utilityService: UtilService) {
+    var current_Date = new Date(utilityService.getSessionDate());
     var numberOfDayToSubtract = 14;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionChecksGrThan = current_Date.getTime();
@@ -853,8 +851,8 @@ export class PouchQueriesService {
   }
 
 
-  public static GetSessionCards_PostNotSynced() {
-    var current_Date = new Date(this.sessionDate);
+  public static GetSessionCards_PostNotSynced(utilityService: UtilService) {
+    var current_Date = new Date(utilityService.getSessionDate());
     var numberOfDayToSubtract = 14;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionCardsGrThan = current_Date.getTime();
@@ -1366,8 +1364,8 @@ export class PouchQueriesService {
     return (promise);
   }
 
-  public static async GetAllLocalTransactions_ByAccount(AccountId) {
-    const dateOnlyEpoch = Math.floor(new Date(this.sessionDate).setHours(0, 0, 0, 0) / 1000);
+  public async GetAllLocalTransactions_ByAccount(AccountId) {
+    const dateOnlyEpoch = Math.floor(new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) / 1000);
 
     // Fetch transactions for the given account and date
     const transactions = await EXP_TRANSACTIONS.find({
@@ -1381,6 +1379,9 @@ export class PouchQueriesService {
         },
         'saleData.AccountId': {
           $eq: AccountId
+        },
+        'saleData.TransactionType': {
+          $gt: 0
         }
       },
       include_docs: true
@@ -1680,7 +1681,7 @@ export class PouchQueriesService {
   public PostSessionCheck() {
     console.log('--------------------Sending SessionChecks -------------------------');
     return new Promise((resolve, reject) => {
-      PouchQueriesService.GetSessionChecks_PostNotSynced().then((res) => {
+      PouchQueriesService.GetSessionChecks_PostNotSynced(this.utilService).then((res) => {
         const checks = res.docs;
         if (checks.length > 0) {
           checks.map(doc => {
@@ -1712,7 +1713,7 @@ export class PouchQueriesService {
   public PostSessionCard() {
     console.log('--------------------Sending SessionCards -------------------------');
     return new Promise((resolve, reject) => {
-      PouchQueriesService.GetSessionCards_PostNotSynced().then((res) => {
+      PouchQueriesService.GetSessionCards_PostNotSynced(this.utilService).then((res) => {
         const cards = res.docs;
         if (cards.length > 0) {
           cards.map(doc => {

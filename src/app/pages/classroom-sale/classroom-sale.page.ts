@@ -38,7 +38,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
 
     public ngOnInit() {
-        this.sessionDate = this.utilService.getSessionDate();
         this.nextTransTime = `${new Date().toISOString()}`;
         if (this.specialRosterList.length === 0) { // Saketh for Special SpecialRosters
             this.getSpecialRostersList();
@@ -134,7 +133,6 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public studentWiseAlaCarte: any = [];
     public transactionInProgress: boolean = false;
     public nextTransTime = `${new Date().toISOString()}`;
-    public sessionDate: string;
 
     public alaCarteOrderData: any = {
         accountBalance: 0.00,
