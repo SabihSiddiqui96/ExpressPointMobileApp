@@ -335,6 +335,27 @@ interface State {
   lastBackup?: string; // Optional property
 }
 
+ipcMain.handle('backup-exists-ornot', async (event) => {
+  try {
+    const appVersion = app.getVersion();
+    const fileName = `ExpressPointData_backup_before_${appVersion}`;
+    const stateFolderPath = path.join(process.env.PUBLIC || '', 'Documents', fileName);
+
+    if (await fs.existsSync(stateFolderPath) == false) {
+      if (await fs.pathExists(stateFilePath)) {
+        const newState = { lastBackup: null };
+        await fs.writeJson(stateFilePath, newState, { spaces: 2 });
+      }
+      return false;
+    }
+    else {
+      return true;
+    }
+  } catch (error) {
+    return true;
+  }
+});
+
 ipcMain.on('backup-and-relaunch', async (event) => {
   try {
     const now = new Date();
@@ -358,19 +379,10 @@ ipcMain.on('backup-and-relaunch', async (event) => {
     if (diffMilliseconds < daysInMilliseconds) {
       return;
     }
-
-    // Show a modal dialog to inform the user
-    var index = dialog.showMessageBoxSync({
-      type: 'info',
-      title: 'ExpressPoint App Backup',
-      message: `Transaction data backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 30 days or when a new version of ExpressPoint is installed.`,
-      buttons: ["OK"],
-      noLink: true, // Prevents link-styled buttons
-    });
-    
     
     // Update the state file with the current timestamp
     const newState = { lastBackup: now.toISOString() };
+    localStorage.setItem("BackupAndRelaunchDate", now.toISOString());
     await fs.writeJson(stateFilePath, newState, { spaces: 2 });
 
     const appVersion = app.getVersion(); // Get the app version dynamically
