@@ -100,6 +100,11 @@ export class SystemDBService {
         performanceOptions = AppStateService.get('performanceOptions');
       }
 
+      let backupAndRelaunchDate = '';
+      if (AppStateService.get('BackupAndRelaunchDate') != undefined) {
+        backupAndRelaunchDate = AppStateService.get('BackupAndRelaunchDate');
+      }
+
       const dataforofflineUse = {
         '_id': 'dataforofflineUse',
         'selectedDistrict': selectedDistrict,
@@ -127,7 +132,8 @@ export class SystemDBService {
         'AllCatRemainOpen': AllCatRemainOpen,
         'CheckIfPinEntered': checkIfPinEntered,
         'performanceOptions': performanceOptions,
-        'isOnlyThisSitePatrons': isOnlyThisSitePatrons
+        'isOnlyThisSitePatrons': isOnlyThisSitePatrons,
+        'BackupAndRelaunchDate': backupAndRelaunchDate
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';
