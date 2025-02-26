@@ -169,7 +169,7 @@
                                                     <label *ngIf="hideBalSetting==0" class="patron-info-balance"
                                                         [style.font-size.rem]="((isElectronApp === true) && ((patronDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                                                         [ngClass]="{'color-green': patronDetails.Balance > 0, 'color-red': patronDetails.Balance < 0 }"
-                                                        [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'"
+                                                        [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? 'block': 'none'"
                                                         (click)="showBalance()" style="cursor: pointer;">{{patronDetails.Balance |
                                                         currency:'USD':'symbol':'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
@@ -222,7 +222,7 @@
                                         <ion-button
                                                         (click)="blurInputElement(); ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0 ? ' ': 'none'">
+                                                        [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0 ? 'block': 'none'">
                                                         Previous
                                                         <span style="margin-left: 5px;"
                                                             *ngIf="patronDetails.IsSecondMeal != true && patronDetails.Payments.length == 0">Item(s)</span>
@@ -298,7 +298,7 @@
                                                     <label *ngIf="hideBalSetting==0" class="patron-info-balance"
                                                         [style.font-size.rem]="((isElectronApp === true) && ((selectedAccountDetails.Balance - orderData.totalAmount) < 99)) ? '1.8' : '1.4'"
                                                         [ngClass]="{'color-green': selectedAccountDetails.Balance > 0, 'color-red': selectedAccountDetails.Balance < 0 }"
-                                                        [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? ' ': 'none'"
+                                                        [style.display]="(selectedAccountDetails.Balance>0 || selectedAccountDetails.Balance == 0 || selectedAccountDetails.Balance < 0) ? 'block': 'none'"
                                                         (click)="showBalance()" style="cursor: pointer;">{{selectedAccountDetails.Balance |
                                                         currency:'USD':'symbol':'1.2-2'}}
                                                         &nbsp; <span class="color-black"><span>
@@ -320,7 +320,7 @@
                                                     <ion-button default expand="block"
                                                         (click)="blurInputElement(); ShowsolditemsPopover($event)"
                                                         [ngClass]="{'btn_previous_items':(selectedAccountDetails.IsSecondMeal!=true), 'btn_previous_meals':(selectedAccountDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) || selectedAccountDetails.Payments.length > 0 ? ' ': 'none'">
+                                                        [style.display]="(!selectedAccountDetails.isSpecialAccount && selectedAccountDetails.HadSale===true) || selectedAccountDetails.Payments.length > 0 ? 'block': 'none'">
                                                         Previous
                                                         <span style="margin-left: 5px;"
                                                             *ngIf="selectedAccountDetails.IsSecondMeal != true && selectedAccountDetails.Payments.length == 0">Item(s)</span>
@@ -370,7 +370,7 @@
                             <ion-col size="4" *ngIf="!hideAddFunds" style="padding-left:0px">
                                 <ion-button default expand="block" (click)="blurInputElement(); ShowAddDollarPopover($event)"
                                     *ngIf="patronDetails.isSpecialAccount==false"
-                                    [style.display]="(patronDetails.Balance>0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? ' ': 'none'">
+                                    [style.display]="(patronDetails.Balance > 0 || patronDetails.Balance == 0 || patronDetails.Balance < 0) ? 'block' : 'none'">
                                     Add Funds
                                 </ion-button>
                             </ion-col>
