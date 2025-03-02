@@ -27,6 +27,7 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { HashingService } from '../../services/hashing.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
+import { SessionType } from '../../services/enums/session-types';
 
 @Component({
   selector: 'app-login',
@@ -57,7 +58,8 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   public hasNotSentTransactions: boolean;
   public isAndroid: boolean = false;
   public transactions: any = [];
-  public summaryTransactions:any = [];
+  public summaryTransactions: any = [];
+  private isComponentDestroyed = false;
 
   public windowsUsername;
   public windowsDomainName;
@@ -172,10 +174,6 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
     this.isAndroid = utilService.isPlatformAndroid();
 
-    setTimeout(() => {
-      this.getTransactions();
-    }, 70000);
-
 
     this.event.subscribe('login:AuthenticateCredentials', (userEventData) => {
       this.event.destroy('login:AuthenticateCredentials');
@@ -195,7 +193,12 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
     // Handle transactions if enabled
     if (EXP_TRANSACTIONS) {
-      this.processTransactions();
+      this.processTransactionsUntilSynced();
+    }
+    else {
+      setTimeout(() => {
+        this.getTransactions();
+      }, 70000);
     }
     
     if (UtilService.isCordovaApp) {
@@ -216,6 +219,30 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     if (UtilService.isCordovaApp) {
       this.keyboardShowSubscription.unsubscribe();
       this.keyboardHideSubscription.unsubscribe();
+    }
+    this.isComponentDestroyed = true;
+  }
+
+  private async processTransactionsUntilSynced(retries: number = 5) {
+    if (this.isComponentDestroyed) return; // Stop execution if component is destroyed
+    await this.getTransactions();
+
+    if (this.hasNotSentTransactions) {
+      if (this.utilService.isAppOnline) {
+        console.log(`Unsynced transactions found, checking again in 60 seconds... (Retries left: ${retries})`);
+
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, 60000)); // Wait 60 seconds
+          await this.processTransactionsUntilSynced(retries - 1);
+        } else {
+          console.warn("Max retries reached. Stopping transaction sync attempts.");
+        }
+      }
+    } else {
+      const checkBackUp = LoginPage.shouldCheckBackup();
+      if (!this.login.username && !this.loginProcessing && !this.samlProcessing && checkBackUp == true && this.utilService.isElectronApp() && this.utilService.isAppOnline) {
+        this.checkProcessedTransactions();
+      }
     }
   }
 
@@ -281,6 +308,25 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  static shouldCheckBackup(): boolean {
+    const storedDate: string | null = AppStateService.get("BackupAndRelaunchDate");
+
+    // If no stored date, backup is required
+    if (!storedDate) {
+      return true;
+    }
+
+    // Convert stored date to Date object
+    const backupDate: Date = new Date(storedDate);
+    const currentDate: Date = new Date();
+
+    // Calculate the difference in days
+    const differenceInDays: number = (currentDate.getTime() - backupDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    // Return true if 30 or more days have passed
+    return differenceInDays >= 30;
   }
 
 
@@ -410,15 +456,20 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     }
   }
 
-  private async processTransactions() {
+  private async checkProcessedTransactions() {
     try {
-      this.utilService.setLoader(true);
-      await this.getTransactions();
-      
       if (this.utilService.isElectronApp() && this.utilService.isAppOnline) {
-        // Check if transactions are fully synced
-        if (!this.hasNotSentTransactions) {
-          this.utilService.publishIpcEvent('backup-and-relaunch');
+        let isOpenSession = AppStateService.get('session_id') ? true : false;
+        // Check if transactions are fully synced and any open sessions
+        if (!this.hasNotSentTransactions && isOpenSession == false) {
+          if (AppStateService.get("SelectedSite")) {
+            const canBackup = await this.canTakeBackUp();
+            if (canBackup) {
+              console.log("Backup can proceed.");
+              this.utilService.setLoader(true);
+              this.utilService.publishIpcEvent('backup-and-relaunch');
+            }
+          }          
         }
       }
     } catch (error) {
@@ -429,7 +480,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   }
 
   private async getTransactions() {
-    this.utilService.setLoader(true);
+    this.utilService.setLoader(false);
     try {
       this.transactions = await this.transactionService.getAllTransactions();
       this.checkUnsyncedTransactions();
@@ -437,6 +488,45 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       console.error('Error fetching transactions:', error);
     } finally {
       this.utilService.setLoader(false);
+    }
+  }
+
+  public async canTakeBackUp(): Promise<boolean> {
+    try {
+      const transactionsRes = await PouchQueriesService.GetAllPendingTransactions_NotSynced();
+      const transactions = transactionsRes.docs;
+      const hasNotProcessedTransactions = transactions.some(doc => doc.saleData.IsProcessed === false);
+
+      const summaryTransactions = await PouchQueriesService.GetAllPendingSummarySale();
+      const summaryTransactionDocs = summaryTransactions.docs;
+      const hasNotSentSummarySales = summaryTransactionDocs.some(doc => doc.IsSynced === false);
+
+      const reviewsRes = await PouchQueriesService.GetAllMarkedForReviews();
+      const reviews = reviewsRes.rows.map(row => row.doc);
+      const hasNotSentReviews = reviews.some(doc => doc.IsSynced === false);
+
+      const terminalSalesRes = await PouchQueriesService.GetAllTerminalSaleDocs();
+      const terminalDocs = terminalSalesRes.rows.map(row => row.doc);
+      const hasNotSentTSales = terminalDocs.some(doc => doc.IsSynced === false);
+
+      const data = await PouchQueriesService.GetAllOpenSessions();
+      let sessionDocs = data.rows.map(row => row.doc);
+      sessionDocs = sessionDocs.filter(s =>
+        s.isStillOpen &&
+        s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+        s.SchoolId === JSON.parse(AppStateService.get("SelectedSite")).SchoolId &&
+        s.SessionType === SessionType.EXPRESSPOINT
+      );
+      const hasOpenSessions = sessionDocs.length > 0;
+
+      const closeSessionsRes = await PouchQueriesService.GetAllCloseSessionDocs();
+      const closeSessionDocs = closeSessionsRes.rows.map(row => row.doc);
+      const hasNotSentCloseSessions = closeSessionDocs.length > 0;
+
+      return !(hasNotSentSummarySales || hasNotSentReviews || hasNotProcessedTransactions || hasNotSentTSales || hasOpenSessions || hasNotSentCloseSessions);
+    } catch (error) {
+      console.error("Error checking backup conditions:", error);
+      return false;
     }
   }
 

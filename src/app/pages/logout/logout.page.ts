@@ -8,6 +8,7 @@ import { TransactionService } from '../../services/transaction.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { PouchDBService, EXP_SYSTEM } from '../../services/pouch-db.service';
 import { Router } from '@angular/router';
+import { ElectronService } from '../../services/electron.service';
 
 
 @Component({
@@ -20,12 +21,16 @@ export class LogoutPage implements OnInit {
 
 ngOnInit() {
     this.isElectronApp = this.utilService.isElectronApp();
-    this.SaveDataForOfflineUse().then(() => {
+    this.SaveDataForOfflineUse().then(async () => {
       this.menu.close();
       console.log('Hello Logout Page');
       this.sessionTimeout.stopTimeoutWatch();
       if (this.utilService.isElectronApp()) {
         if (this.utilService.isAppOnline) {
+          const result = await this.electronService.ipcRenderer.invoke('backup-exists-ornot');
+          if (result == false) {
+            AppStateService.remove('BackupAndRelaunchDate');
+          }
           this.pouchQuery.PostOpenSession().then(() => {
             this.pouchQuery.PostSessionCheck().then(() => { });
             this.pouchQuery.PostSessionCard().then(() => { });
@@ -44,6 +49,7 @@ ngOnInit() {
   public isElectronApp: boolean;
 
   constructor(public _nav: NavController,
+    public electronService: ElectronService, 
     public sessionTimeout: SessionTimeoutService, public menu: MenuController, public utilService: UtilService,
     public transactionService: TransactionService, public pouchQuery: PouchQueriesService,
     public router: Router, public appStateService: AppStateService, public pouchDBService: PouchDBService
@@ -138,6 +144,11 @@ ngOnInit() {
         performanceOptions = AppStateService.get('performanceOptions');
       }
 
+      let backupAndRelaunchDate = '';
+      if (AppStateService.get('BackupAndRelaunchDate') != undefined) {
+        backupAndRelaunchDate = AppStateService.get('BackupAndRelaunchDate');
+      }
+
       // localStorage.clear();
       AppStateService.reset();
       AppStateService.set('selectedDistrict', selectedDistrict);
@@ -188,7 +199,9 @@ ngOnInit() {
       if (performanceOptions != undefined && performanceOptions != '') {
         AppStateService.set('performanceOptions', performanceOptions);
       }
-
+      if (backupAndRelaunchDate != undefined && backupAndRelaunchDate != '') {
+        AppStateService.set('BackupAndRelaunchDate', backupAndRelaunchDate);
+      }
       const dataforofflineUse = {
         '_id': 'dataforofflineUse',
         'selectedDistrict': selectedDistrict,
@@ -216,7 +229,8 @@ ngOnInit() {
         'AllCatRemainOpen': AllCatRemainOpen,
         'isOnlyThisSitePatrons': isOnlyThisSitePatrons,
         'CheckIfPinEntered': checkIfPinEntered,
-        'performanceOptions': performanceOptions
+        'performanceOptions': performanceOptions,
+        'BackupAndRelaunchDate': backupAndRelaunchDate
       }
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         resolve(null);
