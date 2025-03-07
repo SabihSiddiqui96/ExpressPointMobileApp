@@ -555,14 +555,29 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         this.enableStudentButton();
     }
 
-    public enableStudentButton() {
-
-        if ((this.filter.selected_homeroom !== -1 // this.filter.selected_grade != -1 &&
-            && this.filter.selected_mealtype >= 0 && this.filter.selected_menuitem >= 0) || this.selectedSpecialRosterId > 0) {
-            this.studentBtnDisable = false;
-        } else {
-            this.studentBtnDisable = true;
+    public onSegmentChange(event: any) {
+        const selectedValue = event.detail.value;
+        if (selectedValue === 'by_homeroom') {
+            this.resetHomeroom();
+        } else if (selectedValue === 'by_specialroster') {
+            this.resetSpecial();
         }
+    }
+
+    public enableStudentButton() {
+        const isHomeroomSelected = this.filter.selected_homeroom !== -1;
+        const isMealTypeValid = this.filter.selected_mealtype >= 0;
+        const isMenuItemValid = this.filter.selected_menuitem >= 0;
+
+        // Convert selectedSpecialRosterId to a string and check conditions
+        const specialRosterIdStr = this.selectedSpecialRosterId.toString();
+        const isSpecialRosterIdValid = specialRosterIdStr !== "" && specialRosterIdStr !== "0" && specialRosterIdStr !== "-1";
+
+        // Enable button if conditions are met
+        this.studentBtnDisable = !(
+            (isHomeroomSelected && isMealTypeValid && isMenuItemValid) ||
+            (isSpecialRosterIdValid && isMealTypeValid && isMenuItemValid)
+        );
     }
 
     launchAlacarteItemsPopups(student) {

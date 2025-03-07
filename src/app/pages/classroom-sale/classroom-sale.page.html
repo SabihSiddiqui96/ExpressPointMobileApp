@@ -32,13 +32,13 @@
       <div box-list-white class="ion-margin-horizontal" style="height: 100% !important;">
         <ion-icon color="slate" text-xxl text-block slot="end" class="ion-text-center" name="people"></ion-icon>
         <h1 class="ion-text-center" title>Perform meal sales by homeroom or roster.</h1>
-        <ion-segment mode="md" color="slate" [(ngModel)]="patronAccount" class="ion-padding-horizontal">
-          <ion-segment-button value="by_homeroom" (click)="resetHomeroom()">
+        <ion-segment mode="md" color="slate" [(ngModel)]="patronAccount" (ionChange)="onSegmentChange($event)" class="ion-padding-horizontal">
+          <ion-segment-button value="by_homeroom">
             <ion-label>
               By Homeroom
             </ion-label>
           </ion-segment-button>
-          <ion-segment-button value="by_specialroster" (click)="resetSpecial()">
+          <ion-segment-button value="by_specialroster">
             <ion-label>
               By Roster
             </ion-label>

@@ -467,6 +467,15 @@ export class LookupService {
                     patron.Balance = await this.personService.GetBalanceByAccountId(patron.AccountId);
                 }
             }
+            
+            let schoolId;
+            if (AppStateService.get('SelectedSite')) {
+                schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+            }
+            // check visiting patron previous sales
+            if (checkForServer && patron) {
+                checkForServer = !patron.isSpecialAccount && (patron.SchoolId !== schoolId);
+            }
 
             // Retrieve local sales and merge with previous sales
             const localSalesByMealType = await this.pouchQryService.GetAllLocalTransactions_ByAccount(patron.AccountId);
@@ -681,31 +690,44 @@ export class LookupService {
         }
     }
 
-    public serverLookup(pin, schoolId) {
-        return new Promise((resolve) => {
+    public serverLookup(pin, schoolId): Promise<any[]> {
+        return new Promise((resolve, reject) => {
 
             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
 
                 if (isNetworkOnline) {
-                    if ((this.CanServeVisitingAdults || this.canServeVisitingPatrons) && this.utilService.isNetworkOnline()) {
-                        this.http.PatronLookup(pin, schoolId).
-                            subscribe
-                            (
-                                data => {                                  
-                                    this.lookupResults = data.patrons;
-                                    if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
-                                        this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
-                                    }
-                                    resolve(this.lookupResults);
-                                }, () => { this.loader.dismiss(); });
+                    if (this.CanServeVisitingAdults || this.canServeVisitingPatrons) {
+                        this.http.PatronLookup(pin, schoolId).subscribe(
+                            data => {
+                                this.lookupResults = data.patrons;
+                                if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
+                                    this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
+                                }
+                                resolve(this.lookupResults);
+
+                                // Dismiss the loader if it exists
+                                this.dismissLoader();
+                            },
+                            error => {
+                                console.error('Error fetching patron lookup:', error);
+                                this.dismissLoader();
+                                reject(error);
+                            }
+                        );
                     } else {
                         this.lookupResults = [];
                         resolve([]);
+                        this.dismissLoader();
                     }
                 } else {
                     this.lookupResults = [];
                     resolve([]);
+                    this.dismissLoader();
                 }
+            }).catch((error) => {
+                console.error('Error checking network status:', error);
+                reject(error);
+                this.dismissLoader();
             });
         });
 
@@ -907,10 +929,22 @@ export class LookupService {
     }
 
     public dismissLoader() {
-        this.loader.getTop().then(v => v ? this.doStopLoader() : null);
+        this.loader.getTop()
+            .then(v => {
+                if (v) {
+                    this.doStopLoader();
+                }
+            })
+            .catch(error => {
+                console.error('Error getting top loader:', error);
+            });
     }
+
     public doStopLoader() {
-        this.loader.dismiss();
+        this.loader.dismiss()
+            .catch(error => {
+                console.error('Error dismissing loader:', error);
+            });
     }
 
     public patronFromServer(firstname, lastname, externalId, selectedsite, pageFrom = '') {
@@ -953,7 +987,7 @@ export class LookupService {
 
                             this.handlePersonResults(true, Direction.None, pageFrom);
                         },
-                        error => { console.log(error); this.loader.dismiss(); });
+                        error => { console.log(error); this.dismissLoader(); });
             }
         });
     }
