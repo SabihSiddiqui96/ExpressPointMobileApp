@@ -24,10 +24,10 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
     SyncTransactionData: "1",
-    SyncStudentDetail: "2",
-    SyncTerminalHeartbeat: "1",
-    SyncAccountDetail: "1",
-    SyncTransactionStatus: "2"
+    SyncStudentDetail: "5",
+    SyncTerminalHeartbeat: "30",
+    SyncAccountDetail: "2",
+    SyncTransactionStatus: "3"
   }
   public perfOptionDB = {
     '_id': 'PerformanceOptionSetting',

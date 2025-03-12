@@ -1087,7 +1087,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 // Step 2: Check for live balance payments after fetching unprocessed payments                
                 if (this.utilService.isAppOnline &&
-                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
+                    (performanceOptions && performanceOptions.LivePaymentsForPatron)) {
                     if (this.patronDetails.AccountId) {
                         return this.http.GetPersonTodaysPayments(this.patronDetails.AccountId).toPromise(); // Return the promise to chain
                     }
@@ -7175,7 +7175,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
                 // Step 2: Check for live balance payments after fetching unprocessed payments                
                 if (this.utilService.isAppOnline &&
-                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
+                    (performanceOptions && performanceOptions.LivePaymentsForPatron)) {
                     if (this.selectedAccountDetails.AccountId) {
                         return this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).toPromise(); // Return the promise to chain
                     }

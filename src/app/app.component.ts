@@ -141,10 +141,10 @@ export class AppComponent {
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
     SyncTransactionData: "1",
-    SyncStudentDetail: "2",
-    SyncTerminalHeartbeat: "1",
-    SyncAccountDetail: "1",
-    SyncTransactionStatus: "2"
+    SyncStudentDetail: "5",
+    SyncTerminalHeartbeat: "30",
+    SyncAccountDetail: "2",
+    SyncTransactionStatus: "3"
   }
 
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
@@ -242,7 +242,7 @@ export class AppComponent {
       const dataToServer = 1000 * 60 * Number(this.performanceOptions.SyncTransactionData);
       const personFromServer = 1000 * 60 * Number(this.performanceOptions.SyncStudentDetail);
       const accountFromServer = 1000 * 60 * Number(this.performanceOptions.SyncAccountDetail);
-      const transactionStatusFromServer = 1000 * 60 * Number(this.performanceOptions.SyncTransactionData);
+      const transactionStatusFromServer = 1000 * 60 * Number(this.performanceOptions.SyncTransactionStatus);
 
       this.syncService.initializeTimers(
         personFromServer,
@@ -1249,12 +1249,8 @@ export class AppComponent {
                             .PostTerminalServingLineDefaultMenu()
                             .then(() => {
                               this.pouchQuery
-                                .PostHeartBeatDetails()
-                                .then(() => {
-                                  this.pouchQuery
-                                    .PostSuspiciousTransaction()
-                                    .then(() => { });
-                                });
+                                .PostSuspiciousTransaction()
+                                .then(() => { });
                             });
                         });
                       });

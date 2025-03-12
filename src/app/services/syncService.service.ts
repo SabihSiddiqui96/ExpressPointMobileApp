@@ -175,9 +175,7 @@ export class SyncService {
                                             this.pouchQuery.PostSummarySale().then(() => {
                                                 this.pouchQuery.PostTerminalDefaultMenu().then(() => {
                                                     this.pouchQuery.PostTerminalServingLineDefaultMenu().then(() => {
-                                                        this.pouchQuery.PostHeartBeatDetails().then(() => {
-                                                            this.pouchQuery.PostSuspiciousTransaction().then(() => {
-                                                            });
+                                                        this.pouchQuery.PostSuspiciousTransaction().then(() => {
                                                         });
                                                     });
                                                 });
