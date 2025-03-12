@@ -2089,33 +2089,6 @@ export class PouchQueriesService {
     });
   }
 
-
-  public PostHeartBeatDetails() {
-    console.log('-----------------Checking for Heart Beat Details--------------------');
-    return new Promise((resolve, reject) => {
-      PouchQueriesService.GetAllHeartBeatDetails().then((res) => {
-        const heartBeatDetails = res.rows.map(row => row.doc);
-        console.log(JSON.stringify(heartBeatDetails));
-        if (heartBeatDetails.length > 0) {
-          heartBeatDetails.map(doc => {
-            this.http.saveHeartBeatDetails(doc).subscribe(
-              data => {
-                console.log('Posted Heart Beat Details' + JSON.stringify(data));
-                EXP_COMMON.remove(doc);
-              },
-              error => { console.log(error); reject(); },
-              () => {
-                resolve(null);
-              });
-          });
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  }
-
-
   // public PostSummarySaleCount(summarySaleData) {
   //     console.log('-----------------Post Summary Sale---------------------');
   //     return new Promise((resolve, reject) => {

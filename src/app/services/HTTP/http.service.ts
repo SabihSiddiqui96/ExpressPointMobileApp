@@ -565,15 +565,6 @@ export class HttpService {
             }, { responseType: 'text' }).pipe(map(res => res));
     }
 
-
-
-    public saveHeartBeatDetails(heartBeatDetailsData): any {
-        return this.http.post(API_URL + 'LogHeartBeatDetails',
-            JSON.stringify(heartBeatDetailsData),
-        ).pipe(map(res => res));
-    }
-
-
     public savePreOrdersSaleModel(preOrderData): any {
         return this.http.post(API_URL + 'SaveOrderSaleModel',
             JSON.stringify(preOrderData),
