@@ -22,6 +22,7 @@ import { HashingService } from '../../services/hashing.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
+import { SyncService } from '../../services/syncService.service';
 
 @Injectable()
 export class GoLogin implements OnDestroy {
@@ -52,6 +53,7 @@ export class GoLogin implements OnDestroy {
         public http: HttpService,
         public deviceService: DeviceService, public pouchQuery: PouchQueriesService, public router: Router,
         public appStateService: AppStateService,
+        public syncService: SyncService,
         public settingService: SettingService, public signalRService: SignalRService
         , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
 
@@ -666,6 +668,10 @@ export class GoLogin implements OnDestroy {
                     }
                 }
                 AppStateService.set('IsTokenExpired', false);
+                this.syncService.updateToServerInterval(Number(SettingService.getSettingValue("TRASYNINT") || "1"));
+                this.syncService.updateTransactionStatusInterval(Number(SettingService.getSettingValue("TRASTAINT") || "5"));
+                this.syncService.updatePersonInterval(Number(SettingService.getSettingValue("PATSYNINT") || "5"));
+                this.syncService.updateAccountInterval(Number(SettingService.getSettingValue("PREVACINT") || "2"));
             });
         }
     }

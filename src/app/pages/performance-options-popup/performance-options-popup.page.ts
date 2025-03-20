@@ -23,11 +23,11 @@ export class PerformanceOptionsPopUpComponent implements OnInit {
     LivePaymentsForPatron: false,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
-    SyncTransactionData: "1",
-    SyncStudentDetail: "5",
-    SyncTerminalHeartbeat: "30",
-    SyncAccountDetail: "2",
-    SyncTransactionStatus: "3"
+    SyncTransactionData: SettingService.getSettingValue("TRASYNINT") || "1",
+    SyncStudentDetail: SettingService.getSettingValue("PATSYNINT") || "5",
+    SyncTerminalHeartbeat: SettingService.getSettingValue("TERHBTINT") || "30",
+    SyncAccountDetail: SettingService.getSettingValue("PREVACINT") || "2",
+    SyncTransactionStatus: SettingService.getSettingValue("TRASTAINT") || "5"
   }
   public perfOptionDB = {
     '_id': 'PerformanceOptionSetting',

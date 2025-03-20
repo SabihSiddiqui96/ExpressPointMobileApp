@@ -28,6 +28,7 @@ import { SignalRService } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
+import { SyncService } from '../../services/syncService.service';
 
 @Component({
   selector: 'app-device-connection',
@@ -92,13 +93,14 @@ export class DeviceConnectionPage extends GoLogin implements OnInit, OnDestroy {
     public pouchDBService: PouchDBService,
     public deviceService: DeviceService, public popupMessageService: PopupMessageService,
     public pouchQuery: PouchQueriesService, public router: Router, public appStateService: AppStateService,
+    public syncService: SyncService,
     public settingService: SettingService, public electronService: ElectronService, private authService: AuthService,
     public signalRService: SignalRService,
     public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) {
 
     super(navCtrl, loading, alertCtrl, network, sessionTimeOut,
       event, pouchDBService, modalCtrl, utilService, http,
-      deviceService, pouchQuery, router, appStateService, settingService,
+      deviceService, pouchQuery, router, appStateService, syncService, settingService,
       signalRService, setupDbService, deviceControlsService);
 
     this.isCordovaApp = UtilService.isCordovaApp;

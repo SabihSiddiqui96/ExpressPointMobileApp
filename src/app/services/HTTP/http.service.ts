@@ -26,7 +26,7 @@ export class HttpService {
 
     public getLoginToken(userdata): any {
         const selectedDistrict = JSON.parse(AppStateService.get('selectedDistrict'));
-        const LOGIN_URL = AppStateService.get('LOGIN_URL') ? AppStateService.get('LOGIN_URL') : '' || '';
+        const LOGIN_URL = AppStateService.get('LOGIN_URL') ? AppStateService.get('LOGIN_URL') : '';
         // const LOGIN_URL = AppStateService.get('selectedDistrict') ? selectedDistrict.loginUrl : '' || '';
 
         const scopeData = [];
@@ -257,6 +257,15 @@ export class HttpService {
     }
     public GetPersonImage(personId): any {
         return this.http.get(API_URL + 'GetPersonImage/' + personId).pipe(map(res => res));
+    }
+
+    public GetPersonImagesBySchoolId(): any {
+        const schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+        return this.http.get(API_URL + 'GetPicturesBySchoolId/' + schoolId).pipe(map(res => res));
+    }
+
+    public GetPersonImagesByPersonIds(personIds): any {
+        return this.http.post(API_URL + 'GetPicturesByPersonIds', personIds).pipe(map(res => res));
     }
 
     public GetPersonTodaysPayments(accountId): any {
@@ -551,6 +560,10 @@ export class HttpService {
 
     public SaveTransactionRecordList(orderData): any {
         return this.http.post(API_URL + 'RecordtransactionList', orderData).pipe(map(res => res));
+    }
+
+    public CheckTransactionStatusMultiple(transactionIds): any {
+        return this.http.post(API_URL + 'CheckTransactionStatusMultiple', transactionIds).pipe(map(res => res));
     }
 
     public postHeartBeat(terminalId, pending, sent, heartBeatTime, appVersion): any {

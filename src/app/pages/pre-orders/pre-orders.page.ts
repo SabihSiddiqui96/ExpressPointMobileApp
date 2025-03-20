@@ -196,7 +196,7 @@ export class PreOrdersPage implements OnInit {
                         students.map(student => {
                             this.utilService.isNetworkOnline().then((isNetworkOnline) => {
                                 if (isNetworkOnline) {
-                                    if (student.PersonId) {
+                                    if (student.PersonId && student.HasImage == 1) {
                                         this.http.GetPersonImage(student.PersonId).subscribe(data => {
                                             if (data != null) {
                                                 student['Image'] = data;

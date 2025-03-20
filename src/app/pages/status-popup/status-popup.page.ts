@@ -16,6 +16,7 @@ import { Events } from "../../services/events.service";
 // import { Router, ActivatedRoute } from "@angular/router";
 import { NgZone } from "@angular/core";
 import { SettingService } from "../../services/setting.service";
+import { PersonImageDBService } from "../../services/Database/person-image-db.service";
 
 @Component({
     selector: "app-status-popup",
@@ -25,6 +26,7 @@ import { SettingService } from "../../services/setting.service";
 export class StatusPopupPage implements OnInit {
     @Input() modal: Components.IonModal;
     @Input() navSyncList;
+    public isElectronApp: boolean;
 
     ngOnInit() {
         this.syncList = this.navSyncList;
@@ -32,6 +34,7 @@ export class StatusPopupPage implements OnInit {
         this.detailSyncStatus.set("StaticMenusDB", new Map<string, string>());
         this.detailSyncStatus.set("DynamicMenusDB", new Map<string, string>());
         this.detailSyncStatus.set("SetupPersonDB", new Map<string, string>());
+        this.detailSyncStatus.set("SetupPersonImageDB", new Map<string, string>());
         this.detailSyncStatus.set("SetupUsersDB", new Map<string, string>());
         this.detailSyncStatus.set("DeviceSettings", new Map<string, string>());
         if (
@@ -40,6 +43,15 @@ export class StatusPopupPage implements OnInit {
         ) {
             this.deviceInfo = JSON.parse(AppStateService.get("DeviceInfo"));
         }
+
+        this.events.subscribe('data:personImageDBTotal',
+            (data) => {
+                this.progressSetupPersonImageDBTotal = data.personImageDBTotal;
+            });
+
+        this.events.subscribe('data:personImageDBCurrent',
+            (data) => {
+                this.progressSetupPersonImageDBCurrent = data.personImageDBCurrent;});
 
         this.events.subscribe("data:sync", (data) => {
 
@@ -63,6 +75,13 @@ export class StatusPopupPage implements OnInit {
                 syncStudents = true;
             }
 
+            let syncStudentImages = false;
+            if (this.syncList.StudentImages) {
+                syncStudentImages = (this.syncList.StudentImages === "Success" || this.syncList.StudentImages === "Stopped" || this.syncList.StudentImages === "Failed");
+            } else {
+                syncStudentImages = true;
+            }
+
             let syncDynamicMenus = false;
             if (this.syncList.dynamicMenusDB) {
                 syncDynamicMenus = this.syncList.DynamicMenus === "Success";
@@ -74,7 +93,7 @@ export class StatusPopupPage implements OnInit {
                 this.syncList.SiteSettings === "Success" &&
                 this.syncList.StaticMenus === "Success" &&
                 syncDynamicMenus &&
-                syncStudents
+                syncStudents && syncStudentImages
             ) {
                 // && this.syncList.Users === "Success"
                 this.error = false;
@@ -248,7 +267,7 @@ export class StatusPopupPage implements OnInit {
                                     break;
                                 case 'SyncPersonDetails':
                                     this.progressSetupPersonDBLabels.set(key, 'Person Details');
-                                    break;
+                                    break;                                
                                 case 'SyncHSSRVSPersonDetails':
                                     this.progressSetupPersonDBLabels.set(key, 'HSSRVS Person Details');
                                     break;
@@ -259,6 +278,22 @@ export class StatusPopupPage implements OnInit {
                         }
                         if (data.SetupPersonDB[key][Object.keys(data.SetupPersonDB[key])[0]] === 'D') {
                             this.progressSetupPersonDBLabels.delete(key);
+                        }
+                    } else if (data.SetupPersonImageDB) {
+                        const key = Object.keys(data.SetupPersonImageDB)[0];
+                        this.detailSyncStatus.get("SetupPersonImageDB").set(key, data.SetupPersonImageDB[key]);
+                        if (!this.progressSetupPersonImageDBLabels.get(key)) {
+                            switch (key) {                              
+                                case 'SyncPersonImages':
+                                    this.progressSetupPersonImageDBLabels.set(key, 'Student Images');
+                                    break;                               
+                                default:
+                                    this.progressSetupPersonImageDBLabels.set(key, key);
+                                    break;
+                            }
+                        }
+                        if (data.SetupPersonImageDB[key][Object.keys(data.SetupPersonImageDB[key])[0]] === 'D') {
+                            this.progressSetupPersonImageDBLabels.delete(key);
                         }
                     } else if (data.SetupUsersDB) {
                         const key = Object.keys(data.SetupUsersDB)[0];
@@ -323,6 +358,9 @@ export class StatusPopupPage implements OnInit {
     public progressSetupPersonDBCurrent = 0;
     public progressSetupPersonDBTotal = 3;
     public progressSetupPersonDBLabels = new Map<string, string>();
+    public progressSetupPersonImageDBCurrent = 0;
+    public progressSetupPersonImageDBTotal = 1;
+    public progressSetupPersonImageDBLabels = new Map<string, string>();
     public progressSetupUsersDBCurrent = 0;
     public progressSetupUsersDBTotal = 1;
     public progressSetupUsersDBLabel = new Map<string, string>();
@@ -338,6 +376,7 @@ export class StatusPopupPage implements OnInit {
         public dynamicMenusDB: DynamicMenusDBService,
         public staticMenusDB: StaticMenusDBService,
         public personDB: PersonDBService,
+        public personImageDB: PersonImageDBService,
         public usersDB: UsersDBService,
         public _nav: NavController,
         // public deviceService: DeviceService,
@@ -347,6 +386,7 @@ export class StatusPopupPage implements OnInit {
         public appStateService: AppStateService,
         public zone: NgZone,
     ) {
+        this.isElectronApp = this.utilService.isElectronApp();
         // this.activeRoute = this.route.snapshot.firstChild.url[0].path;
     }
 
@@ -372,6 +412,16 @@ export class StatusPopupPage implements OnInit {
     public retryDynamicMenusDB() {
         this.syncList.DynamicMenus = "InProgress";
         this.dynamicMenusDB.SetupDynamicMenusDB();
+    }
+
+    public retryPersonImageDB() {
+        this.syncList.StudentImages = "InProgress";
+        this.personImageDB.SetupPersonImageDB();
+    }
+
+    public cancelSyncImages() {
+        this.syncList.StudentImages = "Stopped";
+        this.personImageDB.stopSyncProcess();
     }
 
     public async close() {

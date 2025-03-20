@@ -57,21 +57,21 @@ export class SyncService {
         this.startAccountTimer();
     }
 
-    updateTransactionStatusInterval(newInterval: number) {
+    updateTransactionStatusInterval(newInterval: number, immediateStart: boolean = false) {
         this.transactionStatusInterval = 1000 * 60 * newInterval;
-        this.startTransactionStatusTimer();
+        this.startTransactionStatusTimer(immediateStart);
     }
 
-    updateToServerInterval(newInterval: number) {
+    updateToServerInterval(newInterval: number, immediateStart: boolean = false) {
         this.toServerInterval = 1000 * 60 * newInterval;
-        this.startDataToServerTimer();
+        this.startDataToServerTimer(immediateStart);
     }
 
     private startPersonTimer() {
         if (this.personTimerSubscription) {
             this.personTimerSubscription.unsubscribe();
         }
-        this.personTimerSubscription = timer(5000, this.personInterval).subscribe(() => {
+        this.personTimerSubscription = timer(7000 + this.personInterval, this.personInterval).subscribe(() => {
             this.syncPersonFromServer();
         });
         console.log("personInterval:" + this.personInterval);
@@ -81,27 +81,29 @@ export class SyncService {
         if (this.accountTimerSubscription) {
             this.accountTimerSubscription.unsubscribe();
         }
-        this.accountTimerSubscription = timer(15000, this.accountInterval).subscribe(() => {
+        this.accountTimerSubscription = timer(10000 + this.accountInterval, this.accountInterval).subscribe(() => {
             this.syncAccountFromServer();
         });
         console.log("accountInterval:" + this.accountInterval);
     }
 
-    private startTransactionStatusTimer() {
+    private startTransactionStatusTimer(immediateStart: boolean = false) {
         if (this.transactionStatusTimerSubscription) {
             this.transactionStatusTimerSubscription.unsubscribe();
         }
-        this.transactionStatusTimerSubscription = timer(5000, this.transactionStatusInterval).subscribe(() => {
+        const initialInterval = immediateStart ? 0 : 15000 + this.transactionStatusInterval; 
+        this.transactionStatusTimerSubscription = timer(initialInterval, this.transactionStatusInterval).subscribe(() => {
             this.transactionStatusFromServer();
         });
         console.log("transactionStatusInterval:" + this.transactionStatusInterval);
     }
 
-    private startDataToServerTimer() {
+    private startDataToServerTimer(immediateStart: boolean = false) {
         if (this.dataToServerTimerSubscription) {
             this.dataToServerTimerSubscription.unsubscribe();
         }
-        this.dataToServerTimerSubscription = timer(10000, this.toServerInterval).subscribe(() => {
+        const initialInterval = immediateStart ? 0 : 3000 + this.toServerInterval;
+        this.dataToServerTimerSubscription = timer(initialInterval, this.toServerInterval).subscribe(() => {
             this.syncDataToServer();
         });
         console.log("toServerInterval:" + this.toServerInterval);

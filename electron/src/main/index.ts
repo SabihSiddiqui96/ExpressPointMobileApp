@@ -12,6 +12,7 @@ import * as si from 'systeminformation';
 import * as net from 'net';
 const { localStorage } = require('electron-browser-storage')
 const fs = require('fs-extra');
+import * as sqlite3 from 'sqlite3';
 const { exec } = require('child_process');
 
 let mainWindow: BrowserWindow;
@@ -22,6 +23,10 @@ let deviceName = os.hostname();
 let SystemUUID, Serial: string, UUID_os: string, UUID_FileSystem: string, UUID_BlockDevices: string, UUID_system: string;
 let DeviceIpAddress;
 let ADFSInfo = '', NameId = '', LoginError = '', ssowin: any;
+let db: sqlite3.Database;
+const CryptoJS = require("crypto-js");
+
+const SECRET_KEY = "cybersoft-primeroedge-expresspoint";
 
 let readSocket: net.Socket;
 let child: ChildProcess.ChildProcess;
@@ -154,7 +159,7 @@ function createWindow() {
         autoHideMenuBar: true,
         webPreferences: {
           nodeIntegration: true,
-          enableRemoteModule : true
+          enableRemoteModule: true
         }
       },
     });
@@ -176,6 +181,29 @@ function createWindow() {
     // win.webContents.closeDevTools();
     win.maximize();
   })
+
+  const dbPath = path.join(app.getPath('userData'), 'personImages.db');
+
+  db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error('Error opening database', err.message);
+      return;
+    }
+    console.log('Connected to the SQLite database.');
+
+    // Create the table if it doesn't exist
+    db.run(`CREATE TABLE IF NOT EXISTS person_images (
+      PersonId TEXT PRIMARY KEY,
+      StreamImage BLOB,
+      UpdateDate TEXT
+    );`, (err) => {
+      if (err) {
+        console.error('Error creating table', err.message);
+      } else {
+        console.log('Table person_images created or already exists.');
+      }
+    });
+  });
 
 }
 
@@ -216,8 +244,8 @@ autoUpdater.on('update-downloaded', (info) => {
   };
 
   dialog.showMessageBox(win, dialogOptions)
-      .then(() => autoUpdater.quitAndInstall())
-      .catch((err) => console.error(err));
+    .then(() => autoUpdater.quitAndInstall())
+    .catch((err) => console.error(err));
 });
 
 autoUpdater.on('error', (e) => {
@@ -255,11 +283,11 @@ ipcMain.on('print', (evnt: any, arg: any) => {
         console.log('---mainWindow---');
         console.log(success);
 
-      mainWindow.hide();
-          mainWindow.close();
-          setTimeout(() => {
-            win.focus();
-          }, 200);
+        mainWindow.hide();
+        mainWindow.close();
+        setTimeout(() => {
+          win.focus();
+        }, 200);
       });
     }
   });
@@ -379,7 +407,7 @@ ipcMain.on('backup-and-relaunch', async (event) => {
     if (diffMilliseconds < daysInMilliseconds) {
       return;
     }
-    
+
     // Update the state file with the current timestamp
     const newState = { lastBackup: now.toISOString() };
     localStorage.setItem("BackupAndRelaunchDate", now.toISOString());
@@ -390,7 +418,7 @@ ipcMain.on('backup-and-relaunch', async (event) => {
     const expFolder = path.join(documentsFolder, 'ExpressPoint');
     const appFolder = path.join(documentsFolder, 'ExpressPointData');
     const backupFolder = path.join(documentsFolder, `ExpressPointData_backup_before_${appVersion}`);
-    const exePath = path.join(expFolder, 'ExpressPoint.exe'); 
+    const exePath = path.join(expFolder, 'ExpressPoint.exe');
 
     // Step 2: Create the batch file content with dynamic paths
     const batchFilePath = path.join(expFolder, 'cleanup_and_relaunch.bat');
@@ -459,7 +487,7 @@ exit
     console.log('Exiting the app...');
     app.exit();
   } catch (error) {
-    console.error('Error during backup-and-relaunch:', error.message);    
+    console.error('Error during backup-and-relaunch:', error.message);
   }
 });
 
@@ -515,6 +543,136 @@ ipcMain.on('check-app-updates', (event: any, deploymentServerURL: any) => {
   autoUpdater.checkForUpdates();
 });
 
+function encryptString(plainText, secretKey) {
+  const encrypted = CryptoJS.AES.encrypt(plainText, secretKey).toString();
+  return encrypted; // Return the encrypted string
+}
+
+// Function to decrypt a string
+function decryptString(encryptedText, secretKey) {
+  const decryptedBytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+  const decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8);
+  return decrypted; // Return the decrypted string
+}
+
+// Save Image (Encrypt Before Storing)
+ipcMain.on("save-image", (event, personId, image, updateDate) => {
+  try {
+    const queryCheck = `SELECT StreamImage, UpdateDate FROM person_images WHERE PersonId = ? LIMIT 1`;
+
+    db.get(queryCheck, [personId], (err, row: any) => {
+      if (err) {
+        event.reply("save-image-response", { error: err.message });
+        return;
+      }
+
+      // Encrypt the image before storing
+      const encryptedImage = encryptString(image, SECRET_KEY);
+
+      if (row) {
+        // If image exists, check UpdateDate
+        const existingUpdateDate = new Date(row.UpdateDate);
+        const newUpdateDate = new Date(updateDate);
+
+        // Check if the new UpdateDate is greater than the existing one
+        if (newUpdateDate > existingUpdateDate) {
+          const queryUpdate = `UPDATE person_images SET StreamImage = ?, UpdateDate = ? WHERE PersonId = ?`;
+
+          db.run(queryUpdate, [encryptedImage, updateDate, personId], (err) => {
+            if (err) {
+              event.reply("save-image-response", { error: err.message });
+            } else {
+              event.reply("save-image-response", { success: true, message: "Image updated." });
+            }
+          });
+        } else {
+          // Image exists and the new UpdateDate is not greater
+          event.reply("save-image-response", { success: false, message: "Image exists with an equal or later update date." });
+        }
+      } else {
+        // Insert new image
+        const queryInsert = `INSERT INTO person_images (PersonId, StreamImage, UpdateDate) VALUES (?, ?, ?)`;
+
+        db.run(queryInsert, [personId, encryptedImage, updateDate], (err) => {
+          if (err) {
+            event.reply("save-image-response", { error: err.message });
+          } else {
+            event.reply("save-image-response", { success: true, message: "Image saved successfully." });
+          }
+        });
+      }
+    });
+  } catch (err) {
+    event.reply("save-image-response", { error: err.message });
+  }
+});
+
+
+
+// Get Image (Decrypt After Retrieving)
+ipcMain.on("get-image", (event, { personId, responseChannel }) => {
+  try {
+    const query = `SELECT StreamImage FROM person_images WHERE PersonId = ?`;
+    db.get(query, [personId], (err, row: PersonImage) => {
+      if (err) {
+        event.reply(responseChannel, { error: err.message, personId });
+      } else {
+        if (row && row.StreamImage) {
+          const decryptedImage = decryptString(row.StreamImage, SECRET_KEY);
+          event.reply(responseChannel, { personId, image: decryptedImage });
+        } else {
+          event.reply(responseChannel, { personId, image: null });
+        }
+      }
+    });
+  } catch (err) {
+    event.reply(responseChannel, { error: err.message, personId });
+  }
+});
+
+ipcMain.on("check-person-exists", async (event, { personId, updateDate, responseChannel }) => {
+  try {
+    const query = `SELECT UpdateDate FROM person_images WHERE PersonId = ?`;
+    db.get(query, [personId], (err, row: any) => {
+      if (err) {
+        event.reply(responseChannel, { error: err.message });
+      } else {
+        const needsUpdate = row ? (new Date(updateDate) > new Date(row.UpdateDate)) : true;
+        event.reply(responseChannel, { exists: !!row, needsUpdate });
+      }
+    });
+  } catch (err) {
+    event.reply(responseChannel, { error: err.message });
+  }
+});
+
+ipcMain.on("delete-person-images", async (event, { personIds, responseChannel }) => {
+  try {
+    if (!Array.isArray(personIds) || personIds.length === 0) {
+      event.reply(responseChannel, { error: "Invalid personIds array." });
+      return;
+    }
+
+    const placeholders = personIds.map(() => "?").join(", ");
+    const query = `DELETE FROM person_images WHERE PersonId IN (${placeholders})`;
+
+    db.run(query, personIds, function (err) {
+      if (err) {
+        event.reply(responseChannel, { error: err.message });
+      } else {
+        event.reply(responseChannel, { success: true, deletedCount: this.changes });
+      }
+    });
+  } catch (err) {
+    event.reply(responseChannel, { error: err.message });
+  }
+});
+
+
+interface PersonImage {
+  PersonId: string;
+  StreamImage: Buffer; // Use Buffer for binary data
+}
 
 ipcMain.on('Open-CashDrawer', () => {
 

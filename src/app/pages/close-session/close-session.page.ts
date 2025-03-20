@@ -20,6 +20,8 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { CloseSessionPrintFormat, PrintService } from '../../services/print.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { SessionType } from '../../services/enums/session-types';
+import { SyncService } from '../../services/syncService.service';
+import { timer } from 'rxjs';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -128,6 +130,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         private alertCtrl: AlertController, public events: Events, private utilService: UtilService,
         public popupMessageService: PopupMessageService, private pouchQuery: PouchQueriesService,
         public router: Router, public appStateService: AppStateService,
+        public syncService: SyncService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public keyboard: Keyboard,
         private elementRef: ElementRef, public printService: PrintService, private route: ActivatedRoute) {
 
@@ -787,7 +790,8 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 }
                 AppStateService.remove('BonusAmount');
                 this.utilService.setLoader(false);
-                this._nav.navigateRoot('service-selection');
+                this.syncService.updateToServerInterval(Number(SettingService.getSettingValue("TRASYNINT") || "1"), true);
+                this._nav.navigateRoot('service-selection', { queryParams: { isFromCloseService: true } });
 
             });
 
