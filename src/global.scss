@@ -278,3 +278,11 @@ ion-button {
   padding: 10px 15px 10px 15px; /* top right bottom left */
   background-color: #e0e0e0; /* #f8f8f8;*/
 }
+
+.close-status-modal {
+  --width: 90%;
+  --max-width: 650px;
+  --height: 410px !important;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}

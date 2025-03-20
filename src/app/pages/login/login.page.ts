@@ -28,6 +28,7 @@ import { HashingService } from '../../services/hashing.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
 import { SessionType } from '../../services/enums/session-types';
+import { SyncService } from '../../services/syncService.service';
 
 @Component({
   selector: 'app-login',
@@ -86,13 +87,14 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     public transactionService: TransactionService, public deviceService: DeviceService,
     public platform: Platform, public pouchQuery: PouchQueriesService, public electronService: ElectronService,
     public router: Router, public appStateService: AppStateService,
+    public syncService: SyncService,
     public settingService: SettingService, private authService: AuthService,
     public signalRService: SignalRService,
     public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) {
 
     super(_nav, loading, alertCtrl, network, sessionTimeOut, event, pouchDBService,
       modalCtrl, utilService, http,
-      deviceService, pouchQuery, router, appStateService,
+      deviceService, pouchQuery, router, appStateService, syncService,
       settingService, signalRService, setupDbService, deviceControlsService);
     this.isCordovaApp = UtilService.isCordovaApp;
     if (UtilService.isCordovaApp) {
@@ -118,7 +120,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     }
     this.copyRightYear = LocalTimerService.getCurrentYear();
     this.utilService.setLoader(true);
-    this.loginUrl = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).loginUrl : '' || null;
+    this.loginUrl = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).loginUrl : '';
     this.districtName = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).districtName : '';
     this.isElectronApp = this.utilService.isElectronApp();
     if (AppStateService.get('pnpPeripherals') !== undefined) {
@@ -625,7 +627,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
   public ssoAuth() {
     this.isSSOAuth = false;
-    this.poDistrictId = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).PODistrictId : '' || null;
+    this.poDistrictId = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).PODistrictId : '';
     this.http.getSAMLAuthSSO(this.poDistrictId).
       subscribe
       (
@@ -652,7 +654,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
   }
 
   public windowsAuthSSO() {
-    this.poDistrictId = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).PODistrictId : '' || null;
+    this.poDistrictId = AppStateService.get('selectedDistrict') ? JSON.parse(AppStateService.get('selectedDistrict')).PODistrictId : '';
     this.authService.getWindowsAuthSSO(this.poDistrictId);
     this.authService.authData.subscribe
       (

@@ -19,6 +19,7 @@ import { Router } from '@angular/router';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { LoadingService } from '../../services/loading.service';
 import { LocalTimerService } from '../../services/local-timer.service';
+import { SettingService } from '../../services/setting.service';
 
 @Component({
     selector: 'app-transaction-details-popup',
@@ -31,6 +32,9 @@ export class TransactionDetailsPopupPage implements OnInit {
     @Input() modal: Components.IonModal;
     @Input() isFromservice;
     public loadingID;
+    public transactionStatusMins;
+    performanceOptions = null;
+
     ngOnInit() {
         this.navIsFromservice = this.isFromservice;
 
@@ -41,7 +45,13 @@ export class TransactionDetailsPopupPage implements OnInit {
 
         // }
         this.events.publish('patronLargeImagehide', null);
-
+        this.performanceOptions = AppStateService.get('performanceOptions');
+        if (this.performanceOptions != null && this.performanceOptions != undefined) {
+            this.transactionStatusMins = this.performanceOptions.SyncTransactionStatus;
+        }
+        else {
+            this.transactionStatusMins = SettingService.getSettingValue("TRASTAINT") || "5";
+        }
     }
 
     public intializeTransactionDetails() {

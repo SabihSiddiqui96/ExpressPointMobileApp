@@ -109,6 +109,7 @@ import { PatronLookupPopupPage } from './pages/patron-lookup-popup/patron-lookup
 import { UnidentifiedPatronPopupPage } from './pages/menu-service/components/unidentified-patron-popup/unidentified-patron-popup.page';
 import { PerformanceOptionsPopUpComponent } from './pages/performance-options-popup/performance-options-popup.page';
 import { MaterialModule } from './material.module';
+import { PersonImageDBService } from './services/Database/person-image-db.service';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -202,6 +203,7 @@ import { MaterialModule } from './material.module';
         DynamicMenusDBService,
         StaticMenusDBService,
         PersonDBService,
+        PersonImageDBService,
         SystemDBService,
         UsersDBService,
         LookupService,

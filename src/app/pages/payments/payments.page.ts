@@ -1072,16 +1072,16 @@ export class PaymentsPage extends DoPayment implements OnInit {
 
 
 
-    public getPatronDetails(patronSelectedData) {
+    public async getPatronDetails(patronSelectedData) {
 
         this.patronSelectedData = JSON.parse(patronSelectedData);
-        if (this.patronSelectedData.PersonId && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
-            this.http.GetPersonImage(this.patronSelectedData.PersonId).subscribe(data => {
-                if (data != null) {
-                    this.patronSelectedData['Image'] = data;
-                }
-            }, e => { console.log(e); }, () => {
-            });
+        if (this.patronSelectedData.HasImage == 1 && this.patronSelectedData.PersonId && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
+            const image = await this.lookUpService.getPersonImage(this.patronSelectedData.PersonId);
+            if (image) {
+                this.patronSelectedData['Image'] = image;
+            } else {
+                this.patronSelectedData['Image'] = null;
+            }
         }
 
         this.patronId = this.patronSelectedData['PersonId'];

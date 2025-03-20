@@ -1364,6 +1364,26 @@ export class PouchQueriesService {
     return (promise);
   }
 
+  public static GetAllPendingTransactions_SyncedButNotProcessed() {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "Transaction",
+          $lt: "Transaction\uffff"
+        },
+        'saleData.IsSynced': {
+          $eq: true
+        },
+        'saleData.IsProcessed': {
+          $eq: false
+        }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
   public async GetAllLocalTransactions_ByAccount(AccountId) {
     const dateOnlyEpoch = Math.floor(new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) / 1000);
 
@@ -1480,6 +1500,24 @@ export class PouchQueriesService {
         IsSynced: {
           $eq: syncedRecords
         }        
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+  public async GetAllSummarySalesBySessionDate(syncedRecords: boolean = false) {
+    const dateOnlyEpoch = Math.floor(new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) / 1000);
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SummarySale",
+          $lt: "SummarySale\uffff"
+        },       
+        TransactionDate: {
+          $gt: dateOnlyEpoch
+        },
       },
       include_docs: true
     });

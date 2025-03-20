@@ -140,11 +140,11 @@ export class AppComponent {
     LivePaymentsForPatron: false,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
-    SyncTransactionData: "1",
-    SyncStudentDetail: "5",
-    SyncTerminalHeartbeat: "30",
-    SyncAccountDetail: "2",
-    SyncTransactionStatus: "3"
+    SyncTransactionData: SettingService.getSettingValue("TRASYNINT") || "1", 
+    SyncStudentDetail: SettingService.getSettingValue("PATSYNINT") || "5",
+    SyncTerminalHeartbeat: SettingService.getSettingValue("TERHBTINT") || "30",
+    SyncAccountDetail: SettingService.getSettingValue("PREVACINT") || "2",
+    SyncTransactionStatus: SettingService.getSettingValue("TRASTAINT") || "5"
   }
 
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
@@ -198,7 +198,8 @@ export class AppComponent {
       AppStateService.set('performanceOptions', this.performanceOptions);
     }
     else {
-      this.performanceOptions = (AppStateService.get('performanceOptions'));
+      //this.performanceOptions = (AppStateService.get('performanceOptions'));
+      AppStateService.set('performanceOptions', this.performanceOptions);
     }
 
     if (!utilService.isDevEnv()) {
@@ -795,7 +796,7 @@ export class AppComponent {
 
         this.syncHeartbeatInterval = setInterval(
           this.checkHeartbeat.bind(this),
-          this.performanceOptions.SyncTerminalHeartbeat != null && this.performanceOptions.SyncTerminalHeartbeat != undefined ? 1000 * 60 * Number(this.performanceOptions.SyncTerminalHeartbeat) : 1000 * 40
+          this.performanceOptions.SyncTerminalHeartbeat != null && this.performanceOptions.SyncTerminalHeartbeat != undefined ? 1000 * 60 * Number(this.performanceOptions.SyncTerminalHeartbeat) : 1000 * 120
         );
       })
       .catch(function (e) {

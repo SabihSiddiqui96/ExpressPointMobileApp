@@ -15,6 +15,7 @@ import { HttpService } from "./HTTP/http.service";
 import { UtilService } from "./util.service";
 import * as _ from "lodash";
 import { desktopCapturer } from "electron";
+import { PersonImageDBService } from "./Database/person-image-db.service";
 
 
 
@@ -26,7 +27,7 @@ export class SetupDbService {
 
     constructor(private generalDB: GeneralDBService, private dynamicMenusDB: DynamicMenusDBService,
         private staticMenusDB: StaticMenusDBService, private personDB: PersonDBService,
-        private usersDb: UsersDBService,
+        private usersDb: UsersDBService, private personImageDB: PersonImageDBService,
         private pouchDBService: PouchDBService, private popoverCtrl: PopoverController,
         private http: HttpService, private utilService: UtilService) {
 
@@ -110,17 +111,27 @@ export class SetupDbService {
                  * Fix for bug 126524 : Deleting Person information- > get person Information on each login
                  */
                 this.ResetDB(false).then(() => {
-                    if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) != 0) {
-                        setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
-                        this.dynamicMenusDB.SetupDynamicMenusDB(), this.personDB.SetupPersonDB()], this.usersDb.SetupUsersDB();
+                    if (DYNMENU === 1 && parseInt(SettingService.getSiteSettingValue('DYNSITE')) !== 0) {
+                        setupPromises = [
+                            this.generalDB.SetupGeneralDB(),
+                            this.staticMenusDB.SetupStaticMenusDB(),
+                            this.dynamicMenusDB.SetupDynamicMenusDB(),
+                            this.personDB.SetupPersonDB().then(() => this.personImageDB.SetupPersonImageDB()) // Ensure sequential execution
+                        ];
                         this.syncList['DynamicMenus'] = 'InProgress';
                         this.syncList['Students'] = 'InProgress';
-                        resolve(setupPromises);
+                        this.syncList['StudentImages'] = 'InProgress';
+                        resolve(Promise.all(setupPromises)); // Ensure all promises complete
                     } else {
-                        setupPromises = [this.generalDB.SetupGeneralDB(), this.staticMenusDB.SetupStaticMenusDB(),
-                        this.personDB.SetupPersonDB(), this.usersDb.SetupUsersDB()];
+                        setupPromises = [
+                            this.generalDB.SetupGeneralDB(),
+                            this.staticMenusDB.SetupStaticMenusDB(),
+                            this.personDB.SetupPersonDB().then(() => this.personImageDB.SetupPersonImageDB()), // Ensure sequential execution
+                            this.usersDb.SetupUsersDB()
+                        ];
                         this.syncList['Students'] = 'InProgress';
-                        resolve(setupPromises);
+                        this.syncList['StudentImages'] = 'InProgress';
+                        resolve(Promise.all(setupPromises)); // Ensure all promises complete
                     }
                 });
             }

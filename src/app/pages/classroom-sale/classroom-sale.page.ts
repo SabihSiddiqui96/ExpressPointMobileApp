@@ -26,6 +26,7 @@ import { TransactionTypes } from '../../services/enums/transaction-types';
 import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.service';
 import { LocalTimerService } from '../../services/local-timer.service';
 import { StudentWiseAlacarteComponent } from './student-alacarte/student-wise-alacart.component';
+import { LookupService } from '../../services/lookup.service';
 
 @Component({
     selector: 'app-classroom-sale',
@@ -184,6 +185,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         public transactionService: TransactionService,
         public router: Router,
         public appStateService: AppStateService,
+        public lookUpService: LookupService,    
         public pouchDBService: PouchDBService, public settingService: SettingService,
         public pouchQuery: PouchQueriesService, public signalRService: SignalRService) {
         super(_nav, popoverCtrl, zone, http, event, network, utilService, modalCtrl, alertCtrl, router, appStateService,
@@ -686,6 +688,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'FirstName': doc.FirstName,
                             'PreferredName': doc.PreferredName,
                             'Image': null, // TO DO
+                            'HasImage': doc.HasImage,
                             'Price': 0,
                             'ShowAlert': this.showAllergiesAndNotes(doc),
                             'IsSaleTaxable': doc.IsSaleTaxable,
@@ -769,6 +772,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                             'FirstName': doc.FirstName,
                             'PreferredName': doc.PreferredName,
                             'Image': null, // TO DO
+                            'HasImage': doc.HasImage,
                             'Price': 0,
                             'ShowAlert': this.showAllergiesAndNotes(doc),
                             'IsSaleTaxable': doc.IsSaleTaxable,
@@ -860,6 +864,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                                 'FirstName': doc.FirstName,
                                 'PreferredName': doc.PreferredName,
                                 'Image': null, // TO DO
+                                'HasImage': doc.HasImage,
                                 'Price': 0,
                                 'ShowAlert': this.showAllergiesAndNotes(doc),
                                 'IsSaleTaxable': doc.IsSaleTaxable,
@@ -921,17 +926,23 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
     public getStudentsImage(students) {
         return new Promise((resolve) => {
             if (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true)) {
-                students.map(student => {
-                    this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                        if (isNetworkOnline && student.PersonId) { // this.network.type != 'none' || navigator.onLine
-                            this.http.GetPersonImage(student.PersonId).subscribe(data => {
-                                if (data != null) {
-                                    student.Image = data;
-                                }
-                            }, e => { console.log(e); }, () => {
-                            });
+                students.map(async student => {
+                    try {
+                        if (student.HasImage == 1) {
+                            student.Image = null;
+                            const image = await this.lookUpService.getPersonImage(student.PersonId);
+                            if (image) {
+                                student.Image = image;
+                            } else {
+                                student.Image = null;
+                            }
+                        } else {
+                            student.Image = null;
                         }
-                    });
+                    } catch (err) {
+                        console.log('Error in getting image ' + err);
+                        student.Image = null;
+                    }                    
                 });
             }
             resolve(students);

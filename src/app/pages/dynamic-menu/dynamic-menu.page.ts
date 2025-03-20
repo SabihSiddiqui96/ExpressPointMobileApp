@@ -1117,37 +1117,28 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 console.error(err);  // Handle errors
             });
 
-        this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-            if (this.utilService.isAppOnline) { // this.network.type != 'none' || navigator.onLine
-                if (this.patronId) {
-                    this.lookUpService.getPersonImage(this.patronId).then((data) => {
-                        if (data) {
-                            this.patronImageLoad(data);                            
-                        } else {
-                            this.isPatronHavingImage = false;
-                            this.largeImageToShow = false;
-                            this.largeImageIsShowing = false;
-                            setTimeout(() => {
-                                this.patronImageLoad();
-                            }, 100);                            
-                        }
-                    }, e => {
-                        console.log(e);
+            if (this.patronId && this.patronDetails.HasImage == 1) {
+                this.lookUpService.getPersonImage(this.patronId).then((data) => {
+                    if (data) {
+                        this.patronImageLoad(data);                            
+                    } else {
                         this.isPatronHavingImage = false;
                         this.largeImageToShow = false;
                         this.largeImageIsShowing = false;
                         setTimeout(() => {
                             this.patronImageLoad();
-                        }, 100);
-                    }, () => {
-                    });
-                } else {
+                        }, 100);                            
+                    }
+                }, e => {
+                    console.log(e);
                     this.isPatronHavingImage = false;
                     this.largeImageToShow = false;
                     this.largeImageIsShowing = false;
-                }
-            }
-            else {
+                    setTimeout(() => {
+                        this.patronImageLoad();
+                    }, 100);
+                });
+            } else {
                 this.isPatronHavingImage = false;
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
@@ -1159,8 +1150,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (inputDirId) {
                 this.patronDetails.InputDirection = inputDirId;
                 sessionStorage.removeItem(this.patronDetails.Identifier);
-            }            
-        });
+            } 
 
         // **********!!!!TO DO: Menu Item Restrictions with Dynamic Menus!!!!!!!!!******** */
 
@@ -7206,7 +7196,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             });
         
         this.patronImage = null;
-        if (this.utilService.isAppOnline) {
+        if (this.selectedAccountDetails.HasImage == 1) {
             this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
                 if (image) {
                     this.patronImage = image;

@@ -5,6 +5,7 @@ import {
   PopoverController,
   NavController,
   AlertController,
+  ModalController,
 } from "@ionic/angular";
 import { UserDetailsPopupPage } from "../../pages/user-details-popup/user-details-popup.page";
 import { AllPopupPage } from "../../pages/all-popup/all-popup.page";
@@ -20,11 +21,13 @@ import { SessionTimeoutService } from "../../services/session-timeout.service";
 import { SettingService } from "../../services/setting.service";
 import { Events } from "../../services/events.service";
 import * as _ from "lodash";
-import { NavigationExtras, Router } from "@angular/router";
+import { ActivatedRoute, NavigationExtras, Router } from "@angular/router";
 import { LoadingService } from "../../services/loading.service";
 import { LocalTimerService } from "../../services/local-timer.service";
 import { SessionType } from "../../services/enums/session-types";
 import { GeneralDBService } from "../../services/Database/general-db.service";
+import { SyncService } from "../../services/syncService.service";
+import { ClosingStatusPopupPageComponent } from "../closing-status-popup/closing-status-popup.page";
 
 @Component({
   selector: "app-service-selection",
@@ -48,16 +51,17 @@ export class ServiceSelectionPage implements OnInit {
   public ORDMEALS: boolean;
   public canOpenPOS: boolean;
   public canSumSale: boolean;
-
+  public isFromCloseService: boolean = false;
   public hidePaymentOptions: boolean = false;
   public loadingID;
 
   constructor(
     private popoverCtrl: PopoverController,
+    private modalController: ModalController,
     private _nav: NavController,
     public utilService: UtilService,
     public http: HttpService,
-
+    public syncService: SyncService,  
     public event: Events,
     public loading: LoadingController,
     public lookUpService: LookupService,
@@ -67,6 +71,7 @@ export class ServiceSelectionPage implements OnInit {
     public alertCtrl: AlertController,
     public zone: NgZone,
     public router: Router,
+    private route: ActivatedRoute,
     public appStateService: AppStateService,
     public settingService: SettingService,
     public pouchQuery: PouchQueriesService,
@@ -205,6 +210,24 @@ export class ServiceSelectionPage implements OnInit {
   }
 
   async ngOnInit() {
+
+    this.route.queryParams
+      .subscribe(params => {
+        this.isFromCloseService = params.isFromCloseService;
+        if (this.isFromCloseService) {
+          this.modalController.create({
+            component: ClosingStatusPopupPageComponent, componentProps: {
+              homeref: this
+            },
+            backdropDismiss: false,
+            cssClass: 'close-status-modal'
+          }).then(async (res) => {
+            await res.present();
+          });
+        }
+      }
+    );
+    
     const IGTIMZONE = parseInt(SettingService.getSiteSettingValue('IGTIMZONE'));
     const dst = parseInt(SettingService.getSettingValue('DAYLGTSATE'));
     const diffThreshold = parseInt(SettingService.getSettingValue('WRNTMDFSAM'));

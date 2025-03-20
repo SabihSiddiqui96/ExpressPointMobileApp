@@ -1076,7 +1076,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             });
 
         
-        if (this.utilService.isAppOnline && (performanceOptions == undefined || performanceOptions.LoadStudentImages == true)) {
+        if (this.patronDetails.HasImage == 1 && (performanceOptions == undefined || performanceOptions.LoadStudentImages == true)) {
             this.lookUpService.getPersonImage(this.patronDetails.PersonId).then((image) => {
                 if (image) {
                     this.patronImageLoad(image);
@@ -4395,7 +4395,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 // Step 2: Check for live balance payments after fetching unprocessed payments                
                 if (this.utilService.isAppOnline &&
-                    (performanceOptions && performanceOptions.LivePaymentsForPatron)) {
+                    (!performanceOptions || (performanceOptions && performanceOptions.LivePaymentsForPatron))) {
                     if (this.selectedAccountDetails.AccountId) {
                         return this.http.GetPersonTodaysPayments(this.selectedAccountDetails.AccountId).toPromise(); // Return the promise to chain
                     }
@@ -4426,7 +4426,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
             });
         
         this.patronImage = null;
-        if (this.utilService.isAppOnline && (performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LoadStudentImages == true))) {
+        if (this.selectedAccountDetails.HasImage == 1 && ((performanceOptions == undefined || (performanceOptions != undefined && performanceOptions.LoadStudentImages == true)))) {
             this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
                 if (image) {
                     this.patronImage = image;

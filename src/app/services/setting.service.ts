@@ -20,16 +20,17 @@ export class SettingService {
 
   // }
   public static getSettingValue(settingCode) {
-    let settings = AppStateService.get('Settings');
-    settings = JSON.parse(settings);
-    const setting = settings.filter(s => {
-      return s.SettingCode.trim().toUpperCase() === settingCode.trim().toUpperCase();
-    });
-    if (setting.length > 0) {
-      return setting[0].SettingValue;
-    } else {
-      const defaultValue = this.getDefaultSettingValue(settingCode);
-      return defaultValue;
+    try {
+      const settings = JSON.parse(AppStateService.get('Settings') || '[]');
+
+      const setting = settings.find(s =>
+        s.SettingCode?.trim().toUpperCase() === settingCode?.trim().toUpperCase()
+      );
+
+      return setting?.SettingValue ?? this.getDefaultSettingValue(settingCode);
+    } catch (error) {
+      console.error("Error parsing settings:", error);
+      return this.getDefaultSettingValue(settingCode);
     }
   }
 

@@ -321,7 +321,8 @@ export class TransactionService {
             }
         });
     }
-    public getAllTransactionswithStatus() {
+
+    public getAllTransactionswithStatus_old() {
         return new Promise((resolve) => {
             const stats = { 'sent': 0, 'pending': 0 };
             this.getAllTransactions().then(() => {
@@ -368,6 +369,78 @@ export class TransactionService {
         });
     }
 
+    public getAllTransactionswithStatus() {
+        return new Promise((resolve) => {
+            const stats = { sent: 0, pending: 0 };
+
+            this.getAllTransactions().then(() => {
+                if (this.transactions.length > 0) {
+                    // Filter transactions that need status check
+                    const transactionsToCheck = this.transactions.filter(t =>
+                        t.saleData.IsSynced === true &&
+                        (t.saleData.IsProcessed === null || t.saleData.IsProcessed === false)
+                    );
+
+                    // Split transactions into batches of 30
+                    const transactionBatches = [];
+                    for (let i = 0; i < transactionsToCheck.length; i += 30) {
+                        transactionBatches.push(transactionsToCheck.slice(i, i + 30));
+                    }
+
+                    // Process each batch sequentially
+                    const processBatch = (batchIndex: number) => {
+                        if (batchIndex >= transactionBatches.length) {
+                            // After processing all batches, update stats and resolve promise
+                            AppStateService.set('TransactionStats', JSON.stringify(stats));
+                            resolve(null);
+                            return;
+                        }
+
+                        const batch = transactionBatches[batchIndex];
+                        const transactionIds = batch.map(t => ({ DeviceTransactionId: t.saleData.DeviceTransactionId }));
+
+                        this.getTransactionStatusMultiple(transactionIds).then((dataList: any) => {
+                            if (dataList) {
+                                dataList.forEach((data) => {
+                                    const matchingTransaction = this.transactions.find(t => t.saleData.DeviceTransactionId === data.DeviceTransactionId);
+                                    if (matchingTransaction) {
+                                        if (data['IsProcessed'] === undefined || data['IsProcessed'] == null) {
+                                            matchingTransaction.saleData.IsSynced = false;
+                                            matchingTransaction.saleData.IsSent = false;
+                                            matchingTransaction.saleData.IsProcessed = false;
+                                        } else {
+                                            matchingTransaction.saleData.IsProcessed = data['IsProcessed'];
+                                            matchingTransaction.saleData.IsSynced = data['IsSent'];
+                                            matchingTransaction.saleData.IsSent = data['IsSent'];
+                                        }
+
+                                        // **Update transaction stats**
+                                        if (matchingTransaction.saleData.IsSynced === true) {
+                                            stats.sent += 1;
+                                        } else {
+                                            stats.pending += 1;
+                                        }
+
+                                        PouchDBService.UpsertSingleDoc(matchingTransaction, EXP_TRANSACTIONS).then(() => { });
+                                    }
+                                });
+                            }
+
+                            // Process the next batch
+                            processBatch(batchIndex + 1);
+                        });
+                    };
+
+                    // Start processing batches
+                    processBatch(0);
+                } else {
+                    AppStateService.set('TransactionStats', JSON.stringify(stats));
+                    resolve(null);
+                }
+            });
+        });
+    }
+
     public getTransactionStatus(tansactionId) {
         return new Promise((resolve) => {
 
@@ -385,6 +458,21 @@ export class TransactionService {
         });
 
     }
+
+    public getTransactionStatusMultiple(tansactionIds) {
+        return new Promise((resolve) => {
+            this.http.CheckTransactionStatusMultiple(tansactionIds).
+                subscribe
+                (
+                    (data) => {
+                        resolve(data);
+                    },
+                    error => {
+                        console.log(error);
+                        resolve(null);
+                    });
+        });
+    }  
 
 
     public forcePostTransactions() {

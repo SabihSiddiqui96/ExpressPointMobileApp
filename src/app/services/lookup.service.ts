@@ -19,6 +19,7 @@ import { LogType } from './enums/log-type';
 import { EventType } from './enums/event-type';
 import { PersonService } from './person.service';
 import { Router } from '@angular/router';
+import { PersonImageService } from './person-image.service';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -49,6 +50,7 @@ export class LookupService {
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
         public router: Router,
+        public personImageService: PersonImageService,
         public pouchQryService: PouchQueriesService,
         private electronService: ElectronService, private personService: PersonService) {
 
@@ -835,29 +837,62 @@ export class LookupService {
         });
     }
 
-    public getPersonImage(personId): any {
-        // tslint:disable-next-line:no-shadowed-variable
-        return new Promise((resolve, reject) => {
-            let performanceOptions = AppStateService.get('performanceOptions');
-            if (this.utilService.isAppOnline && (performanceOptions != undefined && performanceOptions.LoadStudentImages == false)) {
-                resolve(null);
-            }
-            this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
-                    if (personId) {
-                        this.http.GetPersonImage(personId).subscribe(data => {
-
-                            resolve(data);
-
-                        }, e => { console.log(e); }, () => {
-                            reject(null);
-                        });
-                    }
-                } else {
-                    resolve(null);
-                }
-            });
+    private convertToBase64(imageData: Uint8Array): Promise<string> {
+        return new Promise((resolve) => {
+            const blob = new Blob([imageData], { type: 'image/jpeg' });
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
         });
+    }
+
+    private convertBase64ToBlob(base64: string, contentType: string) {
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: contentType });
+    }
+
+    public async getPersonImage(personId): Promise<string | null> {
+        const performanceOptions = AppStateService.get('performanceOptions');
+
+        // If online but performance options disable image loading, resolve null
+        if (this.utilService.isAppOnline && performanceOptions?.LoadStudentImages === false) {
+            return null;
+        }
+
+        if (this.utilService.isElectronApp()) {
+            try {
+                // Retrieve the person image from PouchDB first
+                let personImageData = await this.personImageService.getImage(personId);
+
+                // Ensure we got a valid response
+                if (personImageData && personImageData.personId === personId && personImageData.image) {
+                    return personImageData.image.startsWith("data:image/jpg;base64,")
+                        ? personImageData.image
+                        : `data:image/jpg;base64,${personImageData.image}`;
+                }
+            } catch (error) {
+                console.error("Error fetching person image from PouchDB:", error);
+            }
+        }
+
+        // If not found in PouchDB, fetch from the server
+        try {
+            const isNetworkOnline = await this.utilService.isNetworkOnline();
+            if (isNetworkOnline && personId) {
+                return await this.http.GetPersonImage(personId).toPromise();
+            }
+        } catch (error) {
+            console.error("Error checking network status:", error);
+        }
+
+        return null;
     }
 
     /**

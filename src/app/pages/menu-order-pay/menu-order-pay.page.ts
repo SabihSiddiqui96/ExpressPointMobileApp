@@ -1635,7 +1635,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.hideBalSetting = parseInt(SettingService.getSettingValue('hidebal'));
 
         this.patronImage = null;
-        if (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true)) {
+        if (this.accountDetails.HasImage == 1 && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
             this.lookUpService.getPersonImage(this.accountDetails.PersonId).then((image) => {
                 if (image) {
                     this.patronImage = image;

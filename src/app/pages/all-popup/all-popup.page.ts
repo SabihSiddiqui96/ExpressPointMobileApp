@@ -23,6 +23,7 @@ import { Events } from "../../services/events.service";
 import { Router } from "@angular/router";
 import { IonDigitKeyboardOptions } from "../../../components/ion-digit-keyboard/interfaces/ion-digit-keyboard.interface";
 import { SettingService } from '../../services/setting.service';
+import { LookupService } from "../../services/lookup.service";
 @Component({
     selector: "app-all-popup",
     templateUrl: "./all-popup.page.html",
@@ -398,6 +399,7 @@ export class AllPopupPage implements OnInit {
         public router: Router,
         public popoverCtrl: PopoverController,
         public appStateService: AppStateService,
+        public lookUpService: LookupService,
         public pouchDBService: PouchDBService
     ) {
         this.isElectronApp = this.utilService.isElectronApp();
@@ -606,7 +608,8 @@ export class AllPopupPage implements OnInit {
                         FirstName: item["FirstName"],
                         LastName: item["LastName"],
                         PreferredName: item["PreferredName"],
-                        PersonName: item["PersonName"]
+                        PersonName: item["PersonName"],
+                        HasImage: item["HasImage"]
                     });
                 } else {
                     newArray.push({
@@ -623,7 +626,8 @@ export class AllPopupPage implements OnInit {
                         FirstName: item["FirstName"],
                         LastName: item["LastName"],
                         PreferredName: item["PreferredName"],
-                        PersonName: item["PersonName"]
+                        PersonName: item["PersonName"],
+                        HasImage: item["HasImage"]
                     });
                 }
             } else {
@@ -643,7 +647,8 @@ export class AllPopupPage implements OnInit {
                     FirstName: item["FirstName"],
                     LastName: item["LastName"],
                     PreferredName: item["PreferredName"],
-                    PersonName: item["PersonName"]
+                    PersonName: item["PersonName"],
+                    HasImage: item["HasImage"]
                 });
             }
         }
@@ -766,30 +771,24 @@ export class AllPopupPage implements OnInit {
         // let reimbursableItems = [];
         if (this.isPatronType && firstTime) {
             this.zone.run(() => {
-                this.rawList.map((student) => {
-                    if (student.Image === null && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
-                        this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                            if (isNetworkOnline) {
-                                if (student.value) {
-                                    this.http.GetPersonImage(student.value).subscribe(
-                                        (data) => {
-                                            if (data != null) {
-                                                student.Image = data;
-                                                const objIndex = this.popUpData.findIndex(
-                                                    (obj) => obj.PersonId === student.value
-                                                );
-                                                this.popUpData[objIndex].Image = data;
-                                                this.cd.detectChanges();
-                                            }
-                                        },
-                                        (e) => {
-                                            console.log(e);
-                                        },
-                                        () => { }
-                                    );
-                                }
+                this.rawList.map(async (student) => {
+                    if (student.HasImage == 1 && student.Image === null && (this.performanceOptions == null || this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
+                        try {
+                            const image = await this.lookUpService.getPersonImage(student.value);
+                            if (image) {
+                                student.Image = image;
+                                const objIndex = this.popUpData.findIndex(
+                                    (obj) => obj.PersonId === student.value
+                                );
+                                this.popUpData[objIndex].Image = image;
+                                this.cd.detectChanges();
+                            } else {
+                                student.Image = null;
                             }
-                        });
+                        } catch (err) {
+                            console.log('Error in getting image ' + err);
+                            student.Image = null;
+                        }
                     }
                 });
             });
