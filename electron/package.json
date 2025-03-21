@@ -58,7 +58,7 @@
     "net": "^1.0.2",
     "os": "^0.1.1",
     "source-map-support": "^0.5.19",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "5.0.2",
     "systeminformation": "^4.23.1"
   },
   "devDependencies": {
