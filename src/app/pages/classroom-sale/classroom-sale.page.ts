@@ -27,6 +27,7 @@ import { SignalRService, PersonSaledetailsModel } from '../../services/SignalR.s
 import { LocalTimerService } from '../../services/local-timer.service';
 import { StudentWiseAlacarteComponent } from './student-alacarte/student-wise-alacart.component';
 import { LookupService } from '../../services/lookup.service';
+import { MathService } from '../../services/math.service';
 
 @Component({
     selector: 'app-classroom-sale',
@@ -184,6 +185,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         private menuGridService: MenugridService,
         public transactionService: TransactionService,
         public router: Router,
+        private mathService: MathService,
         public appStateService: AppStateService,
         public lookUpService: LookupService,    
         public pouchDBService: PouchDBService, public settingService: SettingService,
@@ -2331,7 +2333,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
 
         studentAlaCarte['alaCarteItems'] = modifiedItems;
         studentAlaCarte['alaCartItemCount'] = modifiedItems.length;
-        studentAlaCarte['alaCartTotalPrice'] = totalPrice;
+        studentAlaCarte['alaCartTotalPrice'] = this.mathService.convertToNumber(totalPrice);
         studentAlaCarte['alaCartTotalTax'] = this.menuGridService.calculateTax(this.alaCartItems, this.patronDetails.IsSaleTaxable);
         studentAlaCarte['alaCartTotalWithTax'] = Number(studentAlaCarte['alaCartTotalPrice']) + Number(studentAlaCarte['alaCartTotalTax']);
 
@@ -2666,7 +2668,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
                     alaItems.map(a => {
                         previousALCAmt += a.Price;
                     });
-                    pDetails.ALCDaily = previousALCAmt; // Daily ALC Calculated value
+                    pDetails.ALCDaily = this.mathService.convertToNumber(previousALCAmt); // Daily ALC Calculated value
                 }
 
             } else {
@@ -2742,13 +2744,13 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         if (this.patronDetails.DailyALCRestriction || this.patronDetails.MonthlyALCRestriction || this.patronDetails.WeeklyALCRestriction) {
             const amounts = [];
             if (this.patronDetails.DailyALCRestriction != null) {
-                amounts.push(this.patronDetails.DailyALCRestriction - this.patronDetails.ALCDaily);
+                amounts.push(this.mathService.subtract(this.patronDetails.DailyALCRestriction, this.patronDetails.ALCDaily));
             }
             if (this.patronDetails.WeeklyALCRestriction != null) {
-                amounts.push(this.patronDetails.WeeklyALCRestriction - aLCWeekly);
+                amounts.push(this.mathService.subtract(this.patronDetails.WeeklyALCRestriction, aLCWeekly));
             }
             if (this.patronDetails.MonthlyALCRestriction != null) {
-                amounts.push(this.patronDetails.MonthlyALCRestriction - aLCMonthly);
+                amounts.push(this.mathService.subtract(this.patronDetails.MonthlyALCRestriction, aLCMonthly));
             }
 
             this.patronDetails.AvailableAmountForALCPurchases = _.min(amounts);
