@@ -10,6 +10,7 @@ import { EventType } from './enums/event-type';
 import { LogType } from './enums/log-type';
 import { LogsDBService } from './Database/logs-db.service';
 import { Router } from '@angular/router';
+import { MathService } from './math.service';
 
 
 @Injectable({
@@ -57,6 +58,7 @@ export class RestrictionsService {
     constructor(
         private popupMessageService: PopupMessageService,
         private logDBService: LogsDBService,
+        private mathService: MathService,
         public router: Router) {
         
         if (AppStateService.get('SelectedSite')) {
@@ -148,7 +150,7 @@ export class RestrictionsService {
             restriction.Description = PopupMessageCode.E12400;
             return restriction;
         }
-        if ((this.alacarteTotal + this.menuItemPrice) > student['AvailableAmountForAlaCartePurchases'] &&
+        if (this.mathService.add(this.alacarteTotal, this.menuItemPrice) > student['AvailableAmountForAlaCartePurchases'] &&
             student['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
             restriction.ChargeRestriction = true;
             // restriction.Description = 'A La Carte dollar amount restriction has been reached for this patron.';
@@ -178,7 +180,7 @@ export class RestrictionsService {
 
         }
 
-        if ((student.Balance - (this.alacarteTotal + this.menuItemPrice)) < 0) {
+        if (this.mathService.subtract(student.Balance, this.mathService.add(this.alacarteTotal, this.menuItemPrice)) < 0) {
             const verifiedResult = this.checkChargeLimits(student, restriction);
             return verifiedResult;
         } else {
@@ -198,7 +200,7 @@ export class RestrictionsService {
         // this.Setting_ActionWhenBelowChargeLimit = 1;
         // 1=user decsion, 2=sale with some cash, 3=no sale
 
-        const projectedBalance = accountBalance - (itemPrice + totalALCAmount);
+        const projectedBalance = this.mathService.subtract(accountBalance, this.mathService.add(itemPrice, totalALCAmount));
 
         creditLimit = -creditLimit;
 
@@ -262,7 +264,7 @@ export class RestrictionsService {
 
         const saleHasOnlyAlaCarteItems = (this.mealCount === 0 && this.alacarteCount >= 0) ? true : false;
 
-        const totalSaleALaCarteItems = itemPrice + totalALCAmount; // this.alacarte_Total;
+        const totalSaleALaCarteItems = this.mathService.add(itemPrice, totalALCAmount); // this.alacarte_Total;
         if (saleHasOnlyOneReimbursableMeal ||
             totalSaleALaCarteItems <= accountBalance || // need to cross check
             !this.settingChargeReimbursableMealsOnly) {
@@ -439,7 +441,7 @@ export class RestrictionsService {
             }
         }
 
-        if (this.patronDetails.isSpecialAccount || (this.patronDetails.Balance - this.orderData.accountBalance) < 0) {
+        if (this.patronDetails.isSpecialAccount || this.mathService.subtract(this.patronDetails.Balance, this.orderData.accountBalance) < 0) {
 
             if (this.patronDetails.isSpecialAccount) {
 
@@ -577,7 +579,7 @@ export class RestrictionsService {
                 } else if (this.settingActionWhenBelowChargeLimit === 1) {
 
                     if ((saleHasOnlyOneReimbursableMeal && this.settingChargeReimbursableMealsOnly && reimProjBal < creditLimit) ||
-                        saleTotalOfJustALaCarteItems <= (accountBalance + paymentAmount) ||
+                        saleTotalOfJustALaCarteItems <= this.mathService.add(accountBalance, paymentAmount) ||
                          // Previously, there were no conditions when setting "settingChargeReimbursableMealsOnly" false; 
                         //now there are conditions to check both types.
                         (
@@ -677,7 +679,7 @@ export class RestrictionsService {
         const saleTotalOfJustALaCarteItems = this.alacarteTotal;
 
         if (saleHasOnlyOneReimbursableMeal ||
-            saleTotalOfJustALaCarteItems <= (accBal + payAmnt) ||
+            saleTotalOfJustALaCarteItems <= this.mathService.add(accBal, payAmnt) ||
             !this.settingChargeReimbursableMealsOnly) {
             if (promptUser) {
                 this.showPrompt = true;
@@ -770,9 +772,9 @@ export class RestrictionsService {
             alaItems.map(item => {
                 alacarteTotal += item.Price;
             });
-            return alacarteTotal;
+            return this.mathService.convertToNumber(alacarteTotal);
         } else {
-            return alacarteTotal;
+            return this.mathService.convertToNumber(alacarteTotal);
         }
 
     }
