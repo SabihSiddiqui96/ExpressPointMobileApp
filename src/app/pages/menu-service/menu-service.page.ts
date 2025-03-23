@@ -58,6 +58,7 @@ import { CCTransactionStatus, CreditCardTransactionService } from '../../service
 import { PauseOptions } from '../../services/Database/autoserve-pause-options.interface';
 import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 import { UnidentifiedPatronPopupPage } from './components/unidentified-patron-popup/unidentified-patron-popup.page';
+import { MathService } from '../../services/math.service';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -362,6 +363,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public renderer2: Renderer2, public router: Router, public appStateService: AppStateService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public pouchQuery: PouchQueriesService,
         public logDBService: LogsDBService,
+        private mathService: MathService,
         private cdr: ChangeDetectorRef,
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
@@ -603,7 +605,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
                 }
             }
-            this.orderData.subTotal = this.orderData.subTotal - userEventData.orderItemData.IniTotalPrice;
+            this.orderData.subTotal = this.mathService.subtract(this.orderData.subTotal, userEventData.orderItemData.IniTotalPrice);
 
             this.calculateTotals(userEventData.orderItemData.Price, true);
 
@@ -1357,7 +1359,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     alaItems.map(a => {
                         previousALCAmt += a.Price;
                     });
-                    this.patronDetails.ALCDaily = previousALCAmt; // Daily ALC Calculated value
+                    this.patronDetails.ALCDaily = this.mathService.convertToNumber(previousALCAmt); // Daily ALC Calculated value
                 }
                 // previousALCCount = alaItems.length;
                 if (this.patronDetails.NoOfAlaCarteAllowedForPerson != null) {
@@ -1525,18 +1527,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (this.patronDetails.DailyALCRestriction || this.patronDetails.MonthlyALCRestriction || this.patronDetails.WeeklyALCRestriction) {
             const amounts = [];
             if (this.patronDetails.DailyALCRestriction != null) {
-                amounts.push(this.patronDetails.DailyALCRestriction - this.patronDetails.ALCDaily);
+                amounts.push(this.mathService.subtract(this.patronDetails.DailyALCRestriction, this.patronDetails.ALCDaily));   
             }
             if (this.patronDetails.WeeklyALCRestriction != null) {
-                amounts.push(this.patronDetails.WeeklyALCRestriction - aLCWeekly);
+                amounts.push(this.mathService.subtract(this.patronDetails.WeeklyALCRestriction, aLCWeekly));
             }
             if (this.patronDetails.MonthlyALCRestriction != null) {
-                amounts.push(this.patronDetails.MonthlyALCRestriction - aLCMonthly);
+                amounts.push(this.mathService.subtract(this.patronDetails.MonthlyALCRestriction, aLCMonthly));
             }
 
             this.patronDetails.AvailableAmountForALCPurchases = _.min(amounts);
         }
     }
+
     public padding_left(str, char, num) {
         if (!str || !char || str.length >= num) {
             return str;
@@ -2028,7 +2031,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if ((isRestrictedItem !== -1 || isRestrictedCategory !== -1) &&
             !this.patronDetails.isSpecialAccount &&
             this.patronDetails.IsStudent) { // IsStudent Check
-            this.alacarteTotal = this.alacarteTotal - this.orderData.items[index]['Price'];
+            this.alacarteTotal = this.mathService.subtract(this.alacarteTotal, this.orderData.items[index]['Price']);
             this.restrictedAlacarteCount = this.restrictedAlacarteCount - this.orderData.items[index].Quantity;
         }
     }
@@ -2060,7 +2063,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         item['isSecondMeal']) {
                         this.restrictedAlacarteCount = this.restrictedAlacarteCount > 0 ? (item['Quantity'] > 1) ? this.restrictedAlacarteCount - item['Quantity'] : this.restrictedAlacarteCount - 1 : 0;
                     }
-                    itemPrice = itemPrice + this.orderData.items[i]['Price'];
+                    itemPrice = this.mathService.add(itemPrice, this.orderData.items[i]['Price']);
                     this.mealCount = 0;
                     // this.itemCount -= this.orderData.items[i].Quantity; // itemCount
                 } else {
@@ -2281,7 +2284,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     if ((isRestrictedItem != -1 || isRestrictedCategory != -1) &&
                         this.patronDetails.isSpecialAccount === false &&
                         isStudent === true) { // IsStudent Check
-                        if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
+                        if (this.mathService.add(this.alacarteTotal, currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                             this.patronDetails['AvailableAmountForALCPurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
                             this.alacarteCount = this.alacarteCount - 1;
@@ -2296,7 +2299,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             }
                             return;
                         } else {
-                            this.alacarteTotal = this.alacarteTotal + currPrice;
+                            this.alacarteTotal = this.mathService.add(this.alacarteTotal, currPrice);
                         }
                         /**
                          * As Ala Carte Restrictions are only to be applied on restricted ala carte items as per Ron
@@ -3862,7 +3865,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (this.patronDetails['Balance'] >= this.orderData.totalAmount) {
             return 0;
         } else if (this.patronDetails['Balance'] > 0 && this.patronDetails['Balance'] < this.orderData.totalAmount) {
-            return (this.orderData.totalAmount - this.patronDetails['Balance']);
+            return (this.mathService.subtract(this.orderData.totalAmount, this.patronDetails['Balance']));
         } else {
             return this.orderData.totalAmount;
         }
@@ -4160,7 +4163,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         if (!isitemAdded) {
             price = 0 - price;
         }
-        this.orderData.subTotal = this.orderData.subTotal + price;
+        this.orderData.subTotal = this.mathService.add(this.orderData.subTotal, price);
         this.orderData.totalAmount = +Number(Number(Math.round((this.orderData.tax + this.orderData.subTotal) * 100) / 100).toFixed(2));
         this.orderData.accountBalance = this.setAmount();
         /////////////////////
@@ -4256,7 +4259,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         const isSpecialAccount = this.patronDetails.isSpecialAccount;
 
         if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
-            const projBal = this.selectedAccountDetails.Balance - this.orderData.totalAmount;
+            const projBal = this.mathService.subtract(this.selectedAccountDetails.Balance, this.orderData.totalAmount);
             if (itemLen > 0 && totAmount >= 0.00 && projBal >= 0) { // To enable Charge button when account is linked to adult
                 return false;
             } else {
@@ -5176,7 +5179,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 this.patronDetails.isSpecialAccount === false &&
                                 isStudent === true) { // IsStudent Check
                                 if (this.settingAutoPause.restrictions) {
-                                    if (((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
+                                    if ((this.mathService.add(this.alacarteTotal, currPrice) > this.patronDetails['AvailableAmountForALCPurchases'] &&
                                         this.patronDetails['AvailableAmountForALCPurchases'] != null) && this.ALACASREST) {
                                         this.restrictedAlacarteCount--;
                                         this.popupMessageService.showMessage(PopupMessageCode.E05429);
@@ -5191,7 +5194,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         resolve(false);
                                         return;
                                     } else {
-                                        this.alacarteTotal = this.alacarteTotal + currPrice;
+                                        this.alacarteTotal = this.mathService.add(this.alacarteTotal, currPrice);
                                     }
                                 }
                             }
