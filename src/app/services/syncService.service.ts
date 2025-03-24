@@ -8,6 +8,9 @@ import { GeneralDBService } from './Database/general-db.service';
 import { PersonDBService } from './Database/person-db.service';
 import { HttpService } from './HTTP/http.service';
 import { TransactionService } from './transaction.service';
+import { EXP_TRANSACTIONS, PouchDBService } from './pouch-db.service';
+import { ElectronService } from './electron.service';
+import { DeviceService } from './device.service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,6 +20,8 @@ export class SyncService {
     constructor(private generalDB: GeneralDBService,
         private pouchQuery: PouchQueriesService,
         private personDB: PersonDBService, private http: HttpService,
+        public electronService: ElectronService,
+        public deviceService: DeviceService,
         public transactionService: TransactionService, private utilService: UtilService) {       
     }
 
@@ -24,27 +29,32 @@ export class SyncService {
     private accountTimerSubscription: Subscription;
     private transactionStatusTimerSubscription: Subscription;
     private dataToServerTimerSubscription: Subscription;
+    private terminalSystemInfoSubscription: Subscription;
 
     private personInterval: number;
     private accountInterval: number;
     private transactionStatusInterval: number;
     private toServerInterval: number;
+    private terminalSystemInfoInterval: number;
 
     initializeTimers(
         personInterval: number,
         accountInterval: number,
         transactionStatusInterval: number,
-        toServerInterval: number
+        toServerInterval: number,
+        terminalSystemInfoInterval: number = 1000 * 60 * 15 // 15 minutes by default
     ) {
         this.personInterval = personInterval;
         this.accountInterval = accountInterval;
         this.transactionStatusInterval = transactionStatusInterval;
         this.toServerInterval = toServerInterval;
+        this.terminalSystemInfoInterval = terminalSystemInfoInterval;
 
         this.startPersonTimer();
         this.startAccountTimer();
         this.startTransactionStatusTimer();
         this.startDataToServerTimer();
+        this.startTerminalSystemInfoTimer();
     }
 
     updatePersonInterval(newInterval: number) {
@@ -109,6 +119,92 @@ export class SyncService {
         console.log("toServerInterval:" + this.toServerInterval);
     }
 
+    private startTerminalSystemInfoTimer() {
+        if (this.terminalSystemInfoSubscription) {
+            this.terminalSystemInfoSubscription.unsubscribe();
+        }
+        this.terminalSystemInfoSubscription = timer(10000, this.terminalSystemInfoInterval).subscribe(() => {
+            this.getTerminalSystemInfo();
+        });
+        console.log("terminalSystemInfoInterval:" + this.terminalSystemInfoInterval);
+    }
+
+    public async getTerminalSystemInfo(sessionSource = 0) {
+        const deviceInfo = AppStateService.get('DeviceInfo');
+        let sessionPointTerminalInfo = AppStateService.get('SessionPointTerminalInfo');
+        let isOpenSession = AppStateService.get('session_id') ? true : false;
+        if (isOpenSession == false && sessionSource == 0) {
+            return;
+        }
+
+        if (deviceInfo) {
+            const isAndroid = this.utilService.isPlatformAndroid();
+            const isIOS = this.utilService.isPlatformIos();
+            const terminalId = JSON.parse(deviceInfo).TerminalId;
+
+            if (terminalId > 0) {
+                if (sessionSource == -1) {
+                    AppStateService.set('SessionPointTerminalInfo', 0);
+                    sessionPointTerminalInfo = -1;
+                }
+                if (sessionSource == 0) {
+                    if (!sessionPointTerminalInfo) {
+                        AppStateService.set('SessionPointTerminalInfo', 1);
+                        sessionPointTerminalInfo = 1;
+                    }
+                    else {
+                        sessionPointTerminalInfo = Number(sessionPointTerminalInfo) + 1;
+                        AppStateService.set('SessionPointTerminalInfo', sessionPointTerminalInfo);
+                    }
+                }
+                else if (sessionSource == -2) {
+                    AppStateService.set('SessionPointTerminalInfo', 0);
+                    sessionPointTerminalInfo = -2;
+                }
+                let systemInfo: any;
+
+                // Retrieve system info based on platform
+                if (this.utilService.isElectronApp()) {
+                    systemInfo = await this.electronService.ipcRenderer.invoke('get-system-info');
+                } else if (isAndroid || isIOS) {
+                    try {
+                        systemInfo = await this.deviceService.getSystemInfo();
+                    } catch (error) {
+                        console.error('Error retrieving system info:', error);
+                        return; // Exit if there's an error
+                    }
+                }
+
+                // If systemInfo is obtained, proceed to save it
+                if (systemInfo) {
+                    const now = new Date(this.utilService.getSessionDate());
+                    const UTC = now.getTime();
+                    const localOffset = (-1) * now.getTimezoneOffset() * 60000;
+                    const currentTime = Math.round(new Date(UTC + localOffset).getTime());
+
+                    const doc = {
+                        _id: 'SystemInfo--' + this.utilService.generateUUID(),
+                        systemInfo: {
+                            ...systemInfo,
+                            terminalId: terminalId,
+                            isSynced: false,
+                            infoDate: currentTime,
+                            sessionPoint: sessionPointTerminalInfo
+                        }
+                    };
+
+                    // Save to PouchDB
+                    try {
+                        await PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS);
+                        console.log('System info saved successfully.');
+                    } catch (error) {
+                        console.error('Error saving system info:', error);
+                    }
+                }
+            }
+        }
+    }
+
     public transactionStatusFromServer() {
         this.utilService.isNetworkOnline().then((isNetworkOnline) => {
             if (isNetworkOnline) {
@@ -171,6 +267,7 @@ export class SyncService {
                                 this.pouchQuery.PostDeviceSettings().then(() => { });
                                 this.pouchQuery.PostSessionCheck().then(() => { });
                                 this.pouchQuery.PostSessionCard().then(() => { });
+                                this.pouchQuery.PostTerminalSystemInfo().then(() => { });
                                 this.pouchQuery.PostClassRoomSales().then(() => {
                                     this.pouchQuery.PostCloseSessionDocs().then(() => {
                                         this.pouchQuery.PostNoMealSaleInClassroomSale().then(() => {

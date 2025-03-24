@@ -759,7 +759,7 @@ export class PouchQueriesService {
 
   public static GetSessionChecks_PostNotSynced(utilityService: UtilService) {
     var current_Date = new Date(utilityService.getSessionDate());
-    var numberOfDayToSubtract = 14;
+    var numberOfDayToSubtract = 30;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionChecksGrThan = current_Date.getTime();
 
@@ -853,7 +853,7 @@ export class PouchQueriesService {
 
   public static GetSessionCards_PostNotSynced(utilityService: UtilService) {
     var current_Date = new Date(utilityService.getSessionDate());
-    var numberOfDayToSubtract = 14;
+    var numberOfDayToSubtract = 30;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionCardsGrThan = current_Date.getTime();
 
@@ -872,6 +872,48 @@ export class PouchQueriesService {
         // ,IsDeleted: {
         //   $eq: false
         // }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+  public static GetTerminalSystemInfo(utilityService: UtilService) {
+    var current_Date = new Date(utilityService.getSessionDate());
+    var numberOfDayToSubtract = 30;
+    current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
+    var systemInfoDateGrThan = current_Date.getTime();
+
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SystemInfo--",
+          $lt: "SystemInfo--\uffff"
+        },
+        'systemInfo.infoDate': {
+          $gt: systemInfoDateGrThan
+        },
+        'systemInfo.isSynced': {
+          $eq: false
+        }        
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+  public static GetAllTerminalSystemInfo_Synced() {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SystemInfo--",
+          $lt: "SystemInfo--\uffff"
+        },
+        'systemInfo.isSynced': {
+          $eq: true
+        }
       },
       include_docs: true
     });
@@ -1780,6 +1822,38 @@ export class PouchQueriesService {
     });
   }
 
+  public PostTerminalSystemInfo() {
+    console.log('--------------------Sending TerminalSystemInfo -------------------------');
+    return new Promise((resolve, reject) => {
+      PouchQueriesService.GetTerminalSystemInfo(this.utilService).then((res) => {
+        if (res.docs.length > 0) {
+          let infoRecords = res.docs.sort((a, b) => a.systemInfo.infoDate - b.systemInfo.infoDate);
+          infoRecords.map(doc => {
+            if (doc.systemInfo.isSynced === false) {
+              this.http.SaveTerminalSystemInfo(doc.systemInfo).subscribe(
+                data => {
+                  if (data) {
+                    console.log('Posted terminal system info');
+                    doc.systemInfo.isSynced = data;
+                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
+                  }
+                },
+                error => { console.log(error); },
+                () => {
+                  resolve(null);
+                }
+              );
+            }
+
+          });
+          resolve(null);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
 
   public PostClassRoomSales() {
     console.log('-----------------Checking for pending ClassRoomSales---------------------');
@@ -2219,6 +2293,17 @@ export class PouchQueriesService {
             if (terminalDocs && terminalDocs.length > 0) {
               terminalDocs.map(doc => {
                 if (doc.IsSynced === true) {
+                  EXP_TRANSACTIONS.remove(doc);
+                }
+              });
+            }
+          });
+        }).then(() => {
+          PouchQueriesService.GetAllTerminalSystemInfo_Synced().then((res) => {
+            const infoDocs = res.docs;
+            if (infoDocs && infoDocs.length > 0) {
+              infoDocs.map(doc => {
+                if (doc.systemInfo.isSynced === true) {
                   EXP_TRANSACTIONS.remove(doc);
                 }
               });

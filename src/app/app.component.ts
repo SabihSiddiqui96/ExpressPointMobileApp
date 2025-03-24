@@ -50,6 +50,7 @@ import { SetupDbService } from "./services/setup-db.service";
 import { LocalTimerService } from "./services/local-timer.service";
 import { SessionType } from "./services/enums/session-types";
 import { SyncService } from "./services/syncService.service";
+import { PersonImageService } from "./services/person-image.service";
 
 declare var Fullscreen: any;
 @Component({
@@ -185,6 +186,7 @@ export class AppComponent {
     public settingService: SettingService,
     public authService: AuthService,
     public timerService: LocalTimerService,
+    public personImageService: PersonImageService,
     public keyboard: Keyboard, public signalRService: SignalRService, public setupDbService: SetupDbService
   ) {
     if (AppStateService.get("login_details")) {
@@ -1240,6 +1242,7 @@ export class AppComponent {
                 this.pouchQuery.PostDeviceSettings().then(() => { });
                 this.pouchQuery.PostSessionCheck().then(() => { });
                 this.pouchQuery.PostSessionCard().then(() => { });
+                this.pouchQuery.PostTerminalSystemInfo().then(() => { });
                 this.pouchQuery.PostClassRoomSales().then(() => {
                   this.pouchQuery.PostCloseSessionDocs().then(() => {
                     this.pouchQuery.PostNoMealSaleInClassroomSale().then(() => {
@@ -1358,6 +1361,9 @@ export class AppComponent {
         return false;
       }
 
+    }
+    if (this.utilService.isElectronApp()) {
+      this.personImageService.deletePersonImagesFromLocalDB();
     }
     this.utilService.setLoader(true);
     this.navCtrl.navigateRoot("logout");

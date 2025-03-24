@@ -13,7 +13,7 @@ import * as net from 'net';
 const { localStorage } = require('electron-browser-storage')
 const fs = require('fs-extra');
 import * as sqlite3 from 'sqlite3';
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 
 let mainWindow: BrowserWindow;
 let win: BrowserWindow;
@@ -183,28 +183,30 @@ function createWindow() {
   })
 
   const dbPath = path.join(app.getPath('userData'), 'personImages.db');
-
-  db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-      console.error('Error opening database', err.message);
-      return;
-    }
-    console.log('Connected to the SQLite database.');
-
-    // Create the table if it doesn't exist
-    db.run(`CREATE TABLE IF NOT EXISTS person_images (
-      PersonId TEXT PRIMARY KEY,
-      StreamImage BLOB,
-      UpdateDate TEXT
-    );`, (err) => {
+  try {
+    db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
-        console.error('Error creating table', err.message);
-      } else {
-        console.log('Table person_images created or already exists.');
+        console.error('Error opening database', err.message);
+        return;
       }
-    });
-  });
+      console.log('Connected to the SQLite database.');
 
+      // Create the table if it doesn't exist
+      db.run(`CREATE TABLE IF NOT EXISTS person_images (
+              PersonId TEXT PRIMARY KEY,
+              StreamImage BLOB,
+              UpdateDate TEXT
+            );`, (err) => {
+        if (err) {
+          console.error('Error creating table', err.message);
+        } else {
+          console.log('Table person_images created or already exists.');
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error initializing SQLite database:', error);
+  }
 }
 
 
@@ -668,6 +670,111 @@ ipcMain.on("delete-person-images", async (event, { personIds, responseChannel })
   }
 });
 
+const BATCH_SIZE = 50; // Define the size of each batch
+
+ipcMain.on("delete-persons", (event, { personIds }) => {
+  try {
+    if (personIds.length === 0) return; // No IDs to delete
+
+    const deleteInBatches = (ids: string[]) => {
+      // Split IDs into batches
+      const batches = [];
+      for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+        batches.push(ids.slice(i, i + BATCH_SIZE));
+      }
+
+      // Function to execute each batch
+      const executeBatch = (batch: string[], index: number) => {
+        const placeholders = batch.map(() => '?').join(',');
+        const query = `DELETE FROM person_images WHERE PersonId IN (${placeholders})`;
+
+        db.run(query, batch, function (err) {
+          if (err) {
+            console.error(`Error deleting persons in batch ${index}:`, err.message);
+            event.reply("delete-persons-response", { success: false, error: err.message });
+            return; // Stop execution on error
+          } else {
+            console.log(`Deleted ${this.changes} person(s) from batch ${index}`);
+          }
+
+          // Execute the next batch if available
+          if (index + 1 < batches.length) {
+            executeBatch(batches[index + 1], index + 1);
+          } else {
+            event.reply("delete-persons-response", { success: true, deletedCount: personIds.length });
+          }
+        });
+      };
+
+      // Start executing the first batch
+      executeBatch(batches[0], 0);
+    };
+
+    // Start batch deletion
+      deleteInBatches(personIds);
+    } catch (err) {
+      event.reply("delete-persons-response", { success: false, error: err.message });
+    }
+});
+
+ipcMain.on("get-all-persons", (event, { responseChannel }) => {
+  try {
+    const query = `SELECT PersonId FROM person_images`;
+    db.all(query, [], (err, rows: any) => {
+      if (err) {
+        event.reply(responseChannel, { error: err.message });
+      } else {
+        const personIds = rows.map(row => row.PersonId);
+        event.reply(responseChannel, personIds);
+      }
+    });
+  } catch (err) {
+    event.reply(responseChannel, { error: err.message });
+  }
+});
+
+const dbFilePath = path.join(app.getPath('userData'), 'personImages.db');
+ipcMain.on("vacuum-database", async (event) => {
+  try {
+    console.log("Starting database VACUUM operation...");
+
+    // Run incremental vacuum
+    db.serialize(() => {
+      db.run("PRAGMA synchronous = NORMAL;"); // Reduce I/O pressure
+      db.run("PRAGMA incremental_vacuum(100);", (err) => {
+        if (err) {
+          console.error("Error during incremental VACUUM:", err.message);
+          event.reply("vacuum-response", { success: false, error: err.message });
+          return;
+        }
+      });
+
+      // Perform full VACUUM
+      db.run("VACUUM;", (err) => {
+        if (err) {
+          console.error("Error during full VACUUM:", err.message);
+          event.reply("vacuum-response", { success: false, error: err.message });
+          return;
+        }
+
+        console.log("Database vacuumed successfully.");
+        try {
+          const stats = fs.statSync(dbFilePath);
+          const fileSize = stats.size;
+          console.log(`Database file size after VACUUM: ${fileSize} bytes`);
+
+          // Send success response with the new file size
+          event.reply("vacuum-response", { success: true, fileSize });
+        } catch (fsError) {
+          console.error("Failed to get database file size:", fsError.message);
+          event.reply("vacuum-response", { success: true, fileSize: "Unknown" });
+        }
+      });
+    });
+  } catch (err) {
+    event.reply("vacuum-response", { success: false, error: err.message });
+  }
+});
 
 interface PersonImage {
   PersonId: string;
@@ -790,6 +897,168 @@ function quitPeripheralApp() {
   if (child != undefined) {
     child.kill()
   }
+}
+
+interface ActiveNetworkConnection {
+  type: string;        // Type of the connection (e.g., "Wi-Fi", "Ethernet")
+  speed: number;       // Speed of the connection in Mbps
+  signalStrength: number; // Signal strength percentage (0-100%)
+}
+
+interface SystemInfo {
+  totalMemory: number;
+  freeMemory: number;
+  usedMemory: number;
+  cpuModel: string;
+  cpuSpeedMHz: number;
+  cpuCoreCount: number;
+  cpuUsage: number; // CPU usage percentage
+  ipAddress: string;
+  connectionType: string; // e.g., "Wi-Fi" or "Ethernet"
+  isConnected: boolean;
+  totalDisk: number;
+  freeDisk: number;
+  usedDisk: number;
+  appVersion: string;   // Application version
+  macAddress: string;   // MAC address
+  diskAccessDenied: boolean; // True if disk access was denied
+  memoryAccessDenied: boolean; // True if memory access was denied
+  errors: string[];     // List of errors, if any  
+  activeConnections: string; // List of active network connections with type, speed, and signal strength
+  pingTime: number;
+}
+
+// Helper function to convert bytes to GB
+const bytesToGB = (bytes: number): number => parseFloat((bytes / (1024 ** 3)).toFixed(2));
+
+ipcMain.handle('get-system-info', async (): Promise<SystemInfo> => {
+  const systemInfo: SystemInfo = {
+    totalMemory: 0,
+    freeMemory: 0,
+    usedMemory: 0,
+    cpuModel: "Unknown",
+    cpuSpeedMHz: 0,
+    cpuCoreCount: 0,
+    cpuUsage: 0,
+    ipAddress: "Unknown",
+    connectionType: "Unknown",
+    isConnected: false,
+    totalDisk: 0,
+    freeDisk: 0,
+    usedDisk: 0,
+    appVersion: app.getVersion(), // Get app version
+    macAddress: "Unknown", // Initialize MAC address
+    diskAccessDenied: false,
+    memoryAccessDenied: false,
+    errors: [],
+    activeConnections: null, // List of active network connections with type, speed, and signal strength
+    pingTime: 1000
+  };
+
+  // Get memory information
+  try {
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    systemInfo.totalMemory = bytesToGB(totalMem);
+    systemInfo.freeMemory = bytesToGB(freeMem);
+    systemInfo.usedMemory = bytesToGB(totalMem - freeMem);
+  } catch (error) {
+    systemInfo.memoryAccessDenied = true; // Set memory access denied status
+    systemInfo.errors.push(`Memory access error: ${error.message}`);
+  }
+
+  // Get CPU info and usage
+  try {
+    const cpus = os.cpus();
+    if (cpus.length > 0) {
+      systemInfo.cpuModel = cpus[0]?.model || "Unknown";
+      systemInfo.cpuSpeedMHz = cpus[0]?.speed || 0;
+      systemInfo.cpuCoreCount = cpus.length;
+
+      // Calculate CPU usage
+      const cpuLoad = await getCpuUsage();
+      systemInfo.cpuUsage = cpuLoad;
+    }
+  } catch (error) {
+    systemInfo.errors.push(`CPU info access error: ${error.message}`);
+  }
+
+  // Network Info
+  try {
+    const networkInterfaces = os.networkInterfaces();
+    for (const key in networkInterfaces) {
+      for (const net of networkInterfaces[key] || []) {
+        if (!net.internal && net.family === 'IPv4') {
+          systemInfo.ipAddress = net.address;
+          systemInfo.connectionType = key.includes('Wi-Fi') ? 'Wi-Fi' : 'Ethernet';
+          systemInfo.isConnected = true;
+          systemInfo.macAddress = net.mac;
+        }
+      }
+    }
+  } catch (error) {
+    systemInfo.errors.push(`Network access error: ${error.message}`);
+  }
+
+  // Disk Info
+  let totalDisk = 0, freeDisk = 0, usedDisk = 0;
+  try {
+    if (os.platform() === 'win32') {
+      const output = execSync('wmic logicaldisk get size,freespace,caption').toString();
+      const lines = output.trim().split('\n').filter(line => line.trim() !== '');
+
+      for (const line of lines) {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length === 3 && parts[0].includes(':')) {
+          freeDisk += parseInt(parts[1]) || 0;
+          totalDisk += parseInt(parts[2]) || 0;
+        }
+      }
+    } else {
+      const output = execSync("df -k / | awk 'NR==2 {print $2, $4}'").toString().trim();
+      const [total, free] = output.split(/\s+/).map(Number);
+      totalDisk = total * 1024;
+      freeDisk = free * 1024;
+    }
+    usedDisk = totalDisk - freeDisk;
+
+    systemInfo.totalDisk = totalDisk ? bytesToGB(totalDisk) : 0;
+    systemInfo.freeDisk = freeDisk ? bytesToGB(freeDisk) : 0;
+    systemInfo.usedDisk = usedDisk ? bytesToGB(usedDisk) : 0;
+  } catch (error) {
+    systemInfo.diskAccessDenied = true; // Set disk access denied status
+    systemInfo.errors.push(`Disk access error: ${error.message}`);
+  }
+
+  return systemInfo;
+});
+
+// Function to get CPU usage percentage
+async function getCpuUsage() {
+  return new Promise<number>((resolve) => {
+    const cpus = os.cpus();
+    const startTime = process.hrtime();
+
+    const startUsage = cpus.map(cpu => cpu.times);
+
+    setTimeout(() => {
+      const endUsage = os.cpus().map(cpu => cpu.times);
+      const endTime = process.hrtime(startTime);
+
+      const totalDiff = endUsage.reduce((total, cpu, i) => {
+        const totalTime = Object.values(cpu).reduce((acc, time) => acc + time, 0);
+        const startTotalTime = Object.values(startUsage[i]).reduce((acc, time) => acc + time, 0);
+        return total + (totalTime - startTotalTime);
+      }, 0);
+
+      const idleDiff = endUsage.reduce((total, cpu, i) => {
+        return total + (cpu.idle - startUsage[i].idle);
+      }, 0);
+
+      const usage = ((totalDiff - idleDiff) / totalDiff) * 100;
+      resolve(parseFloat(usage.toFixed(2))); // Round to two decimal places
+    }, 1000); // Wait for 1 second to measure CPU usage
+  });
 }
 
 //#endregion Peripherl Utility Methods
