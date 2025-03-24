@@ -20,6 +20,7 @@ import { HashingService } from './hashing.service';
 import { PouchQueriesService } from './Database/pouch-queries.service';
 import { PouchDBService, EXP_SYSTEM, EXP_COMMON } from './pouch-db.service';
 import { GeneralDBService } from './Database/general-db.service';
+import { AppVersion } from '@ionic-native/app-version/ngx';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +43,7 @@ export class DeviceService {
     private electronService: ElectronService, private systemService: SystemService,
     private appStateService: AppStateService, private event: Events,
     public generalDBService: GeneralDBService,
+    private appVersion: AppVersion
   ) {
   }
 
@@ -663,6 +665,137 @@ export class DeviceService {
     });
   }
 
+  private async pingServer(url: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now(); // Record the start time
+
+      // Create an image element to send a request
+      const img = new Image();
+      img.src = `${url}?t=${startTime}`; // Add a timestamp to prevent caching
+
+      // Handle successful load
+      img.onload = () => {
+        const pingTime = Date.now() - startTime; // Calculate round-trip time
+        resolve(pingTime);
+      };
+
+      // Handle error (e.g., server unreachable)
+      img.onerror = () => {
+        resolve(-1); // Indicate an error in ping
+      };
+    });
+  }
+
+  // Memory Retrieval Methods
+  private async getTotalMemory(): Promise<{ total: number; accessDenied: boolean }> {
+    return new Promise((resolve) => {
+      (window as any).plugins.memory.getMemoryInfo((memoryInfo) => {
+        resolve({ total: memoryInfo.total, accessDenied: false }); // Return actual total memory
+      }, () => {
+        resolve({ total: 0, accessDenied: true }); // Indicate access denied
+      });
+    });
+  }
+
+  private async getFreeMemory(): Promise<{ free: number; accessDenied: boolean }> {
+    return new Promise((resolve) => {
+      (window as any).plugins.memory.getMemoryInfo((memoryInfo) => {
+        resolve({ free: memoryInfo.free, accessDenied: false }); // Return actual free memory
+      }, () => {
+        resolve({ free: 0, accessDenied: true }); // Indicate access denied
+      });
+    });
+  }
+
+  // Disk Info Retrieval Method
+  private async getDiskInfo(): Promise<{ total: number; free: number; accessDenied: boolean }> {
+    return new Promise((resolve) => {
+      // Example logic to retrieve disk info using a Cordova plugin or other means
+      (window as any).plugins.disk.getDiskInfo((diskInfo) => {
+        resolve({ total: diskInfo.total, free: diskInfo.free, accessDenied: false });
+      }, () => {
+        resolve({ total: 0, free: 0, accessDenied: true });
+      });
+    });
+  }
+
+  getAppVersion(): Promise<string> {
+    return this.appVersion.getVersionNumber()
+      .catch(() => 'Unknown'); // Handle error
+  }
+
+  getConnectionType(): string {
+    const networkType = this.network.type;
+    return networkType ? networkType : 'Unknown';
+  }
+
+  // Get System Info Method
+  async getSystemInfo(): Promise<SystemInfo> {
+    const systemInfo: SystemInfo = {
+      totalMemory: 0,
+      freeMemory: 0,
+      usedMemory: 0,
+      cpuModel: `${this.device.model} - ${this.device.version}`,
+      cpuSpeedMHz: 0,
+      cpuCoreCount: 0,
+      cpuUsage: 0,
+      ipAddress: "Unknown",
+      connectionType: "Unknown",
+      isConnected: navigator.onLine,
+      totalDisk: 0,
+      freeDisk: 0,
+      usedDisk: 0,
+      appVersion: "Unknown",
+      macAddress: "Unknown",
+      diskAccessDenied: false,
+      memoryAccessDenied: false,
+      errors: [],
+      activeConnections: "",
+      pingTime: 0
+    };
+
+    // Memory Info
+    const totalMemoryResult = await this.getTotalMemory();
+    const freeMemoryResult = await this.getFreeMemory();
+
+    if (!totalMemoryResult.accessDenied && !freeMemoryResult.accessDenied) {
+      systemInfo.totalMemory = totalMemoryResult.total;
+      systemInfo.freeMemory = freeMemoryResult.free;
+      systemInfo.usedMemory = systemInfo.totalMemory - systemInfo.freeMemory;
+    } else {
+      systemInfo.memoryAccessDenied = true; // Indicate that access to memory info was denied
+      systemInfo.errors.push('Memory access denied');
+    }
+
+    // Disk Info
+    const diskResult = await this.getDiskInfo();
+    if (!diskResult.accessDenied) {
+      systemInfo.totalDisk = diskResult.total;
+      systemInfo.freeDisk = diskResult.free;
+      systemInfo.usedDisk = systemInfo.totalDisk - systemInfo.freeDisk;
+    } else {
+      systemInfo.diskAccessDenied = true; // Indicate that access to disk info was denied
+      systemInfo.errors.push('Disk access denied');
+    }
+
+    // Get App Version
+    systemInfo.appVersion = await this.getAppVersion(); // Await the promise
+
+    // Network Info (You can enhance this section as needed)
+    const connectionType = this.getConnectionType();
+    if (connectionType) {
+      systemInfo.ipAddress = "192.168.1.1"; // Example placeholder for IP address
+      systemInfo.connectionType = connectionType; // e.g., "wifi", "cellular"
+      systemInfo.isConnected = connectionType !== 'none';
+      systemInfo.macAddress = "00:00:00:00:00:00"; // Placeholder for MAC address
+    }
+
+    // Get Ping Time
+    systemInfo.pingTime = await this.pingServer('https://www.google.com'); // Example server to ping
+
+    return systemInfo;
+  }
+
 }
 
 export class DeviceInfo {
@@ -687,4 +820,28 @@ export class VersionUpdateDoc {
     public TerminalId: number;
     public CodeVersion: string;
     public IsSynced: boolean;
+}
+
+// SystemInfo interface definition
+interface SystemInfo {
+  totalMemory: number;
+  freeMemory: number;
+  usedMemory: number;
+  cpuModel: string;
+  cpuSpeedMHz: number;
+  cpuCoreCount: number;
+  cpuUsage: number; // CPU usage percentage
+  ipAddress: string;
+  connectionType: string; // e.g., "Wi-Fi" or "Ethernet"
+  isConnected: boolean;
+  totalDisk: number;
+  freeDisk: number;
+  usedDisk: number;
+  appVersion: string;   // Application version
+  macAddress: string;   // MAC address
+  diskAccessDenied: boolean; // True if disk access was denied
+  memoryAccessDenied: boolean; // True if memory access was denied
+  errors: string[];     // List of errors, if any  
+  activeConnections: string; // List of active network connections with type, speed, and signal strength
+  pingTime: number;
 }

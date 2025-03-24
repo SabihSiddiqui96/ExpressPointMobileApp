@@ -29,6 +29,7 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import moment from 'moment';
 import { HttpService } from '../../services/HTTP/http.service';
+import { SyncService } from '../../services/syncService.service';
 
 @Component({
   selector: 'app-open-session',
@@ -179,6 +180,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private httpService : HttpService,
     public events: Events,
+    public syncService: SyncService,
     public popupMessageService: PopupMessageService, public router: Router,
     public appStateService: AppStateService, public pouchDBService: PouchDBService,
     public pouchQuery: PouchQueriesService,
@@ -903,7 +905,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
         // this.utilService.setLoader(false);
 
-
+        this.syncService.getTerminalSystemInfo(-1);
         this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
       }
       if (this.currentRoute === 'summarySales') {

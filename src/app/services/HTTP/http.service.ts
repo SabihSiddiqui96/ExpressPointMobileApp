@@ -495,6 +495,10 @@ export class HttpService {
         return this.http.post(API_URL + 'SyncPayment', JSON.stringify(postData)).pipe(map(res => res));
     }
 
+    public SaveTerminalSystemInfo(systemInfo): any {
+        return this.http.post(API_URL + 'SaveTerminalSystemInfo', JSON.stringify(systemInfo)).pipe(map(res => res));
+    }
+
     public postCloseSession_pouch(denominations, checks, total, sessionId, schoolId, terminalId, closeDateWithTime): any {
         return this.http.post(API_URL + 'SyncCloseSession',
             JSON.stringify({

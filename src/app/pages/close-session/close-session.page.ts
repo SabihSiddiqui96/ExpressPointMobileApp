@@ -751,6 +751,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 'TerminalId': this.terminalId,
                 'SessionDenominations': sessionDenominations
             };
+            this.syncService.getTerminalSystemInfo(-2);
         }
 
 
