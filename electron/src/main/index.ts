@@ -1030,6 +1030,13 @@ ipcMain.handle('get-system-info', async (): Promise<SystemInfo> => {
     systemInfo.errors.push(`Disk access error: ${error.message}`);
   }
 
+  // Get ping time
+  try {
+    systemInfo.pingTime = await getPingTime(); // Get ping time
+  } catch (error) {
+    systemInfo.errors.push(`Ping error: ${error.message}`);
+  }
+  
   return systemInfo;
 });
 
@@ -1058,6 +1065,88 @@ async function getCpuUsage() {
       const usage = ((totalDiff - idleDiff) / totalDiff) * 100;
       resolve(parseFloat(usage.toFixed(2))); // Round to two decimal places
     }, 1000); // Wait for 1 second to measure CPU usage
+  });
+}
+
+// Function to measure ping time to a server
+async function getPingTime(host = 'google.com'): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const http = require('http');
+    const options = {
+      host: host,
+      port: 80,
+      path: '/',
+      method: 'HEAD',
+      timeout: 5000 // 5 second timeout
+    };
+
+    const req = http.request(options, (res) => {
+      const endTime = Date.now();
+      const pingTime = endTime - startTime;
+      resolve(pingTime);
+    });
+
+    req.on('error', (error) => {
+      // Fallback to ping command if HTTP request fails
+      fallbackPing(host)
+        .then(resolve)
+        .catch(reject);
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      // Fallback to ping command on timeout
+      fallbackPing(host)
+        .then(resolve)
+        .catch(reject);
+    });
+
+    req.end();
+  });
+}
+
+// Fallback ping using command line
+async function fallbackPing(host: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const { exec } = require('child_process');
+    const pingCount = 4;
+    const command = process.platform === 'win32'
+      ? `ping -n ${pingCount} ${host}`
+      : `ping -c ${pingCount} ${host}`;
+
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Ping command failed:', error);
+        // Return a default value rather than failing
+        resolve(1000);
+        return;
+      }
+
+      try {
+        // Parse ping results based on platform
+        if (process.platform === 'win32') {
+          // Windows format
+          const match = stdout.match(/Average = (\d+)ms/);
+          if (match && match[1]) {
+            resolve(parseInt(match[1]));
+          } else {
+            resolve(1000); // Default fallback
+          }
+        } else {
+          // Unix/Linux/macOS format
+          const match = stdout.match(/rtt min\/avg\/max\/mdev = [0-9.]+\/([0-9.]+)\/[0-9.]+\/[0-9.]+ ms/);
+          if (match && match[1]) {
+            resolve(parseFloat(match[1]));
+          } else {
+            resolve(1000); // Default fallback
+          }
+        }
+      } catch (err) {
+        console.error('Failed to parse ping results:', err);
+        resolve(1000); // Default fallback
+      }
+    });
   });
 }
 
