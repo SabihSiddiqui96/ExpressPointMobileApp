@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@trodi/electron-splashscreen": "^1.0.0",
+    "crypto-js": "^4.2.0",
     "electron-browser-storage": "^1.0.7",
     "electron-log": "^4.3.1",
     "electron-updater": "4.3.9",
@@ -57,6 +58,7 @@
     "net": "^1.0.2",
     "os": "^0.1.1",
     "source-map-support": "^0.5.19",
+    "sqlite3": "5.0.2",
     "systeminformation": "^4.23.1"
   },
   "devDependencies": {

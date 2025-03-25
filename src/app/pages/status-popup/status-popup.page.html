@@ -10,6 +10,10 @@
     <p class="ion-text-center" *ngIf="!error">
         ExpressPoint is downloading data to make it available for offline use...
     </p>
+    <p style="text-align: center;" *ngIf="isElectronApp">
+        <b>Downloading Student images...</b>This may take longer than usual. You can cancel anytime using the button below if you need
+        immediate access.
+    </p>
     
     <ion-list lines="none" class="ion-text-center">
        
@@ -52,15 +56,11 @@
             <ion-spinner slot="end" name="crescent" *ngIf="syncList.Students=='APIComplete'"></ion-spinner>
             <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.Students=='Success'"></ion-icon>
             <ion-icon slot="end" color="danger" name="alert-circle-sharp" *ngIf="syncList.Students=='Failed'"></ion-icon>
-
-
-            <!-- <ion-label slot="start"> -->
+            
             <ion-button slot="end" fill="outline" (click)="retryPersonDB()" class="margin-3px" *ngIf="syncList.Students=='Failed'">
                 <ion-icon slot="start" name="refresh"></ion-icon>
                 Retry
             </ion-button>
-            <!-- </ion-label> -->
-
         </ion-item>
         <ion-item *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.Students=='Failed')) ) && syncList.Students && progressSetupPersonDBLabels && progressSetupPersonDBLabels.size > 0" class="syncDetailText">
             <ion-label class="ion-text-wrap">
@@ -69,6 +69,39 @@
                </span>
            </ion-label>
        </ion-item>
+
+        <ion-item *ngIf="syncList.StudentImages && isElectronApp" class="done">
+            <ion-icon slot="start" name="person-circle"></ion-icon>
+            <ion-label slot="start">
+                Student Images
+            </ion-label>
+            <ion-progress-bar *ngIf="progressSetupPersonImageDBTotal && progressSetupPersonImageDBTotal > 0" slot="start"
+                color="secondary" [value]="progressSetupPersonImageDBCurrent/progressSetupPersonImageDBTotal"></ion-progress-bar>
+            <span> {{progressSetupPersonImageDBCurrent}} / {{ progressSetupPersonImageDBTotal}}</span>
+            <ion-button color="slate" style="padding-left: 30px;" *ngIf="syncList.StudentImages !=='Stopped'" (click)="cancelSyncImages()">
+                Cancel
+            </ion-button>
+            <ion-spinner name="circles" slot="end" *ngIf="syncList.StudentImages=='InProgress'"></ion-spinner>
+            <ion-spinner slot="end" name="crescent" *ngIf="syncList.StudentImages=='APIComplete'"></ion-spinner>
+            <ion-icon name="checkmark-circle" color="green" slot="end" *ngIf="syncList.StudentImages=='Success' || syncList.StudentImages=='Stopped'"></ion-icon>
+            <ion-icon slot="end" color="danger" name="alert-circle-sharp" *ngIf="syncList.StudentImages=='Failed'"></ion-icon>
+        
+            <ion-button slot="end" fill="outline" (click)="retryPersonImageDB()" class="margin-3px"
+                *ngIf="syncList.Students=='Failed'">
+                <ion-icon slot="start" name="refresh"></ion-icon>
+                Retry
+            </ion-button>
+        
+        </ion-item>
+        <ion-item
+            *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.StudentImages=='Failed')) ) && syncList.StudentImages && progressSetupPersonImageDBLabels && progressSetupPersonImageDBLabels.size > 0 && isElectronApp"
+            class="syncDetailText">
+            <ion-label class="ion-text-wrap">
+                <span *ngFor="let mapItem of progressSetupPersonImageDBLabels | keyvalue">
+                    {{mapItem.value}}&#44;&nbsp;
+                </span>
+            </ion-label>
+        </ion-item>
 
         <ion-item *ngIf="syncList.StaticMenus" class="done">
             <ion-icon slot="start" name="grid"></ion-icon>

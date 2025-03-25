@@ -14,6 +14,7 @@ const si = require("systeminformation");
 const net = require("net");
 const { localStorage } = require('electron-browser-storage');
 const fs = require('fs-extra');
+const sqlite3 = require("sqlite3");
 const { exec } = require('child_process');
 let mainWindow;
 let win;
@@ -23,6 +24,9 @@ let deviceName = os.hostname();
 let SystemUUID, Serial, UUID_os, UUID_FileSystem, UUID_BlockDevices, UUID_system;
 let DeviceIpAddress;
 let ADFSInfo = '', NameId = '', LoginError = '', ssowin;
+let db;
+const CryptoJS = require("crypto-js");
+const SECRET_KEY = "cybersoft-primeroedge-expresspoint";
 let readSocket;
 let child;
 // let writeSocket: net.Socket;
@@ -149,6 +153,27 @@ function createWindow() {
     win.on('show', function () {
         // win.webContents.closeDevTools();
         win.maximize();
+    });
+    const dbPath = path.join(electron_1.app.getPath('userData'), 'personImages.db');
+    db = new sqlite3.Database(dbPath, (err) => {
+        if (err) {
+            console.error('Error opening database', err.message);
+            return;
+        }
+        console.log('Connected to the SQLite database.');
+        // Create the table if it doesn't exist
+        db.run(`CREATE TABLE IF NOT EXISTS person_images (
+      PersonId TEXT PRIMARY KEY,
+      StreamImage BLOB,
+      UpdateDate TEXT
+    );`, (err) => {
+            if (err) {
+                console.error('Error creating table', err.message);
+            }
+            else {
+                console.log('Table person_images created or already exists.');
+            }
+        });
     });
 }
 //Create an app window when the app is ready
@@ -278,6 +303,26 @@ electron_1.ipcMain.on('ssologin', (event, loginSSOUrl) => {
     });
 });
 const stateFilePath = path.join(process.env.PUBLIC, 'Documents', 'ExpressPoint', 'state.json');
+electron_1.ipcMain.handle('backup-exists-ornot', async (event) => {
+    try {
+        const appVersion = electron_1.app.getVersion();
+        const fileName = `ExpressPointData_backup_before_${appVersion}`;
+        const stateFolderPath = path.join(process.env.PUBLIC || '', 'Documents', fileName);
+        if (await fs.existsSync(stateFolderPath) == false) {
+            if (await fs.pathExists(stateFilePath)) {
+                const newState = { lastBackup: null };
+                await fs.writeJson(stateFilePath, newState, { spaces: 2 });
+            }
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    catch (error) {
+        return true;
+    }
+});
 electron_1.ipcMain.on('backup-and-relaunch', async (event) => {
     try {
         const now = new Date();
@@ -296,16 +341,9 @@ electron_1.ipcMain.on('backup-and-relaunch', async (event) => {
         if (diffMilliseconds < daysInMilliseconds) {
             return;
         }
-        // Show a modal dialog to inform the user
-        var index = electron_1.dialog.showMessageBoxSync({
-            type: 'info',
-            title: 'ExpressPoint App Backup',
-            message: `Transaction data backup in progress.\n\nPlease close this message or click OK to proceed.\n\nThe app will relaunch once the backup is completed.\n\nBackup will take place every 15 days or when a new version of ExpressPoint is installed.`,
-            buttons: ["OK"],
-            noLink: true, // Prevents link-styled buttons
-        });
         // Update the state file with the current timestamp
         const newState = { lastBackup: now.toISOString() };
+        localStorage.setItem("BackupAndRelaunchDate", now.toISOString());
         await fs.writeJson(stateFilePath, newState, { spaces: 2 });
         const appVersion = electron_1.app.getVersion(); // Get the app version dynamically
         const documentsFolder = path.join(process.env.PUBLIC, 'Documents');
@@ -326,49 +364,41 @@ set "appFolder=%baseFolder%\\ExpressPointData"
 set "backupFolder=%baseFolder%\\ExpressPointData_backup_before_${appVersion}"
 set "exePath=%baseFolder%\\ExpressPoint\\ExpressPoint.exe"
 
-:: Step 1: Wait for a few seconds to ensure the app is fully closed
-echo Waiting for 3 seconds before proceeding...
-timeout /t 3 /nobreak > nul
+:: Step 1: Kill any lingering ExpressPoint processes (if running)
+:kill_process
+tasklist | find /i "ExpressPoint.exe" >nul
+if %errorlevel%==0 (
+    echo Closing running ExpressPoint application...
+    taskkill /f /im ExpressPoint.exe > nul 2>&1
+    timeout /t 1 > nul  :: Wait briefly for the process to close
+    goto kill_process  :: Check again if it's still running
+) else (
+    echo ExpressPoint is not running.
+)
 
-:: Step 2: Kill any lingering processes (optional)
-taskkill /f /im ExpressPoint.exe > nul 2>&1
-
-:: Step 3: Delete the backup folder if it already exists
+:: Step 2: Delete the backup folder if it already exists
 echo Checking if backup folder exists...
 if exist "%backupFolder%" (
     echo Backup folder exists. Deleting it...
     rd /s /q "%backupFolder%" >nul 2>&1
 )
 
-:: Step 4: Create a backup of the app folder
+:: Step 3: Create a backup of the app folder
 echo Creating backup of the app folder...
 xcopy "%appFolder%" "%backupFolder%" /E /I /Y >nul 2>&1
 
-:: Step 5: Delete the app folder using RD /S /Q
-echo Deleting the ExpressPointData folder...
-rd /s /q "%appFolder%" >nul 2>&1
-
-:: Step 6: Create necessary directories (if not already created)
-echo Creating directories...
-mkdir "%appFolder%\\Local Storage" >nul 2>&1
-
-:: Step 7: Copy files from backup to app folder
-echo Copying files from backup folder...
-xcopy "%backupFolder%\\Local Storage\\*.log" "%appFolder%\\Local Storage\\" /E /I /Y > nul 2>&1
-
-:: Step 8: Check if ExpressPointDevices.db exists and copy it
-if exist "%backupFolder%\\ExpressPointDevices.db" (
-    echo Found ExpressPointDevices.db, copying...
-    copy "%backupFolder%\\ExpressPointDevices.db" "%appFolder%\\ExpressPointDevices.db" >nul 2>&1
-) else (
-    echo ExpressPointDevices.db not found in backup.
+:: Step 4: Delete the IndexedDB folder inside ExpressPointData if it exists
+if exist "%appFolder%\\IndexedDB\\" (
+    echo Deleting the IndexedDB folder...
+    attrib -h -s -r "%appFolder%\\IndexedDB" /S /D >nul 2>&1
+    rd /s /q "%appFolder%\\IndexedDB\\" >nul 2>&1
 )
 
-:: Step 9: Relaunch the app
+:: Step 5: Relaunch the app
 echo Relaunching the app...
 start "" "%exePath%"
 
-:: Step 10: Exit the batch script
+:: Step 6: Exit the batch script
 exit
     `;
         // Step 3: Write the batch file to the file system
@@ -432,6 +462,127 @@ electron_1.ipcMain.on('check-app-updates', (event, deploymentServerURL) => {
         provider: 'generic'
     });
     electron_updater_1.autoUpdater.checkForUpdates();
+});
+function encryptString(plainText, secretKey) {
+    const encrypted = CryptoJS.AES.encrypt(plainText, secretKey).toString();
+    return encrypted; // Return the encrypted string
+}
+// Function to decrypt a string
+function decryptString(encryptedText, secretKey) {
+    const decryptedBytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+    const decrypted = decryptedBytes.toString(CryptoJS.enc.Utf8);
+    return decrypted; // Return the decrypted string
+}
+// Save Image (Encrypt Before Storing)
+electron_1.ipcMain.on("save-image", (event, personId, image, updateDate) => {
+    try {
+        const queryCheck = `SELECT StreamImage, UpdateDate FROM person_images WHERE PersonId = ? LIMIT 1`;
+        db.get(queryCheck, [personId], (err, row) => {
+            if (err) {
+                event.reply("save-image-response", { error: err.message });
+                return;
+            }
+            // Encrypt the image before storing
+            const encryptedImage = encryptString(image, SECRET_KEY);
+            if (row) {
+                // If image exists, check UpdateDate
+                const existingUpdateDate = new Date(row.UpdateDate);
+                const newUpdateDate = new Date(updateDate);
+                // Check if the new UpdateDate is greater than the existing one
+                if (newUpdateDate > existingUpdateDate) {
+                    const queryUpdate = `UPDATE person_images SET StreamImage = ?, UpdateDate = ? WHERE PersonId = ?`;
+                    db.run(queryUpdate, [encryptedImage, updateDate, personId], (err) => {
+                        if (err) {
+                            event.reply("save-image-response", { error: err.message });
+                        }
+                        else {
+                            event.reply("save-image-response", { success: true, message: "Image updated." });
+                        }
+                    });
+                }
+                else {
+                    // Image exists and the new UpdateDate is not greater
+                    event.reply("save-image-response", { success: false, message: "Image exists with an equal or later update date." });
+                }
+            }
+            else {
+                // Insert new image
+                const queryInsert = `INSERT INTO person_images (PersonId, StreamImage, UpdateDate) VALUES (?, ?, ?)`;
+                db.run(queryInsert, [personId, encryptedImage, updateDate], (err) => {
+                    if (err) {
+                        event.reply("save-image-response", { error: err.message });
+                    }
+                    else {
+                        event.reply("save-image-response", { success: true, message: "Image saved successfully." });
+                    }
+                });
+            }
+        });
+    }
+    catch (err) {
+        event.reply("save-image-response", { error: err.message });
+    }
+});
+// Get Image (Decrypt After Retrieving)
+electron_1.ipcMain.on("get-image", (event, { personId, responseChannel }) => {
+    try {
+        const query = `SELECT StreamImage FROM person_images WHERE PersonId = ?`;
+        db.get(query, [personId], (err, row) => {
+            if (err) {
+                event.reply(responseChannel, { error: err.message, personId });
+            }
+            else {
+                if (row && row.StreamImage) {
+                    const decryptedImage = decryptString(row.StreamImage, SECRET_KEY);
+                    event.reply(responseChannel, { personId, image: decryptedImage });
+                }
+                else {
+                    event.reply(responseChannel, { personId, image: null });
+                }
+            }
+        });
+    }
+    catch (err) {
+        event.reply(responseChannel, { error: err.message, personId });
+    }
+});
+electron_1.ipcMain.on("check-person-exists", async (event, { personId, updateDate, responseChannel }) => {
+    try {
+        const query = `SELECT UpdateDate FROM person_images WHERE PersonId = ?`;
+        db.get(query, [personId], (err, row) => {
+            if (err) {
+                event.reply(responseChannel, { error: err.message });
+            }
+            else {
+                const needsUpdate = row ? (new Date(updateDate) > new Date(row.UpdateDate)) : true;
+                event.reply(responseChannel, { exists: !!row, needsUpdate });
+            }
+        });
+    }
+    catch (err) {
+        event.reply(responseChannel, { error: err.message });
+    }
+});
+electron_1.ipcMain.on("delete-person-images", async (event, { personIds, responseChannel }) => {
+    try {
+        if (!Array.isArray(personIds) || personIds.length === 0) {
+            event.reply(responseChannel, { error: "Invalid personIds array." });
+            return;
+        }
+        const placeholders = personIds.map(() => "?").join(", ");
+        const query = `DELETE FROM person_images WHERE PersonId IN (${placeholders})`;
+        db.run(query, personIds, function (err) {
+            if (err) {
+                event.reply(responseChannel, { error: err.message });
+            }
+            else {
+                event.reply(responseChannel, { success: true, deletedCount: this.changes });
+            }
+        });
+    }
+    catch (err) {
+        event.reply(responseChannel, { error: err.message });
+    }
 });
 electron_1.ipcMain.on('Open-CashDrawer', () => {
     const paths = process.env.CashDrawer ? process.env.CashDrawer :

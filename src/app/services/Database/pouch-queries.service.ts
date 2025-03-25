@@ -759,7 +759,7 @@ export class PouchQueriesService {
 
   public static GetSessionChecks_PostNotSynced(utilityService: UtilService) {
     var current_Date = new Date(utilityService.getSessionDate());
-    var numberOfDayToSubtract = 14;
+    var numberOfDayToSubtract = 30;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionChecksGrThan = current_Date.getTime();
 
@@ -853,7 +853,7 @@ export class PouchQueriesService {
 
   public static GetSessionCards_PostNotSynced(utilityService: UtilService) {
     var current_Date = new Date(utilityService.getSessionDate());
-    var numberOfDayToSubtract = 14;
+    var numberOfDayToSubtract = 30;
     current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
     var sessionCardsGrThan = current_Date.getTime();
 
@@ -872,6 +872,48 @@ export class PouchQueriesService {
         // ,IsDeleted: {
         //   $eq: false
         // }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+  public static GetTerminalSystemInfo(utilityService: UtilService) {
+    var current_Date = new Date(utilityService.getSessionDate());
+    var numberOfDayToSubtract = 30;
+    current_Date.setDate(current_Date.getDate() - numberOfDayToSubtract);
+    var systemInfoDateGrThan = current_Date.getTime();
+
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SystemInfo--",
+          $lt: "SystemInfo--\uffff"
+        },
+        'systemInfo.infoDate': {
+          $gt: systemInfoDateGrThan
+        },
+        'systemInfo.isSynced': {
+          $eq: false
+        }        
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+  public static GetAllTerminalSystemInfo_Synced() {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SystemInfo--",
+          $lt: "SystemInfo--\uffff"
+        },
+        'systemInfo.isSynced': {
+          $eq: true
+        }
       },
       include_docs: true
     });
@@ -1364,6 +1406,26 @@ export class PouchQueriesService {
     return (promise);
   }
 
+  public static GetAllPendingTransactions_SyncedButNotProcessed() {
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "Transaction",
+          $lt: "Transaction\uffff"
+        },
+        'saleData.IsSynced': {
+          $eq: true
+        },
+        'saleData.IsProcessed': {
+          $eq: false
+        }
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
   public async GetAllLocalTransactions_ByAccount(AccountId) {
     const dateOnlyEpoch = Math.floor(new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) / 1000);
 
@@ -1480,6 +1542,24 @@ export class PouchQueriesService {
         IsSynced: {
           $eq: syncedRecords
         }        
+      },
+      include_docs: true
+    });
+
+    return (promise);
+  }
+
+  public async GetAllSummarySalesBySessionDate(syncedRecords: boolean = false) {
+    const dateOnlyEpoch = Math.floor(new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) / 1000);
+    var promise = EXP_TRANSACTIONS.find({
+      selector: {
+        _id: {
+          $gt: "SummarySale",
+          $lt: "SummarySale\uffff"
+        },       
+        TransactionDate: {
+          $gt: dateOnlyEpoch
+        },
       },
       include_docs: true
     });
@@ -1723,6 +1803,38 @@ export class PouchQueriesService {
                   if (data) {
                     console.log('Posted session cards');
                     doc.IsSynced = data;
+                    PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
+                  }
+                },
+                error => { console.log(error); },
+                () => {
+                  resolve(null);
+                }
+              );
+            }
+
+          });
+          resolve(null);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  public PostTerminalSystemInfo() {
+    console.log('--------------------Sending TerminalSystemInfo -------------------------');
+    return new Promise((resolve, reject) => {
+      PouchQueriesService.GetTerminalSystemInfo(this.utilService).then((res) => {
+        if (res.docs.length > 0) {
+          let infoRecords = res.docs.sort((a, b) => a.systemInfo.infoDate - b.systemInfo.infoDate);
+          infoRecords.map(doc => {
+            if (doc.systemInfo.isSynced === false) {
+              this.http.SaveTerminalSystemInfo(doc.systemInfo).subscribe(
+                data => {
+                  if (data) {
+                    console.log('Posted terminal system info');
+                    doc.systemInfo.isSynced = data;
                     PouchDBService.UpsertSingleDoc(doc, EXP_TRANSACTIONS).then(() => { resolve(null); });
                   }
                 },
@@ -2181,6 +2293,17 @@ export class PouchQueriesService {
             if (terminalDocs && terminalDocs.length > 0) {
               terminalDocs.map(doc => {
                 if (doc.IsSynced === true) {
+                  EXP_TRANSACTIONS.remove(doc);
+                }
+              });
+            }
+          });
+        }).then(() => {
+          PouchQueriesService.GetAllTerminalSystemInfo_Synced().then((res) => {
+            const infoDocs = res.docs;
+            if (infoDocs && infoDocs.length > 0) {
+              infoDocs.map(doc => {
+                if (doc.systemInfo.isSynced === true) {
                   EXP_TRANSACTIONS.remove(doc);
                 }
               });

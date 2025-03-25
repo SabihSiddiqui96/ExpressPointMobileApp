@@ -8,6 +8,7 @@ import { Events } from '../../services/events.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { SettingService } from '../../services/setting.service';
+import { LookupService } from '../../services/lookup.service';
 
 @Component({
     selector: 'app-patron-list-modal',
@@ -73,6 +74,7 @@ export class PatronListModalPage implements OnInit {
 
     constructor(public navCtrl: NavController,
         public event: Events, public utilService: UtilService,
+        public lookUpService: LookupService,    
         public http: HttpService, public router: Router, public appStateService: AppStateService) {
         // , public lookUpService:LookUpServiceProvider
 
@@ -86,31 +88,38 @@ export class PatronListModalPage implements OnInit {
           'dismissed': true
         });
         this.utilService.showModalPopup = true;
-      }
-
-    public getPatronImages(list) {
-        return list.map((patron) => {            
-            if (this.utilService.isAppOnline && (this.performanceOptions == undefined || (this.performanceOptions != undefined && this.performanceOptions.LoadStudentImages == true))) {
-                this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-                    if (isNetworkOnline) { // this.network.type != 'none' || navigator.onLine
-                        if (patron['Image'] === null || patron['Image'] === undefined) {
-                            if (patron.PersonId && (patron.ImageLoaded == null || patron.ImageLoaded == undefined || patron.ImageLoaded == false)) {
-                                this.http.GetPersonImage(patron.PersonId).subscribe(data => {
-                                    if (data != null) {
-                                        patron.Image = data;
-                                    }
-                                    patron.ImageLoaded = true;
-                                }, e => { console.log(e); }, () => {
-                                });
-                            }
-                        }
-                    }
-                });
-                patron['Image'] = patron.Image;
-            }            
-            return patron;
-        });
     }
+
+    public async getPatronImages(list): Promise<any[]> {
+        const updatedList = await Promise.all(
+            list.map(async (patron) => {
+                if (
+                    this.performanceOptions === undefined ||
+                    (this.performanceOptions !== undefined && this.performanceOptions.LoadStudentImages === true)
+                ) {
+                    try {
+                        patron.Image = null;
+                        if (patron.HasImage == 1) {
+                            const image = await this.lookUpService.getPersonImage(patron.PersonId);
+                            if (image) {
+                                patron.Image = image;
+                            } else {
+                                patron.Image = null;
+                            }
+                            patron.ImageLoaded = true;
+                        }
+                    } catch (err) {
+                        console.log('Error in getting image ' + err);
+                        patron.Image = null;
+                    }
+                }
+                return patron;
+            })
+        );
+
+        return updatedList;
+    }
+
     // public selectPatron(value) {
     //   this.dismiss();
     //   this.event.publish('patron:list', { 'selected_patron': value });
@@ -250,7 +259,7 @@ export class PatronListModalPage implements OnInit {
         return type === this.nameSortOrder;
     }
 
-    public getNextPatronList() {
+    public async getNextPatronList() {
         this.utilService.setLoader(true);
         let maxClicks = 0;
         this.loadMoreCount = this.loadMoreCount + 20;
@@ -264,7 +273,7 @@ export class PatronListModalPage implements OnInit {
 
         maxClicks = Math.floor(navPatronListSiteFilter.length / 20);
         this.filteredPatronList = navPatronListSiteFilter.slice(0, this.loadMoreCount);
-        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
+        this.filteredPatronList = await this.getPatronImages(this.filteredPatronList);
         this.updateAdvLookupSortOrder();
         if (this.loadMoreClicks >= maxClicks) {
             this.disableLoadMore = true;
@@ -273,7 +282,7 @@ export class PatronListModalPage implements OnInit {
         this.utilService.setLoader(false);
     }
 
-    public loadFirst20Patrons() {
+    public async loadFirst20Patrons() {
         let filteredNavPatronList = this.isOnlyThisSite && this.selectedSiteName
             ? this.navPatronList.filter(item => (item.SiteCode?.toLowerCase() || "").includes(this.selectedSiteName.toLowerCase()))
             : this.navPatronList;
@@ -288,7 +297,7 @@ export class PatronListModalPage implements OnInit {
 
         this.disableLoadMore = this.loadMoreClicks >= maxClicks;
 
-        this.filteredPatronList = this.getPatronImages(this.filteredPatronList);
+        this.filteredPatronList = await this.getPatronImages(this.filteredPatronList);
     }
 
     public blurInputElement() {

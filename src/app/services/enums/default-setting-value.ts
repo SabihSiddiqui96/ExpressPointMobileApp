@@ -51,5 +51,11 @@ export enum DefaultSettingValue {
     ALNUMPIN = '0',
     PARTIALPAY = '0',
     BIRTHSH = '1',
-    PREFNAME = '1'
+    PREFNAME = '1',
+    USEPPSORL = '0',
+    TRASYNINT = '1',
+    PATSYNINT = '5',
+    TERHBTINT = '30',
+    PREVACINT = '2',
+    TRASTAINT = '5',
 }

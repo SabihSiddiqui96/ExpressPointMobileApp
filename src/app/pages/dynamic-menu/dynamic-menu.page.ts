@@ -48,6 +48,7 @@ import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popu
 import { UnidentifiedPatronPopupPage } from '../menu-service/components/unidentified-patron-popup/unidentified-patron-popup.page';
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
+import { MathService } from '../../services/math.service';
 
 enum Contributors {
     Fruit = 1,
@@ -353,6 +354,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         public utilService: UtilService, public http: HttpService,
         public lookUpService: LookupService, public patronLookup: PatronLookupPage, private dynamicMenusDB: DynamicMenusDBService,
         public switchHandsService: SwitchHandsService,
+        private mathService: MathService,
         public transactionService: TransactionService, private elRef: ElementRef,
         public menuGridService: MenugridService, public restrictService: RestrictionsService,
         public popupMessageService: PopupMessageService, public platform: Platform, public renderer: Renderer2,
@@ -1117,37 +1119,28 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 console.error(err);  // Handle errors
             });
 
-        this.utilService.isNetworkOnline().then((isNetworkOnline) => {
-            if (this.utilService.isAppOnline) { // this.network.type != 'none' || navigator.onLine
-                if (this.patronId) {
-                    this.lookUpService.getPersonImage(this.patronId).then((data) => {
-                        if (data) {
-                            this.patronImageLoad(data);                            
-                        } else {
-                            this.isPatronHavingImage = false;
-                            this.largeImageToShow = false;
-                            this.largeImageIsShowing = false;
-                            setTimeout(() => {
-                                this.patronImageLoad();
-                            }, 100);                            
-                        }
-                    }, e => {
-                        console.log(e);
+            if (this.patronId && this.patronDetails.HasImage == 1) {
+                this.lookUpService.getPersonImage(this.patronId).then((data) => {
+                    if (data) {
+                        this.patronImageLoad(data);                            
+                    } else {
                         this.isPatronHavingImage = false;
                         this.largeImageToShow = false;
                         this.largeImageIsShowing = false;
                         setTimeout(() => {
                             this.patronImageLoad();
-                        }, 100);
-                    }, () => {
-                    });
-                } else {
+                        }, 100);                            
+                    }
+                }, e => {
+                    console.log(e);
                     this.isPatronHavingImage = false;
                     this.largeImageToShow = false;
                     this.largeImageIsShowing = false;
-                }
-            }
-            else {
+                    setTimeout(() => {
+                        this.patronImageLoad();
+                    }, 100);
+                });
+            } else {
                 this.isPatronHavingImage = false;
                 this.largeImageToShow = false;
                 this.largeImageIsShowing = false;
@@ -1159,8 +1152,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (inputDirId) {
                 this.patronDetails.InputDirection = inputDirId;
                 sessionStorage.removeItem(this.patronDetails.Identifier);
-            }            
-        });
+            } 
 
         // **********!!!!TO DO: Menu Item Restrictions with Dynamic Menus!!!!!!!!!******** */
 
@@ -1470,7 +1462,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     alaItems.map(a => {
                         previousALCAmt += a.Price;
                     });
-                    this.patronDetails.ALCDaily = previousALCAmt; // Daily ALC Calculated value
+                    this.patronDetails.ALCDaily = this.mathService.convertToNumber(previousALCAmt); // Daily ALC Calculated value
                 }
                 // previousALCCount = alaCarteItems.length;
                 if (this.patronDetails.NoOfAlaCarteAllowedForPerson != null) {
@@ -1582,13 +1574,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.patronDetails.DailyALCRestriction || this.patronDetails.MonthlyALCRestriction || this.patronDetails.WeeklyALCRestriction) {
             const amounts = [];
             if (this.patronDetails.DailyALCRestriction != null) {
-                amounts.push(this.patronDetails.DailyALCRestriction - this.patronDetails.ALCDaily);
+                amounts.push(this.mathService.subtract(this.patronDetails.DailyALCRestriction, this.patronDetails.ALCDaily));
             }
             if (this.patronDetails.MonthlyALCRestriction != null) {
-                amounts.push(this.patronDetails.MonthlyALCRestriction - aLCMonthly);
+                amounts.push(this.mathService.subtract(this.patronDetails.MonthlyALCRestriction, aLCMonthly));
             }
             if (this.patronDetails.WeeklyALCRestriction != null) {
-                amounts.push(this.patronDetails.WeeklyALCRestriction - aLCWeekly);
+                amounts.push(this.mathService.subtract(this.patronDetails.WeeklyALCRestriction, aLCWeekly));
             }
             remainingAmt = _.min(amounts);
             this.patronDetails.AvailableAmountForAlaCartePurchases = remainingAmt;
@@ -1959,7 +1951,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if ((isRestrictedItem !== -1 || isRestrictedCategory !== -1) &&
             this.patronDetails.isSpecialAccount === false &&
             this.patronDetails.IsStudent === true) { // IsStudent Check
-            this.alacarteTotal = this.alacarteTotal - this.orderData.items[index]['Price'];
+            this.alacarteTotal = this.mathService.subtract(this.alacarteTotal, this.orderData.items[index]['Price']);
             this.restrictedAlacarteCount = this.restrictedAlacarteCount - 1;
 
         }
@@ -1982,7 +1974,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 });
 
                 if (this.orderData.items[i]['IsReimbursable']) {
-                    itemPrice = itemPrice + this.orderData.items[i]['Price'];
+                    itemPrice = this.mathService.add(itemPrice, this.orderData.items[i]['Price']);
                     this.mealCount = this.mealCount - 1;
                 } else {
                     cartItems.push(this.orderData.items[i]);
@@ -4537,7 +4529,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         }
 
-        if (this.isSpecialAccount || (this.patronDetails.Balance - this.orderData.accountBalance) < 0) {
+        if (this.isSpecialAccount || this.mathService.subtract(this.patronDetails.Balance, this.orderData.accountBalance) < 0) {
             console.log('balance-acBalance<0');
 
             if (this.isSpecialAccount) {
@@ -4587,7 +4579,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         // this.Setting_ActionWhenBelowChargeLimit = 1;
         // 1=user decsion, 2=sale with some cash, 3=no sale
 
-        const projectedBalance = accountBalance - saleTotal + paymentAmount;
+        const projectedBalance = this.mathService.add(this.mathService.subtract(accountBalance, saleTotal), paymentAmount);
 
         creditLimit = -creditLimit;
         creditLimitAlaCarte = -creditLimitAlaCarte;
@@ -4654,8 +4646,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         } else if (this.sepChargeLimit) { // Work in Progress for US
             this.alacarteTotal = this.calcAlaTotal(this.orderData["items"]);
-            const alaProjBal = accountBalance - this.alacarteTotal;
-            const reimProjBal = accountBalance - (saleTotal - this.alacarteTotal);
+            const alaProjBal = this.mathService.subtract(accountBalance, this.alacarteTotal);
+            const reimProjBal = this.mathService.subtract(accountBalance, this.mathService.subtract(saleTotal, this.alacarteTotal));
 
             const saleHasOnlyOneReimbursableMeal = (this.mealCount === 1) ? this.alacarteCount > 0 ? false : true : false;
             const saleHasBothReimbursableMealsAndAlacarteItems = (this.mealCount > 0 && this.alacarteCount > 0) ? true : false;
@@ -4750,7 +4742,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         const saleTotalOfJustALaCarteItems = this.alacarteTotal;
 
         if (saleHasOnlyOneReimbursableMeal ||
-            saleTotalOfJustALaCarteItems <= (accountBalance + paymentAmount) ||
+            saleTotalOfJustALaCarteItems <= this.mathService.add(accountBalance, paymentAmount) ||
             !this.setting.Setting_ChargeReimbursableMealsOnly) {
             if (showPromptToAllowDecisionToUser) {
 
@@ -5005,7 +4997,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.patronDetails['Balance'] >= this.orderData.totalAmount) {
             return 0;
         } else if (this.patronDetails['Balance'] > 0 && this.patronDetails['Balance'] < this.orderData.totalAmount) {
-            return (this.orderData.totalAmount - this.patronDetails['Balance']);
+            return this.mathService.subtract(this.orderData.totalAmount, this.patronDetails['Balance']);
         } else {
             return this.orderData.totalAmount;
         }
@@ -6023,7 +6015,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     if ((isRestrictedItem != -1 || isRestrictedCategory != -1) && this.isSpecialAccount === false && this.patronDetails.IsStudent === true) { // IsStudent Check
                         /////////////////////////////////////////////////////////////////
 
-                        if ((this.alacarteTotal + currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
+                        if (this.mathService.add(this.alacarteTotal, currPrice) > this.patronDetails['AvailableAmountForAlaCartePurchases'] &&
                             this.patronDetails['AvailableAmountForAlaCartePurchases'] != null && this.ALACASREST) {
                             this.restrictedAlacarteCount--;
                             this.alacarteCount = this.alacarteCount - 1;
@@ -6038,7 +6030,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             }
                             return;
                         } else {
-                            this.alacarteTotal = this.alacarteTotal + currPrice;
+                            this.alacarteTotal = this.mathService.add(this.alacarteTotal, currPrice);
                             // this.utilService.setLoader(false);
                         }
                         /** Vikram - comments
@@ -6994,7 +6986,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (this.isValidMenuItemArray || this.transactionInProgress) {
             return true;
         } else if (isSpecialAccount === true && Object.keys(this.selectedAccountDetails).length !== 0) {
-            const projBal = this.selectedAccountDetails.Balance - this.orderData.totalAmount;
+            const projBal = this.mathService.subtract(this.selectedAccountDetails.Balance, this.orderData.totalAmount);
             if (itemLen > 0 && totAmount >= 0.00 && projBal >= 0) { // To enable Charge button when account is linked to adult
                 return false;
             } else {
@@ -7206,7 +7198,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             });
         
         this.patronImage = null;
-        if (this.utilService.isAppOnline) {
+        if (this.selectedAccountDetails.HasImage == 1) {
             this.lookUpService.getPersonImage(this.selectedAccountDetails.PersonId).then((image) => {
                 if (image) {
                     this.patronImage = image;

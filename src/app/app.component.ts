@@ -50,6 +50,7 @@ import { SetupDbService } from "./services/setup-db.service";
 import { LocalTimerService } from "./services/local-timer.service";
 import { SessionType } from "./services/enums/session-types";
 import { SyncService } from "./services/syncService.service";
+import { PersonImageService } from "./services/person-image.service";
 
 declare var Fullscreen: any;
 @Component({
@@ -140,11 +141,11 @@ export class AppComponent {
     LivePaymentsForPatron: false,
     LoadStudentImages: true,
     LiveDataFromOtherTerminals: true,
-    SyncTransactionData: "1",
-    SyncStudentDetail: "5",
-    SyncTerminalHeartbeat: "30",
-    SyncAccountDetail: "2",
-    SyncTransactionStatus: "3"
+    SyncTransactionData: SettingService.getSettingValue("TRASYNINT") || "1", 
+    SyncStudentDetail: SettingService.getSettingValue("PATSYNINT") || "5",
+    SyncTerminalHeartbeat: SettingService.getSettingValue("TERHBTINT") || "30",
+    SyncAccountDetail: SettingService.getSettingValue("PREVACINT") || "2",
+    SyncTransactionStatus: SettingService.getSettingValue("TRASTAINT") || "5"
   }
 
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
@@ -185,6 +186,7 @@ export class AppComponent {
     public settingService: SettingService,
     public authService: AuthService,
     public timerService: LocalTimerService,
+    public personImageService: PersonImageService,
     public keyboard: Keyboard, public signalRService: SignalRService, public setupDbService: SetupDbService
   ) {
     if (AppStateService.get("login_details")) {
@@ -198,7 +200,8 @@ export class AppComponent {
       AppStateService.set('performanceOptions', this.performanceOptions);
     }
     else {
-      this.performanceOptions = (AppStateService.get('performanceOptions'));
+      //this.performanceOptions = (AppStateService.get('performanceOptions'));
+      AppStateService.set('performanceOptions', this.performanceOptions);
     }
 
     if (!utilService.isDevEnv()) {
@@ -795,7 +798,7 @@ export class AppComponent {
 
         this.syncHeartbeatInterval = setInterval(
           this.checkHeartbeat.bind(this),
-          this.performanceOptions.SyncTerminalHeartbeat != null && this.performanceOptions.SyncTerminalHeartbeat != undefined ? 1000 * 60 * Number(this.performanceOptions.SyncTerminalHeartbeat) : 1000 * 40
+          this.performanceOptions.SyncTerminalHeartbeat != null && this.performanceOptions.SyncTerminalHeartbeat != undefined ? 1000 * 60 * Number(this.performanceOptions.SyncTerminalHeartbeat) : 1000 * 120
         );
       })
       .catch(function (e) {
@@ -1239,6 +1242,7 @@ export class AppComponent {
                 this.pouchQuery.PostDeviceSettings().then(() => { });
                 this.pouchQuery.PostSessionCheck().then(() => { });
                 this.pouchQuery.PostSessionCard().then(() => { });
+                this.pouchQuery.PostTerminalSystemInfo().then(() => { });
                 this.pouchQuery.PostClassRoomSales().then(() => {
                   this.pouchQuery.PostCloseSessionDocs().then(() => {
                     this.pouchQuery.PostNoMealSaleInClassroomSale().then(() => {
@@ -1357,6 +1361,9 @@ export class AppComponent {
         return false;
       }
 
+    }
+    if (this.utilService.isElectronApp()) {
+      this.personImageService.deletePersonImagesFromLocalDB();
     }
     this.utilService.setLoader(true);
     this.navCtrl.navigateRoot("logout");

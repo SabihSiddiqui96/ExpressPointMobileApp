@@ -26,7 +26,7 @@ export class HttpService {
 
     public getLoginToken(userdata): any {
         const selectedDistrict = JSON.parse(AppStateService.get('selectedDistrict'));
-        const LOGIN_URL = AppStateService.get('LOGIN_URL') ? AppStateService.get('LOGIN_URL') : '' || '';
+        const LOGIN_URL = AppStateService.get('LOGIN_URL') ? AppStateService.get('LOGIN_URL') : '';
         // const LOGIN_URL = AppStateService.get('selectedDistrict') ? selectedDistrict.loginUrl : '' || '';
 
         const scopeData = [];
@@ -259,6 +259,15 @@ export class HttpService {
         return this.http.get(API_URL + 'GetPersonImage/' + personId).pipe(map(res => res));
     }
 
+    public GetPersonImagesBySchoolId(): any {
+        const schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+        return this.http.get(API_URL + 'GetPicturesBySchoolId/' + schoolId).pipe(map(res => res));
+    }
+
+    public GetPersonImagesByPersonIds(personIds): any {
+        return this.http.post(API_URL + 'GetPicturesByPersonIds', personIds).pipe(map(res => res));
+    }
+
     public GetPersonTodaysPayments(accountId): any {
         return this.http.get(API_URL + 'GetTodaysPaymentsByAccount/' + accountId).pipe(map(res => res));
     }
@@ -486,6 +495,10 @@ export class HttpService {
         return this.http.post(API_URL + 'SyncPayment', JSON.stringify(postData)).pipe(map(res => res));
     }
 
+    public SaveTerminalSystemInfo(systemInfo): any {
+        return this.http.post(API_URL + 'SaveTerminalSystemInfo', JSON.stringify(systemInfo)).pipe(map(res => res));
+    }
+
     public postCloseSession_pouch(denominations, checks, total, sessionId, schoolId, terminalId, closeDateWithTime): any {
         return this.http.post(API_URL + 'SyncCloseSession',
             JSON.stringify({
@@ -551,6 +564,10 @@ export class HttpService {
 
     public SaveTransactionRecordList(orderData): any {
         return this.http.post(API_URL + 'RecordtransactionList', orderData).pipe(map(res => res));
+    }
+
+    public CheckTransactionStatusMultiple(transactionIds): any {
+        return this.http.post(API_URL + 'CheckTransactionStatusMultiple', transactionIds).pipe(map(res => res));
     }
 
     public postHeartBeat(terminalId, pending, sent, heartBeatTime, appVersion): any {
