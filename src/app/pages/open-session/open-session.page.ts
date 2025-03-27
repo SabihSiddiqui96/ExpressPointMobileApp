@@ -30,6 +30,7 @@ import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import moment from 'moment';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SyncService } from '../../services/syncService.service';
+import { MathService } from '../../services/math.service';
 
 @Component({
   selector: 'app-open-session',
@@ -184,6 +185,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     public popupMessageService: PopupMessageService, public router: Router,
     public appStateService: AppStateService, public pouchDBService: PouchDBService,
     public pouchQuery: PouchQueriesService,
+    public mathService: MathService,
     public keyboard: Keyboard
   ) {
     this.isCordovaApp = UtilService.isCordovaApp;
@@ -246,7 +248,13 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       this.type = this.router.getCurrentNavigation().extras.state.navData.type;
     }
 
-    this.getOpenSession();
+    this.getOpenSession()
+      .then(() => {
+        console.log('Denominations loaded and DOM updated successfully');
+      })
+      .catch(error => {
+        console.error('Error loading denominations:', error);
+      });
   }
 
   /**
@@ -615,85 +623,123 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     });
   }
 
-  public getOpenSession() {
+  public getOpenSession(): Promise<void> {
     this.utilService.setLoader(true);
 
-    PouchQueriesService.GetDenominations()
+    return PouchQueriesService.GetDenominations()
       .then(data => {
         this.denominationsList = data.rows.map(row => row.doc);
-        this.denominationsList = _.sortBy(this.denominationsList, [
-          d => d.Worth
-        ]);
+        this.denominationsList = _.sortBy(this.denominationsList, [d => d.Worth]);
         this.initDenominationDetails();
         this.utilService.setLoader(false);
+
+        // Wait for next render cycle to ensure DOM elements exist
+        return this.waitForInputElements();
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        this.utilService.setLoader(false);
+      });
   }
 
   public initDenominationDetails() {
-    for (const deno in this.denominationsList) {
-      if (this.denominationsList[deno].Type === 'COINS') {
-        this.denominationDetailsCoins.push({
-          DenominationId: this.denominationsList[deno].DenominationId,
-          Quantity: 0,
-          Total: 0 * this.denominationsList[deno].Worth,
-          Description: this.denominationsList[deno].Description,
-          Worth: this.denominationsList[deno].Worth,
-          Type: this.denominationsList[deno].Type
-        });
+    // Clear existing arrays
+    this.denominationDetailsCoins = [];
+    this.denominationDetailsBills = [];
+
+    // Use for...of instead of for...in for arrays
+    for (const denomination of this.denominationsList) {
+      const denominationObject = {
+        DenominationId: denomination.DenominationId,
+        Quantity: 0,
+        Total: 0, // 0 * Worth is always 0
+        Description: denomination.Description,
+        Worth: denomination.Worth,
+        Type: denomination.Type
+      };
+
+      if (denomination.Type === 'COINS') {
+        this.denominationDetailsCoins.push(denominationObject);
       } else {
-        this.denominationDetailsBills.push({
-          DenominationId: this.denominationsList[deno].DenominationId,
-          Quantity: 0,
-          Total: 0 * this.denominationsList[deno].Worth,
-          Description: this.denominationsList[deno].Description,
-          Worth: this.denominationsList[deno].Worth,
-          Type: this.denominationsList[deno].Type
-        });
+        this.denominationDetailsBills.push(denominationObject);
       }
     }
 
-    this.denominationDetailsCoins = _.sortBy(this.denominationDetailsCoins, [
-      d => d.Worth
-    ]);
+    // Sort the arrays by worth
+    this.denominationDetailsCoins = _.sortBy(this.denominationDetailsCoins, [d => d.Worth]);
+    this.denominationDetailsBills = _.sortBy(this.denominationDetailsBills, [d => d.Worth]);
+  }
 
-    this.denominationDetailsBills = _.sortBy(this.denominationDetailsBills, [
-      d => d.Worth
-    ]);
-    setTimeout(() => {
-      for (let i = 0; i < this.denominationDetailsCoins.length; i++) {
-        if (this.utilService.isPlatformAndroid()) {
-          const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-          if (input) {
-            input.setAttribute('type', 'tel');
-            input.setAttribute('pattern', '[0-9]');
-          }
-        } else {
-          const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-          if (input) {
-            input.setAttribute('type', 'text');
-            input.setAttribute('pattern', '[0-9]');
-          }
-
-        }
+  private waitForInputElements(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      // If we have no denominations, resolve immediately
+      if (this.denominationDetailsCoins.length === 0 && this.denominationDetailsBills.length === 0) {
+        resolve();
+        return;
       }
-      for (let i = 0; i < this.denominationDetailsBills.length; i++) {
-        if (this.utilService.isPlatformAndroid()) {
-          const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-          if (input) {
-            input.setAttribute('type', 'tel');
-            input.setAttribute('pattern', '[0-9]');
-          }
 
-        } else {
-          const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-          if (input) {
-            input.setAttribute('type', 'text');
-          }
+      // Set up observer to watch for DOM changes
+      const observer = new MutationObserver(() => {
+        if (this.checkForInputElements()) {
+          this.setupInputElements();
+          observer.disconnect();
+          resolve();
         }
-      }
-    }, 3000);
+      });
 
+      // First try immediate check with requestAnimationFrame
+      requestAnimationFrame(() => {
+        if (this.checkForInputElements()) {
+          this.setupInputElements();
+          resolve();
+        } else {
+          // Start observing if elements aren't available yet
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+
+          // Fallback timeout (3 seconds)
+          setTimeout(() => {
+            observer.disconnect();
+            this.setupInputElements(); // Try anyway
+            resolve();
+          }, 3000);
+        }
+      });
+    });
+  }
+
+  private checkForInputElements(): boolean {
+    // Check if at least one input element exists (if we have denominations)
+    return (this.denominationDetailsCoins.length === 0 ||
+      this.denominationDetailsCoins.some(coin =>
+        document.getElementById('' + coin.DenominationId))) &&
+      (this.denominationDetailsBills.length === 0 ||
+        this.denominationDetailsBills.some(bill =>
+          document.getElementById('' + bill.DenominationId)));
+  }
+
+  private setupInputElements(): void {
+    const isAndroid = this.utilService.isPlatformAndroid();
+
+    // Set up coin inputs
+    this.denominationDetailsCoins.forEach(coin => {
+      const input = document.getElementById('' + coin.DenominationId);
+      if (input) {
+        input.setAttribute('type', isAndroid ? 'tel' : 'text');
+        input.setAttribute('pattern', '[0-9]');
+      }
+    });
+
+    // Set up bill inputs
+    this.denominationDetailsBills.forEach(bill => {
+      const input = document.getElementById('' + bill.DenominationId);
+      if (input) {
+        input.setAttribute('type', isAndroid ? 'tel' : 'text');
+        input.setAttribute('pattern', '[0-9]');
+      }
+    });
   }
 
   // public onFocus(event, index) {
@@ -804,22 +850,18 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public openSession() {
 
     this.saveInProgress = true;
-    const sessionDenominations = [];
 
     const allDenominations = _.concat(
       this.denominationDetailsCoins,
       this.denominationDetailsBills
     );
-    for (const denodet of Object.keys(allDenominations)) {
-      let denoArray = {};
-      if (allDenominations.indexOf(denodet)) {
-        denoArray = {
-          DenominationId: allDenominations[denodet].DenominationId,
-          Quantity: parseInt(allDenominations[denodet].Quantity)
-        };
-        sessionDenominations.push(denoArray);
-      }
-    }
+    
+    // Create session denominations with uniqueness by DenominationId
+    const sessionDenominations = _.uniqBy(allDenominations, 'DenominationId')
+      .map(deno => ({
+        DenominationId: deno.DenominationId,
+        Quantity: parseInt(String(deno.Quantity || 0), 10) || 0
+      }));
 
     const sessionId = this.generateUUID();
 
@@ -1292,6 +1334,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       amount = 0;
       this.total = '$0.00';
     }
-    return amount;
+    return this.mathService.convertToNumber(amount);
   }
 }
