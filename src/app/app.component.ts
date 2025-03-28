@@ -420,6 +420,7 @@ export class AppComponent {
         this.event.publish("reTryConnectionCheckCompleted", null);
       });
     });
+    AppStateService.set('EnableInputLogging', false);
   }
 
   ngOnInit() {

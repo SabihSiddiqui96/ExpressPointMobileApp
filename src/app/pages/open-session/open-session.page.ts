@@ -31,6 +31,7 @@ import moment from 'moment';
 import { HttpService } from '../../services/HTTP/http.service';
 import { SyncService } from '../../services/syncService.service';
 import { MathService } from '../../services/math.service';
+import { FileService } from '../../services/fileService';
 
 @Component({
   selector: 'app-open-session',
@@ -186,6 +187,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     public appStateService: AppStateService, public pouchDBService: PouchDBService,
     public pouchQuery: PouchQueriesService,
     public mathService: MathService,
+    public fileService: FileService,
     public keyboard: Keyboard
   ) {
     this.isCordovaApp = UtilService.isCordovaApp;
@@ -966,6 +968,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         }
       }
     });
+    this.fileService.saveLogToCSVFile("OPEN_SESSION", "OPEN SESSION", 0);
   }
 
   public generateUUID() {

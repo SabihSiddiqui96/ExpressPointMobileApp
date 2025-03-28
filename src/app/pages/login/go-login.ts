@@ -23,6 +23,7 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
 import { SyncService } from '../../services/syncService.service';
+import { FileService } from '../../services/fileService';
 
 @Injectable()
 export class GoLogin implements OnDestroy {
@@ -53,6 +54,7 @@ export class GoLogin implements OnDestroy {
         public http: HttpService,
         public deviceService: DeviceService, public pouchQuery: PouchQueriesService, public router: Router,
         public appStateService: AppStateService,
+        public fileService: FileService,
         public syncService: SyncService,
         public settingService: SettingService, public signalRService: SignalRService
         , public setupDbService: SetupDbService, public deviceControlsService: DeviceControlsService) { // , public settingService:SettingService
@@ -225,7 +227,7 @@ export class GoLogin implements OnDestroy {
                                     'LastFailedLoginDate': new Date(data.UserDetails.lastFailedLoginDate).getTime(),
                                     'IsValid': data.UserDetails.IsValid
                                 };
-
+                                this.fileService.deleteOldLogFiles();
                             } else {
                                 this.utilService.showToast('Invalid Login Details');
                             }

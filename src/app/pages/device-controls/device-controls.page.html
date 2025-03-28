@@ -86,6 +86,12 @@
           <ion-toggle slot="end" color="slate" [(ngModel)]="CheckIfPinEntered" (ionChange)="OnChangeCheckIfPinEntered($event)">
           </ion-toggle>
         </ion-item>
+        <ion-item *ngIf='isElectronApp' title="Enabling Input Logging may affect performance" lines="none"
+          class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Enable Input Logging</ion-label>
+          <ion-toggle slot="end" color="slate" [checked]="EnableInputLogging" (ionChange)="OnChangeEnableInputLogging($event)">
+          </ion-toggle>
+        </ion-item>
       </div>
     </ion-col>
   </ion-row>

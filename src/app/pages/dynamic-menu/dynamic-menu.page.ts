@@ -49,6 +49,7 @@ import { UnidentifiedPatronPopupPage } from '../menu-service/components/unidenti
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { MathService } from '../../services/math.service';
+import { FileService } from '../../services/fileService';
 
 enum Contributors {
     Fruit = 1,
@@ -350,7 +351,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
-        private cdr: ChangeDetectorRef,
+        private cdr: ChangeDetectorRef, public fileService: FileService,
         public utilService: UtilService, public http: HttpService,
         public lookUpService: LookupService, public patronLookup: PatronLookupPage, private dynamicMenusDB: DynamicMenusDBService,
         public switchHandsService: SwitchHandsService,
@@ -4043,6 +4044,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                                     })
                                         .then(() => {
+                                            const identifier = this.patronDetails?.PersonIdentifier ?? this.patronDetails?.Identifier ?? "UNKNOWN";
+                                            const inputDirection = this.patronDetails?.InputDirection ?? 0;
+                                            this.fileService.saveLogToCSVFile(identifier, "TRANSACTION COMPLETE", inputDirection);
                                             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
                                             const spId = AppStateService.get('SpecialRosterId');
                                             // let hmId = AppStateService.get('HomeroomId');
@@ -4831,6 +4835,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         }
 
+
+        let identifier = this.patronDetails.PersonIdentifier ?? this.patronDetails.Identifier; // Use Identifier if PersonIdentifier is null or undefined
+        const inputDirection = (this.patronDetails.InputDirection === null || this.patronDetails.InputDirection === 0) ? 0 : this.patronDetails.InputDirection;
+        this.fileService.saveLogToCSVFile(identifier, "VOID", inputDirection);
 
         this.transactionInProgress = false;
 
@@ -6828,6 +6836,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 let lookupResults;
                 if (data.docs.length > 0) {
                     lookupResults = JSON.parse(JSON.stringify(data.docs[0]));
+                    const identifier = lookupResults?.PersonIdentifier ?? lookupResults?.Identifier ?? "UNKNOWN";
+                    const inputDirection = lookupResults?.InputDirection ?? 0;
+                    this.fileService.saveLogToCSVFile(identifier, "PREVIOUS PATRON", inputDirection);
                 }
 
                 if (lookupResults) {

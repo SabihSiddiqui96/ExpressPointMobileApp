@@ -196,6 +196,7 @@ ngOnInit() {
       AppStateService.set('AllCatRemainOpen', AllCatRemainOpen);
       AppStateService.set('isOnlyThisSitePatrons', isOnlyThisSitePatrons);
       AppStateService.set('CheckIfPinEntered', checkIfPinEntered);
+      AppStateService.set('EnableInputLogging', false);
       if (performanceOptions != undefined && performanceOptions != '') {
         AppStateService.set('performanceOptions', performanceOptions);
       }
@@ -230,7 +231,8 @@ ngOnInit() {
         'isOnlyThisSitePatrons': isOnlyThisSitePatrons,
         'CheckIfPinEntered': checkIfPinEntered,
         'performanceOptions': performanceOptions,
-        'BackupAndRelaunchDate': backupAndRelaunchDate
+        'BackupAndRelaunchDate': backupAndRelaunchDate,
+        'EnableInputLogging': false
       }
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         resolve(null);

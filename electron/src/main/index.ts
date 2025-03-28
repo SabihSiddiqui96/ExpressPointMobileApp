@@ -454,9 +454,16 @@ if exist "%backupFolder%" (
     rd /s /q "%backupFolder%" >nul 2>&1
 )
 
-:: Step 3: Create a backup of the app folder
-echo Creating backup of the app folder...
-xcopy "%appFolder%" "%backupFolder%" /E /I /Y >nul 2>&1
+:: Step 3: Create backup excluding InputLogging folder
+mkdir "%backupFolder%" >nul 2>&1
+for /d %%i in ("%appFolder%\\*") do (
+    if /i "%%~nxi" neq "InputLogging" (
+        xcopy "%%i" "%backupFolder%\\%%~nxi\\" /E /I /Y >nul 2>&1
+    )
+)
+for %%i in ("%appFolder%\\*.*") do (
+    xcopy "%%i" "%backupFolder%\\" /Y >nul 2>&1
+)
 
 :: Step 4: Delete the IndexedDB folder inside ExpressPointData if it exists
 if exist "%appFolder%\\IndexedDB\\" (
@@ -1150,4 +1157,136 @@ async function fallbackPing(host: string): Promise<number> {
   });
 }
 
+const date_Present = new Date();
+const localDate = `${date_Present.getFullYear()}-${(date_Present.getMonth() + 1).toString().padStart(2, '0')}-${date_Present.getDate().toString().padStart(2, '0')}`;
+const logDir = path.join(process.env.PUBLIC, 'Documents', 'ExpressPointData', 'InputLogging');
+const inputLoggingPath = path.join(logDir, `InputLogging_${localDate}.txt`);
+
+ipcMain.on('save-logto-text-file', (event, text) => {
+  try {
+    // Check if the folder exists, create if not
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true }); // Ensures all directories in the path are created      
+    }
+
+    // Check if the file exists, create if not
+    if (!fs.existsSync(inputLoggingPath)) {
+      // Keep only the last ten log files
+      const files = fs.readdirSync(logDir).filter(file => file.startsWith('InputLogging_')).sort((a, b) => {
+        const aDate = new Date(a.replace('InputLogging_', '').replace('.txt', ''));
+        const bDate = new Date(b.replace('InputLogging_', '').replace('.txt', ''));
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      if (files.length > 10) {
+        const filesToDelete = files.slice(10);
+        filesToDelete.forEach(file => fs.unlinkSync(path.join(logDir, file)));
+      }
+      // If file doesn't exist, create it
+      fs.writeFileSync(inputLoggingPath, '', 'utf-8');
+    }
+
+    // Append the new data to the file
+    fs.appendFileSync(inputLoggingPath, text + '\n', 'utf-8');
+    event.reply('save-logto-text-file-success');
+  } catch (error) {
+    event.reply('save-logto-text-file-error', error.message);
+  }
+});
+
+ipcMain.on('delete-log-file', (event) => {
+  try {
+    if (fs.existsSync(inputLoggingPath)) {
+      fs.unlinkSync(inputLoggingPath);
+      event.reply('delete-log-file-success');
+    } else {
+      // Handle the case where the file doesn't exist (e.g., send a warning message)
+      event.reply('delete-log-file-not-found');
+    }
+  } catch (error) {
+    event.reply('delete-log-file-error', error);
+  }
+});
+
+const inputLoggingCSVPath = path.join(logDir, `InputLogging_${localDate}.csv`);
+ipcMain.on('save-logto-csv-file', (event, pinId, status, device) => {
+  try {
+    // Ensure the log directory exists
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+
+    // Check if the CSV file exists
+    const fileExists = fs.existsSync(inputLoggingCSVPath);
+
+    // Open the file in append mode
+    const stream = fs.createWriteStream(inputLoggingCSVPath, { flags: 'a' });
+
+    // Write the header if the file is new
+    if (!fileExists) {
+      stream.write('Timestamp,PIN/ID,Status,DEVICE\n');
+    }
+
+    // Get the current local timestamp with AM/PM format
+    const timestamp = new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+
+    // Append new data (wrap timestamp in quotes to keep it as one column)
+    stream.write(`"${timestamp}","${pinId}","${status}","${device}"\n`);
+    stream.end();
+    event.reply('save-logto-csv-file-success');
+  } catch (error) {
+    event.reply('save-logto-csv-file-error', error.message);
+  }
+});
+
+ipcMain.on('delete-old-log-files', (event) => {
+  try {
+    if (!fs.existsSync(logDir)) {
+      event.reply('delete-old-log-files-success');
+      return;
+    }
+    const files = fs.readdirSync(logDir)
+      .filter(file => file.startsWith('InputLogging_') && file.endsWith('.csv'));
+
+    const now = new Date();
+    const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
+
+    files.forEach(file => {
+      const fileName = file.replace('InputLogging_', '').replace('.csv', '');
+      const fileDate = new Date(fileName);
+
+      // Check if the file date is valid and if it's older than one month
+      if (isNaN(fileDate.getTime()) || fileDate < oneMonthAgo) {
+        fs.unlinkSync(path.join(logDir, file));
+        console.log(`Deleted log file: ${file} (Invalid date or older than one month)`);
+      }
+    });
+
+    // Cleanup old files (Keep only the last 10 logs)
+    const filesInInputLogging = fs.readdirSync(logDir)
+      .filter(file => file.startsWith('InputLogging_') && file.endsWith('.csv'))
+      .sort((a, b) => {
+        const aDate = new Date(a.replace('InputLogging_', '').replace('.csv', ''));
+        const bDate = new Date(b.replace('InputLogging_', '').replace('.csv', ''));
+        return bDate.getTime() - aDate.getTime();
+      });
+
+    if (filesInInputLogging.length > 10) {
+      const filesToDelete = filesInInputLogging.slice(10);
+      filesToDelete.forEach(file => fs.unlinkSync(path.join(logDir, file)));
+    }
+
+    event.reply('delete-old-log-files-success');
+  } catch (error) {
+    event.reply('delete-old-log-files-error', error.message);
+  }
+});
 //#endregion Peripherl Utility Methods
