@@ -29,6 +29,7 @@ import { SetupDbService } from '../../services/setup-db.service';
 import { DeviceControlsService } from '../../services/device-controls.service';
 import { SessionType } from '../../services/enums/session-types';
 import { SyncService } from '../../services/syncService.service';
+import { FileService } from '../../services/fileService';
 
 @Component({
   selector: 'app-login',
@@ -87,6 +88,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     public transactionService: TransactionService, public deviceService: DeviceService,
     public platform: Platform, public pouchQuery: PouchQueriesService, public electronService: ElectronService,
     public router: Router, public appStateService: AppStateService,
+    public fileService: FileService,
     public syncService: SyncService,
     public settingService: SettingService, private authService: AuthService,
     public signalRService: SignalRService,
@@ -94,7 +96,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
 
     super(_nav, loading, alertCtrl, network, sessionTimeOut, event, pouchDBService,
       modalCtrl, utilService, http,
-      deviceService, pouchQuery, router, appStateService, syncService,
+      deviceService, pouchQuery, router, appStateService, fileService, syncService,
       settingService, signalRService, setupDbService, deviceControlsService);
     this.isCordovaApp = UtilService.isCordovaApp;
     if (UtilService.isCordovaApp) {

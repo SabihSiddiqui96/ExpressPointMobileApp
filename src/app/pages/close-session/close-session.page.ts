@@ -23,6 +23,7 @@ import { SessionType } from '../../services/enums/session-types';
 import { SyncService } from '../../services/syncService.service';
 import { timer } from 'rxjs';
 import { MathService } from '../../services/math.service';
+import { FileService } from '../../services/fileService';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -131,6 +132,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         private alertCtrl: AlertController, public events: Events, private utilService: UtilService,
         public popupMessageService: PopupMessageService, private pouchQuery: PouchQueriesService,
         public router: Router, public appStateService: AppStateService,
+        public fileService: FileService,
         public syncService: SyncService,
         public mathService: MathService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public keyboard: Keyboard,
@@ -839,6 +841,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
         });
         this.events.publish('RefreshSideMenu', { 'OpenSession': false });
+        this.fileService.saveLogToCSVFile("CLOSE_SESSION", "CLOSE SESSION", 0);
     }
 
     public clickCheck() {

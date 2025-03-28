@@ -26,6 +26,7 @@ import { LoadingService } from "../../services/loading.service";
 import { EventType } from '../../services/enums/event-type';
 import { LogType } from '../../services/enums/log-type';
 import { LogsDBService } from '../../services/Database/logs-db.service';
+import { FileService } from '../../services/fileService';
 
 @Component({
     selector: 'page-patron-lookup',
@@ -185,6 +186,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         public loadingCtrl: LoadingController, public electronService: ElectronService,
         public router: Router, public appStateService: AppStateService, public settingService: SettingService,
         private cdr: ChangeDetectorRef,
+        private fileService: FileService,
         public pouchQuery: PouchQueriesService) {
         this.patronAccount = 'patron_pin';
         this.advancedPatron = 'by_patron';
@@ -1023,6 +1025,7 @@ export class PatronLookupPage implements OnInit, OnDestroy {
     }
 
     public lookupByPIN() {
+        this.fileService.saveLogToCSVFile(this.patronSearch.keyword, 'ENTER - UI', 0);
         this.logDBService.logData({
             event: EventType.LOOKUP,
             patronId: this.patronSearch.keyword,
@@ -1591,6 +1594,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
+                            let inpDire = queueInput.InputDirection == 0 ? 'ENTER - UI' : (queueInput.InputDirection == 2) ? 'EnterRight' : 'EnterLeft';
+                            const inputDirection = queueInput.InputDirection ?? 0;
+                            this.fileService.saveLogToCSVFile(incomingID, inpDire, Number(inputDirection));
                             this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length);                                                      
                             this.utilService.showModalPopup = false;
                             this.patronSearch.keyword = null;
@@ -1641,6 +1647,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                                 'PIN': incomingID,
                                 'InputDirection': event.code === 'NumpadEnter' ? 0 : sessionStorage.getItem(incomingID)
                             }
+                            let inpDire = queueInput.InputDirection == 0 ? 'ENTER - UI' : (queueInput.InputDirection == 2) ? 'EnterRight' : 'EnterLeft';
+                            const inputDirection = queueInput.InputDirection ?? 0;
+                            this.fileService.saveLogToCSVFile(incomingID, inpDire, Number(inputDirection));
                             this.lookUpService.setQ(queueInput, this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false && this.patronSearch.keyword != null && this.patronSearch.keyword.length);                             
                             this.utilService.showModalPopup = false;
                             this.patronSearch.keyword = null;
@@ -1983,6 +1992,9 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                     let lookupResults;
                     if (data.docs.length > 0) {
                         lookupResults = JSON.parse(JSON.stringify(data.docs[0]));
+                        const identifier = lookupResults?.PersonIdentifier ?? lookupResults?.Identifier ?? "UNKNOWN";
+                        const inputDirection = lookupResults?.InputDirection ?? 0;
+                        this.fileService.saveLogToCSVFile(identifier, "PREVIOUS PATRON", inputDirection);
                     }
 
                     if (lookupResults) {
