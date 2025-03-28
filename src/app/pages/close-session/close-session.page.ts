@@ -22,6 +22,7 @@ import { LocalTimerService } from '../../services/local-timer.service';
 import { SessionType } from '../../services/enums/session-types';
 import { SyncService } from '../../services/syncService.service';
 import { timer } from 'rxjs';
+import { MathService } from '../../services/math.service';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -131,6 +132,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         public popupMessageService: PopupMessageService, private pouchQuery: PouchQueriesService,
         public router: Router, public appStateService: AppStateService,
         public syncService: SyncService,
+        public mathService: MathService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public keyboard: Keyboard,
         private elementRef: ElementRef, public printService: PrintService, private route: ActivatedRoute) {
 
@@ -258,18 +260,27 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         //console.log(height,div,div_inner);*/
     }
 
-    public getOpenSession() {
+    public getOpenSession(): Promise<void> {
         this.utilService.setLoader(true);
 
-        PouchQueriesService.GetDenominations().
-            then((data) => {
+        // Initialize arrays to avoid potential issues
+        this.denominationDetailsCoins = [];
+        this.denominationDetailsBills = [];
+
+        return PouchQueriesService.GetDenominations()
+            .then((data) => {
                 this.denominationsList = data.rows.map(row => row.doc);
                 this.denominationsList = _.sortBy(this.denominationsList, [d => d.Worth]);
                 this.initDenominationDetails();
                 this.utilService.setLoader(false);
-            }).
-            catch((err) => {
+
+                // Wait for next render cycle to ensure DOM elements exist
+                return this.waitForDomElements();
+            })
+            .catch((err) => {
                 console.log(err);
+                this.utilService.setLoader(false);
+                return Promise.reject(err); // Properly propagate the error
             });
     }
 
@@ -288,7 +299,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             this.checkList = res.docs.map(doc => {
                 return {
                     'CheckNumber': doc.CheckNumber,
-                    'Amount': doc.Amount,
+                    'Amount': this.mathService.convertToNumber(doc.Amount),
                     'SessionCheckId': doc.SessionCheckId,
                     'SessionId': doc.SessionId,
                     'IsDeleted': doc.IsDeleted,
@@ -340,7 +351,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             this.cardList = res.docs.map(doc => {
                 return {
                     'CardNumber': doc.CardNumber,
-                    'Amount': doc.Amount,
+                    'Amount': this.mathService.convertToNumber(doc.Amount),
                     'SessionCardId': doc.SessionCardId,
                     'SessionId': doc.SessionId,
                     'IsDeleted': doc.IsDeleted,
@@ -356,71 +367,103 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
+    public initDenominationDetails(): void {
+        // Modern for...of loop instead of for...in for arrays
+        for (const denomination of this.denominationsList) {
+            const commonProps = {
+                'DenominationId': denomination.DenominationId,
+                'Quantity': 0,
+                'Total': 0,  // 0 * Worth is always 0
+                'Description': denomination.Description,
+                'Worth': denomination.Worth,
+                'Type': denomination.Type,
+            };
 
-
-    public initDenominationDetails() {
-
-        for (const deno in this.denominationsList) {
-
-            if (this.denominationsList[deno].Type === 'COINS') {
-
-                this.denominationDetailsCoins.push({
-                    'DenominationId': this.denominationsList[deno].DenominationId,
-                    'Quantity': 0,
-                    'Total': 0 * this.denominationsList[deno].Worth,
-                    'Description': this.denominationsList[deno].Description,
-                    'Worth': this.denominationsList[deno].Worth,
-                    'Type': this.denominationsList[deno].Type,
-                });
-
+            if (denomination.Type === 'COINS') {
+                this.denominationDetailsCoins.push(commonProps);
             } else {
-                this.denominationDetailsBills.push({
-                    'DenominationId': this.denominationsList[deno].DenominationId,
-                    'Quantity': 0,
-                    'Total': 0 * this.denominationsList[deno].Worth,
-                    'Description': this.denominationsList[deno].Description,
-                    'Worth': this.denominationsList[deno].Worth,
-                    'Type': this.denominationsList[deno].Type,
-                });
+                this.denominationDetailsBills.push(commonProps);
             }
         }
 
+        // Sort the arrays by worth
         this.denominationDetailsCoins = _.sortBy(this.denominationDetailsCoins, [d => d.Worth]);
-
         this.denominationDetailsBills = _.sortBy(this.denominationDetailsBills, [d => d.Worth]);
+    }
 
-        setTimeout(() => {
-            for (let i = 0; i < this.denominationDetailsCoins.length; i++) {
-                if (this.utilService.isPlatformAndroid()) {
-                    const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-                    if (input) {
-                        input.setAttribute('type', 'tel');
-                        input.setAttribute('pattern', '[0-9]');
-                    }
-                } else {
-                    const input = document.getElementById('' + this.denominationDetailsCoins[i].DenominationId);
-                    if (input) {
-                        input.setAttribute('type', 'text');
-                        input.setAttribute('pattern', '[0-9]');
-                    }
-                }
+    // Function to wait for DOM elements to be ready
+    private waitForDomElements(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            // If we have no denominations, resolve immediately
+            if (this.denominationDetailsCoins.length === 0 && this.denominationDetailsBills.length === 0) {
+                resolve();
+                return;
             }
-            for (let i = 0; i < this.denominationDetailsBills.length; i++) {
-                if (this.utilService.isPlatformAndroid()) {
-                    const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-                    if (input) {
-                        input.setAttribute('type', 'tel');
-                        input.setAttribute('pattern', '[0-9]');
-                    }
-                } else {
-                    const input = document.getElementById('' + this.denominationDetailsBills[i].DenominationId);
-                    if (input) {
-                        input.setAttribute('type', 'text');
-                    }
-                }
-            }
-        }, 3000);
 
+            // Set up observer to watch for DOM changes
+            const observer = new MutationObserver(() => {
+                if (this.checkForInputElements()) {
+                    this.setupInputElements();
+                    observer.disconnect();
+                    resolve();
+                }
+            });
+
+            // First try immediate check with requestAnimationFrame
+            requestAnimationFrame(() => {
+                if (this.checkForInputElements()) {
+                    this.setupInputElements();
+                    resolve();
+                } else {
+                    // Start observing if elements aren't available yet
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+
+                    // Fallback timeout (3 seconds)
+                    setTimeout(() => {
+                        observer.disconnect();
+                        this.setupInputElements(); // Try anyway
+                        resolve();
+                    }, 3000);
+                }
+            });
+        });
+    }
+
+    // Helper method to check if required elements exist
+    private checkForInputElements(): boolean {
+        // Check if at least one input element exists (if we have denominations)
+        return (this.denominationDetailsCoins.length === 0 ||
+            this.denominationDetailsCoins.some(coin =>
+                document.getElementById('' + coin.DenominationId))) &&
+            (this.denominationDetailsBills.length === 0 ||
+                this.denominationDetailsBills.some(bill =>
+                    document.getElementById('' + bill.DenominationId)));
+    }
+
+    // Separate function to set up input elements
+    private setupInputElements(): void {
+        const isAndroid = this.utilService.isPlatformAndroid();
+
+        // Configure coin inputs
+        for (const coin of this.denominationDetailsCoins) {
+            const input = document.getElementById('' + coin.DenominationId);
+            if (input) {
+                input.setAttribute('pattern', '[0-9]');
+                input.setAttribute('type', isAndroid ? 'tel' : 'text');
+            }
+        }
+
+        // Configure bill inputs
+        for (const bill of this.denominationDetailsBills) {
+            const input = document.getElementById('' + bill.DenominationId);
+            if (input) {
+                input.setAttribute('pattern', '[0-9]');
+                input.setAttribute('type', isAndroid ? 'tel' : 'text');
+            }
+        }
     }
 
     public checkforEnter(event: KeyboardEvent) {
@@ -694,7 +737,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
     public checkCloseSession() {
         this.saveInProgress = true;
-        if (this.total < this.openingBalance) {
+        if (this.mathService.convertToNumber(this.total) < this.mathService.convertToNumber(this.openingBalance)) {
             this.popupMessageService.showMessage(PopupMessageCode.E03302, null, false).then((data) => {
                 if (data) {
                     this.closeSession();
@@ -709,31 +752,27 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public closeSession() {
-        const sessionDenominations = [];
         const sessionCheck = [];
         const allDenominations = _.concat(this.denominationDetailsCoins, this.denominationDetailsBills);
-        for (const denodet of Object.keys(allDenominations)) {
-            let denoArray = {};
-            if (allDenominations.indexOf(denodet)) {
-                denoArray = {
-                    DenominationId: allDenominations[denodet].DenominationId,
-                    Quantity: parseInt(allDenominations[denodet].Quantity)
-                };
-                sessionDenominations.push(denoArray);
-            }
-        }
+        // Create session denominations with uniqueness by DenominationId
+        const sessionDenominations = _.uniqBy(allDenominations, 'DenominationId')
+            .map(deno => ({
+                DenominationId: deno.DenominationId,
+                Quantity: parseInt(String(deno.Quantity || 0), 10) || 0
+            }));
         const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
 
         this.utilService.setLoader(true);
 
         let closeSessionDoc;
+        const isSummarySalesCloseSession = this.router.url.includes('summary-sales-close-session');
 
-        if (this.router.url.includes('summary-sales-close-session')) {
+        if (isSummarySalesCloseSession) {
             closeSessionDoc = {
                 '_id': 'CloseSession--' + this.sessionId,
                 'SessionId': this.sessionId,
                 'SessionCheck': sessionCheck,
-                'ClosingBalance': this.total,
+                'ClosingBalance': this.mathService.convertToNumber(this.total),
                 'SessionType': SessionType.MANUALSALE,
                 'CloseDateWithTime': currentTime,
                 'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
@@ -745,7 +784,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 '_id': 'CloseSession--' + AppStateService.get('session_id'),
                 'SessionId': AppStateService.get('session_id'),
                 'SessionCheck': sessionCheck,
-                'ClosingBalance': this.total,
+                'ClosingBalance': this.mathService.convertToNumber(this.total),
                 'CloseDateWithTime': currentTime,
                 'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
                 'TerminalId': this.terminalId,
@@ -786,13 +825,15 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 if (closeSessionDoc.SessionType === SessionType.EXPRESSPOINT) {
                 AppStateService.remove('session_id');
                 }
-                if (this.router.url.includes('summary-sales-close-session') == false) {
+                if (isSummarySalesCloseSession == false) {
                     AppStateService.remove('TransactionNumber');
                 }
                 AppStateService.remove('BonusAmount');
                 this.utilService.setLoader(false);
-                this.syncService.updateToServerInterval(Number(SettingService.getSettingValue("TRASYNINT") || "1"), true);
-                this._nav.navigateRoot('service-selection', { queryParams: { isFromCloseService: true } });
+                setTimeout(() => {
+                    this.syncService.updateToServerInterval(Number(SettingService.getSettingValue("TRASYNINT") || "1"), true);
+                }, 2000);
+                this._nav.navigateRoot('service-selection', { queryParams: { isFromCloseService: !isSummarySalesCloseSession } });
 
             });
 
@@ -843,12 +884,12 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 'Checks': this.checkList,
                 'Cards': this.cardList,
                 'OpeningBalance': Number(this.openingBalance).toFixed(2),
-                'ClosingBalance': this.total,
-                'TotalCash': this.denominationTotalBills + this.denominationTotalCoins,
-                'TotalChecks': this.checkTotal,
-                'TotalCard': this.cardTotal,
-                'TotalClosing': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal,
-                'NetBalance': this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal - this.openingBalance,
+                'ClosingBalance': this.mathService.convertToNumber(this.total),
+                'TotalCash': this.mathService.add(this.denominationTotalBills, this.denominationTotalCoins),
+                'TotalChecks': this.mathService.convertToNumber(this.checkTotal),
+                'TotalCard': this.mathService.convertToNumber(this.cardTotal),
+                'TotalClosing': this.mathService.convertToNumber(this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal),
+                'NetBalance': this.mathService.convertToNumber(this.denominationTotalBills + this.denominationTotalCoins + this.checkTotal - this.openingBalance),
                 'Date': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
                     { hour: 'numeric', minute: 'numeric', hour12: true })
             };

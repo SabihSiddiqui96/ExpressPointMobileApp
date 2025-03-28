@@ -621,20 +621,38 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.event.destroy('default-terminal-menu:save');
         this.event.subscribe('default-terminal-menu:save', () => {
             this.GetDaySelection();
-            const defaultMenuDoc = {
-                '_id': 'TerminalDefaultMenu--' + this.terminalId + '--' + this.selectedMealType,
-                'TerminalId': this.terminalId,
-                'MenuGridId': this.selectedMenuType,
-                'MealTypeId': this.selectedMealType,
-                'ServingDays': this.daySelected,
-                'DefaultMenuItem': 0,
-                'MenuGridName': this.selectedMenuTypeName,
-                'IsSynced': false
-            };
+            if (!this.terminalId || this.terminalId === 0) {
+                const deviceInfo = AppStateService.get('DeviceInfo');
+                const siteDetails = AppStateService.get('site_details');
 
-            //this.terminalDefaultMenu.push(defaultMenuDoc);
+                try {
+                    if (deviceInfo) {
+                        const parsedDeviceInfo = JSON.parse(deviceInfo);
+                        this.terminalId = parsedDeviceInfo.TerminalId || 0;  // Default to 0 if TerminalId is missing
+                    } else if (siteDetails) {
+                        this.terminalId = JSON.parse(siteDetails).TerminalId || 0; // Default to 0 if TerminalId is missing
+                    }
+                } catch (error) {
+                    console.error("Error parsing data:", error);
+                    this.terminalId = 0; // Set to 0 if parsing fails
+                }
+            }
+            if (this.selectedMenuType !== -1 && this.selectedMealType !== -1) {
+                const defaultMenuDoc = {
+                    '_id': 'TerminalDefaultMenu--' + this.terminalId + '--' + this.selectedMealType,
+                    'TerminalId': this.terminalId,
+                    'MenuGridId': this.selectedMenuType,
+                    'MealTypeId': this.selectedMealType,
+                    'ServingDays': this.daySelected,
+                    'DefaultMenuItem': 0,
+                    'MenuGridName': this.selectedMenuTypeName,
+                    'IsSynced': this.terminalId === 0 // TerminalId not found, no need to Sync
+                };
 
-            this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType, defaultMenuDoc);
+                //this.terminalDefaultMenu.push(defaultMenuDoc);
+
+                this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType, defaultMenuDoc);
+            }
 
         });
 
