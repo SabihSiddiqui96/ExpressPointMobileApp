@@ -3506,7 +3506,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         .then(() => {
                                             const identifier = this.patronDetails?.PersonIdentifier ?? this.patronDetails?.Identifier ?? "UNKNOWN";
                                             const inputDirection = this.patronDetails?.InputDirection ?? 0;
-                                            this.fileService.saveLogToCSVFile(identifier, "TRANSACTION COMPLETE", inputDirection);
+                                            this.fileService.saveLogToCSVFile(identifier, transactionType == 0 ? "VOID" : "TRANSACTION COMPLETE", inputDirection);
                                             if (this.menuGrid['Buttons'].length) {
                                                 for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
                                                     this.menuGrid['Buttons'][k]['restrictedItem'] = false;

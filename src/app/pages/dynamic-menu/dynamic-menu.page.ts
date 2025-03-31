@@ -4046,7 +4046,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         .then(() => {
                                             const identifier = this.patronDetails?.PersonIdentifier ?? this.patronDetails?.Identifier ?? "UNKNOWN";
                                             const inputDirection = this.patronDetails?.InputDirection ?? 0;
-                                            this.fileService.saveLogToCSVFile(identifier, "TRANSACTION COMPLETE", inputDirection);
+                                            this.fileService.saveLogToCSVFile(identifier, transactionType == 0 ? "VOID" : "TRANSACTION COMPLETE", inputDirection);
                                             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
                                             const spId = AppStateService.get('SpecialRosterId');
                                             // let hmId = AppStateService.get('HomeroomId');
