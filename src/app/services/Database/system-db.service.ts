@@ -133,7 +133,8 @@ export class SystemDBService {
         'CheckIfPinEntered': checkIfPinEntered,
         'performanceOptions': performanceOptions,
         'isOnlyThisSitePatrons': isOnlyThisSitePatrons,
-        'BackupAndRelaunchDate': backupAndRelaunchDate
+        'BackupAndRelaunchDate': backupAndRelaunchDate,
+        'EnableInputLogging': false
       };
       PouchDBService.UpsertSingleDoc(dataforofflineUse, EXP_SYSTEM).then(() => {
         this.syncStatus = 'Success';

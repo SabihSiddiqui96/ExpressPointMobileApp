@@ -59,6 +59,7 @@ import { PauseOptions } from '../../services/Database/autoserve-pause-options.in
 import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 import { UnidentifiedPatronPopupPage } from './components/unidentified-patron-popup/unidentified-patron-popup.page';
 import { MathService } from '../../services/math.service';
+import { FileService } from '../../services/fileService';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -365,6 +366,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public logDBService: LogsDBService,
         private mathService: MathService,
         private cdr: ChangeDetectorRef,
+        public fileService: FileService,
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
         this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
@@ -621,20 +623,38 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.event.destroy('default-terminal-menu:save');
         this.event.subscribe('default-terminal-menu:save', () => {
             this.GetDaySelection();
-            const defaultMenuDoc = {
-                '_id': 'TerminalDefaultMenu--' + this.terminalId + '--' + this.selectedMealType,
-                'TerminalId': this.terminalId,
-                'MenuGridId': this.selectedMenuType,
-                'MealTypeId': this.selectedMealType,
-                'ServingDays': this.daySelected,
-                'DefaultMenuItem': 0,
-                'MenuGridName': this.selectedMenuTypeName,
-                'IsSynced': false
-            };
+            if (!this.terminalId || this.terminalId === 0) {
+                const deviceInfo = AppStateService.get('DeviceInfo');
+                const siteDetails = AppStateService.get('site_details');
 
-            //this.terminalDefaultMenu.push(defaultMenuDoc);
+                try {
+                    if (deviceInfo) {
+                        const parsedDeviceInfo = JSON.parse(deviceInfo);
+                        this.terminalId = parsedDeviceInfo.TerminalId || 0;  // Default to 0 if TerminalId is missing
+                    } else if (siteDetails) {
+                        this.terminalId = JSON.parse(siteDetails).TerminalId || 0; // Default to 0 if TerminalId is missing
+                    }
+                } catch (error) {
+                    console.error("Error parsing data:", error);
+                    this.terminalId = 0; // Set to 0 if parsing fails
+                }
+            }
+            if (this.selectedMenuType !== -1 && this.selectedMealType !== -1) {
+                const defaultMenuDoc = {
+                    '_id': 'TerminalDefaultMenu--' + this.terminalId + '--' + this.selectedMealType,
+                    'TerminalId': this.terminalId,
+                    'MenuGridId': this.selectedMenuType,
+                    'MealTypeId': this.selectedMealType,
+                    'ServingDays': this.daySelected,
+                    'DefaultMenuItem': 0,
+                    'MenuGridName': this.selectedMenuTypeName,
+                    'IsSynced': this.terminalId === 0 // TerminalId not found, no need to Sync
+                };
 
-            this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType, defaultMenuDoc);
+                //this.terminalDefaultMenu.push(defaultMenuDoc);
+
+                this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType, defaultMenuDoc);
+            }
 
         });
 
@@ -3484,6 +3504,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         // this.voidOrder();
                                     })
                                         .then(() => {
+                                            const identifier = this.patronDetails?.PersonIdentifier ?? this.patronDetails?.Identifier ?? "UNKNOWN";
+                                            const inputDirection = this.patronDetails?.InputDirection ?? 0;
+                                            this.fileService.saveLogToCSVFile(identifier, transactionType == 0 ? "VOID" : "TRANSACTION COMPLETE", inputDirection);
                                             if (this.menuGrid['Buttons'].length) {
                                                 for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
                                                     this.menuGrid['Buttons'][k]['restrictedItem'] = false;
@@ -3785,6 +3808,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
         // tslint:disable-next-line:max-line-length
         this.patronDetails.isSpecialAccount ? this.lookUpService.popPersonFromQ(this.patronDetails.PersonName) : this.lookUpService.popPersonFromQ(this.patronDetails.Identifier);
 
+        let identifier = this.patronDetails.PersonIdentifier ?? this.patronDetails.Identifier; // Use Identifier if PersonIdentifier is null or undefined
+        const inputDirection = (this.patronDetails.InputDirection === null || this.patronDetails.InputDirection === 0) ? 0 : this.patronDetails.InputDirection;
+        this.fileService.saveLogToCSVFile(identifier, "VOID", inputDirection);
         this.restrictedAlacarteCount = 0;
         this.alacarteTotal = 0.00;
         this.patronDetails = {};
@@ -4111,6 +4137,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 let lookupResults;
                 if (data.docs.length > 0) {
                     lookupResults = JSON.parse(JSON.stringify(data.docs[0]));
+                    const identifier = lookupResults?.PersonIdentifier ?? lookupResults?.Identifier ?? "UNKNOWN";
+                    const inputDirection = lookupResults?.InputDirection ?? 0;
+                    this.fileService.saveLogToCSVFile(identifier, "PREVIOUS PATRON", inputDirection);
                 }
 
                 if (lookupResults) {

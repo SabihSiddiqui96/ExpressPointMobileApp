@@ -20,6 +20,7 @@ import { EventType } from './enums/event-type';
 import { PersonService } from './person.service';
 import { Router } from '@angular/router';
 import { PersonImageService } from './person-image.service';
+import { FileService } from './fileService';
 // import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable({
@@ -50,6 +51,7 @@ export class LookupService {
         private popupMessageService: PopupMessageService,
         private event: Events, private modalCtrl: ModalController,
         public router: Router,
+        private fileService: FileService,
         public personImageService: PersonImageService,
         public pouchQryService: PouchQueriesService,
         private electronService: ElectronService, private personService: PersonService) {
@@ -96,6 +98,8 @@ export class LookupService {
             const handleQueueInput = async (event, queueInput) => {
                 this.localtimer_device = new Date(this.utilService.getSessionDate()).getTime();
                 AppStateService.set('localTimerSearchPatron_Device', this.localtimer_device);
+                const inputDirection = queueInput.InputDirection ?? 0;
+                this.fileService.saveLogToCSVFile(queueInput.PIN, "QUEUE", inputDirection);
                 const keywordSearchLength = this.keywordService.keywordSearchLength;
                 await this.setQ(queueInput, keywordSearchLength);
                 this.utilService.showModalPopup = false;
@@ -164,6 +168,8 @@ export class LookupService {
                     ...results[0],
                     InputDirection: queueInput.InputDirection
                 };
+                const inputDirection = queueInput.InputDirection ?? 0;
+                this.fileService.saveLogToCSVFile(queueInput.PIN, "FOUND", inputDirection);
             } else {
                 console.log(`Adding ${queueInput.PIN} without a unique lookup result.`);
                 // Create a temporary placeholder entry
@@ -739,6 +745,7 @@ export class LookupService {
     // Added in Lookup refactor
     public async handlePersonResults(fromAdvPatronSearch?: boolean, inputDirection = Direction.None, pageFrom = '') {
         return new Promise(async (resolve) => {
+            const inpDirection = inputDirection ?? 0;
             if (this.lookupResults.length === 0) {
                 let params = []
                 if (fromAdvPatronSearch) {
@@ -746,6 +753,7 @@ export class LookupService {
                 } else {
                     params.push(' for ' + this.studentPin.toString());
                 }
+                this.fileService.saveLogToCSVFile(this.studentPin, "NOT FOUND", inpDirection);
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
                 let popuptoshow = parseInt(SettingService.getSiteSettingValue('LAWRIDS'))
                 if (popuptoshow == 1) {
@@ -759,6 +767,7 @@ export class LookupService {
                 resolve('Success');
                 // this.utilService.showToast('No results found.');
             } else if (this.lookupResults.length === 1) {
+                this.fileService.saveLogToCSVFile(this.studentPin, "FOUND", inpDirection);
                 if (this.lookupResults[0].IsFromServer) {
                     this.getPersonInfoByPersonId(this.lookupResults[0].PersonId).then(async () => {
                         this.personDetails.InputDirection = inputDirection;

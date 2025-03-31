@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { SettingService } from '../../services/setting.service';
 import { LookupService } from '../../services/lookup.service';
+import { FileService } from '../../services/fileService';
 
 @Component({
     selector: 'app-patron-list-modal',
@@ -74,7 +75,7 @@ export class PatronListModalPage implements OnInit {
 
     constructor(public navCtrl: NavController,
         public event: Events, public utilService: UtilService,
-        public lookUpService: LookupService,    
+        public lookUpService: LookupService, private fileService: FileService,    
         public http: HttpService, public router: Router, public appStateService: AppStateService) {
         // , public lookUpService:LookUpServiceProvider
 
@@ -126,6 +127,10 @@ export class PatronListModalPage implements OnInit {
     // }
     public selectPatron(value, index?) {
         this.dismiss();
+        let inpDire = 'SELECTED FROM PATRON LIST';
+        const inputDirection = value.InputDirection ?? 0; // Default to 0 if InputDirection is null or undefined
+        let identifier = value.PersonIdentifier ?? value.Identifier ?? "UNKNOWN"; // Use Identifier if PersonIdentifier is null/undefined, fallback to "UNKNOWN"
+        this.fileService.saveLogToCSVFile(identifier, inpDire, inputDirection);
         this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
         this.event.publish('patronSelectedFromList', { 'selected_patron': value, 'index': index, 'pageFrom': this.pageFrom });
     }

@@ -31,8 +31,22 @@ export class DeviceControlsPage implements OnInit {
 
 
   ngOnInit() {    
-        const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
-        this.isGridView = isGridViewParent;
+    const isGridViewParent = (parseInt(SettingService.getDeviceSettingValue('PATDISLP')) > 0) ? true : false;
+    this.isGridView = isGridViewParent;
+    this.popupMessageDoc[0] = {
+      'MessageCode': 'E99999',
+      'MessageDescription': 'Enabling Input Logging may affect performance. Are you sure you want to proceed?',
+      'Header': 'CONFIRM',
+      'FootNote': '',
+      'MessageType': 'CONFIRM',
+      'ShowOk': 0,
+      'ShowCancel': 0,
+      'ShowYes': 1,
+      'ShowNo': 1,
+      'ShowNoThanks': 0,
+      'DontShowMe': 0,
+      'ChkShowValue': false
+    };
   }
 
   /**
@@ -50,6 +64,8 @@ export class DeviceControlsPage implements OnInit {
   public timerSubscription;
   public isElectronApp: boolean;
   public isUserLoggedIn: boolean = false;
+  public popupMessageDoc = [];
+  public EnableInputLogging: boolean = false;
 
   public canSetupTerminals: boolean = false;
   public CheckIfPinEntered: boolean = false;
@@ -125,12 +141,27 @@ export class DeviceControlsPage implements OnInit {
       this.CheckIfPinEntered = AppStateService.get('CheckIfPinEntered');
     }
 
+    if (AppStateService.get('EnableInputLogging') != undefined) {
+      this.EnableInputLogging = AppStateService.get('EnableInputLogging');
+    }
   }
 
-
-
-
-
+  public OnChangeEnableInputLogging(event) {
+    this.EnableInputLogging = event.detail['checked'];
+    if (this.EnableInputLogging) {
+      this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((bool) => {
+        if (bool) {
+          AppStateService.set('EnableInputLogging', this.EnableInputLogging);
+        } else {
+          this.EnableInputLogging = false;
+          AppStateService.set('EnableInputLogging', false);
+        }
+      });
+    }
+    else {
+      AppStateService.set('EnableInputLogging', this.EnableInputLogging);
+    }
+  }
 
   public goToMenuInstructions() {
     //   let menuOPtions = this.popoverCtrl.create(MenuServiceOptions, {'menuService': this}, this.utilService.popOption_center);

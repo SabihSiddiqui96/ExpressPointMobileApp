@@ -49,6 +49,7 @@ import { UnidentifiedPatronPopupPage } from '../menu-service/components/unidenti
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { MathService } from '../../services/math.service';
+import { FileService } from '../../services/fileService';
 
 enum Contributors {
     Fruit = 1,
@@ -350,7 +351,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController,
         private printService: PrintService,
-        private cdr: ChangeDetectorRef,
+        private cdr: ChangeDetectorRef, public fileService: FileService,
         public utilService: UtilService, public http: HttpService,
         public lookUpService: LookupService, public patronLookup: PatronLookupPage, private dynamicMenusDB: DynamicMenusDBService,
         public switchHandsService: SwitchHandsService,
@@ -481,10 +482,21 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
         this.event.destroy('default-terminal-menu:save');
         this.event.subscribe('default-terminal-menu:save', () => {
-            var terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
+            if (!this.terminalId || this.terminalId === 0) {
+                const deviceInfo = AppStateService.get('DeviceInfo');
+                const siteDetails = AppStateService.get('site_details');
 
-            if (terminalId === undefined) {
-                terminalId = 0;
+                try {
+                    if (deviceInfo) {
+                        const parsedDeviceInfo = JSON.parse(deviceInfo);
+                        this.terminalId = parsedDeviceInfo.TerminalId || 0;  // Default to 0 if TerminalId is missing
+                    } else if (siteDetails) {
+                        this.terminalId = JSON.parse(siteDetails).TerminalId || 0; // Default to 0 if TerminalId is missing
+                    }
+                } catch (error) {
+                    console.error("Error parsing data:", error);
+                    this.terminalId = 0; // Set to 0 if parsing fails
+                }
             }
 
             this.GetDaySelection();
@@ -495,54 +507,55 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             const currentDate = new Date(UTC + localOffset);
 
             if (this.servingLineId !== undefined) {
+                if (this.selectedServingLine !== -1 && this.selectedMealType !== -1) {
+                    const defaultMenuDoc = {
+                        '_id': 'TerminalDynamicDefaultMenu--' + this.terminalId + '--' + this.selectedMealType,
+                        'TerminalId': this.terminalId,
+                        'MenuGridId': this.selectedServingLine,
+                        'MealTypeId': this.selectedMealType,
+                        'ServingDays': this.daySelected,
+                        'DefaultMenuItem': 0,
+                        'MenuGridName': this.selectedServingLineName,
+                        'UpdateDate': currentDate,
+                        'IsSynced': this.terminalId === 0 // TerminalId not found, no need to Sync
+                    };
 
-                const defaultMenuDoc = {
-                    '_id': 'TerminalDynamicDefaultMenu--' + terminalId + '--' + this.selectedMealType,
-                    'TerminalId': terminalId,
-                    'MenuGridId': this.selectedServingLine,
-                    'MealTypeId': this.selectedMealType,
-                    'ServingDays': this.daySelected,
-                    'DefaultMenuItem': 0,
-                    'MenuGridName': this.selectedServingLineName,
-                    'UpdateDate': currentDate,
-                    'IsSynced': false
-                };
-
-                if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-                    let tdFilterDyncMenus = this.terminalDefaultMenu.filter(f => f._id.includes('TerminalDynamicDefaultMenu') && f.MealTypeId === this.selectedMealType);
-                    if (tdFilterDyncMenus && tdFilterDyncMenus.length > 0) {
-                        this.terminalDefaultMenu = this.terminalDefaultMenu.filter(f => f._id != tdFilterDyncMenus[0]._id);
+                    if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                        let tdFilterDyncMenus = this.terminalDefaultMenu.filter(f => f._id.includes('TerminalDynamicDefaultMenu') && f.MealTypeId === this.selectedMealType);
+                        if (tdFilterDyncMenus && tdFilterDyncMenus.length > 0) {
+                            this.terminalDefaultMenu = this.terminalDefaultMenu.filter(f => f._id != tdFilterDyncMenus[0]._id);
+                        }
                     }
+
+                    this.terminalDefaultMenu.push(defaultMenuDoc);
+
+                    this.checkDefaultTerminalDynamicMenuExists(this.terminalId, this.selectedMealType);
                 }
-
-                this.terminalDefaultMenu.push(defaultMenuDoc);
-
-                this.checkDefaultTerminalDynamicMenuExists(terminalId, this.selectedMealType);
             } else {
+                if (this.selectedMenuType !== -1 && this.selectedMealType !== -1) {
+                    const defaultMenuDoc = {
+                        '_id': 'TerminalDefaultMenu--' + this.terminalId + '--' + this.selectedMealType,
+                        'TerminalId': this.terminalId,
+                        'MenuGridId': this.selectedMenuType,
+                        'MealTypeId': this.selectedMealType,
+                        'ServingDays': this.daySelected,
+                        'DefaultMenuItem': 0,
+                        'MenuGridName': this.selectedMenuTypeName,
+                        'UpdateDate': currentDate,
+                        'IsSynced': this.terminalId === 0 // TerminalId not found, no need to Sync
+                    };
 
-                const defaultMenuDoc = {
-                    '_id': 'TerminalDefaultMenu--' + terminalId + '--' + this.selectedMealType,
-                    'TerminalId': terminalId,
-                    'MenuGridId': this.selectedMenuType,
-                    'MealTypeId': this.selectedMealType,
-                    'ServingDays': this.daySelected,
-                    'DefaultMenuItem': 0,
-                    'MenuGridName': this.selectedMenuTypeName,
-                    'UpdateDate': currentDate,
-                    'IsSynced': false
-                };
-
-                if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
-                    let tdFilterStcMenus = this.terminalDefaultMenu.filter(f => f._id.includes('TerminalDefaultMenu') && f.MealTypeId === this.selectedMealType);
-                    if (tdFilterStcMenus && tdFilterStcMenus.length > 0) {
-                        this.terminalDefaultMenu = this.terminalDefaultMenu.filter(f => f._id != tdFilterStcMenus[0]._id);
+                    if (this.terminalDefaultMenu && this.terminalDefaultMenu.length > 0) {
+                        let tdFilterStcMenus = this.terminalDefaultMenu.filter(f => f._id.includes('TerminalDefaultMenu') && f.MealTypeId === this.selectedMealType);
+                        if (tdFilterStcMenus && tdFilterStcMenus.length > 0) {
+                            this.terminalDefaultMenu = this.terminalDefaultMenu.filter(f => f._id != tdFilterStcMenus[0]._id);
+                        }
                     }
+
+                    this.terminalDefaultMenu.push(defaultMenuDoc);
+
+                    this.checkDefaultTerminalMenuExists(this.terminalId, this.selectedMealType, this.daySelected);
                 }
-
-                this.terminalDefaultMenu.push(defaultMenuDoc);
-
-                this.checkDefaultTerminalMenuExists(terminalId, this.selectedMealType, this.daySelected);
-
             }
 
         });
@@ -4031,6 +4044,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                         //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                                     })
                                         .then(() => {
+                                            const identifier = this.patronDetails?.PersonIdentifier ?? this.patronDetails?.Identifier ?? "UNKNOWN";
+                                            const inputDirection = this.patronDetails?.InputDirection ?? 0;
+                                            this.fileService.saveLogToCSVFile(identifier, transactionType == 0 ? "VOID" : "TRANSACTION COMPLETE", inputDirection);
                                             this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
                                             const spId = AppStateService.get('SpecialRosterId');
                                             // let hmId = AppStateService.get('HomeroomId');
@@ -4819,6 +4835,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             }
         }
 
+
+        let identifier = this.patronDetails.PersonIdentifier ?? this.patronDetails.Identifier; // Use Identifier if PersonIdentifier is null or undefined
+        const inputDirection = (this.patronDetails.InputDirection === null || this.patronDetails.InputDirection === 0) ? 0 : this.patronDetails.InputDirection;
+        this.fileService.saveLogToCSVFile(identifier, "VOID", inputDirection);
 
         this.transactionInProgress = false;
 
@@ -6158,12 +6178,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             if (this.menuItemsArr.length === 0) {
                 this.isValidMenuItemArray = false;
             }
-
-        });
-        setTimeout(() => {
             this.disableCharge = this.enableCharge()
             this.disablePay = this.enablePay()
-        }, 50)
+        });
     }
 
     public addMenuToCartForStaticMenus(menuItem) {
@@ -6819,6 +6836,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 let lookupResults;
                 if (data.docs.length > 0) {
                     lookupResults = JSON.parse(JSON.stringify(data.docs[0]));
+                    const identifier = lookupResults?.PersonIdentifier ?? lookupResults?.Identifier ?? "UNKNOWN";
+                    const inputDirection = lookupResults?.InputDirection ?? 0;
+                    this.fileService.saveLogToCSVFile(identifier, "PREVIOUS PATRON", inputDirection);
                 }
 
                 if (lookupResults) {
