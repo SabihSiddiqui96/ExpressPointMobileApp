@@ -1119,6 +1119,34 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         this.homeRoomList = [];
     }
 
+    public onLookupSegmentChange(event: any) {
+        const selectedValue = event.detail.value;
+        if (selectedValue === 'patron_pin') {
+            this.patronPinClick();
+        } else if (selectedValue === 'advanced') {
+            this.advancePatronClick();
+        }
+    }
+
+    public onAdvancedPatronSegmentChange(event: any) {
+        const selectedValue = event.detail.value;
+        if (selectedValue === 'by_patron') {
+            this.advancePatronClick();
+        } else if (selectedValue === 'by_homeroom') {
+            this.advancePatronClick();
+        }
+    }
+
+    public onAdvancedPatronSegmentChange2(event: any) {
+        const selectedValue = event.detail.value;
+        if (selectedValue === 'by_patron') {
+            this.advancePatronClick();
+        } else if (selectedValue === 'by_homeroom') {
+            this.advancePatronClick();
+        } else if (selectedValue === 'by_specialroster') {
+            this.getSpecialRostersList();
+        }
+    }
 
     public AdvancedPatronLookup() {
         if (this.patronAccount === 'advanced' && this.enablePinSchool) {

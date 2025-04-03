@@ -30,13 +30,13 @@
                               Lookup
                             </ion-button>
                           </ion-col>-->
-              <ion-segment [(ngModel)]="patronAccount">
-                <ion-segment-button value="patron_pin" (click)="patronPinClick()">
+              <ion-segment [(ngModel)]="patronAccount" (ionChange)="onLookupSegmentChange($event)">
+                <ion-segment-button value="patron_pin">
                   <ion-label class="color-white">
                     {{PinIdLabel}}
                   </ion-label>
                 </ion-segment-button>
-                <ion-segment-button value="advanced" (click)="advancePatronClick()">
+                <ion-segment-button value="advanced">
                   <ion-label class="color-white">
                     Lookup
                   </ion-label>
@@ -57,11 +57,11 @@
           bg-theme>
           <ion-col size="12" size-md="12" size-sm="12">
             <div class="ion-padding">
-              <ion-segment color="slate" [(ngModel)]="advancedPatron">
-                <ion-segment-button value="by_patron" (click)="advancePatronClick()">
+              <ion-segment color="slate" [(ngModel)]="advancedPatron" (ionChange)="onAdvancedPatronSegmentChange($event)">
+                <ion-segment-button value="by_patron">
                   <ion-label>Name</ion-label>
                 </ion-segment-button>
-                <ion-segment-button value="by_homeroom" (click)="advancePatronClick()">
+                <ion-segment-button value="by_homeroom">
                   <ion-label>Homeroom</ion-label>
                 </ion-segment-button>
                 <ion-segment-button value="by_specialroster">
@@ -380,14 +380,14 @@
       <div [ngSwitch]="patronAccount" view-mobile>
         <ion-row *ngSwitchCase="'advanced'" class="patron-advanced-search">
           <ion-col>
-            <ion-segment color="white" [(ngModel)]="advancedPatron">
-              <ion-segment-button value="by_patron" (click)="advancePatronClick()">
+            <ion-segment color="white" [(ngModel)]="advancedPatron" (ionChange)="onAdvancedPatronSegmentChange2($event)">
+              <ion-segment-button value="by_patron">
                 <ion-label>Name</ion-label>
               </ion-segment-button>
-              <ion-segment-button value="by_homeroom" (click)="advancePatronClick()">
+              <ion-segment-button value="by_homeroom">
                 <ion-label>Homeroom</ion-label>
               </ion-segment-button>
-              <ion-segment-button value="by_specialroster" (click)="getSpecialRostersList()">
+              <ion-segment-button value="by_specialroster">
                 <ion-label>Roster</ion-label>
               </ion-segment-button>
             </ion-segment>

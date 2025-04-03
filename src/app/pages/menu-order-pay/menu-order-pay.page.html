@@ -30,14 +30,14 @@
 
           <ion-item>
             <ion-label>
-              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="blurInputElement(); setCashPaymentOption()"
+              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="blurInputElement(); setCashPaymentOption(); onPaymentSegmentChange($event)"
                 class="pay_segment" mode="md">
-                <ion-segment-button value="cash" (click)="changeActiveInput('amount')">
+                <ion-segment-button value="cash">
                   <ion-label>
                     Cash
                   </ion-label>
                 </ion-segment-button>
-                <ion-segment-button value="check" (click)="changeActiveInput('amount')" *ngIf="!hideCheckOption">
+                <ion-segment-button value="check" *ngIf="!hideCheckOption">
                   <ion-label>
                     Check
                     <span *ngIf="!navPatronDetails.AcceptCheck">
@@ -45,7 +45,7 @@
                     </span>
                   </ion-label>
                 </ion-segment-button>
-                <ion-segment-button value="card" (click)="changeActiveInput('card')" *ngIf="!hideCardOption">
+                <ion-segment-button value="card" *ngIf="!hideCardOption">
                   <ion-label>
                     Card
                   </ion-label>
