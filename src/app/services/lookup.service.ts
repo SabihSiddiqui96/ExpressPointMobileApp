@@ -44,7 +44,7 @@ export class LookupService {
     public CanServeVisitingAdults = null;
     public isModelWindowOpened: boolean = false;
     public menuPayselectAccountClick: boolean = false;
-    public checkImageLocalOrServer: any = "0";
+    public checkImageLocalOrServer = "0";
 
     constructor(private loader: LoadingController, private utilService: UtilService, private http: HttpService,
         private logDBService: LogsDBService,
@@ -109,7 +109,6 @@ export class LookupService {
                 handleQueueInput(event, queueInput); // Call the async handler for each event
             });
         }
-        this.checkImageLocalOrServer = SettingService.getSettingValue("USEPPSORL") || "0";
     }
 
     private inputQueue: any[] = []; // Queue for inputs
@@ -871,13 +870,13 @@ export class LookupService {
 
     public async getPersonImage(personId): Promise<string | null> {
         const performanceOptions = AppStateService.get('performanceOptions');
-
+        this.checkImageLocalOrServer = SettingService.getSettingValue("USEPPSORL") || "0";
         // If online but performance options disable image loading, resolve null
         if (this.utilService.isAppOnline && performanceOptions?.LoadStudentImages === false) {
             return null;
         }
 
-        if (this.utilService.isElectronApp() && this.checkImageLocalOrServer === '1') {
+        if (this.utilService.isElectronApp() && this.checkImageLocalOrServer.toString() === '1') {
             try {
                 // Retrieve the person image from PouchDB first
                 let personImageData = await this.personImageService.getImage(personId);
