@@ -332,8 +332,13 @@ export class PersonDBService {
                       updatedDoc.PreviousSales.map(u => {
                         if (u.MealTypeId === n.MealTypeId) {
 
-                          const allSales = n.SalesByMealType.concat.apply([], u.SalesByMealType);
-                          u.SalesByMealType = _.uniqWith(allSales, _.isEqual)
+                          const allSales = [...n.SalesByMealType, ...u.SalesByMealType];
+
+                          // Deduplicate using composite keys, converting numbers to strings for consistency
+                          u.SalesByMealType = _.uniqBy(allSales, item =>
+                            `${String(item.Date || 0)}_${String(item.TransactionNo || 0)}_${String(item.MenuItemId || 0)}_${Number(item.Price || 0).toFixed(2)}`
+                          );
+
                           // n.SalesByMealType.map(sd => {
                           //   const saleDetailExists = _.some(u.SalesByMealType, { 'Date': sd.Date });
                           //   if (!saleDetailExists) {

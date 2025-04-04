@@ -298,6 +298,14 @@ export class DoPayment {
         }
     }
 
+    public onPaymentSegmentChange(event: any) {
+        const selectedValue = event.detail.value;
+        if (selectedValue === 'cash') {
+            this.changeActiveInput('amount');
+        } else if (selectedValue === 'check') {
+            this.changeActiveInput('check');
+        }
+    }
 
     public changeActiveInput(field) {
 

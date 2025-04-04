@@ -427,6 +427,15 @@ export class MenuPaymentPopupPage extends DoPayment implements OnInit, OnDestroy
     }
   }
 
+  public onPaymentSegmentChange(event: any) {
+    const selectedValue = event.detail.value;
+    if (selectedValue === 'cash') {
+      this.changeActiveInput('amount');
+    } else if (selectedValue === 'check') {
+      this.changeActiveInput('check');
+    }
+  }
+
   public changeActiveInput(field) {
 
     // console.log(this.patronDetails.AcceptCheck)

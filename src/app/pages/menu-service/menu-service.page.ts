@@ -3314,7 +3314,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                                             'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
                                                             'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
                                                             'IsPartOfMeal': false, // this.orderData.items[i]['IsPartOfMeal']
-                                                            'TerminalName': this.terminalName
+                                                            'TerminalName': this.terminalName,
+                                                            'TransactionNo': this.transactionNumber
                                                         });
                                                     }
                                                 }

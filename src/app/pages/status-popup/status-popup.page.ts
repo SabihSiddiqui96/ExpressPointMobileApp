@@ -37,6 +37,7 @@ export class StatusPopupPage implements OnInit {
         this.detailSyncStatus.set("SetupPersonImageDB", new Map<string, string>());
         this.detailSyncStatus.set("SetupUsersDB", new Map<string, string>());
         this.detailSyncStatus.set("DeviceSettings", new Map<string, string>());
+        this.DownloadImagesOrNot = SettingService.getSettingValue("USEPPSORL") || "0";
         if (
             AppStateService.get("DeviceInfo") !== undefined ||
             AppStateService.get("DeviceInfo") != null
@@ -345,6 +346,7 @@ export class StatusPopupPage implements OnInit {
     //   public activeRoute;
     public deviceInfo;
     public syncList;
+    public DownloadImagesOrNot;
     public detailSyncStatus = new Map<string, Map<string, string>>();// Category , PromiseHttpName , status
     public progressSiteSettingsCurrent = 0;
     public progressSiteSettingsTotal = 12;

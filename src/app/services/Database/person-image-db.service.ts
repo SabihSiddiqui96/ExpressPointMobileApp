@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { PersonImageService } from '../person-image.service';
 import { UtilService } from '../util.service';
 import { PouchQueriesService } from './pouch-queries.service';
+import { SettingService } from '../setting.service';
 
 @Injectable({
     providedIn: 'root'
@@ -38,14 +39,17 @@ export class PersonImageDBService {
     }
 
     public SyncPersonImages() {
+        let downloadImagesOrNot = SettingService.getSettingValue("USEPPSORL") || "0";
         this.stopSync = false; // Reset flag when starting a new sync
         this.events.publish('data:syncDetails', { SetupPersonImageDB: { SyncPersonImages: "S" } });
 
         return new Promise((resolve, reject) => {
-            let schoolId;
-
-            if (AppStateService.get('SelectedSite')) {
-                schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+            
+            if (this.utilService.isElectronApp() == false || downloadImagesOrNot == "0") {
+                this.syncStatus = 'Success';
+                this.events.publish('data:syncDetails', { SetupPersonImageDB: { SyncPersonImages: "D" } });
+                resolve(null);
+                return;
             }
 
             PouchQueriesService.GetAllPersons().then(async res => {

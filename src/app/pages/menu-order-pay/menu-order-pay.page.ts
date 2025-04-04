@@ -572,6 +572,17 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }, 500);
     }
 
+    public onPaymentSegmentChange(event: any) {
+        const selectedValue = event.detail.value;
+        if (selectedValue === 'cash') {
+            this.changeActiveInput('amount');
+        } else if (selectedValue === 'check') {
+            this.changeActiveInput('amount');
+        } else if (selectedValue === 'card') {
+            this.changeActiveInput('card');
+        }
+    }
+
     public changeActiveInput(field) {
 
         // console.log(this.patronDetails.AcceptCheck)
