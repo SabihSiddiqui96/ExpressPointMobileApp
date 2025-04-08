@@ -49,6 +49,7 @@ steps:
       SourceFolder: $(Build.SourcesDirectory)/platforms/android/app/build/outputs/bundle/release
       Contents: app-release.aab
       TargetFolder: C:\Program Files\Java\jdk-11\bin
+      OverWrite: true
 
   - script: |
      cd "C:\Program Files\Java\jdk-11\bin"
