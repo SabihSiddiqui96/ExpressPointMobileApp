@@ -112,6 +112,7 @@
         "cordova-plugin-device": "^2.1.0",
         "cordova-plugin-dialogs": "^2.0.2",
         "cordova-plugin-file": "^7.0.0",
+        "cordova-plugin-memory-disk-info": "file:CustomPlugins/cordova-plugin-memory-disk-info",
         "electron": "^11.5.0",
         "jasmine-core": "^5.0.1",
         "jasmine-spec-reporter": "^7.0.0",
@@ -150,7 +151,8 @@
                 "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
             },
             "cordova-plugin-androidx": {},
-            "cordova-plugin-androidx-adapter": {}
+            "cordova-plugin-androidx-adapter": {},
+            "cordova-plugin-memory-disk-info": {}
         },
         "platforms": [
             "android"
