@@ -1,0 +1,23 @@
+{
+  "name": "cordova-plugin-memory-disk-info",
+  "version": "1.0.0",
+  "description": "Cordova plugin to get memory and disk information on Android and iOS.",
+  "cordova": {
+    "id": "cordova-plugin-memory-disk-info",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "keywords": [
+    "cordova",
+    "plugin",
+    "memory",
+    "disk",
+    "info",
+    "android",
+    "ios"
+  ],
+  "author": "PrimeroEdge",
+  "license": "MIT"
+}
