@@ -10,7 +10,7 @@
     <p class="ion-text-center" *ngIf="!error">
         ExpressPoint is downloading data to make it available for offline use...
     </p>
-    <p style="text-align: center;" *ngIf="isElectronApp">
+    <p style="text-align: center;" *ngIf="isElectronApp == true && DownloadImagesOrNot == '1'">
         <b>Downloading Student images...</b>This may take longer than usual. You can cancel anytime using the button below if you need
         immediate access.
     </p>
@@ -70,7 +70,7 @@
            </ion-label>
        </ion-item>
 
-        <ion-item *ngIf="syncList.StudentImages && isElectronApp" class="done">
+        <ion-item *ngIf="syncList.StudentImages && isElectronApp == true && DownloadImagesOrNot == '1'" class="done">
             <ion-icon slot="start" name="person-circle"></ion-icon>
             <ion-label slot="start">
                 Student Images
@@ -94,7 +94,7 @@
         
         </ion-item>
         <ion-item
-            *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.StudentImages=='Failed')) ) && syncList.StudentImages && progressSetupPersonImageDBLabels && progressSetupPersonImageDBLabels.size > 0 && isElectronApp"
+            *ngIf="((showDetailProgressType === 2) || ((showDetailProgressType === 0) && (syncList.StudentImages=='Failed')) ) && syncList.StudentImages && progressSetupPersonImageDBLabels && progressSetupPersonImageDBLabels.size > 0 && isElectronApp == true && DownloadImagesOrNot == '1'"
             class="syncDetailText">
             <ion-label class="ion-text-wrap">
                 <span *ngFor="let mapItem of progressSetupPersonImageDBLabels | keyvalue">

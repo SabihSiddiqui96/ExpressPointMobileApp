@@ -3671,41 +3671,49 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             if (res === true) {
                                 // meal combo item
                                 if (this.mealFormed) {
-                                    let priceType = this.patronDetails.PriceTypeId;
-                                    let systemMealName = this.systemMenuItem.MenuItemDescription;
-                                    if (this.patronDetails.IsSecondMeal === true) {
-                                        priceType = this.secondMealPriceType;
-                                        systemMealName = 'Second ' + this.systemMenuItem.MenuItemDescription;
-                                    }
-                                    this.orderData.items.push({
-                                        'Price': this.systemMenuItem.Price,
-                                        'RefId': this.systemMenuItem.MenuItemId,
-                                        'price_type_id': priceType,
-                                        'IsReimbursable': true,
-                                        'Name': systemMealName,
-                                        'IsPartOfMeal': false, // **verify
-                                        'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
-                                        'ItemAddedAt': UTC,
-                                        'TransactionNo': this.transactionNumber,
-                                        'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
-                                        'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
+                                    // Check if system meal item already exists in the order items
+                                    const mealExists = this.orderData.items.some(item =>
+                                        item.RefId === this.systemMenuItem.MenuItemId &&
+                                        (item.Name === this.systemMenuItem.MenuItemDescription ||
+                                            item.Name === 'Second ' + this.systemMenuItem.MenuItemDescription)
+                                    );
+                                    if (!mealExists) {
+                                        let priceType = this.patronDetails.PriceTypeId;
+                                        let systemMealName = this.systemMenuItem.MenuItemDescription;
+                                        if (this.patronDetails.IsSecondMeal === true) {
+                                            priceType = this.secondMealPriceType;
+                                            systemMealName = 'Second ' + this.systemMenuItem.MenuItemDescription;
+                                        }
+                                        this.orderData.items.push({
+                                            'Price': this.systemMenuItem.Price,
+                                            'RefId': this.systemMenuItem.MenuItemId,
+                                            'price_type_id': priceType,
+                                            'IsReimbursable': true,
+                                            'Name': systemMealName,
+                                            'IsPartOfMeal': false, // **verify
+                                            'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
+                                            'ItemAddedAt': UTC,
+                                            'TransactionNo': this.transactionNumber,
+                                            'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
+                                            'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
 
-                                    });
-                                    items.push({
-                                        'Price': this.systemMenuItem.Price,
-                                        'MenuItemId': this.systemMenuItem.MenuItemId,
-                                        'priceTypeId': priceType,
-                                        'IsReimbursable': true,
-                                        'MenuItemDescription': this.systemMenuItem.MenuItemDescription,
-                                        'IsPartOfMeal': false, // **verify
-                                        'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
-                                        'TransactionNo': this.transactionNumber,
-                                        'TerminalName': this.terminalName,
-                                        'IsTaxable': this.systemMenuItem.IsTaxable,
-                                        'MenuId': null,
-                                        'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
-                                        'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
-                                    });
+                                        });
+                                        items.push({
+                                            'Price': this.systemMenuItem.Price,
+                                            'MenuItemId': this.systemMenuItem.MenuItemId,
+                                            'priceTypeId': priceType,
+                                            'IsReimbursable': true,
+                                            'MenuItemDescription': this.systemMenuItem.MenuItemDescription,
+                                            'IsPartOfMeal': false, // **verify
+                                            'Date': (new Date(this.utilService.getSessionDate())).getTime().toString(),
+                                            'TransactionNo': this.transactionNumber,
+                                            'TerminalName': this.terminalName,
+                                            'IsTaxable': this.systemMenuItem.IsTaxable,
+                                            'MenuId': null,
+                                            'StateEligibilityId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId : null,
+                                            'StatePriceTypeId': this.patronDetails.IsSecondMeal == false ? this.patronDetails.StateEligibilityId ? this.patronDetails.StateEligibilityId : this.patronDetails.StatePriceTypeId : null //Intentially Added
+                                        });
+                                    }
                                 }
                                 let paymentData: TransactionDoc, paymentDoc;
                                 if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== ''
@@ -6164,6 +6172,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 }
                 if (this.menuItemsArr.length === 0) {
                     this.isValidMenuItemArray = false;
+                }
+                if (menuItem.IsReimbursable === true) {
+                    if (this.mealCount > 0) {
+                        this.mealCount = this.mealCount - 1;
+                    }
+                }
+                else {
+                    this.calALaCarteCount(this.orderData.items);
                 }
                 return;
             }

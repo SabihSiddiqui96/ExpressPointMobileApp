@@ -33,4 +33,22 @@ export class MathService {
         let num = parseFloat(value);
         return isNaN(num) ? 0 : Number(num.toFixed(2)); // Ensures two decimal places
     }
+
+    static subtract_static(num1: any, num2: any): number {
+        return Number((Math.round((this.toNumber_static(num1) - this.toNumber_static(num2)) * 100) / 100).toFixed(2));
+    }
+
+    static add_static(num1: any, num2: any): number {
+        return Number((Math.round((this.toNumber_static(num1) + this.toNumber_static(num2)) * 100) / 100).toFixed(2));
+    }
+
+    private static toNumber_static(value: any): number {
+        let num = Number(value);
+        return isNaN(num) ? 0 : num; // If NaN, return 0
+    }
+
+    static convertToNumber_static(value: any): number {
+        let num = parseFloat(value);
+        return isNaN(num) ? 0 : Number(num.toFixed(2)); // Ensures two decimal places
+    }
 }

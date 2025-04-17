@@ -106,14 +106,14 @@
               <ion-list class="ion-no-padding ion-no-margin">
                 <ion-item lines="none">
                   <ion-label>
-                    <ion-segment color="slate" [(ngModel)]="paymentOption" (ionChange)="setCashPaymentOption()"
+                    <ion-segment color="slate" [(ngModel)]="paymentOption" (ionChange)="setCashPaymentOption(); onPaymentSegmentChange($event)"
                       class="pay_segment">
-                      <ion-segment-button value="cash" (click)="changeActiveInput('amount')">
+                      <ion-segment-button value="cash">
                         <ion-label>
                           Cash
                         </ion-label>
                       </ion-segment-button>
-                      <ion-segment-button value="check" (click)="changeActiveInput('check')" *ngIf="!hideCheckOption">
+                      <ion-segment-button value="check" *ngIf="!hideCheckOption">
                         <ion-label>
                           Check
                           <span *ngIf="!navPatronDetails.AcceptCheck">

@@ -21,6 +21,7 @@ import { PouchQueriesService } from './Database/pouch-queries.service';
 import { PouchDBService, EXP_SYSTEM, EXP_COMMON } from './pouch-db.service';
 import { GeneralDBService } from './Database/general-db.service';
 import { AppVersion } from '@ionic-native/app-version/ngx';
+import { MathService } from './math.service';
 
 @Injectable({
   providedIn: 'root'
@@ -666,56 +667,62 @@ export class DeviceService {
   }
 
   private async pingServer(url: string): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const startTime = Date.now(); // Record the start time
-
-      // Create an image element to send a request
-      const img = new Image();
-      img.src = `${url}?t=${startTime}`; // Add a timestamp to prevent caching
-
-      // Handle successful load
-      img.onload = () => {
-        const pingTime = Date.now() - startTime; // Calculate round-trip time
-        resolve(pingTime);
-      };
-
-      // Handle error (e.g., server unreachable)
-      img.onerror = () => {
-        resolve(-1); // Indicate an error in ping
-      };
-    });
+    const startTime = Date.now();
+    try {
+      await fetch(`${url}?t=${startTime}`, { method: 'HEAD', mode: 'no-cors' });
+      return Date.now() - startTime;
+    } catch (e) {
+      return -1;
+    }
   }
 
   // Memory Retrieval Methods
-  private async getTotalMemory(): Promise<{ total: number; accessDenied: boolean }> {
+  async getDiskSpace(location: number): Promise<{ total: number; free: number; accessDenied: boolean, error: any }> {
     return new Promise((resolve) => {
-      (window as any).plugins.memory.getMemoryInfo((memoryInfo) => {
-        resolve({ total: memoryInfo.total, accessDenied: false }); // Return actual total memory
-      }, () => {
-        resolve({ total: 0, accessDenied: true }); // Indicate access denied
-      });
+      try {
+        const plugin = (window as any).DiskSpacePlugin;
+        if (plugin && typeof plugin.getDiskSpace === 'function') {
+          plugin.getDiskSpace(location, (result: any) => {
+            resolve({
+              total: result.total || 0,
+              free: result.free || 0,
+              accessDenied: false,
+              error: ''
+            });
+          }, (error: any) => {
+            resolve({ total: 0, free: 0, accessDenied: true, error: error });
+          });          
+        } else {
+          resolve({ total: 0, free: 0, accessDenied: true, error : 'else' });
+        }
+      } catch (err) {
+        resolve({ total: 0, free: 0, accessDenied: true, error: err });
+      }
     });
   }
 
-  private async getFreeMemory(): Promise<{ free: number; accessDenied: boolean }> {
+  async getMemoryInfo(): Promise<{ totalMemory: number; freeMemory: number; usedMemory: number; accessDenied: boolean, error: any }> {
     return new Promise((resolve) => {
-      (window as any).plugins.memory.getMemoryInfo((memoryInfo) => {
-        resolve({ free: memoryInfo.free, accessDenied: false }); // Return actual free memory
-      }, () => {
-        resolve({ free: 0, accessDenied: true }); // Indicate access denied
-      });
-    });
-  }
-
-  // Disk Info Retrieval Method
-  private async getDiskInfo(): Promise<{ total: number; free: number; accessDenied: boolean }> {
-    return new Promise((resolve) => {
-      // Example logic to retrieve disk info using a Cordova plugin or other means
-      (window as any).plugins.disk.getDiskInfo((diskInfo) => {
-        resolve({ total: diskInfo.total, free: diskInfo.free, accessDenied: false });
-      }, () => {
-        resolve({ total: 0, free: 0, accessDenied: true });
-      });
+      try {
+        const plugin = (window as any).DiskSpacePlugin;
+        if (plugin && typeof plugin.getMemoryInfo === 'function') {
+          plugin.getMemoryInfo((result: any) => {
+            resolve({
+              totalMemory: (result.totalMemory < result.freeMemory ? result.freeMemory : result.totalMemory) || 0,
+              freeMemory: result.freeMemory || 0,
+              usedMemory: result.usedMemory || 0,
+              accessDenied: false,
+              error:''
+            });
+          }, (error: any) => {
+            resolve({ totalMemory: 0, freeMemory: 0, usedMemory: 0, accessDenied: true, error: error });
+          });
+        } else {
+          resolve({ totalMemory: 0, freeMemory: 0, usedMemory: 0, accessDenied: true, error: 'else' });
+        }
+      } catch (err) {
+        resolve({ totalMemory: 0, freeMemory: 0, usedMemory: 0, accessDenied: true, error: err });
+      }
     });
   }
 
@@ -754,28 +761,44 @@ export class DeviceService {
       pingTime: 0
     };
 
-    // Memory Info
-    const totalMemoryResult = await this.getTotalMemory();
-    const freeMemoryResult = await this.getFreeMemory();
+    const bytesToGB = (bytes: number): number => parseFloat((bytes / (1024 ** 3)).toFixed(2));
 
-    if (!totalMemoryResult.accessDenied && !freeMemoryResult.accessDenied) {
-      systemInfo.totalMemory = totalMemoryResult.total;
-      systemInfo.freeMemory = freeMemoryResult.free;
-      systemInfo.usedMemory = systemInfo.totalMemory - systemInfo.freeMemory;
+    // Memory Info
+    const memoryResult = await this.getMemoryInfo();
+
+    if (!memoryResult.accessDenied) {
+      systemInfo.totalMemory = bytesToGB(memoryResult.totalMemory);
+      systemInfo.freeMemory = bytesToGB(memoryResult.freeMemory);
+      systemInfo.usedMemory = MathService.convertToNumber_static(systemInfo.totalMemory - systemInfo.freeMemory);
     } else {
-      systemInfo.memoryAccessDenied = true; // Indicate that access to memory info was denied
-      systemInfo.errors.push('Memory access denied');
+      try {
+        systemInfo.totalMemory = memoryResult.totalMemory;
+        systemInfo.freeMemory = memoryResult.freeMemory;
+        systemInfo.usedMemory = systemInfo.totalMemory - systemInfo.freeMemory;
+        systemInfo.errors.push(memoryResult.error);
+      } catch (error) {
+        systemInfo.memoryAccessDenied = true; // Indicate that access to memory info was denied
+        systemInfo.errors.push('Memory access denied');
+      }     
     }
 
     // Disk Info
-    const diskResult = await this.getDiskInfo();
+    const diskResult = await this.getDiskSpace(0);
     if (!diskResult.accessDenied) {
-      systemInfo.totalDisk = diskResult.total;
-      systemInfo.freeDisk = diskResult.free;
-      systemInfo.usedDisk = systemInfo.totalDisk - systemInfo.freeDisk;
+      systemInfo.totalDisk = bytesToGB(diskResult.total);
+      systemInfo.freeDisk = bytesToGB(diskResult.free);
+      systemInfo.usedDisk = MathService.convertToNumber_static(systemInfo.totalDisk - systemInfo.freeDisk);
     } else {
-      systemInfo.diskAccessDenied = true; // Indicate that access to disk info was denied
-      systemInfo.errors.push('Disk access denied');
+      try {
+        systemInfo.totalDisk = diskResult.total;
+        systemInfo.freeDisk = diskResult.free;
+        systemInfo.usedDisk = systemInfo.totalDisk - systemInfo.freeDisk;
+        systemInfo.diskAccessDenied = true; // Indicate that access to disk info was denied
+        systemInfo.errors.push(diskResult.error);
+      } catch (error) {
+        systemInfo.diskAccessDenied = true; // Indicate that access to disk info was denied
+        systemInfo.errors.push('Disk access denied');
+      }     
     }
 
     // Get App Version
@@ -791,7 +814,7 @@ export class DeviceService {
     }
 
     // Get Ping Time
-    systemInfo.pingTime = await this.pingServer('https://www.google.com'); // Example server to ping
+    systemInfo.pingTime = await this.pingServer('https://www.gstatic.com/webp/gallery/1.jpg');
 
     return systemInfo;
   }
