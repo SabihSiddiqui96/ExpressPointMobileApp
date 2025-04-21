@@ -197,8 +197,22 @@
 </ion-content>
 <ion-footer>
   <ion-toolbar color="light">
-    <ion-text class="ion-padding">
-      Note: Transaction status is set to update every {{transactionStatusMins}} Min
+    <ion-text class="ion-padding" style="display: block; font-size: 1.1em; line-height: 1.6; font-family: system-ui;">
+      <strong style="font-size: 1.1em;">Note:</strong>
+      Transactions set to update every
+      <ion-text style="color: #3880ff; font-size: 1.1em;">
+        <strong>{{ transactionStatusMins || '--' }}</strong>
+        <span style="font-family: system-ui;"> min</span>
+      </ion-text>
+      —
+      <ion-text color="success" style="font-size: 0.95em; font-family: system-ui; padding-left: 10px;">
+        <strong>Last Updated: </strong>
+        <span style="font-family: system-ui;">{{ lastTransactionStatusTime ? (lastTransactionStatusTime | date:'mediumTime') : '--' }}</span>
+      </ion-text> |
+      <ion-text color="tertiary" style="font-size: 0.95em;font-family: system-ui; padding-left: 10px;">
+        <strong>Next Update: </strong>
+        <span style="font-family: system-ui;">{{ nextTransactionStatusTime ? (nextTransactionStatusTime | date:'mediumTime') : '--' }}</span>
+      </ion-text>
     </ion-text>
   </ion-toolbar>
 </ion-footer>

@@ -418,13 +418,22 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         });
         this.event.destroy('unidentifiedPatronLookUp');
         this.event.subscribe('unidentifiedPatronLookUp', (userEventData) => {
-            if (userEventData != null && userEventData.pinLookUp) {
-                this.patronAccount = 'patron_pin';
-                this.patronPinClick();
+            if (userEventData?.checkPatronAccount) {               
+                if (this.patronAccount == 'patron_pin') {
+                    if (this.lookUpService.getQ().length !== 0) {
+                        this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
+                    }
+                }
             }
             else {
-                this.patronAccount = 'advanced';
-                this.advancePatronClick();
+                if (userEventData != null && userEventData.pinLookUp) {
+                    this.patronAccount = 'patron_pin';
+                    this.patronPinClick();
+                }
+                else {
+                    this.patronAccount = 'advanced';
+                    this.advancePatronClick();
+                }
             }
         });
         this.selectAccuntClick = this.utilService.selectAccountClick;
@@ -1579,10 +1588,14 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public delay = ms => new Promise(res => setTimeout(res, ms));
 
-    public async onPeripheralKey(event) {        
+    public async onPeripheralKey(event) {  
+        const isElectronWithoutPNP = this.utilService.isElectronApp() &&
+            AppStateService.get('pnpPeripherals') !== undefined &&
+            AppStateService.get('pnpPeripherals') === false;
+        
         if (event.keyCode === 13) {
             this.blurInputElement();
-            if (this.utilService.isElectronApp() && AppStateService.get('pnpPeripherals') != undefined && AppStateService.get('pnpPeripherals') == false) {
+            if (isElectronWithoutPNP) {
                 await this.delay(300);
             }
         }
@@ -1595,11 +1608,12 @@ export class PatronLookupPage implements OnInit, OnDestroy {
                 data: event,
                 queueCount: this.personsQ.length
             });
-            var charCode = event.which || event.charCode || event.keyCode || 0;
-            if (this.isEnterKeyHandled === true) {
-                this.isEnterKeyHandled = false;
-                this.inputBuffer = [];
-                return;
+            if (isElectronWithoutPNP) {
+                if (this.isEnterKeyHandled === true) {
+                    this.isEnterKeyHandled = false;
+                    this.inputBuffer = [];
+                    return;
+                }
             }
 
             let incomingID = '';

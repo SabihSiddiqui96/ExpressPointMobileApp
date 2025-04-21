@@ -211,7 +211,7 @@ export class LookupService {
     private async processQueue() {
         // Set the processing lock
         this.isProcessingQueue = true;
-
+        const isPaused = this.utilService.getImpermanentAutoServePause();
         // Process each input in the queue
         while (this.inputQueue.length > 0) {
             const { queueInput, searchTextLength } = this.inputQueue.shift(); // Get the next input
@@ -229,7 +229,7 @@ export class LookupService {
 
             // Additional processing checks and actions
             if (this.personsQ.length >= 1 && AppStateService.get('patron_details') === undefined &&
-                AppStateService.get('currentTab') !== 'advanced') {
+                AppStateService.get('currentTab') !== 'advanced' && isPaused === false) {
 
                 // Logic to determine if a modal should be shown or if processing should be skipped
                 if (this.isModelWindowOpened || AppStateService.get('UnidentifiedPatronPopUp') == '1') {
@@ -664,9 +664,9 @@ export class LookupService {
             // Filter results based on useExactPIN flag
             if (this.useExactPIN === 1) {
                 if (SearchByPin === '1') {
-                    this.lookupResults = this.lookupResults.filter(r => r.Identifier === pin);
+                    this.lookupResults = this.lookupResults.filter(r => r && r.Identifier === pin);
                 } else {
-                    this.lookupResults = this.lookupResults.filter(r => r.PersonIdentifier === pin);
+                    this.lookupResults = this.lookupResults.filter(r => r && r.PersonIdentifier === pin);
                 }
             }
 
@@ -687,7 +687,7 @@ export class LookupService {
 
             // Exclude inactive students if required
             if (this.serveInactiveStudents === 0) {
-                this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
+                this.lookupResults = this.lookupResults.filter(r => r && r.isActive === true);
             }
 
             // Return the final lookup results
@@ -710,7 +710,7 @@ export class LookupService {
                             data => {
                                 this.lookupResults = data.patrons;
                                 if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
-                                    this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
+                                    this.lookupResults = this.lookupResults.filter(r => r && r.IsStudent === false);
                                 }
                                 resolve(this.lookupResults);
 
@@ -759,11 +759,10 @@ export class LookupService {
                 let popuptoshow = parseInt(SettingService.getSiteSettingValue('LAWRIDS'))
                 if (popuptoshow == 1) {
                     AppStateService.set("UnidentifiedPatronPopUp", "1");
-                    this.event.publish('unidentifiedPatron:show', { params });
                 }
-                else {
-                    this.popupMessageService.showMessage(PopupMessageCode.E24397, params);
-                } 
+                params.push({ showPopUp: popuptoshow });
+                this.event.publish('unidentifiedPatron:show', { params });
+                
                 this.utilService.setLoader(false);
                 resolve('Success');
                 // this.utilService.showToast('No results found.');
@@ -945,7 +944,7 @@ export class LookupService {
                             this.lookupResults = this.lookupResults.concat(this.lookupPinResults);
                         }
                         if (this.serveInactiveStudents === 0) {
-                            this.lookupResults = this.lookupResults.filter(r => r.isActive === true);
+                            this.lookupResults = this.lookupResults.filter(r => r && r.isActive === true);
                         }
                         let searchServer: number = 0;
                         if (this.lookupResults.length === 0 && (this.canServeVisitingPatrons || this.CanServeVisitingAdults)) {
@@ -1019,14 +1018,14 @@ export class LookupService {
                             this.lookupResults = data.patrons;
                             if (selectedsite.toString() !== '00000000-0000-0000-0000-000000000000') {
                                 //Selected the currentSite , So the results should only have the current site data. 
-                                this.lookupResults = this.lookupResults.filter(r => r.SchoolId === selectedsite);
+                                this.lookupResults = this.lookupResults.filter(r => r && r.SchoolId === selectedsite);
                             }
 
                             if (!this.canServeVisitingPatrons && this.CanServeVisitingAdults) {
-                                this.lookupResults = this.lookupResults.filter(r => r.IsStudent === false);
+                                this.lookupResults = this.lookupResults.filter(r => r && r.IsStudent === false);
                             }
                             if (this.canServeVisitingPatrons && !this.CanServeVisitingAdults) {
-                                this.lookupResults = this.lookupResults.filter(r => r.IsStudent === true);
+                                this.lookupResults = this.lookupResults.filter(r => r && r.IsStudent === true);
                             }
 
 

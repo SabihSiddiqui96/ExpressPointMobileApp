@@ -1,6 +1,6 @@
 import { UtilService } from '../../services/util.service';
 import { PopupMessageService } from '../../services/popup-message.service';
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { NavController, PopoverController } from '@ionic/angular';
 import { AllPopupPage } from '../../pages/all-popup/all-popup.page';
@@ -78,7 +78,15 @@ export class ServiceToolbarComponent implements OnInit {
         public navCtrl: NavController
     ) { }
 
-    ngOnInit() { }
+    ngOnInit() { 
+        this.utilService.setImpermanentAutoServePause(this.impermanentAutoServePause);
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['impermanentAutoServePause']) {
+            this.utilService.setImpermanentAutoServePause(this.impermanentAutoServePause);
+        }
+    }
 
     public showMealTypePopup() {
         if (this.isPersonIdValid()) {
