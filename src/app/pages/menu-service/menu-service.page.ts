@@ -5510,50 +5510,47 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public pauseAutoServeWhenUnidentifiedPatron() {        
         this.event.destroy('unidentifiedPatron:show');
         this.event.subscribe('unidentifiedPatron:show', (userEventData) => {
-            const popupShow = userEventData?.params?.[1]?.showPopUp == 1;
-            if (popupShow) {
-                if (this.autoServeEnabled && this.settingAutoPause.unidentifiedPatron) {
+            const message = userEventData?.params?.[0]?.replace('for', '');
+            let showPopup = userEventData?.params?.[1]?.showPopUp == 1;
+
+            const shouldPause = this.autoServeEnabled && this.settingAutoPause.unidentifiedPatron;
+            const shouldSkipPopup = this.autoServeEnabled && !this.settingAutoPause.unidentifiedPatron;
+
+            if (showPopup) {
+                if (shouldPause) {
                     this.impermanentAutoServePause = true;
                 }
-
+                if (shouldSkipPopup) {
+                    showPopup = false;
+                }
+            }
+            if (showPopup) {                
                 this.modalCtrl.create({
                     component: UnidentifiedPatronPopupPage,
                     cssClass: 'customModal',
                     componentProps: {
-                        'Message': userEventData?.params?.[0]?.replace('for', '')
+                        'Message': message
                     }, backdropDismiss: false
                 }).then(async (res) => {
                     await res.present();
                 });
-            }
-            if (popupShow == false) {
+            } else {
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
                 this.popupMessageService.showMessage(PopupMessageCode.E24397, [userEventData.params[0]]);
-                if (this.autoServeEnabled && this.settingAutoPause.unidentifiedPatron == true) {
+                if (shouldPause) {
                     this.impermanentAutoServePause = true;
-                } else if (this.autoServeEnabled && this.settingAutoPause.unidentifiedPatron ==  false) {
-                    this.event.publish('unidentifiedPatronLookUp', { "checkPatronAccount": true });  
+                } else if (shouldSkipPopup) {
+                    this.event.publish('unidentifiedPatronLookUp', { checkPatronAccount: true });
                 }
             }
         });
 
         this.event.destroy('unidentifiedPatron:nextPatron');
         this.event.subscribe('unidentifiedPatron:nextPatron', (userEventData) => {
-            if (this.autoServeEnabled) {
-                if (this.settingAutoPause.unidentifiedPatron) {
-                    this.impermanentAutoServePause = false;
-                    this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
-                    if (this.lookUpService.getQ().length !== 0) {
-                        this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
-                    }
-                }
-            }
-            else {
-                this.impermanentAutoServePause = false;
-                this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
-                if (this.lookUpService.getQ().length !== 0) {
-                    this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
-                }
+            this.impermanentAutoServePause = false;
+            this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
+            if (this.lookUpService.getQ().length !== 0) {
+                this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
             }
         });
     }
