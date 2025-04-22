@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Components } from '@ionic/core';
 import { NgZone, Renderer2 } from '@angular/core';
 import { NavController, PopoverController, ModalController } from '@ionic/angular';
@@ -27,13 +27,16 @@ import { SettingService } from '../../services/setting.service';
     styleUrls: ['./transaction-details-popup.page.scss'],
     providers: [TransactionService, Keyboard]
 })
-export class TransactionDetailsPopupPage implements OnInit {
+export class TransactionDetailsPopupPage implements OnInit, OnDestroy {
 
     @Input() modal: Components.IonModal;
     @Input() isFromservice;
     public loadingID;
     public transactionStatusMins;
     performanceOptions = null;
+    public lastTransactionStatusTime: Date = null;
+    public nextTransactionStatusTime: Date = null;
+    private updateTimer: any;
 
     ngOnInit() {
         this.navIsFromservice = this.isFromservice;
@@ -52,6 +55,27 @@ export class TransactionDetailsPopupPage implements OnInit {
         else {
             this.transactionStatusMins = SettingService.getSettingValue("TRASTAINT") || "5";
         }
+
+        this.loadTransactionTimes();
+
+        // Refresh every 5 seconds
+        this.updateTimer = setInterval(() => {
+            this.loadTransactionTimes();
+        }, 5000);
+    }
+
+    ngOnDestroy() {
+        if (this.updateTimer) {
+            clearInterval(this.updateTimer);
+        }
+    }
+
+    private loadTransactionTimes() {
+        const last = localStorage.getItem("lastTransactionStatusTime");
+        const next = localStorage.getItem("nextTransactionStatusTime");
+
+        this.lastTransactionStatusTime = last ? new Date(last.replace(/^"|"$/g, '')) : null;
+        this.nextTransactionStatusTime = next ? new Date(next.replace(/^"|"$/g, '')) : null;
     }
 
     public intializeTransactionDetails() {

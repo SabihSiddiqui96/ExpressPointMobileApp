@@ -101,8 +101,18 @@ export class SyncService {
         if (this.transactionStatusTimerSubscription) {
             this.transactionStatusTimerSubscription.unsubscribe();
         }
+        const initialNextTime = new Date(Date.now() + (immediateStart ? 0 : 15000));
+        const firstRunTime = new Date(initialNextTime.getTime() + this.transactionStatusInterval);
+        localStorage.setItem("nextTransactionStatusTime", firstRunTime.toISOString());
         const initialInterval = immediateStart ? 0 : 15000 + this.transactionStatusInterval; 
         this.transactionStatusTimerSubscription = timer(initialInterval, this.transactionStatusInterval).subscribe(() => {
+            const lastTime = new Date();
+            const nextTime = new Date(lastTime.getTime() + this.transactionStatusInterval);
+
+            // Save to localStorage
+            localStorage.setItem("lastTransactionStatusTime", lastTime.toISOString());
+            localStorage.setItem("nextTransactionStatusTime", nextTime.toISOString());
+
             this.transactionStatusFromServer();
         });
         console.log("transactionStatusInterval:" + this.transactionStatusInterval);
