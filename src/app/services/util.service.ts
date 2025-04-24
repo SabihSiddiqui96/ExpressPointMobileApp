@@ -7,6 +7,7 @@ import { AppStateService } from './app-state.service';
 import { ElectronService } from './electron.service';
 import * as _ from 'lodash';
 import moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +48,8 @@ export class UtilService {
   public sessionPickedDate: string = '';
   public summarySalePickedDate: string = '';
   public datePickerDate: string = '';
+  private impermanentAutoServePauseSubject = new BehaviorSubject<boolean>(false);
+  impermanentAutoServePause$ = this.impermanentAutoServePauseSubject.asObservable();
 
   constructor(private loadingCtrl: LoadingController, private alertCtrl: AlertController,
     public toastCtrl: ToastController,
@@ -404,5 +407,13 @@ export class UtilService {
     } else {
       return '100vh';
     }
+  }
+
+  setImpermanentAutoServePause(value: boolean): void {
+    this.impermanentAutoServePauseSubject.next(value);
+  }
+
+  getImpermanentAutoServePause(): boolean {
+    return this.impermanentAutoServePauseSubject.getValue();
   }
 }

@@ -7380,22 +7380,28 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public UnidentifiedPatronPopUpShowHide() {
         this.event.destroy('unidentifiedPatron:show');
         this.event.subscribe('unidentifiedPatron:show', (userEventData) => {
-            this.modalCtrl.create({
-                component: UnidentifiedPatronPopupPage,
-                cssClass: 'customModal',
-                componentProps: {
-                    'Message': userEventData.params[0].replace('for', '')
-                }, backdropDismiss: false
-            }).then(async (res) => {
-                await res.present();
-            });
+            const popupShow = userEventData?.params?.[1]?.showPopUp == 1;
+            if (popupShow) {
+                this.modalCtrl.create({
+                    component: UnidentifiedPatronPopupPage,
+                    cssClass: 'customModal',
+                    componentProps: {
+                        'Message': userEventData.params[0].replace('for', '')
+                    }, backdropDismiss: false
+                }).then(async (res) => {
+                    await res.present();
+                });
+            }
+            else {
+                AppStateService.set("UnidentifiedPatronPopUp", "0");
+                this.popupMessageService.showMessage(PopupMessageCode.E24397, [userEventData.params[0]]);
+            }
         });
 
         this.event.destroy('unidentifiedPatron:nextPatron');
         this.event.subscribe('unidentifiedPatron:nextPatron', (userEventData) => {
             this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
             if (this.lookUpService.getQ().length !== 0) {
-                console.log('GetQ   ' + this.lookUpService.getQ()[0]);
                 this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
             }
         });

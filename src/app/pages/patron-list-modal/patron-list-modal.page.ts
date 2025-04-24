@@ -131,6 +131,7 @@ export class PatronListModalPage implements OnInit {
         const inputDirection = value.InputDirection ?? 0; // Default to 0 if InputDirection is null or undefined
         let identifier = value.PersonIdentifier ?? value.Identifier ?? "UNKNOWN"; // Use Identifier if PersonIdentifier is null/undefined, fallback to "UNKNOWN"
         this.fileService.saveLogToCSVFile(identifier, inpDire, inputDirection);
+        this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
         this.event.publish('patron:setLastPatronMenuService', AppStateService.get('patron_details'));
         this.event.publish('patronSelectedFromList', { 'selected_patron': value, 'index': index, 'pageFrom': this.pageFrom });
     }

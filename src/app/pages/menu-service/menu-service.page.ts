@@ -4760,6 +4760,19 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 menuItems = _.orderBy(menuItems, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
                 let refCount = 0;
                 if (this.menuGrid['Buttons'].length > 0) {
+                    // Find the backColor from the "Planned Entrees" category
+                    const plannedEntreesColor = this.allCategories.find(
+                        item => item.Description === "Planned Entrees"
+                    )?.BackColor;
+
+                    // Apply that color to items with DynEntree_Id > 0
+                    if (plannedEntreesColor) {
+                        this.menuGrid.Buttons.forEach(item => {
+                            if (item.DynEntree_Id > 0) {
+                                item.BackColor = plannedEntreesColor;
+                            }
+                        });
+                    }
                     this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
                     for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
                         if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
@@ -5497,63 +5510,47 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public pauseAutoServeWhenUnidentifiedPatron() {        
         this.event.destroy('unidentifiedPatron:show');
         this.event.subscribe('unidentifiedPatron:show', (userEventData) => {
-            let popupShow = false;
-            if (this.autoServeEnabled) {
-                if (this.settingAutoPause.unidentifiedPatron) {
+            const message = userEventData?.params?.[0]?.replace('for', '');
+            let showPopup = userEventData?.params?.[1]?.showPopUp == 1;
+
+            const shouldPause = this.autoServeEnabled && this.settingAutoPause.unidentifiedPatron;
+            const shouldSkipPopup = this.autoServeEnabled && !this.settingAutoPause.unidentifiedPatron;
+
+            if (showPopup) {
+                if (shouldPause) {
                     this.impermanentAutoServePause = true;
-                    popupShow = true;
-                    this.modalCtrl.create({
-                        component: UnidentifiedPatronPopupPage,
-                        cssClass: 'customModal',
-                        componentProps: {
-                            'Message': userEventData.params[0].replace('for', '')
-                        }, backdropDismiss: false
-                    }).then(async (res) => {
-                        await res.present();
-                        // await res.onDidDismiss().then(() => {
-                        //     this.event.publish('unidentifiedPatronLookUp', {});
-                        // });
-                    });
-                    
-                }                
+                }
+                if (shouldSkipPopup) {
+                    showPopup = false;
+                }
             }
-            else {               
-                popupShow = true;
+            if (showPopup) {                
                 this.modalCtrl.create({
                     component: UnidentifiedPatronPopupPage,
                     cssClass: 'customModal',
                     componentProps: {
-                        'Message': userEventData.params[0].replace('for', '')
+                        'Message': message
                     }, backdropDismiss: false
                 }).then(async (res) => {
-                    await res.present();                    
+                    await res.present();
                 });
-            }
-            if (popupShow == false) {
+            } else {
                 AppStateService.set("UnidentifiedPatronPopUp", "0");
-                this.popupMessageService.showMessage(PopupMessageCode.E24397, userEventData);
+                this.popupMessageService.showMessage(PopupMessageCode.E24397, [userEventData.params[0]]);
+                if (shouldPause) {
+                    this.impermanentAutoServePause = true;
+                } else if (shouldSkipPopup) {
+                    this.event.publish('unidentifiedPatronLookUp', { checkPatronAccount: true });
+                }
             }
         });
 
         this.event.destroy('unidentifiedPatron:nextPatron');
         this.event.subscribe('unidentifiedPatron:nextPatron', (userEventData) => {
-            if (this.autoServeEnabled) {
-                if (this.settingAutoPause.unidentifiedPatron) {
-                    this.impermanentAutoServePause = false;
-                    this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
-                    if (this.lookUpService.getQ().length !== 0) {
-                        console.log('GetQ   ' + this.lookUpService.getQ()[0]);
-                        this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
-                    }
-                }
-            }
-            else {
-                this.impermanentAutoServePause = false;
-                this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
-                if (this.lookUpService.getQ().length !== 0) {
-                    console.log('GetQ   ' + this.lookUpService.getQ()[0]);
-                    this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
-                }
+            this.impermanentAutoServePause = false;
+            this.event.publish('unidentifiedPatronLookUp', { "pinLookUp": true });
+            if (this.lookUpService.getQ().length !== 0) {
+                this.lookUpService.selectPatron(this.lookUpService.getQ()[0]);
             }
         });
     }
