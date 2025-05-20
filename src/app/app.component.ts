@@ -40,8 +40,8 @@ import { PopupMessageService } from "./services/popup-message.service";
 import { PopupMessageCode } from "./services/enums/popup-message-codes";
 import { Observable, Subscription, timer } from "rxjs";
 import { BehaviorSubject } from "rxjs";
-import { NavigationExtras } from "@angular/router";
-import { distinctUntilChanged } from "rxjs/operators";
+import { NavigationEnd, NavigationExtras } from "@angular/router";
+import { distinctUntilChanged, filter } from "rxjs/operators";
 import { Router } from "@angular/router";
 import { AuthService } from './services/auth.service';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
@@ -151,7 +151,9 @@ export class AppComponent {
 
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
   public popupMessageDoc = [];
-
+  public showBackDatedWarning : boolean = false;
+  public sessionDate: string;
+  
   constructor(
     public platform: Platform,
     public menu: MenuController,
@@ -433,20 +435,26 @@ export class AppComponent {
 
   ngOnInit() {
     this.navCtrl.navigateRoot([""]);
-    this.popupMessageDoc[0] = {
-      'MessageCode': 'E99999',
-      'MessageDescription': 'You\'re about to perform transactions for a non-current session date (past or future). Do you want to continue?',
-      'Header': 'CONFIRM',
-      'FootNote': '',
-      'MessageType': 'CONFIRM',
-      'ShowOk': 0,
-      'ShowCancel': 0,
-      'ShowYes': 1,
-      'ShowNo': 1,
-      'ShowNoThanks': 0,
-      'DontShowMe': 0,
-      'ChkShowValue': false
-    };
+
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        const urlSubstringsArray = [
+          'dynamic-menu',
+          'menu-service',
+          'payments',
+          'summary-sale',
+          'classroom-sale'
+        ];
+        this.sessionDate = this.utilService.getSessionDate();
+        const selectedDateTocheckBackDate = moment(this.utilService.getSessionDate()).format('YYYY-MM-DD');
+        const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
+        const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;       
+
+        this.showBackDatedWarning = isBackdated && urlSubstringsArray.some(substring =>
+          event.urlAfterRedirects.toUpperCase().includes(substring.toUpperCase())
+        );
+      });
   }
 
   private inputBuffer = [];
@@ -1493,6 +1501,7 @@ export class AppComponent {
     if (this.openSession === true) {
       // Get the selected session date from the form
       const selectedDateTocheckBackDate = moment(this.utilService.getSessionDate()).format('YYYY-MM-DD');
+      const selectedDateString = moment(this.utilService.getSessionDate()).format('MM/DD/YYYY');
       
       // Get the current date
       const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
@@ -1553,6 +1562,24 @@ export class AppComponent {
         }
       };
       if (isBackdated && ["MenuService", "Payments", "ClassroomSale"].includes(type)) {
+        this.popupMessageDoc[0] = {
+          'MessageCode': 'E99999',
+          'MessageDescription': `
+            Session is not set to current date.<br>
+            You are about to process transactions for <strong>${selectedDateString}</strong>.<br><br>
+            Please double-check you wish to ring up transactions for this date.<br><br>
+            <strong>Are you sure you want to continue with back/post dating transactions?</strong>`,
+          'Header': 'CONFIRM',
+          'FootNote': '',
+          'MessageType': 'CONFIRM',
+          'ShowOk': 0,
+          'ShowCancel': 0,
+          'ShowYes': 1,
+          'ShowNo': 1,
+          'ShowNoThanks': 0,
+          'DontShowMe': 0,
+          'ChkShowValue': false
+        };
         this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((proceed: boolean) => {
           if (proceed) {
             continueLogic(); // run the same code

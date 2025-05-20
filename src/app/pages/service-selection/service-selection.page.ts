@@ -216,9 +216,16 @@ export class ServiceSelectionPage implements OnInit {
 
   async ngOnInit() {
     this.sessionDate = this.utilService.getSessionDate();
+    const rawDate = new Date(this.utilService.getSessionDate());
+    const sessionDateString = `${(rawDate.getMonth() + 1).toString().padStart(2, '0')}/${rawDate.getDate().toString().padStart(2, '0')}/${rawDate.getFullYear()}`;
+
     this.popupMessageDoc[0] = {
       'MessageCode': 'E99999',
-      'MessageDescription': 'You\'re about to perform transactions for a non-current session date (past or future). Do you want to continue?',
+      'MessageDescription': `
+            Session is not set to current date.<br>
+            You are about to process transactions for <strong>${sessionDateString}</strong>.<br><br>
+            Please double-check you wish to ring up transactions for this date.<br><br>
+            <strong>Are you sure you want to continue with back/post dating transactions?</strong>`,
       'Header': 'CONFIRM',
       'FootNote': '',
       'MessageType': 'CONFIRM',

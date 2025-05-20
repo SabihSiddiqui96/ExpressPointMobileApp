@@ -102,21 +102,6 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       this.checkPOSPeriod(new Date().toISOString());
       //this.getOpenSession();
     }
-
-    this.popupMessageDoc[0] = {
-      'MessageCode': 'E99999',
-      'MessageDescription': 'You\'re about to perform transactions for a non-current session date (past or future). Do you want to continue?',
-      'Header': 'CONFIRM',
-      'FootNote': '',
-      'MessageType': 'CONFIRM',
-      'ShowOk': 0,
-      'ShowCancel': 0,
-      'ShowYes': 1,
-      'ShowNo': 1,
-      'ShowNoThanks': 0,
-      'DontShowMe': 0,
-      'ChkShowValue': false
-    };
   }
 
   ngOnDestroy() {
@@ -868,7 +853,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public openSession() {
     // Get the selected session date from the form
     const selectedDateTocheckBackDate = moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD');
-
+    const selectedDateString = moment(this.utilService.getSessionDate()).format('MM/DD/YYYY');
+    
     // Get the current date
     const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
 
@@ -991,6 +977,24 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     };
     
     if (isBackdated) {
+      this.popupMessageDoc[0] = {
+        'MessageCode': 'E99999',
+        'MessageDescription': `
+            Session is not set to current date.<br>
+            You are about to process transactions for <strong>${selectedDateString}</strong>.<br><br>
+            Please double-check you wish to ring up transactions for this date.<br><br>
+            <strong>Are you sure you want to continue with back/post dating transactions?</strong>`,
+        'Header': 'CONFIRM',
+        'FootNote': '',
+        'MessageType': 'CONFIRM',
+        'ShowOk': 0,
+        'ShowCancel': 0,
+        'ShowYes': 1,
+        'ShowNo': 1,
+        'ShowNoThanks': 0,
+        'DontShowMe': 0,
+        'ChkShowValue': false
+      };
       this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((proceed: boolean) => {
         if (proceed) {
           continueLogic(); // run the same code
