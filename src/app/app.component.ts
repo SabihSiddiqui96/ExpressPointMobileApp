@@ -443,7 +443,6 @@ export class AppComponent {
           'dynamic-menu',
           'menu-service',
           'payments',
-          'summary-sale',
           'classroom-sale'
         ];
         this.sessionDate = this.utilService.getSessionDate();
