@@ -51,6 +51,7 @@ import { LocalTimerService } from "./services/local-timer.service";
 import { SessionType } from "./services/enums/session-types";
 import { SyncService } from "./services/syncService.service";
 import { PersonImageService } from "./services/person-image.service";
+import moment from "moment";
 
 declare var Fullscreen: any;
 @Component({
@@ -149,6 +150,7 @@ export class AppComponent {
   }
 
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
+  public popupMessageDoc = [];
 
   constructor(
     public platform: Platform,
@@ -216,11 +218,12 @@ export class AppComponent {
       .pipe(distinctUntilChanged())
       .subscribe((value) => {
         let evenType;
+        const date = new Date();
         if (value == true) {
-          AppStateService.set("HeartBeatLastOfflineDate", LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()));
+          AppStateService.set("HeartBeatLastOfflineDate", date.getTime());
           evenType = "disconnect";
         } else {
-          AppStateService.set("LastOnlineDate", LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()));
+          AppStateService.set("LastOnlineDate", date.getTime());
           evenType = "connect";
         }
 
@@ -286,7 +289,12 @@ export class AppComponent {
     }
 
     this.event.subscribe("RefreshSideMenu", (data) => {
-      this.openSession = data.OpenSession;
+      if (AppStateService.get('session_id')) {
+        this.openSession = data.OpenSession;
+      }
+      else {
+        this.openSession = false;
+      }
     });
 
     this.event.subscribe("school-selection-page", (userEventData) => {
@@ -425,6 +433,20 @@ export class AppComponent {
 
   ngOnInit() {
     this.navCtrl.navigateRoot([""]);
+    this.popupMessageDoc[0] = {
+      'MessageCode': 'E99999',
+      'MessageDescription': 'You\'re about to perform transactions for a non-current session date (past or future). Do you want to continue?',
+      'Header': 'CONFIRM',
+      'FootNote': '',
+      'MessageType': 'CONFIRM',
+      'ShowOk': 0,
+      'ShowCancel': 0,
+      'ShowYes': 1,
+      'ShowNo': 1,
+      'ShowNoThanks': 0,
+      'DontShowMe': 0,
+      'ChkShowValue': false
+    };
   }
 
   private inputBuffer = [];
@@ -511,7 +533,7 @@ export class AppComponent {
           _thisRef.platform.pause.subscribe(() => {
             console.log("App paused");
             UtilService.isAppForeground = false;
-            UtilService.appBackgroundTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+            UtilService.appBackgroundTime = new Date().getTime();
           });
 
           _thisRef.platform.resume.subscribe(() => {
@@ -1374,7 +1396,7 @@ export class AppComponent {
     const sessionDenominations = [];
     const sessionCheck = [];
     const closeSessionDoc = {
-      '_id': 'CloseSession--' + LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()),
+      '_id': 'CloseSession--' + new Date().getTime(),
       'SessionId': AppStateService.get('session_id'),
       'SessionDenominations': sessionDenominations,
       'SessionCheck': sessionCheck,
@@ -1388,7 +1410,7 @@ export class AppComponent {
 
       let sessionDocs = data.rows.map(row => row.doc);
       sessionDocs = sessionDocs.filter(s => {
-        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+        return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
           Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
           && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
           && s.SessionType === SessionType.EXPRESSPOINT;
@@ -1469,56 +1491,76 @@ export class AppComponent {
     }
 
     if (this.openSession === true) {
-      switch (type) {
-        case "MenuService":
-          if (this.useDynamicMenus) {
-            const navigationExtras: NavigationExtras = {
-              state: {
-                navData: {
-                  autoLoadQueue: "true",
+      // Get the selected session date from the form
+      const selectedDateTocheckBackDate = moment(this.utilService.getSessionDate()).format('YYYY-MM-DD');
+      
+      // Get the current date
+      const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
+      
+      // Check if the dates are different and store the result
+      const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;
+      const continueLogic = () => {
+        switch (type) {
+          case "MenuService":
+            if (this.useDynamicMenus) {
+              const navigationExtras: NavigationExtras = {
+                state: {
+                  navData: {
+                    autoLoadQueue: "true",
+                  },
                 },
-              },
-            };
-            this.navCtrl.navigateRoot("dynamic-menu", navigationExtras);
-          } else {
-            const navigationExtras: NavigationExtras = {
-              state: {
-                navData: {
-                  autoLoadQueue: "true",
+              };
+              this.navCtrl.navigateRoot("dynamic-menu", navigationExtras);
+            } else {
+              const navigationExtras: NavigationExtras = {
+                state: {
+                  navData: {
+                    autoLoadQueue: "true",
+                  },
                 },
-              },
-            };
-            this.navCtrl.navigateRoot("menu-service", navigationExtras);
+              };
+              this.navCtrl.navigateRoot("menu-service", navigationExtras);
+            }
+            AppStateService.set("HidePaymentsQueue", false);
+            break;
+          case "ClassroomSale":
+            this.currentPage = "";
+            this.navCtrl.navigateRoot("classroom-sale", {});
+            break;
+          case "Payments":
+            this.currentPage = "";
+            this.navCtrl.navigateRoot("payments", {});
+            AppStateService.set("HidePaymentsQueue", true);
+            break;
+          case "Transactions":
+            this.currentPage = "";
+            this.navCtrl.navigateRoot("transaction-details-popup", {});
+            break;
+          case "DeviceConfiguration":
+            this.currentPage = "";
+            this.navCtrl.navigateRoot(["device-configuration"], {
+              state: { showBack: false },
+            });
+            break;
+          case "PreOrders":
+            this.currentPage = "";
+            this.navCtrl.navigateRoot("pre-orders", {});
+            break;
+          case "SummarySale":
+            this.currentPage = "";
+            this.navCtrl.navigateRoot("summary-sale", {});
+            break;
+        }
+      };
+      if (isBackdated && ["MenuService", "Payments", "ClassroomSale"].includes(type)) {
+        this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((proceed: boolean) => {
+          if (proceed) {
+            continueLogic(); // run the same code
           }
-          AppStateService.set("HidePaymentsQueue", false);
-          break;
-        case "ClassroomSale":
-          this.currentPage = "";
-          this.navCtrl.navigateRoot("classroom-sale", {});
-          break;
-        case "Payments":
-          this.currentPage = "";
-          this.navCtrl.navigateRoot("payments", {});
-          AppStateService.set("HidePaymentsQueue", true);
-          break;
-        case "Transactions":
-          this.currentPage = "";
-          this.navCtrl.navigateRoot("transaction-details-popup", {});
-          break;
-        case "DeviceConfiguration":
-          this.currentPage = "";
-          this.navCtrl.navigateRoot(["device-configuration"], {
-            state: { showBack: false },
-          });
-          break;
-        case "PreOrders":
-          this.currentPage = "";
-          this.navCtrl.navigateRoot("pre-orders", {});
-          break;
-        case "SummarySale":
-          this.currentPage = "";
-          this.navCtrl.navigateRoot("summary-sale", {});
-          break;
+          // If not proceed, do nothing
+        });
+      } else {
+        continueLogic(); // run the same code without popup
       }
     } else {
       if (type === "Transactions") {
@@ -1544,7 +1586,7 @@ export class AppComponent {
                 type: type,
               },
             },
-            queryParams: { refresh: LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()) }
+            queryParams: { refresh: new Date().getTime() }
           };
           this.navCtrl.navigateRoot("open-session", navigationExtras);
         }
@@ -1556,7 +1598,7 @@ export class AppComponent {
               type: type,
             },
           },
-          queryParams: { refresh: LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()) }
+          queryParams: { refresh: new Date().getTime() }
         };
         this.navCtrl.navigateRoot("open-session", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
@@ -1568,7 +1610,7 @@ export class AppComponent {
               type: type,
             },
           },
-          queryParams: { refresh: LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()) }
+          queryParams: { refresh: new Date().getTime() }
         };
         this.navCtrl.navigateRoot("open-session", navigationExtras);
       }
@@ -1970,7 +2012,7 @@ export class AppComponent {
       }
 
       const heartBeatDetailsDoc = {
-        _id: "HeartBeatDetails--" + LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate()),
+        _id: "HeartBeatDetails--" + new Date().getTime(),
         TerminalId: this.terminalId,
         LogErrorDescription: this.errDescription,
         AppOnlineLogTime: this.lastOnlineDate,

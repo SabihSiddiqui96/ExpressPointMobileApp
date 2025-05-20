@@ -227,7 +227,7 @@ export class SetupDbService {
                     // delete open sessions from previous day
                     openSessionDocs.forEach(doc => {
                         if (doc.isSentToServer === true
-                            && (doc.OpenDate !== LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) || doc.openDate <= LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate())))
+                            && (doc.OpenDate !== LocalTimerService.GetLocalDateAsString() || doc.openDate <= LocalTimerService.GetLocalDateAsString()))
                             EXP_TRANSACTIONS.remove(doc);
                     });
 
@@ -235,7 +235,7 @@ export class SetupDbService {
                         openSessionDocs.length > 0 ? openSessionDocs.find((doc) => doc.isSentToServer === false) : true;
 
                     const hasOpenToday = openSessionDocs.length > 0 ? openSessionDocs.find((doc) =>
-                        doc.isStillOpen && doc.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate())) : true;
+                        doc.isStillOpen && doc.OpenDate === LocalTimerService.GetLocalDateAsString()) : true;
 
                     if (hasNotSentOpenSessions || hasOpenToday) {
                         canDeleteOpenSession = false;

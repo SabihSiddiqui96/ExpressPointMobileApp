@@ -175,7 +175,7 @@ export class QuickClassroomSalePage implements OnInit {
 
             let sessionDocs = data.rows.map(row => row.doc);
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === new Date(this.utilService.getSessionDate()).setHours(0, 0, 0, 0) &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                 Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             });

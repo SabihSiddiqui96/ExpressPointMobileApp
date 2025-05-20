@@ -1185,7 +1185,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
         if (this.cashpaymentOption === 'card') {
             this.cashtendAmount = this.cardAmount;
-            this.cashCardNum = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined)? '' : this.cashCardNum;
+            this.cashCardNum = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? '' : this.cashCardNum;
             this.SquareTransactionStarted =  this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
             if (this.cardAmount.indexOf('$') !== -1) {
                 this.cashtendAmount = this.cardAmount.replace('$', '');
@@ -1245,14 +1245,19 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 }
             } else if (this.cashpaymentOption === 'card') {
                 this.navOrderData.CardNumber = this.cashCardNum;
-                if (!this.navOrderData.CardNumber && !this.isPrincipleAccountClicked && !this.SquareSetting) {
+                const isSquareSetting = this.SquareSetting;
+                const hasSquareDevice = this.squareDeviceId != null && this.squareDeviceId != undefined;
+                // Determine if card number is required
+                const isCardRequired = !isSquareSetting || !hasSquareDevice;
+
+                if (!this.navOrderData.CardNumber && !this.isPrincipleAccountClicked && isCardRequired) {
 
                     this.saveInProgress = false;
                     this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07494);
                     // this.utilService.showToast('Please enter the card number');
                     return;
-                } else if (this.navOrderData.CardNumber != null && (this.navOrderData.CardNumber.length < 4 && !this.SquareSetting)) {
+                } else if (this.navOrderData.CardNumber != null && (this.navOrderData.CardNumber.length < 4 && isCardRequired)) {
                     this.saveInProgress = false;
                     this.isCompleteTransactionProcessing = false;
                     this.popupMessageService.showMessage(PopupMessageCode.E07495);

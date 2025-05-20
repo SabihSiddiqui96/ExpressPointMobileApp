@@ -332,7 +332,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 sessionId_from = this.sessionId;
             }
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
                     && s.SessionId === sessionId_from;
@@ -804,7 +804,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             let sid;
 
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
                     && s.SessionId === closeSessionDoc.SessionId;

@@ -28,6 +28,8 @@ import { SessionType } from "../../services/enums/session-types";
 import { GeneralDBService } from "../../services/Database/general-db.service";
 import { SyncService } from "../../services/syncService.service";
 import { ClosingStatusPopupPageComponent } from "../closing-status-popup/closing-status-popup.page";
+import moment from "moment";
+import { PopupMessageService } from "../../services/popup-message.service";
 
 @Component({
   selector: "app-service-selection",
@@ -54,6 +56,8 @@ export class ServiceSelectionPage implements OnInit {
   public isFromCloseService: boolean = false;
   public hidePaymentOptions: boolean = false;
   public loadingID;
+  public sessionDate: string;
+  public popupMessageDoc = [];
 
   constructor(
     private popoverCtrl: PopoverController,
@@ -75,7 +79,8 @@ export class ServiceSelectionPage implements OnInit {
     public appStateService: AppStateService,
     public settingService: SettingService,
     public pouchQuery: PouchQueriesService,
-    public loadingService: LoadingService
+    public loadingService: LoadingService,
+    public popupMessageService: PopupMessageService
   ) {
     // this.loader = this.loading.create({
     //   message: 'One moment. ExpressPoint is configuring your local database ...',
@@ -210,7 +215,21 @@ export class ServiceSelectionPage implements OnInit {
   }
 
   async ngOnInit() {
-
+    this.sessionDate = this.utilService.getSessionDate();
+    this.popupMessageDoc[0] = {
+      'MessageCode': 'E99999',
+      'MessageDescription': 'You\'re about to perform transactions for a non-current session date (past or future). Do you want to continue?',
+      'Header': 'CONFIRM',
+      'FootNote': '',
+      'MessageType': 'CONFIRM',
+      'ShowOk': 0,
+      'ShowCancel': 0,
+      'ShowYes': 1,
+      'ShowNo': 1,
+      'ShowNoThanks': 0,
+      'DontShowMe': 0,
+      'ChkShowValue': false
+    };
     this.route.queryParams
       .subscribe(params => {
         this.isFromCloseService = params.isFromCloseService;
@@ -429,7 +448,7 @@ export class ServiceSelectionPage implements OnInit {
           sessionDocs = sessionDocs.filter((s) => {
             return (
               s.isStillOpen &&
-              s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+              s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
               Number(s.OpenedBy) ===
               JSON.parse(AppStateService.get("login_details")).UserId &&
               s.SchoolId ===
@@ -475,46 +494,66 @@ export class ServiceSelectionPage implements OnInit {
 
   public checkOpenSession(type) {
     if (this.openSession === true) {
-      switch (type) {
-        case "MenuService":
-          const navigationExtras: NavigationExtras = {
-            state: {
-              navData: {
-                autoLoadQueue: "true",
-              }
-            }
-          };
-          if (this.useDynamicMenus) {
-            this._nav.navigateRoot("dynamic-menu", navigationExtras);
-          } else {
-            this._nav.navigateRoot("menu-service", navigationExtras);
-          }
-          AppStateService.set("HidePaymentsQueue", false);
-          break;
-        case "ClassroomSale":
-          this._nav.navigateRoot("classroom-sale", {});
-          break;
-        case "Payments":
-          this._nav.navigateRoot("payments", {});
-          AppStateService.set("HidePaymentsQueue", true);
-          break;
-        case "Transactions":
-          this._nav.navigateRoot("transaction-details-popup", {});
-          break;
-        case "DeviceConfiguration":
-          // this._nav.navigateForward('device-configuration', {});
-          this._nav.navigateRoot(["device-configuration"], {
-            state: { showBack: false },
-          });
-          break;
-        case "PreOrders":
-          this._nav.navigateRoot("pre-orders", {});
-          break;
-        case "SummarySale":
-          this._nav.navigateRoot("summary-sale", {});
-          break;
-      }
+      // Get the selected session date from the form
+      const selectedDateTocheckBackDate = moment(this.utilService.getSessionDate()).format('YYYY-MM-DD');
+      
+      // Get the current date
+      const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
+      
+      // Check if the dates are different and store the result
+      const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;
 
+      const continueLogic = () => {
+        switch (type) {
+          case "MenuService":
+            const navigationExtras: NavigationExtras = {
+              state: {
+                navData: {
+                  autoLoadQueue: "true",
+                }
+              }
+            };
+            if (this.useDynamicMenus) {
+              this._nav.navigateRoot("dynamic-menu", navigationExtras);
+            } else {
+              this._nav.navigateRoot("menu-service", navigationExtras);
+            }
+            AppStateService.set("HidePaymentsQueue", false);
+            break;
+          case "ClassroomSale":
+            this._nav.navigateRoot("classroom-sale", {});
+            break;
+          case "Payments":
+            this._nav.navigateRoot("payments", {});
+            AppStateService.set("HidePaymentsQueue", true);
+            break;
+          case "Transactions":
+            this._nav.navigateRoot("transaction-details-popup", {});
+            break;
+          case "DeviceConfiguration":
+            // this._nav.navigateForward('device-configuration', {});
+            this._nav.navigateRoot(["device-configuration"], {
+              state: { showBack: false },
+            });
+            break;
+          case "PreOrders":
+            this._nav.navigateRoot("pre-orders", {});
+            break;
+          case "SummarySale":
+            this._nav.navigateRoot("summary-sale", {});
+            break;
+        }
+      };
+      if (isBackdated && ["MenuService", "Payments", "ClassroomSale"].includes(type)) {
+        this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((proceed: boolean) => {
+          if (proceed) {
+            continueLogic(); // run the same code
+          }
+          // If not proceed, do nothing
+        });
+      } else {
+        continueLogic(); // run the same code without popup
+      }
     } else {
       if (type === "Transactions") {
         this._nav.navigateRoot("transaction-details-popup", {});
@@ -532,7 +571,7 @@ export class ServiceSelectionPage implements OnInit {
               type: type,
             }
           },
-          queryParams: { refresh: new Date(this.utilService.getSessionDate()).getTime() }
+          queryParams: { refresh: new Date().getTime() }
         };
         this._nav.navigateRoot("open-session", navigationExtras);
         AppStateService.set("HidePaymentsQueue", true);
@@ -543,7 +582,7 @@ export class ServiceSelectionPage implements OnInit {
               type: type
             }
           },
-          queryParams: { refresh: new Date(this.utilService.getSessionDate()).getTime() }
+          queryParams: { refresh: new Date().getTime() }
         };
         this._nav.navigateRoot("open-session", navigationExtras);
       }

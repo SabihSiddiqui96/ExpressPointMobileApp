@@ -26,7 +26,7 @@
                     <ion-item option-continue-session mode="ios" *ngIf="openSession"
                         (click)="checkOpenSession('MenuService')" detail>
                         <ion-icon slot="start" color="slate" name="restaurant"></ion-icon>
-                        <ion-label text-large>Continue Service</ion-label>
+                        <ion-label text-large>Continue Service (Date: {{ sessionDate | date: 'MM/dd/yyyy' }})</ion-label>
                     </ion-item>
                     <ion-item option-close-session mode="ios" *ngIf="openSession" (click)="goCloseSession()" detail>
                         <ion-icon slot="start" color="slate" name="checkbox-outline"></ion-icon>
