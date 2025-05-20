@@ -853,7 +853,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public openSession() {
     // Get the selected session date from the form
     const selectedDateTocheckBackDate = moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD');
-    const selectedDateString = moment(this.utilService.getSessionDate()).format('MM/DD/YYYY');
+    const selectedDateString = moment(this.openSessionForm.get('sessionDatePicker').value).format('MM/DD/YYYY');
     
     // Get the current date
     const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
