@@ -52,6 +52,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public onKeyDownCallback;
   public currentRoute: string;
   public pageTitle: string;
+  public popupMessageDoc = [];
 
   ngOnInit() {
     this.router.events.pipe(startWith([]),
@@ -91,12 +92,20 @@ export class OpenSessionPage implements OnInit, OnDestroy {
           sessionDatePicker: [new Date(this.utilService.summarySalePickedDate)],
         });
         this.sessionDatePicker = new FormControl(new Date(this.utilService.summarySalePickedDate));
+        /*
+        const selectedDateTocheckBackDate = moment(this.utilService.summarySalePickedDate).format('YYYY-MM-DD');
+        const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
+        const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;
+        if (isBackdated) {
+          this.sessionDateDisable = true;
+        }
+        */
       }
-      this.utilService.setSummarySessionDate(new Date().toISOString());
       this.checkPOSPeriod(new Date().toISOString());
       //this.getOpenSession();
     }
     else {
+      this.utilService.setSummarySessionDate(new Date().toISOString());
       this.utilService.setSessionDate(new Date().toISOString());
       this.checkPOSPeriod(new Date().toISOString());
       //this.getOpenSession();
@@ -850,125 +859,161 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   }
 
   public openSession() {
-
-    this.saveInProgress = true;
-
-    const allDenominations = _.concat(
-      this.denominationDetailsCoins,
-      this.denominationDetailsBills
-    );
+    // Get the selected session date from the form
+    const selectedDateTocheckBackDate = moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD');
+    const selectedDateString = moment(this.openSessionForm.get('sessionDatePicker').value).format('MM/DD/YYYY');
     
-    // Create session denominations with uniqueness by DenominationId
-    const sessionDenominations = _.uniqBy(allDenominations, 'DenominationId')
-      .map(deno => ({
-        DenominationId: deno.DenominationId,
-        Quantity: parseInt(String(deno.Quantity || 0), 10) || 0
-      }));
+    // Get the current date
+    const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
 
-    const sessionId = this.generateUUID();
+    // Check if the dates are different and store the result
+    const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;    
 
-    // const now = new Date();
-    // const UTC = now.getTime();
-    // const localOffset = -1 * now.getTimezoneOffset() * 60000;
-    // const currentTime = Math.round(new Date(UTC + localOffset).getTime());
-    const lastSessionDate = AppStateService.get('NewSessionDate') ?
-      moment(AppStateService.get('NewSessionDate')).format('YYYY-MM-DD') :
-      moment(new Date()).format('YYYY-MM-DD');
-    if (AppStateService.get('NewSessionDate') !== undefined) {
-      if (lastSessionDate !== moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD')) {
-        PouchQueriesService.ResetPreviousSaleData();
-      }
-    }
-    this.utilService.setSessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
-    // AppStateService.set('NewSessionDate', moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD'));
-    AppStateService.set('NewSessionDate', `${this.openSessionForm.get('sessionDatePicker').value}`);
+    const continueLogic = () => {
+      this.saveInProgress = true;
 
-    const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
-    const currentDate = LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate());
+      const allDenominations = _.concat(
+        this.denominationDetailsCoins,
+        this.denominationDetailsBills
+      );
+      
+      // Create session denominations with uniqueness by DenominationId
+      const sessionDenominations = _.uniqBy(allDenominations, 'DenominationId')
+        .map(deno => ({
+          DenominationId: deno.DenominationId,
+          Quantity: parseInt(String(deno.Quantity || 0), 10) || 0
+        }));
 
-    const sessionDate = AppStateService.get('NewSessionDate');
-    const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
-    
-    let sessionDoc: OpenSessionDoc;
-
-    if (this.router.url.includes('summary-sale')) {
-      sessionDoc = {
-        _id: 'OpenSession--' + sessionId,
-        SessionId: sessionId,
-        SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-        SessionDenominations: sessionDenominations,
-        OpeningBalance: this.replaceTotalSign(),
-        SessionType: SessionType.MANUALSALE,
-        // "Status": "New",
-        isStillOpen: true,
-        isSentToServer: false,
-        OpenDateWithTime: currentTime,
-        OpenSessionDate: currentTime,
-        OpenDate: currentDate,
-        OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
-        TerminalId: this.terminalId,
-        LoginWithoutSetup: LoginWithoutSetup
-      };
-    } else {
-      sessionDoc = {
-        _id: 'OpenSession--' + sessionId,
-        SessionId: sessionId,
-        SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
-        SessionDenominations: sessionDenominations,
-        OpeningBalance: this.replaceTotalSign(),
-        SessionType: SessionType.EXPRESSPOINT,
-        // "Status": "New",
-        isStillOpen: true,
-        isSentToServer: false,
-        OpenDateWithTime: currentTime,
-        OpenSessionDate: currentTime,
-        OpenDate: currentDate,
-        OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
-        TerminalId: this.terminalId,
-        LoginWithoutSetup: LoginWithoutSetup
-      };
-    }
-
-
-    PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {
-      if (sessionDoc.SessionType === SessionType.EXPRESSPOINT) {
-        AppStateService.set('session_id', sessionId);
-        AppStateService.set('openingBalance', this.replaceTotalSign());
-        // if (AppStateService.get('TransactionNumber')) {
-        //   AppStateService.set('TransactionNumber', AppStateService.get('TransactionNumber'));
-        // } else {
-        if (this.router.url.includes('summary-sale') == false) {
-          AppStateService.set('TransactionNumber', 0);
+      const sessionId = this.generateUUID();
+      
+      if (this.router.url.includes('summary-sale') == false) {
+        const lastSessionDate = AppStateService.get('NewSessionDate') ?
+          moment(AppStateService.get('NewSessionDate')).format('YYYY-MM-DD') :
+          moment(new Date()).format('YYYY-MM-DD');
+        if (AppStateService.get('NewSessionDate') !== undefined) {
+          if (lastSessionDate !== moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD')) {
+            PouchQueriesService.ResetPreviousSaleData();
+          }
         }
-        AppStateService.set('BonusAmount', 0);
-        // }
-
-
-        PouchQueriesService.DeleteSyncedTransactions().then(() => { });
-        /////////////////////////////////////////////////////////////
-
-        // this.utilService.setLoader(false);
-
-        this.syncService.getTerminalSystemInfo(-1);
-        this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
+        this.utilService.setSessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
+        AppStateService.set('NewSessionDate', `${this.openSessionForm.get('sessionDatePicker').value}`);
       }
-      if (this.currentRoute === 'summarySales') {
-        this._nav.navigateRoot('record-sales', { queryParams: { sessionId: sessionId } });
+
+      const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+      const currentSummarySaleTime = LocalTimerService.getCurrentSessionTime(this.utilService.summarySaleDate);
+      const currentDate = LocalTimerService.GetLocalDateAsString();
+
+      const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
+      
+      let sessionDoc: OpenSessionDoc;
+
+      if (this.router.url.includes('summary-sale')) {
+        sessionDoc = {
+          _id: 'OpenSession--' + sessionId,
+          SessionId: sessionId,
+          SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+          SessionDenominations: sessionDenominations,
+          OpeningBalance: this.replaceTotalSign(),
+          SessionType: SessionType.MANUALSALE,
+          // "Status": "New",
+          isStillOpen: true,
+          isSentToServer: false,
+          OpenDateWithTime: currentSummarySaleTime,
+          OpenSessionDate: currentSummarySaleTime,
+          OpenDate: currentDate,
+          OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
+          TerminalId: this.terminalId,
+          LoginWithoutSetup: LoginWithoutSetup
+        };
       } else {
-        switch (this.type) {
-          case 'MenuService': if (this.useDynamicMenus) {
-            this._nav.navigateRoot('dynamic-menu');
-          } else {
-            this._nav.navigateRoot('menu-service');
-          } break;
-          case 'ClassroomSale': this._nav.navigateRoot('classroom-sale'); break;
-          case 'Payments': this._nav.navigateRoot('payments'); break;
-          case 'Transactions': this._nav.navigateRoot('transaction-details-popup'); break;
-          case 'PreOrders': this._nav.navigateRoot('pre-orders'); break;
-        }
+        sessionDoc = {
+          _id: 'OpenSession--' + sessionId,
+          SessionId: sessionId,
+          SchoolId: JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
+          SessionDenominations: sessionDenominations,
+          OpeningBalance: this.replaceTotalSign(),
+          SessionType: SessionType.EXPRESSPOINT,
+          // "Status": "New",
+          isStillOpen: true,
+          isSentToServer: false,
+          OpenDateWithTime: currentTime,
+          OpenSessionDate: currentTime,
+          OpenDate: currentDate,
+          OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
+          TerminalId: this.terminalId,
+          LoginWithoutSetup: LoginWithoutSetup
+        };
       }
-    });
-    this.fileService.saveLogToCSVFile("OPEN_SESSION", "OPEN SESSION", 0);
+
+      PouchDBService.UpsertSingleDoc(sessionDoc, EXP_TRANSACTIONS).then(() => {
+        if (sessionDoc.SessionType === SessionType.EXPRESSPOINT) {
+          AppStateService.set('session_id', sessionId);
+          AppStateService.set('openingBalance', this.replaceTotalSign());
+          // if (AppStateService.get('TransactionNumber')) {
+          //   AppStateService.set('TransactionNumber', AppStateService.get('TransactionNumber'));
+          // } else {
+          if (this.router.url.includes('summary-sale') == false) {
+            AppStateService.set('TransactionNumber', 0);
+          }
+          AppStateService.set('BonusAmount', 0);
+          // }
+
+
+          PouchQueriesService.DeleteSyncedTransactions().then(() => { });
+          /////////////////////////////////////////////////////////////
+
+          // this.utilService.setLoader(false);
+
+          this.syncService.getTerminalSystemInfo(-1);
+          this.events.publish('RefreshSideMenu', { 'OpenSession': this.openSession });
+        }
+        if (this.currentRoute === 'summarySales') {
+          this._nav.navigateRoot('record-sales', { queryParams: { sessionId: sessionId } });
+        } else {
+          switch (this.type) {
+            case 'MenuService': if (this.useDynamicMenus) {
+              this._nav.navigateRoot('dynamic-menu');
+            } else {
+              this._nav.navigateRoot('menu-service');
+            } break;
+            case 'ClassroomSale': this._nav.navigateRoot('classroom-sale'); break;
+            case 'Payments': this._nav.navigateRoot('payments'); break;
+            case 'Transactions': this._nav.navigateRoot('transaction-details-popup'); break;
+            case 'PreOrders': this._nav.navigateRoot('pre-orders'); break;
+          }
+        }
+      });
+      this.fileService.saveLogToCSVFile("OPEN_SESSION", "OPEN SESSION", 0);
+    };
+    
+    if (isBackdated) {
+      this.popupMessageDoc[0] = {
+        'MessageCode': 'E99999',
+        'MessageDescription': `
+            Session is not set to current date.<br>
+            You are about to process transactions for <strong>${selectedDateString}</strong>.<br><br>
+            Please double-check you wish to ring up transactions for this date.<br><br>
+            <strong>Are you sure you want to continue with back/post dating transactions?</strong>`,
+        'Header': 'CONFIRM',
+        'FootNote': '',
+        'MessageType': 'CONFIRM',
+        'ShowOk': 0,
+        'ShowCancel': 0,
+        'ShowYes': 1,
+        'ShowNo': 1,
+        'ShowNoThanks': 0,
+        'DontShowMe': 0,
+        'ChkShowValue': false
+      };
+      this.popupMessageService.showCustomMessage(this.popupMessageDoc).then((proceed: boolean) => {
+        if (proceed) {
+          continueLogic(); // run the same code
+        }
+        // If not proceed, do nothing
+      });
+    } else {
+      continueLogic(); // run the same code without popup
+    }
   }
 
   public generateUUID() {
