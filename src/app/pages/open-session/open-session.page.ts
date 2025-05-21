@@ -92,12 +92,20 @@ export class OpenSessionPage implements OnInit, OnDestroy {
           sessionDatePicker: [new Date(this.utilService.summarySalePickedDate)],
         });
         this.sessionDatePicker = new FormControl(new Date(this.utilService.summarySalePickedDate));
+        /*
+        const selectedDateTocheckBackDate = moment(this.utilService.summarySalePickedDate).format('YYYY-MM-DD');
+        const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
+        const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;
+        if (isBackdated) {
+          this.sessionDateDisable = true;
+        }
+        */
       }
-      this.utilService.setSummarySessionDate(new Date().toISOString());
       this.checkPOSPeriod(new Date().toISOString());
       //this.getOpenSession();
     }
     else {
+      this.utilService.setSummarySessionDate(new Date().toISOString());
       this.utilService.setSessionDate(new Date().toISOString());
       this.checkPOSPeriod(new Date().toISOString());
       //this.getOpenSession();
@@ -878,21 +886,23 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
       const sessionId = this.generateUUID();
       
-      const lastSessionDate = AppStateService.get('NewSessionDate') ?
-        moment(AppStateService.get('NewSessionDate')).format('YYYY-MM-DD') :
-        moment(new Date()).format('YYYY-MM-DD');
-      if (AppStateService.get('NewSessionDate') !== undefined) {
-        if (lastSessionDate !== moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD')) {
-          PouchQueriesService.ResetPreviousSaleData();
+      if (this.router.url.includes('summary-sale') == false) {
+        const lastSessionDate = AppStateService.get('NewSessionDate') ?
+          moment(AppStateService.get('NewSessionDate')).format('YYYY-MM-DD') :
+          moment(new Date()).format('YYYY-MM-DD');
+        if (AppStateService.get('NewSessionDate') !== undefined) {
+          if (lastSessionDate !== moment(this.openSessionForm.get('sessionDatePicker').value).format('YYYY-MM-DD')) {
+            PouchQueriesService.ResetPreviousSaleData();
+          }
         }
+        this.utilService.setSessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
+        AppStateService.set('NewSessionDate', `${this.openSessionForm.get('sessionDatePicker').value}`);
       }
-      this.utilService.setSessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
-      AppStateService.set('NewSessionDate', `${this.openSessionForm.get('sessionDatePicker').value}`);
 
       const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
+      const currentSummarySaleTime = LocalTimerService.getCurrentSessionTime(this.utilService.summarySaleDate);
       const currentDate = LocalTimerService.GetLocalDateAsString();
 
-      const sessionDate = AppStateService.get('NewSessionDate');
       const LoginWithoutSetup = AppStateService.get('LoginWithoutSetup');
       
       let sessionDoc: OpenSessionDoc;
@@ -908,8 +918,8 @@ export class OpenSessionPage implements OnInit, OnDestroy {
           // "Status": "New",
           isStillOpen: true,
           isSentToServer: false,
-          OpenDateWithTime: currentTime,
-          OpenSessionDate: currentTime,
+          OpenDateWithTime: currentSummarySaleTime,
+          OpenSessionDate: currentSummarySaleTime,
           OpenDate: currentDate,
           OpenedBy: JSON.parse(AppStateService.get('login_details')).UserId,
           TerminalId: this.terminalId,

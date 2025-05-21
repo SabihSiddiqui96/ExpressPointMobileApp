@@ -443,10 +443,18 @@ export class AppComponent {
           'dynamic-menu',
           'menu-service',
           'payments',
+          'record-sales',
           'classroom-sale'
         ];
         this.sessionDate = this.utilService.getSessionDate();
-        const selectedDateTocheckBackDate = moment(this.utilService.getSessionDate()).format('YYYY-MM-DD');
+
+        const currentUrl = event.urlAfterRedirects.toLowerCase();
+
+        // Use summary sale date if URL is record-sales
+        if (currentUrl.includes('record-sales')) {
+          this.sessionDate = this.utilService.summarySaleDate;
+        }
+        const selectedDateTocheckBackDate = moment(this.sessionDate).format('YYYY-MM-DD');
         const currentDateTocheckBackDate = moment().format('YYYY-MM-DD');
         const isBackdated = selectedDateTocheckBackDate !== currentDateTocheckBackDate;       
 

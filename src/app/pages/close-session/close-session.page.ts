@@ -776,7 +776,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 'SessionCheck': sessionCheck,
                 'ClosingBalance': this.mathService.convertToNumber(this.total),
                 'SessionType': SessionType.MANUALSALE,
-                'CloseDateWithTime': currentTime,
+                'CloseDateWithTime': LocalTimerService.getCurrentSessionTime(this.utilService.summarySaleDate),
                 'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
                 'TerminalId': this.terminalId,
                 'SessionDenominations': sessionDenominations

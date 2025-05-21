@@ -593,7 +593,7 @@ export class SummarySalePage implements OnInit {
     if (!this.transactionInProgress) {
       this.transactionInProgress = true;
       const summarySaleDoc = {
-        '_id': 'SummarySale--' + new Date(this.utilService.getSessionDate()).getTime(),
+        '_id': 'SummarySale--' + new Date().getTime(),
         'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
         'MealTypeId': this.filter.selected_mealtype,
         'MenuItemId': this.filter.selected_menuitem,
@@ -604,7 +604,7 @@ export class SummarySalePage implements OnInit {
         'Comment': '',
         'SummarySaleCounts': this.summaryMealCount,
         'IsSynced': false,
-        'TransactionDate': LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate())
+        'TransactionDate': LocalTimerService.getCurrentSessionTime(this.utilService.summarySaleDate)
       };
 
       this.manualSale.push(summarySaleDoc);
