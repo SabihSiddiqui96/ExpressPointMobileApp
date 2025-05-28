@@ -332,7 +332,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 sessionId_from = this.sessionId;
             }
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
                     && s.SessionId === sessionId_from;
@@ -776,7 +776,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                 'SessionCheck': sessionCheck,
                 'ClosingBalance': this.mathService.convertToNumber(this.total),
                 'SessionType': SessionType.MANUALSALE,
-                'CloseDateWithTime': currentTime,
+                'CloseDateWithTime': LocalTimerService.getCurrentSessionTime(this.utilService.summarySaleDate),
                 'SchoolId': JSON.parse(AppStateService.get('SelectedSite')).SchoolId,
                 'TerminalId': this.terminalId,
                 'SessionDenominations': sessionDenominations
@@ -804,7 +804,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             let sid;
 
             sessionDocs = sessionDocs.filter(s => {
-                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+                return s.isStillOpen && s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
                     Number(s.OpenedBy) === JSON.parse(AppStateService.get('login_details')).UserId
                     && s.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId
                     && s.SessionId === closeSessionDoc.SessionId;

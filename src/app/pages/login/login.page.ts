@@ -517,7 +517,7 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
       let sessionDocs = data.rows.map(row => row.doc);
       sessionDocs = sessionDocs.filter(s =>
         s.isStillOpen &&
-        s.OpenDate === LocalTimerService.GetLocalSessionDateAsString(this.utilService.getSessionDate()) &&
+        s.OpenDate === LocalTimerService.GetLocalDateAsString() &&
         s.SchoolId === JSON.parse(AppStateService.get("SelectedSite")).SchoolId &&
         s.SessionType === SessionType.EXPRESSPOINT
       );

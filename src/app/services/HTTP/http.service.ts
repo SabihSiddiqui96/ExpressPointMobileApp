@@ -16,7 +16,7 @@ import { from } from 'rxjs';
 export class HttpService {
 
     public schoolCafeURL: string;
-    public currentExpressPointVersion = "5.4.0";
+    public currentExpressPointVersion = "5.4.1";
 
     constructor(public http: HttpClient, public httpNative: HTTP, public appStateService: AppStateService, public utilService: UtilService) { }
 

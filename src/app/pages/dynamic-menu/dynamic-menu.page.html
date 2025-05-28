@@ -25,7 +25,7 @@
               <span *ngIf="selectedServingLine == -1">Serving Line</span>
             </ion-button>
           </ion-col>
-          <ion-col size="2">
+          <ion-col size="2" *ngIf="!isBackdated">
             <ion-button class="btn-full-size-icon" expand="block" (click)="blurInputElement(); toggleMenus()">
               {{isDynamicMenuSelected ? 'Alacarte' : 'Meal Service'}}
             </ion-button>

@@ -366,7 +366,20 @@ function openLogin(loginSSOUrl) {
         ADFSInfo = '';
         NameId = '';
         LoginError = '';
-        ssowin = new BrowserWindow({ width: 700, height: 700, show: true, autoHideMenuBar : true });
+        // Use a new isolated session for every login
+        const uniqueSession = session.fromPartition(`persist:sso_${Date.now()}`);
+
+        ssowin = new BrowserWindow({
+            width: 700,
+            height: 700,
+            show: true,
+            autoHideMenuBar: true,
+            webPreferences: {
+                session: uniqueSession,
+                nodeIntegration: false,
+                contextIsolation: true
+            }
+        });
         ssowin.loadURL(loginSSOUrl);
         ssowin.webContents.on('did-finish-load', () => {
             const interval = setInterval(() => {

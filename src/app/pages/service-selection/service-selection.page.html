@@ -9,7 +9,7 @@
 </ion-header>
 <ion-content bg-theme>
     <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
-        <ion-col size="12" size-md="8" size-xl="4" class="ion-align-self-center">
+        <ion-col size="12" size-md="8" size-xl="5" class="ion-align-self-center">
             <div box-list-white class="ion-margin-horizontal">
                 <h1 class="ion-text-center" title>
                     Serving Options for
@@ -26,7 +26,7 @@
                     <ion-item option-continue-session mode="ios" *ngIf="openSession"
                         (click)="checkOpenSession('MenuService')" detail>
                         <ion-icon slot="start" color="slate" name="restaurant"></ion-icon>
-                        <ion-label text-large>Continue Service</ion-label>
+                        <ion-label text-large>Continue Service (Date: {{ sessionDate | date: 'MM/dd/yyyy' }})</ion-label>
                     </ion-item>
                     <ion-item option-close-session mode="ios" *ngIf="openSession" (click)="goCloseSession()" detail>
                         <ion-icon slot="start" color="slate" name="checkbox-outline"></ion-icon>

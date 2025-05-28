@@ -87,6 +87,9 @@
         <div *ngIf="hostedUrlMessage && hostedUrlMessage !== 'Production'" class="ribbon"
             [ngClass]="(selectedSide === 'left')?'ribbon-bottom-left':'ribbon-bottom-right'">
             <span>{{hostedUrlMessage}}</span></div>
+        <div class="backdated-session-bar ion-text-center" *ngIf="showBackDatedWarning" style="width: 66% !important;">
+            Session is not set to current date - You are about to process transactions for {{ sessionDate | date: 'MM/dd/yyyy' }}
+        </div>    
     </ion-footer>
     
 </ion-app>
