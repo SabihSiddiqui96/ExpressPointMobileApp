@@ -9,7 +9,7 @@ import { SettingService } from '../../services/setting.service';
 import { PopupMessageService } from '../../services/popup-message.service';
 import { PopupMessageCode } from '../../services/enums/popup-message-codes';
 import { PatronLookupPage } from '../../pages/patron-lookup/patron-lookup.page';
-
+import * as _ from 'lodash';
 import { SuspiciousTransactionDoc, TransactionService } from '../../services/transaction.service';
 import { SiteSettingCodes } from '../../services/enums/site-setting-codes';
 import { Events } from '../../services/events.service';
@@ -20,6 +20,7 @@ import { Subscription, timer } from "rxjs";
 import { CCTransactionStatus, CreditCardTransactionService } from '../../services/Credit-Card-Transaction.service';
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
+import { MathService } from '../../services/math.service';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -55,6 +56,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public disableCancelButton: boolean = false;
     public isContentDisabled: boolean = false;
     performanceOptions: any = null;
+    public noChargeAlaCate: number = 0;
+    public popupMessageNoCharge = [];
     // public ShowRetrySubscription: Subscription;
 
     ngOnInit() {
@@ -68,6 +71,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.changeDue = 0.00;
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
+        this.noChargeAlaCate = parseInt(SettingService.getSettingValue('NOCHGALC'));
         this.setDefaultAmount();
 
 
@@ -314,6 +318,21 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.countDown.unsubscribe();
             });
         }
+
+        this.popupMessageNoCharge[0] = {
+            'MessageCode': 'E99999',
+            'MessageDescription': 'The payment amount must be greater than or equal to the total cost of A La Carte items.',
+            'Header': 'WARNING',
+            'FootNote': '',
+            'MessageType': 'WARNING',
+            'ShowOk': 1,
+            'ShowCancel': 0,
+            'ShowYes': 0,
+            'ShowNo': 0,
+            'ShowNoThanks': 0,
+            'DontShowMe': 0,
+            'ChkShowValue': false
+        };
     }
 
     public navPatronDetails;
@@ -341,6 +360,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     { 'value': 20, 'price': '$20.00' }];
     public hasReimbursibleMeal: boolean = false;
     public hasAlaCarte: boolean = false;
+    public alaCarteAmount = 0;
     public navIsMealFormed: boolean;
     public isElectron: boolean = false;
     public isCompleteTransactionProcessing: boolean = false;
@@ -1176,7 +1196,43 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }        
     }
 
+    private calcAlaTotal(items): boolean {
+        if (this.noChargeAlaCate !== 1) {
+            return true; // No restriction on A La Carte, allow to proceed
+        }
+
+        let alacarteTotal = 0.00;
+
+        const alaItems = _.filter(items, (o) =>
+            (o.IsReimbursable === false && (o.IsPartOfMeal === false || o.IsPartOfMeal === undefined)) ||
+            (o.IsReimbursable === true && o.isSecondMeal === true)
+        );
+
+        if (alaItems.length === 0) {
+            return true; // No A La Carte items, allow to proceed
+        }
+
+        alaItems.forEach(item => {
+            alacarteTotal += item.Price;
+        });
+
+        if (this.cashpaymentOption === 'cash' || this.cashpaymentOption === 'check') {
+            const tenderAmount = MathService.convertToNumber_static(this.cashtendAmount);
+            if (tenderAmount < alacarteTotal) {
+                this.popupMessageService.showCustomMessage(this.popupMessageNoCharge);
+                return false; // Insufficient cash/check for A La Carte
+            }
+        }
+
+        return true; // All checks passed
+    }
+
     public makeSale(retrySquareTransaction = false) {
+        //Added A La Carte total check for 'No Charge' toggle.
+        const canProceed = this.calcAlaTotal(this.navOrderData.items);
+        if (!canProceed) {
+            return; // Stop sale
+        }
 
         if (retrySquareTransaction) {
             this.ShowSquareRetry = false;

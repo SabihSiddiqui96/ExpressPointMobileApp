@@ -171,6 +171,21 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.pauseAutoServeWhenUnidentifiedPatron();
         this.subscribeToMenuServicePopupEvents();
         this.CheckBirthDayNotifications = Boolean(parseInt(SettingService.getSettingValue('BIRTHSH')));
+
+        this.popupMessageNoCharge[0] = {
+            'MessageCode': 'E99999',
+            'MessageDescription': 'A La Carte items (including second meals) cannot be charged. Please remove them and proceed.',
+            'Header': 'WARNING',
+            'FootNote': '',
+            'MessageType': 'WARNING',
+            'ShowOk': 1,
+            'ShowCancel': 0,
+            'ShowYes': 0,
+            'ShowNo': 0,
+            'ShowNoThanks': 0,
+            'DontShowMe': 0,
+            'ChkShowValue': false
+        };
     }
 
     @ViewChild('displayImage') public canvasRef: ElementRef;
@@ -199,7 +214,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public sessionId = null;
     public setting = {
         'Setting_ChargeReimbursableMealsOnly': null, 'Setting_ActionWhenBelowChargeLimit': null,
-        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null, 'PREFNAME': null
+        'CanSwitchMenus': null, 'EXNEGBAL': null, 'CHRGNCEP': null, 'HIDELGBLTY': null, 'PREFNAME': null, 'NOCHGALC': 0
     };
     // public setting={}
     public patronImageConditionCheck = '';
@@ -353,6 +368,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public isIOS: boolean = false;
     public isAndroid: boolean = false;
     public stateEigSetting: boolean = false;
+    public popupMessageNoCharge = [];
 
     constructor(public navCtrl: NavController, public event: Events, private alertCtrl: AlertController, public network: Network,
         private popoverCtrl: PopoverController, private modalCtrl: ModalController, private http: HttpService,
@@ -370,6 +386,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
         this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
+        this.setting.NOCHGALC = parseInt(SettingService.getSettingValue('NOCHGALC'));
         AppStateService.remove('patron_details');
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
@@ -2790,6 +2807,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashtendAmount;
+
+                const alaTotalAllItems = this.calcAlaTotalAllItems(this.orderData['items']);
+                if (alaTotalAllItems > 0 && this.setting.NOCHGALC === 1) {
+                    this.popupMessageService.showCustomMessage(this.popupMessageNoCharge);
+                    this.transactionInProgress = false;
+                    return;
+                }
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
                 } else {
@@ -4640,6 +4664,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.alacarteTotal += item.Price;
                 }
 
+            });
+            return this.alacarteTotal;
+        } else {
+            return this.alacarteTotal;
+        }
+    }
+
+    private calcAlaTotalAllItems(items) { // To calculate sum of all categorical ala carte items including restricted and non-restricted
+        this.alacarteTotal = 0.00;
+        const alaItems = _.filter(items, (o) => o.IsReimbursable === false ||
+            (o.IsReimbursable === true && o.isSecondMeal === true));
+        if (alaItems.length > 0) {
+            alaItems.map(item => {
+                this.alacarteTotal += item.Price;
             });
             return this.alacarteTotal;
         } else {
