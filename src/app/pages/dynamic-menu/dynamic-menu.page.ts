@@ -182,7 +182,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         'EXNEGBAL': null,
         'HIDELGBLTY': null,
         'CHRGNCEP': null,
-        'PREFNAME': null
+        'PREFNAME': null,
+        'NOCHGALC': 0
     };
 
     public dayOfWeek = '0';
@@ -331,6 +332,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public printAllSetting: number = 0;
     private ALACASREST: boolean = false;
     public CheckBirthDayNotifications: boolean = true;
+    public popupMessageNoCharge = [];
 
     public hideStudentId: boolean;
     public isIOS: boolean = false;
@@ -368,6 +370,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
         this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
+        this.setting.NOCHGALC = parseInt(SettingService.getSettingValue('NOCHGALC'));
         AppStateService.remove('patron_details');
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isNaN(this.transactionNumber)) {
@@ -667,6 +670,21 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.event.publish('on-menuservice', { 'currentPage': 'MenuService' });
         this.CheckBirthDayNotifications = Boolean(parseInt(SettingService.getSettingValue('BIRTHSH')));
         this.UnidentifiedPatronPopUpShowHide();
+
+        this.popupMessageNoCharge[0] = {
+            'MessageCode': 'E99999',
+            'MessageDescription': 'A La Carte items (including second meals) cannot be charged. Please remove them and proceed.',
+            'Header': 'WARNING',
+            'FootNote': '',
+            'MessageType': 'WARNING',
+            'ShowOk': 1,
+            'ShowCancel': 0,
+            'ShowYes': 0,
+            'ShowNo': 0,
+            'ShowNoThanks': 0,
+            'DontShowMe': 0,
+            'ChkShowValue': false
+        };
     }
 
     public saveDefaultDynamicTerminalMenu() {
@@ -1425,7 +1443,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             */
             const prevItems = _.map(previousSales, (o) => o.SalesByMealType);
             const allItems = [].concat.apply([], prevItems);
-            console.log('New Array' + JSON.stringify(allItems));
 
             let soldItemsByMealType = [];
             if (prevSalesByMealType) {
@@ -3195,6 +3212,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['patronDetails'] = this.patronDetails;
                 ordDetails['transactionType'] = transactionType;
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
+
+                if (ordDetails['alaTotal'] > 0 && this.setting.NOCHGALC === 1) {
+                    this.popupMessageService.showCustomMessage(this.popupMessageNoCharge);
+                    this.transactionInProgress = false;
+                    return;
+                }
 
                 if (this.utilService.selectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
                     this.postSaleTransaction(transactionType);
