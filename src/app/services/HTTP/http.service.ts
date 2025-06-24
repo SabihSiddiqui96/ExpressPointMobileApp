@@ -619,6 +619,13 @@ export class HttpService {
         ).pipe(map(res => res));
     }
 
+    public uploadCsvLogFile(formData: FormData): any {        
+        const terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
+        if (terminalId) {
+            return this.http.post(API_URL + 'LogFileUpload?terminalId=' + terminalId, formData)
+                .pipe(map(res => res));
+        }
+    }
 
     public SaveDefaultMenusForTerminal(terminalMenuData) {
 
