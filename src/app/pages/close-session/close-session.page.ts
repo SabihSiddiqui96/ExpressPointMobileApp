@@ -809,6 +809,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
                         .then((exists) => {
                             if (exists) {
                                 if (enableInputLogging_Server == true) {
+                                    AppStateService.set('IsDeviceSettingsChanged', 1);
                                     this.deviceService.SaveDeviceSettingToPouchDB('ENABLLOG', '0').then(() => { });
                                 }
                             }
