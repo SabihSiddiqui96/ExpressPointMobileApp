@@ -798,23 +798,23 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
         PouchQueriesService.GetAllOpenSessions().then(data => {
             this.fileService.saveLogToCSVFile("CLOSE_SESSION", "CLOSE SESSION", 0);
-            if (isSummarySalesCloseSession == false) {
+            if (isSummarySalesCloseSession == false && this.utilService.isElectronApp()) {
                 let enableInputLogging_Local = false;
                 if (AppStateService.get('EnableInputLogging') != undefined) {
                     enableInputLogging_Local = AppStateService.get('EnableInputLogging');
                 }
                 let enableInputLogging_Server = (parseInt(SettingService.getDeviceSettingValue('ENABLLOG')) > 0) ? true : false;
-                if (enableInputLogging_Server == true) {
-                    if (enableInputLogging_Local == true) {
-                        this.fileService.checkLogFileExists()
-                            .then((exists) => {
-                                if (exists) {
+                if (enableInputLogging_Local == true) {
+                    this.fileService.uploadLogIfExists()
+                        .then((exists) => {
+                            if (exists) {
+                                if (enableInputLogging_Server == true) {
                                     this.deviceService.SaveDeviceSettingToPouchDB('ENABLLOG', '0').then(() => { });
                                 }
-                            });
-                    }
+                            }
+                        });
                 }
-                else {
+                if (enableInputLogging_Server == false) {
                     AppStateService.set('EnableInputLogging', false);
                 }
             }
