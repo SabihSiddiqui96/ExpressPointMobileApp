@@ -84,6 +84,7 @@ export class DeviceControlsPage implements OnInit {
   public popupMessageDoc_PerformanceToggle = [];
   public EnableInputLogging: boolean = false;
   public EnableDataAnalytics: boolean = false;
+  public NoChargeALaCarte: boolean = false;
 
   public canSetupTerminals: boolean = false;
   public CheckIfPinEntered: boolean = false;
@@ -163,7 +164,8 @@ export class DeviceControlsPage implements OnInit {
     if (AppStateService.get('EnableInputLogging') != undefined) {
       this.EnableInputLogging = AppStateService.get('EnableInputLogging');
     }
-    this.EnableDataAnalytics = (parseInt(SettingService.getDeviceSettingValue('ENBDANAL')) > 0) ? true : false;    
+    this.EnableDataAnalytics = (parseInt(SettingService.getDeviceSettingValue('ENBDANAL')) > 0) ? true : false;
+    this.NoChargeALaCarte = (parseInt(SettingService.getDeviceSettingValue('NOCHGALC')) > 0) ? true : false;
   }
 
   public OnChangeEnableInputLogging(event) {
@@ -218,6 +220,19 @@ export class DeviceControlsPage implements OnInit {
       this.EnableDataAnalytics = false;
       saveSetting(false);
     }
+  }
+
+  public OnChangeNoChargeALaCarte(event) {
+    const toggleSetting = event.detail['checked'] ? '1' : '0';
+
+    const settings = JSON.parse(AppStateService.get('AllDeviceSettings') || '[]');
+    const setting = settings.find(s => s.DeviceSettingCode.trim().toUpperCase() === 'NOCHGALC');
+    if (setting) {
+      setting.DeviceSettingValue = toggleSetting;
+      AppStateService.set('AllDeviceSettings', JSON.stringify(settings));
+      AppStateService.set('IsDeviceSettingsChanged', 1);
+    }
+    this.deviceService.SaveDeviceSettingToPouchDB('NOCHGALC', toggleSetting).then(() => { });
   }
 
   public goToMenuInstructions() {

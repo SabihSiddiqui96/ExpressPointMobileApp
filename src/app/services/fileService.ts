@@ -96,6 +96,15 @@ export class FileService {
         });
     }
 
+    async uploadLogIfExists(): Promise<boolean> {
+        const exists = await this.checkLogFileExists();
+        if (exists) {
+            await this.sendLogFileToServer();
+            return true;
+        }
+        return false;
+    }
+
     getLogFileContent(): Promise<{ content: string; fileName: string }> {
         if (!this.isElectronApp) {
             return Promise.reject(new Error("Not running in Electron"));
@@ -120,7 +129,7 @@ export class FileService {
         });
     }
 
-    private sendLogFileToServer(): void {
+    sendLogFileToServer(): void {
         this.getLogFileContent().then(({ content, fileName }) => {
             if (!content) {
                 // No content, skip upload
@@ -136,14 +145,8 @@ export class FileService {
             const logFileName = fileName && fileName.trim() !== ''
                 ? fileName
                 : `InputLogging_${localDate}.csv`;
-            
             const blob = new Blob([content], { type: 'text/csv' });
-            const file = new File([blob], logFileName, { type: 'text/csv' });
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            this.http.uploadCsvLogFile(formData).subscribe();
+            this.http.uploadCsvLogFile(blob, logFileName).subscribe();
 
         }).catch(err => {
         });

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
 import { API_URL, SC_URL } from '../urls.service';
 import { AppStateService } from '../app-state.service';
@@ -619,11 +619,17 @@ export class HttpService {
         ).pipe(map(res => res));
     }
 
-    public uploadCsvLogFile(formData: FormData): any {        
+    public uploadCsvLogFile(blobContent: Blob, fileName: string): any {
         const terminalId = JSON.parse(AppStateService.get('DeviceInfo')).TerminalId;
         if (terminalId) {
-            return this.http.post(API_URL + 'LogFileUpload?terminalId=' + terminalId, formData)
-                .pipe(map(res => res));
+            const headers = new HttpHeaders({
+                'Content-Type': 'application/octet-stream',
+                'X-Skip-Interceptor': 'true',  
+                'X-TerminalId': terminalId,
+                'X-Filename': fileName,   
+                'Authorization': 'Bearer ' + AppStateService.get('access_token')
+              });
+            return this.http.post(`${API_URL}LogFileUpload`, blobContent, { headers, responseType: 'text' });
         }
     }
 

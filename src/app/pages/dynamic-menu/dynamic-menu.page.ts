@@ -370,7 +370,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.largeImageToShow = false;
         this.utilService.setLoader(false);
         this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
-        this.setting.NOCHGALC = parseInt(SettingService.getSettingValue('NOCHGALC'));
+        this.setting.NOCHGALC = parseInt(SettingService.getDeviceSettingValue('NOCHGALC'));
         AppStateService.remove('patron_details');
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isNaN(this.transactionNumber)) {

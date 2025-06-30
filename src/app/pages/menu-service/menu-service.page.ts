@@ -386,7 +386,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         public loadingService: LoadingService, public signalRService: SignalRService, public creditCardTransactionService: CreditCardTransactionService) {
         this.largeImageToShow = false;
         this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
-        this.setting.NOCHGALC = parseInt(SettingService.getSettingValue('NOCHGALC'));
+        this.setting.NOCHGALC = parseInt(SettingService.getDeviceSettingValue('NOCHGALC'));
         AppStateService.remove('patron_details');
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
