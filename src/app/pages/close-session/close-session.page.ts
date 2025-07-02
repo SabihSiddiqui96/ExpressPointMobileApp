@@ -24,6 +24,7 @@ import { SyncService } from '../../services/syncService.service';
 import { timer } from 'rxjs';
 import { MathService } from '../../services/math.service';
 import { FileService } from '../../services/fileService';
+import { DeviceService } from '../../services/device.service';
 @Component({
     selector: 'app-close-session',
     templateUrl: './close-session.page.html',
@@ -134,7 +135,7 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
         public router: Router, public appStateService: AppStateService,
         public fileService: FileService,
         public syncService: SyncService,
-        public mathService: MathService,
+        public mathService: MathService, public deviceService: DeviceService,
         public pouchDBService: PouchDBService, public settingService: SettingService, public keyboard: Keyboard,
         private elementRef: ElementRef, public printService: PrintService, private route: ActivatedRoute) {
 
@@ -795,10 +796,29 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
             this.syncService.getTerminalSystemInfo(-2);
         }
 
-
-
-
         PouchQueriesService.GetAllOpenSessions().then(data => {
+            this.fileService.saveLogToCSVFile("CLOSE_SESSION", "CLOSE SESSION", 0);
+            if (isSummarySalesCloseSession == false && this.utilService.isElectronApp()) {
+                let enableInputLogging_Local = false;
+                if (AppStateService.get('EnableInputLogging') != undefined) {
+                    enableInputLogging_Local = AppStateService.get('EnableInputLogging');
+                }
+                let enableInputLogging_Server = (parseInt(SettingService.getDeviceSettingValue('ENABLLOG')) > 0) ? true : false;
+                if (enableInputLogging_Local == true) {
+                    this.fileService.uploadLogIfExists()
+                        .then((exists) => {
+                            if (exists) {
+                                if (enableInputLogging_Server == true) {
+                                    AppStateService.set('IsDeviceSettingsChanged', 1);
+                                    this.deviceService.SaveDeviceSettingToPouchDB('ENABLLOG', '0').then(() => { });
+                                }
+                            }
+                        });
+                }
+                if (enableInputLogging_Server == false) {
+                    AppStateService.set('EnableInputLogging', false);
+                }
+            }
 
             let sessionDocs = data.rows.map(row => row.doc);
             let sid;
@@ -841,7 +861,6 @@ export class CloseSessionPage implements OnInit, OnDestroy, AfterViewInit {
 
         });
         this.events.publish('RefreshSideMenu', { 'OpenSession': false });
-        this.fileService.saveLogToCSVFile("CLOSE_SESSION", "CLOSE SESSION", 0);
     }
 
     public clickCheck() {

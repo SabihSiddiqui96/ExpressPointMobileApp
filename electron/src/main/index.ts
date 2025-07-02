@@ -1220,7 +1220,36 @@ ipcMain.on('delete-log-file', (event) => {
   }
 });
 
-const inputLoggingCSVPath = path.join(logDir, `InputLogging_${localDate}.csv`);
+const logFileName = `InputLogging_${localDate}.csv`;
+const inputLoggingCSVPath = path.join(logDir, logFileName);
+ipcMain.on('check-logfile-exists', (event) => {
+  try {
+    const fileExists = fs.existsSync(inputLoggingCSVPath);
+    event.reply('check-logfile-exists-response', fileExists);
+  } catch (error) {
+    event.reply('check-logfile-exists-error', error.message);
+  }
+});
+
+ipcMain.on('get-logfile-content', (event) => {
+  fs.access(inputLoggingCSVPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      event.sender.send('get-logfile-content-error', 'File does not exist');
+    } else {
+      fs.readFile(inputLoggingCSVPath, 'utf8', (readErr, data) => {
+        if (readErr) {
+          event.sender.send('get-logfile-content-error', readErr.message);
+        } else {
+          event.sender.send('get-logfile-content-response', {
+            content: data,
+            fileName: logFileName
+          });
+        }
+      });
+    }
+  });
+});
+
 ipcMain.on('save-logto-csv-file', (event, pinId, status, device) => {
   try {
     // Ensure the log directory exists

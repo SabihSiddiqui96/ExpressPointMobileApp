@@ -20,6 +20,7 @@ import { SetupDbService } from '../../services/setup-db.service';
 import { PouchQueriesService } from '../../services/Database/pouch-queries.service';
 import { AutoServePauseOptionsPopUpComponent } from '../auto-serve-pause-options-popup/auto-serve-pause-options-popup.page';
 import { PerformanceOptionsPopUpComponent } from '../performance-options-popup/performance-options-popup.page';
+import { SyncService } from '../../services/syncService.service';
 
 @Component({
   selector: 'app-device-controls',
@@ -36,6 +37,21 @@ export class DeviceControlsPage implements OnInit {
     this.popupMessageDoc[0] = {
       'MessageCode': 'E99999',
       'MessageDescription': 'Enabling Input Logging may affect performance. Are you sure you want to proceed?',
+      'Header': 'CONFIRM',
+      'FootNote': '',
+      'MessageType': 'CONFIRM',
+      'ShowOk': 0,
+      'ShowCancel': 0,
+      'ShowYes': 1,
+      'ShowNo': 1,
+      'ShowNoThanks': 0,
+      'DontShowMe': 0,
+      'ChkShowValue': false
+    };
+
+    this.popupMessageDoc_PerformanceToggle[0] = {
+      'MessageCode': 'E99999',
+      'MessageDescription': 'Used to send device information to PrimeroEdge for performance monitoring.<br/>May cause performance issues on slower networks.<br/><br/>Are you sure you want to proceed?',
       'Header': 'CONFIRM',
       'FootNote': '',
       'MessageType': 'CONFIRM',
@@ -65,7 +81,10 @@ export class DeviceControlsPage implements OnInit {
   public isElectronApp: boolean;
   public isUserLoggedIn: boolean = false;
   public popupMessageDoc = [];
+  public popupMessageDoc_PerformanceToggle = [];
   public EnableInputLogging: boolean = false;
+  public EnableDataAnalytics: boolean = false;
+  public NoChargeALaCarte: boolean = false;
 
   public canSetupTerminals: boolean = false;
   public CheckIfPinEntered: boolean = false;
@@ -92,6 +111,7 @@ export class DeviceControlsPage implements OnInit {
     private zone: NgZone,
     public router: Router, public appStateService: AppStateService,
     public settingService: SettingService, private setupDbService: SetupDbService,
+    private syncService: SyncService,
     private popoverCtrl: PopoverController
   ) {
     this.syncedPersonData = false;
@@ -144,6 +164,8 @@ export class DeviceControlsPage implements OnInit {
     if (AppStateService.get('EnableInputLogging') != undefined) {
       this.EnableInputLogging = AppStateService.get('EnableInputLogging');
     }
+    this.EnableDataAnalytics = (parseInt(SettingService.getDeviceSettingValue('ENBDANAL')) > 0) ? true : false;
+    this.NoChargeALaCarte = (parseInt(SettingService.getDeviceSettingValue('NOCHGALC')) > 0) ? true : false;
   }
 
   public OnChangeEnableInputLogging(event) {
@@ -161,6 +183,56 @@ export class DeviceControlsPage implements OnInit {
     else {
       AppStateService.set('EnableInputLogging', this.EnableInputLogging);
     }
+  }
+
+  public OnChangeEnableDataAnalytics(event) {
+    this.EnableDataAnalytics = event.detail['checked'];
+    const toggleSetting = this.EnableDataAnalytics ? '1' : '0';
+
+    // This function saves the setting to state and DB
+    const saveSetting = (enabled: boolean) => {
+      // Update AllDeviceSettings
+      const settings = JSON.parse(AppStateService.get('AllDeviceSettings') || '[]');
+      const setting = settings.find(s => s.DeviceSettingCode.trim().toUpperCase() === 'ENBDANAL');
+      if (setting) {
+        setting.DeviceSettingValue = enabled ? '1' : '0';
+        AppStateService.set('AllDeviceSettings', JSON.stringify(settings));
+        AppStateService.set('IsDeviceSettingsChanged', 1);
+      }
+
+      // Save to local DB
+      this.deviceService.SaveDeviceSettingToPouchDB('ENBDANAL', enabled ? '1' : '0').then(() => {});
+    };
+
+    if (this.EnableDataAnalytics) {
+      // Show confirmation popup before enabling
+      this.popupMessageService.showCustomMessage(this.popupMessageDoc_PerformanceToggle).then((confirmed) => {
+        if (confirmed) {
+          this.EnableDataAnalytics = true;
+          saveSetting(true);
+        } else {
+          this.EnableDataAnalytics = false;
+          saveSetting(false);
+        }
+      });
+    } else {
+      // Disabled directly
+      this.EnableDataAnalytics = false;
+      saveSetting(false);
+    }
+  }
+
+  public OnChangeNoChargeALaCarte(event) {
+    const toggleSetting = event.detail['checked'] ? '1' : '0';
+
+    const settings = JSON.parse(AppStateService.get('AllDeviceSettings') || '[]');
+    const setting = settings.find(s => s.DeviceSettingCode.trim().toUpperCase() === 'NOCHGALC');
+    if (setting) {
+      setting.DeviceSettingValue = toggleSetting;
+      AppStateService.set('AllDeviceSettings', JSON.stringify(settings));
+      AppStateService.set('IsDeviceSettingsChanged', 1);
+    }
+    this.deviceService.SaveDeviceSettingToPouchDB('NOCHGALC', toggleSetting).then(() => { });
   }
 
   public goToMenuInstructions() {

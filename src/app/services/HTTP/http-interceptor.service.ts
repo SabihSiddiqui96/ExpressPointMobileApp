@@ -35,9 +35,14 @@ export class HttpInterceptorService {
     if (!this.utilService.isAppOnline && !this.checkURLToAllowInAppOfflineMode(request.url)) {
       return throwError(new HttpErrorResponse({ error: 'App is in Offline mode.' }));
     }
-    // if (request.url.endsWith('RELEASES')) {
-    //  return this.forwardRequest(httpHandler, request);
-    // }
+    if (request.headers.has('X-Skip-Interceptor')) {
+      // Remove the custom header before forwarding if you want:
+      const headersWithoutSkip = request.headers.delete('X-Skip-Interceptor');
+      const clonedReq = request.clone({ headers: headersWithoutSkip });
+
+      // Skip adding/modifying headers (like Authorization or Content-Type)
+      return this.forwardRequest(httpHandler, clonedReq);
+    }
     if (!request.url.endsWith('token')) {
       let clonedReq
       if (request.url.includes('squareup')) {

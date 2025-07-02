@@ -141,9 +141,10 @@ export class SyncService {
 
     public async getTerminalSystemInfo(sessionSource = 0) {
         const deviceInfo = AppStateService.get('DeviceInfo');
+        const isDataAnalyticsEnabled = parseInt(SettingService.getDeviceSettingValue('ENBDANAL'));
         let sessionPointTerminalInfo = AppStateService.get('SessionPointTerminalInfo');
         let isOpenSession = AppStateService.get('session_id') ? true : false;
-        if (isOpenSession == false && sessionSource == 0) {
+        if ((isOpenSession == false && sessionSource == 0) || isDataAnalyticsEnabled == 0) {
             return;
         }
 

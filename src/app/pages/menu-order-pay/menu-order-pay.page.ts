@@ -71,7 +71,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.changeDue = 0.00;
         this.EXNEGBAL = Boolean(parseInt(SettingService.getSettingValue('EXNEGBAL')));
         this.settingActionWhenBelowChargeLimit = parseInt(SettingService.getSettingValue('BABECL'));
-        this.noChargeAlaCate = parseInt(SettingService.getSettingValue('NOCHGALC'));
+        this.noChargeAlaCate = parseInt(SettingService.getDeviceSettingValue('NOCHGALC'));
         this.setDefaultAmount();
 
 

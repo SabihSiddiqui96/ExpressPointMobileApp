@@ -719,6 +719,9 @@ export class GeneralDBService {
                 'TerminalId' : deviceInfo.TerminalId
               };
               settings.push(devSettingDoc);
+              if (setting.DeviceSettingCode.trim().toUpperCase() === 'ENABLLOG') {
+                AppStateService.set('EnableInputLogging', setting.DeviceSettingValue === '1' ? true : false);
+              }
             });
           }
           if (settings.length > 0) {
