@@ -28,7 +28,7 @@ export class PatronListModalPage implements OnInit {
     isOnlyThisSite: boolean = false;
     public selectedSiteName: string;
     public performanceOptions: any = null;
-    ngOnInit() {    
+    async ngOnInit() {    
         this.performanceOptions = AppStateService.get('performanceOptions');
         this.navPatronList = this.patron_list;
         this.searchResultCount = this.navPatronList.length;
@@ -45,7 +45,7 @@ export class PatronListModalPage implements OnInit {
         this.navIsFromQueue = this.isFromQueue;
         this.navIsFromAdvPatronSearch = this.isFromAdvPatronSearch;
         this.navAllowVisitingPatron = this.allowVisitingPatron;
-        this.loadFirst20Patrons();
+        await this.loadFirst20Patrons();
 
         // this.patronList = this.getPatronImages(this.patronList);
         if (!this.navIsFromQueue) {
@@ -223,13 +223,13 @@ export class PatronListModalPage implements OnInit {
         AppStateService.set("GridViewPatronIsPic",this.isGridView);
     }
 
-    toggleOnlyThisSite() {
+    async toggleOnlyThisSite() {
         setTimeout(() => {
             (document.activeElement as HTMLElement).blur();
         }, 0);
         this.isOnlyThisSite = !this.isOnlyThisSite;
         AppStateService.set('isOnlyThisSitePatrons', this.isOnlyThisSite);
-        this.loadFirst20Patrons();
+        await this.loadFirst20Patrons();
         this.updateAdvLookupSortOrder();
     }
 
