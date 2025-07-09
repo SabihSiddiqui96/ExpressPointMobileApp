@@ -48,7 +48,7 @@ steps:
     inputs:
       SourceFolder: $(Build.SourcesDirectory)/platforms/android/app/build/outputs/bundle/release
       Contents: app-release.aab
-      TargetFolder: C:\Program Files\Java\jdk-11\bin
+      TargetFolder: C:\Program Files\Java\jdk-17\bin
       OverWrite: true
 
   - script: |
@@ -59,7 +59,7 @@ steps:
   # Publish APK as artifact
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: 'C:\Program Files\Java\jdk-11\bin\app-release.aab'
+      PathtoPublish: 'C:\Program Files\Java\jdk-17\bin\app-release.aab'
       ArtifactName: 'android-aab'
       publishLocation: 'Container'
     displayName: 'Publish APK Artifact'
