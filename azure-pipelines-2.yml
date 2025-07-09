@@ -1,5 +1,5 @@
 trigger:
-- master
+  - master
 
 pool:
   name: PrimeroEdge
@@ -8,10 +8,9 @@ pool:
 
 variables:
   IONIC_CLI_VERSION: '5.4.16'
-  CORDOVA_CLI_VERSION: '12.0.0'
-  ANDROID_SDK_VERSION: '34.0.0'
-  ANDROID_BUILD_TOOLS_VERSION: '34.0.0'
-  ANDROID_SDK_API_LEVEL: 'android-34'
+  CORDOVA_CLI_VERSION: '12.0.0'  
+  # Local Java 17 path for this pipeline only
+  PIPELINE_JAVA_HOME: 'C:\Program Files\Java\jdk-17'
 
 steps:
   # Use Node.js 20.x
@@ -20,6 +19,14 @@ steps:
       versionSpec: '20.11.1'
       checkLatest: true
     displayName: 'Use Node.js 20.x'
+
+  # Verify Java 17 is available but don't change system default
+  - script: |
+      echo "System JAVA_HOME: %JAVA_HOME%"
+      echo "Pipeline JAVA_HOME: $(PIPELINE_JAVA_HOME)"
+      "$(PIPELINE_JAVA_HOME)\bin\java" -version
+      "$(PIPELINE_JAVA_HOME)\bin\javac" -version
+    displayName: 'Verify Java 17 Availability'
 
   # Install Ionic and Cordova CLI globally
   - script: npm install -g ionic@$(IONIC_CLI_VERSION) cordova@$(CORDOVA_CLI_VERSION)
@@ -32,34 +39,38 @@ steps:
       arguments: '-D -E @angular/cli'
     displayName: 'Install npm packages'
 
-  # Add Android platform
+  # Add Android platform with Java 17
   - script: |
+      SET JAVA_HOME=$(PIPELINE_JAVA_HOME)
+      SET PATH=$(PIPELINE_JAVA_HOME)\bin;%PATH%
       ionic cordova platform add android
     displayName: 'Add Android platform'
 
-  # Build Android APK
+  # Build Android APK with Java 17
   - script: |
+      SET JAVA_HOME=$(PIPELINE_JAVA_HOME)
+      SET PATH=$(PIPELINE_JAVA_HOME)\bin;%PATH%
       ionic cordova build android --prod --release
     displayName: 'Build Android APK'
 
   - task: CopyFiles@2
     name: CopyAPK
-    displayName: 'Copy APK file to JAVA Path'
+    displayName: 'Copy APK file to Java 17 Path'
     inputs:
       SourceFolder: $(Build.SourcesDirectory)/platforms/android/app/build/outputs/bundle/release
       Contents: app-release.aab
-      TargetFolder: C:\Program Files\Java\jdk-17\bin
+      TargetFolder: $(PIPELINE_JAVA_HOME)\bin
       OverWrite: true
 
   - script: |
-     cd "C:\Program Files\Java\jdk-17\bin"
-      jarsigner -verbose -keystore $(KEYSTORE_PATH) -keypass $(KEY_PASSWORD) -storepass $(KEYSTORE_PASSWORD) app-release.aab $(KEY_ALIAS)
-    displayName: 'Sign the APK/AAB'
+      cd "$(PIPELINE_JAVA_HOME)\bin"
+      "$(PIPELINE_JAVA_HOME)\bin\jarsigner" -verbose -keystore $(KEYSTORE_PATH) -keypass $(KEY_PASSWORD) -storepass $(KEYSTORE_PASSWORD) app-release.aab $(KEY_ALIAS)
+    displayName: 'Sign the APK/AAB with Java 17'
 
   # Publish APK as artifact
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: 'C:\Program Files\Java\jdk-17\bin\app-release.aab'
+      PathtoPublish: '$(PIPELINE_JAVA_HOME)\bin\app-release.aab'
       ArtifactName: 'android-aab'
       publishLocation: 'Container'
     displayName: 'Publish APK Artifact'
