@@ -52,7 +52,7 @@ steps:
       OverWrite: true
 
   - script: |
-     cd "C:\Program Files\Java\jdk-11\bin"
+     cd "C:\Program Files\Java\jdk-17\bin"
       jarsigner -verbose -keystore $(KEYSTORE_PATH) -keypass $(KEY_PASSWORD) -storepass $(KEYSTORE_PASSWORD) app-release.aab $(KEY_ALIAS)
     displayName: 'Sign the APK/AAB'
 
