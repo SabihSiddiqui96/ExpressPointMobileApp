@@ -15,8 +15,8 @@
     <preference name="AndroidInsecureFileModeEnabled" value="true" />
     <preference name="AndroidXEnabled" value="true" />
     <preference name="android-minSdkVersion" value="21" />
-    <preference name="android-targetSdkVersion" value="34" />
-    <preference name="android-compileSdkVersion" value="34" />
+    <preference name="android-targetSdkVersion" value="36" />
+    <preference name="android-compileSdkVersion" value="36" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="FadeSplashScreenDuration" value="300" />
