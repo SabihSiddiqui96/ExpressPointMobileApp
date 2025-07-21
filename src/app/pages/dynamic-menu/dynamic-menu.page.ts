@@ -183,7 +183,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         'HIDELGBLTY': null,
         'CHRGNCEP': null,
         'PREFNAME': null,
-        'NOCHGALC': 0
+        'NOCHGALC': 0,
+        'SEPCLSITE': 0
     };
 
     public dayOfWeek = '0';
@@ -371,6 +372,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         this.utilService.setLoader(false);
         this.setting.PREFNAME = parseInt(SettingService.getSettingValue('PREFNAME'));
         this.setting.NOCHGALC = parseInt(SettingService.getDeviceSettingValue('NOCHGALC'));
+        this.setting.SEPCLSITE = parseInt(SettingService.getSettingValue('SEPCLSITE'));
         AppStateService.remove('patron_details');
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isNaN(this.transactionNumber)) {
@@ -1337,7 +1339,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             }
         }
-        this.getCreditLimit();
+        this.setCreditLimit();
         this.GetSystemMenuItemsPriceByPatron();
         this.event.publish('patron:newPatronLoaded', JSON.stringify(this.patronDetails));
         this.utilService.setLoader(false);
@@ -1404,31 +1406,90 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         Promise.resolve().then(() => this.cdr.markForCheck());
     }
 
-    public getCreditLimit() {
-        const priceTypeId = this.stateEigSetting ?
-            (this.patronDetails.StatePriceTypeId == null
-                || this.patronDetails.StatePriceTypeId == undefined) ?
-                this.patronDetails.PriceTypeId : this.patronDetails.StatePriceTypeId
+    public setCreditLimit() {
+        const priceTypeId = this.stateEigSetting
+            ? (this.patronDetails.StatePriceTypeId == null || this.patronDetails.StatePriceTypeId == undefined)
+                ? this.patronDetails.PriceTypeId
+                : this.patronDetails.StatePriceTypeId
             : this.patronDetails.PriceTypeId;
 
-        PouchQueriesService.GetCreditLimit(priceTypeId, this.patronDetails.RDAGroupId,
-            this.patronDetails.IsStudent, this.priceMode).then((res) => {
+        if (this.setting.SEPCLSITE === 1) {
+            // Site-level attempt
+            PouchQueriesService.GetSiteChargeLimit(this.schoolId, priceTypeId)
+                .then((res) => {
+                    if (res.rows.length > 0) {
+                        this.patronDetails['CreditLimit'] = res.rows[0].doc.CreditLimit;
+                        this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+                    } else {
+                        // Fallback to district-level
+                        PouchQueriesService.GetCreditLimit(
+                            priceTypeId,
+                            this.patronDetails.RDAGroupId,
+                            this.patronDetails.IsStudent,
+                            this.priceMode
+                        ).then((res2) => {
+                            if (res2.rows.length > 0) {
+                                this.patronDetails['CreditLimit'] = res2.rows[0].doc.CreditLimit;
+                                this.patronDetails['CreditLimitAaLaCarte'] = res2.rows[0].doc.CreditLimitAaLaCarte;
+                            }
+                        }).catch(err => console.error(err));
+                    }
+                })
+                .catch(err => console.error(err));
+
+            // AaLaCarte override
+            if (priceTypeId === this.patronDetails.StatePriceTypeId) {
+                PouchQueriesService.GetSiteChargeLimit(this.schoolId, this.patronDetails.PriceTypeId)
+                    .then((res) => {
+                        if (res.rows.length > 0) {
+                            this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+                        } else {
+                            // Fallback to district-level
+                            PouchQueriesService.GetCreditLimit(
+                                this.patronDetails.PriceTypeId,
+                                this.patronDetails.RDAGroupId,
+                                this.patronDetails.IsStudent,
+                                this.priceMode
+                            ).then((res2) => {
+                                if (res2.rows.length > 0) {
+                                    this.patronDetails['CreditLimitAaLaCarte'] = res2.rows[0].doc.CreditLimitAaLaCarte;
+                                }
+                            }).catch(err => console.error(err));
+                        }
+                    })
+                    .catch(err => console.error(err));
+            }
+
+        } else {
+            // District-level (no site-level config)
+            PouchQueriesService.GetCreditLimit(
+                priceTypeId,
+                this.patronDetails.RDAGroupId,
+                this.patronDetails.IsStudent,
+                this.priceMode
+            ).then((res) => {
                 if (res.rows.length > 0) {
                     this.patronDetails['CreditLimit'] = res.rows[0].doc.CreditLimit;
                     this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
                 }
-            }).catch(err => console.log(err));
+            }).catch(err => console.error(err));
 
-        // If the PriceTypeId is statePriceTypeId then We should take the AlaCarteCreditLimit
-        if (priceTypeId === this.patronDetails.StatePriceTypeId) {
-            PouchQueriesService.GetCreditLimit(this.patronDetails.PriceTypeId, this.patronDetails.RDAGroupId,
-                this.patronDetails.IsStudent, this.priceMode).then((res) => {
-                    if (res.rows.length > 0) {
-                        this.patronDetails['CreditLimitAaLaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte;
+            // AaLaCarte override
+            if (priceTypeId === this.patronDetails.StatePriceTypeId) {
+                PouchQueriesService.GetCreditLimit(
+                    this.patronDetails.PriceTypeId,
+                    this.patronDetails.RDAGroupId,
+                    this.patronDetails.IsStudent,
+                    this.priceMode
+                ).then((res2) => {
+                    if (res2.rows.length > 0) {
+                        this.patronDetails['CreditLimitAaLaCarte'] = res2.rows[0].doc.CreditLimitAaLaCarte;
                     }
-                }).catch(err => console.log(err));
+                }).catch(err => console.error(err));
+            }
         }
     }
+
     public setPreviousSalesCount() {
         const previousSales = this.patronDetails.PreviousSales;
         let previousALCAmt = 0;

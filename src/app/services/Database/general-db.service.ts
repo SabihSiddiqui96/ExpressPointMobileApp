@@ -24,7 +24,7 @@ export class GeneralDBService {
   public SetupGeneralDB() {
 
     const isOrderingEnabled = parseInt(SettingService.getSettingValue('ORDMEALS')) === 1 ? true : false;
-
+    const isSiteChargeLimitsEnabled = parseInt(SettingService.getSettingValue('SEPCLSITE')) === 1 ? true : false;
 
     const promises = [this.SyncAllEXPSettings(), this.SyncDenominations(),
     this.SyncSiteDetails(), this.SyncMealTypes(),
@@ -36,7 +36,9 @@ export class GeneralDBService {
       promises.push(this.SyncOrders());
       // promises.push(this.SyncPriceTypes());
     }
-
+    if (isSiteChargeLimitsEnabled) {
+      promises.push(this.SyncSiteCreditLimits());
+    }
     // this.SyncOrders(), this.SyncPriceTypes(),
 
     return Promise.all(promises).then(() => {
@@ -431,6 +433,42 @@ export class GeneralDBService {
           });
     });
   }
+
+  public SyncSiteCreditLimits() {
+    const siteCrediLimits = [];
+    this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteCreditLimits: "S" } });
+    return new Promise((resolve, reject) => {
+
+      this.http.SyncSiteCreditLimits().
+        subscribe
+        (
+          data => {
+            if (data != null) {
+              data.map(siteCreditLimit => {
+                const siteCreditLimitDoc = {
+                  '_id': 'SiteCreditLimit--' + siteCreditLimit.PrimeroSchoolId + '--'
+                    + siteCreditLimit.PriceTypeId,
+                  'CreditLimit': siteCreditLimit.CreditLimit,
+                  'CreditLimitAaLaCarte': siteCreditLimit.CreditLimitAaLaCarte
+                };
+                siteCrediLimits.push(siteCreditLimitDoc);
+              });
+            }
+            this.syncStatus = 'Success';
+            PouchDBService.UpsertDocs(siteCrediLimits, EXP_COMMON).then(() => {
+              this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteCreditLimits: "D" } });
+              resolve(null);
+            });
+          },
+          error => {
+            this.syncStatus = 'Failed';
+            this.events.publish('data:syncDetails', { SiteSettings: { SyncSiteCreditLimits: "F" } });
+            console.log(error);
+            resolve(null);
+          });
+    });
+  }
+
   public SyncRdaGroupsBySchool() {
     const rdaGrades = [];
     this.events.publish('data:syncDetails', { SiteSettings: { SyncRdaGrades: "S" } });

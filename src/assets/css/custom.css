@@ -264,8 +264,16 @@ ion-content[top-margin] {
 
 .menu-item-category ion-button {
   --background: linear-gradient(rgba(255, 255, 255, 1), rgba(219, 221, 224, 0.7));
-  --background-hover: linear-gradient(rgba(255, 255, 255, 1), rgba(219, 221, 224, 0.7));
 }
+
+.menu-item-category ion-button::part(native) {
+  transition: background 0.3s ease;
+}
+
+.menu-item-category ion-button::part(native):hover {
+  background: linear-gradient(rgba(240, 240, 240, 1), rgba(200, 200, 200, 0.8));
+}
+
 .menu-item-dynamic ion-button {
   --background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
 }
@@ -277,9 +285,20 @@ ion-content[top-margin] {
 .menu-item-static ion-button {
   --background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
 }
-.menu-item-static ion-button,
-.menu-item-dynamic ion-button {
-  --background-hover: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.15)) !important;
+
+.menu-item-static ion-button::part(native),
+.menu-item-dynamic ion-button::part(native) {
+  transition: background 0.3s ease;
+}
+
+.menu-item-static ion-button::part(native):hover,
+.menu-item-dynamic ion-button::part(native):hover {
+  background: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.15));
+}
+
+.patron-hover:hover {
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .vh100 {
