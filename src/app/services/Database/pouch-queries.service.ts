@@ -598,6 +598,14 @@ export class PouchQueriesService {
     });
   }
 
+  public static GetSiteChargeLimit(schoolId, priceTypeId) {    
+    return EXP_COMMON.allDocs({
+      startkey: 'SiteCreditLimit--' + schoolId + '--' + priceTypeId,
+      endkey: 'SiteCreditLimit--' + schoolId + '--' + priceTypeId + '\uffff',
+      include_docs: true
+    });
+  }
+
   public static GetGrades() {
     const schoolTypeId = JSON.parse(AppStateService.get('SiteTypeId'));
     return EXP_COMMON.allDocs({

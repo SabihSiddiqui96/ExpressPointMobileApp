@@ -221,6 +221,9 @@ export class HttpService {
         return this.http.get(API_URL + 'SyncCreditLimits').pipe(map(res => res));
     }
 
+    public SyncSiteCreditLimits(): any {
+        return this.http.get(API_URL + 'SyncSiteCreditLimits').pipe(map(res => res));
+    }
 
     public SyncRdaGroupsBySchool(): any {
         return this.http.get(API_URL + 'SyncRdaGroupsBySchool/' + JSON.parse(AppStateService.get('SelectedSite')).SchoolId).pipe(map(res => res));

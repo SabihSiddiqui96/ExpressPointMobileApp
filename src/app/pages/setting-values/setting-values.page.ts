@@ -42,7 +42,7 @@ export class SettingValuesPage implements OnInit {
     /**
         * Variable Declarations here
         */
-
+    public isUserLoggedIn: boolean = false;
     public settings: any = {};
     public siteSettings = [];
     public chargeLimitSettings = [];
@@ -56,6 +56,7 @@ export class SettingValuesPage implements OnInit {
     public hideSiteSettings: boolean = true;
     public hideSyncComboMeals: boolean = true;
     public sepChargeLimit: boolean = false;
+    public isSiteChargeLimitsEnabled: boolean = false;
     public showSepChargeLimits: boolean = false;
     public chargeReimbursableMeals: boolean = false;
     public mealText: string = '';
@@ -76,6 +77,8 @@ export class SettingValuesPage implements OnInit {
         public utilService: UtilService,
         public events: Events, public router: Router, public appStateService: AppStateService,
         public settingService: SettingService, public pouchQuery: PouchQueriesService) {
+        this.isUserLoggedIn = utilService.isUserloggedIn();
+        this.isSiteChargeLimitsEnabled = parseInt(SettingService.getSettingValue('SEPCLSITE')) === 1 ? true : false;
 
         if (AppStateService.get('Settings')) {
             this.settings = JSON.parse(AppStateService.get('Settings'));
@@ -153,17 +156,36 @@ export class SettingValuesPage implements OnInit {
                     const tempVar = this.chargeLimitSettings;
                     this.chargeLimitSettings = [];
                     tempVar.forEach((data, index) => {
-                        PouchQueriesService.GetCreditLimit(data.PriceTypeId).then((res) => {
-                            if (res.rows.length > 0) {
-                                let chargeLimit = data;
-                                chargeLimit['CreditLimit'] = res.rows[0].doc.CreditLimit;
-                                chargeLimit['CreditLimitAlaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte === null ? 0 : res.rows[0].doc.CreditLimitAaLaCarte;
-                                this.chargeLimitSettings.push(chargeLimit);
-                                if (index === tempVar.length - 1) {
-                                    resolve(this.chargeLimitSettings);
+                        let schoolId: any = null;
+                        if (AppStateService.get('SelectedSite')) {
+                            schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                        }
+                        if (this.isSiteChargeLimitsEnabled && schoolId) {
+                            PouchQueriesService.GetSiteChargeLimit(schoolId, data.PriceTypeId).then((res) => {
+                                if (res.rows.length > 0) {
+                                    let chargeLimit = data;
+                                    chargeLimit['CreditLimit'] = res.rows[0].doc.CreditLimit === null ? 0 : res.rows[0].doc.CreditLimit;
+                                    chargeLimit['CreditLimitAlaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte === null ? 0 : res.rows[0].doc.CreditLimitAaLaCarte;
+                                    this.chargeLimitSettings.push(chargeLimit);
+                                    if (index === tempVar.length - 1) {
+                                        resolve(this.chargeLimitSettings);
+                                    }
                                 }
-                            }
-                        }).catch(err => console.log(err));
+                            }).catch(err => console.log(err));
+                        }
+                        else {
+                            PouchQueriesService.GetCreditLimit(data.PriceTypeId).then((res) => {
+                                if (res.rows.length > 0) {
+                                    let chargeLimit = data;
+                                    chargeLimit['CreditLimit'] = res.rows[0].doc.CreditLimit;
+                                    chargeLimit['CreditLimitAlaCarte'] = res.rows[0].doc.CreditLimitAaLaCarte === null ? 0 : res.rows[0].doc.CreditLimitAaLaCarte;
+                                    this.chargeLimitSettings.push(chargeLimit);
+                                    if (index === tempVar.length - 1) {
+                                        resolve(this.chargeLimitSettings);
+                                    }
+                                }
+                            }).catch(err => console.log(err));
+                        }
                     });
                 }
             }).catch(err => console.log(err));
