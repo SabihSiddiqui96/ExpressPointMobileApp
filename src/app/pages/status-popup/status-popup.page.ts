@@ -117,8 +117,12 @@ export class StatusPopupPage implements OnInit {
             }
         });
         const isOrderingEnabled = parseInt(SettingService.getSettingValue('ORDMEALS')) === 1 ? true : false;
+        const isSiteChargeLimitsEnabled = parseInt(SettingService.getSettingValue('SEPCLSITE')) === 1 ? true : false;
         if (isOrderingEnabled) {
-            this.progressSiteSettingsTotal = 13;
+            this.progressSiteSettingsTotal = this.progressSiteSettingsTotal + 1;
+        }
+        if (isSiteChargeLimitsEnabled) {
+            this.progressSiteSettingsTotal = this.progressSiteSettingsTotal + 1;
         }
         this.events.subscribe("data:syncDetails", (data) => {
             if (data) {
@@ -142,6 +146,9 @@ export class StatusPopupPage implements OnInit {
                                     break;
                                 case 'SyncCreditLimits':
                                     this.progressSiteSettingsLabels.set(key, 'Credit Limits');
+                                    break;
+                                case 'SyncSiteCreditLimits':
+                                    this.progressSiteSettingsLabels.set(key, 'Site Credit Limits');
                                     break;
                                 case 'SyncGrades':
                                     this.progressSiteSettingsLabels.set(key, 'Grades');
@@ -167,12 +174,15 @@ export class StatusPopupPage implements OnInit {
                                 case 'SyncAllSiteSettings':
                                     this.progressSiteSettingsLabels.set(key, 'Site Settings');
                                     break;
+                                case 'SyncAllDeviceSettings':
+                                    this.progressSiteSettingsLabels.set(key, 'Terminal Settings');
+                                    break;
                                 case 'SyncOrders':
                                     this.progressSiteSettingsLabels.set(key, 'Orders');
                                     break;
-                                    case 'GetSellerRelatedData':
-                                        this.progressSiteSettingsLabels.set(key, 'Seller Data');
-                                        break;
+                                case 'GetSellerRelatedData':
+                                    this.progressSiteSettingsLabels.set(key, 'Seller Data');
+                                    break;
                                 default:
                                     this.progressSiteSettingsLabels.set(key, key);
                                     break;
@@ -349,7 +359,7 @@ export class StatusPopupPage implements OnInit {
     public DownloadImagesOrNot;
     public detailSyncStatus = new Map<string, Map<string, string>>();// Category , PromiseHttpName , status
     public progressSiteSettingsCurrent = 0;
-    public progressSiteSettingsTotal = 12;
+    public progressSiteSettingsTotal = 15;
     public progressSiteSettingsLabels = new Map<string, string>();
     public progressStaticMenusDBCurrent = 0;
     public progressStaticMenusDBTotal = 9;

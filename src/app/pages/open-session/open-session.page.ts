@@ -898,6 +898,9 @@ export class OpenSessionPage implements OnInit, OnDestroy {
         this.utilService.setSessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
         AppStateService.set('NewSessionDate', `${this.openSessionForm.get('sessionDatePicker').value}`);
       }
+      else {
+        this.utilService.setSummarySessionDate(`${this.openSessionForm.get('sessionDatePicker').value}`);
+      }
 
       const currentTime = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
       const currentSummarySaleTime = LocalTimerService.getCurrentSessionTime(this.utilService.summarySaleDate);

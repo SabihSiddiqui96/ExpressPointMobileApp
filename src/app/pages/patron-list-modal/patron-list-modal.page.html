@@ -70,7 +70,7 @@
             <ion-row>
                 <div *ngIf="!isGridView" style="width: 100% !important;">
                     <ion-row *ngFor="let patron of filteredPatronList;let i=index;"
-                        class="ion-justify-content-center bg-border"
+                        class="ion-justify-content-center bg-border patron-hover"
                         [style.border]="(patron.FirstName==null || patron.FirstName=='') ? '3px solid red' : ''">
                         <ion-col size="6">
 
@@ -142,7 +142,7 @@
                         <ion-col size="3" sizeXl="3" sizeLg="4" sizeMd="6" sizeSm="6" sizeXs="6"
                             *ngFor="let patron of filteredPatronList;let i=index;">
                             <ion-card style="height: 15rem;width:99%;" (click)="selectPatron(patron,i)"
-                                class="ion-align-items-center ion-justify-content-center card-size bg-border">
+                                class="ion-align-items-center ion-justify-content-center card-size bg-border patron-hover">
                                 <ion-grid>
                                     <ion-row>
                                         <div style="position: absolute; z-index:2;">

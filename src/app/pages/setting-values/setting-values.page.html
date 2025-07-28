@@ -93,13 +93,15 @@
       </div>
     </ion-col>
   </ion-row>
-  <ion-row class="ion-align-self-baseline" *ngIf="PriceMode === 0">
+  <ion-row class="ion-align-self-baseline" *ngIf="PriceMode === 0 && isUserLoggedIn">
     <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
       <div box-denom padd20 class="ion-margin-horizontal">
         <div class="accordion">
           <div class="option">
             <input type="checkbox" id="toggle5" class="toggle" />
-            <label class="ion-text-uppercase title" for="toggle5">Charge Limits</label>
+            <label class="ion-text-uppercase title" for="toggle5">
+              {{ isSiteChargeLimitsEnabled ? 'Site Charge Limits' : 'Charge Limits' }}    
+            </label>
             <div class="contentBox">
               <ion-grid>
                 <ion-row>
@@ -257,7 +259,7 @@
     </ion-col>
   </ion-row>
 
-  <ion-row class="ion-align-self-baseline" *ngIf="!hideSyncComboMeals">
+  <ion-row class="ion-align-self-baseline" *ngIf="!hideSyncComboMeals && isUserLoggedIn">
     <ion-col size="6" size-sm="12" size-md="12" class="ion-align-self-baseline">
       <div box-denom padd20 class="ion-margin-horizontal">
         <div class="accordion">
