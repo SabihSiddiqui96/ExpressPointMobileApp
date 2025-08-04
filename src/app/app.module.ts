@@ -110,6 +110,7 @@ import { UnidentifiedPatronPopupPage } from './pages/menu-service/components/uni
 import { PerformanceOptionsPopUpComponent } from './pages/performance-options-popup/performance-options-popup.page';
 import { MaterialModule } from './material.module';
 import { PersonImageDBService } from './services/Database/person-image-db.service';
+import { DisplayOptionsPopUpComponent } from './pages/display-options-popup/display-options-popup.page';
 //import { StudentWiseAlacarteComponent } from './pages/classroom-sale/student-alacarte/student-wise-alacart.component';
 
 @NgModule({
@@ -164,7 +165,8 @@ import { PersonImageDBService } from './services/Database/person-image-db.servic
         UnidentifiedPatronPopupPage,
         StudentWiseAlacarteComponent,
         AutoServePauseOptionsPopUpComponent,
-        PerformanceOptionsPopUpComponent
+        PerformanceOptionsPopUpComponent,
+        DisplayOptionsPopUpComponent
     ],    
     imports: [
         BrowserModule,

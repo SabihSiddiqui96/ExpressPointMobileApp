@@ -436,6 +436,22 @@ export class AppComponent {
   ngOnInit() {
     this.navCtrl.navigateRoot([""]);
 
+    // Try to get 'resOptions' from localStorage and parse it
+    const storedResOptions = JSON.parse(localStorage.getItem('resOptions') || '{}');
+
+    // Fallback logic directly to hardcoded values if not found
+    const staticDivisor = storedResOptions.StaticMenuItemSize ?? 6;
+    const dynamicDivisor = storedResOptions.DynamicMenuItemSize ?? 6;
+    const keypadDivisor = storedResOptions.KeypadButtonSize ?? 5;
+    const patronImageDivisor = storedResOptions.PatronImageSize ?? 'standard';
+    const specialAccountDivisor = storedResOptions.SpecialAccountButtonSize ?? 16;
+    // Apply to CSS
+    document.documentElement.style.setProperty('--static-divisor', staticDivisor.toString());
+    document.documentElement.style.setProperty('--dynamic-divisor', dynamicDivisor.toString());
+    document.documentElement.style.setProperty('--keypad-divisor', keypadDivisor.toString());
+    document.documentElement.style.setProperty('--special-account-divisor', specialAccountDivisor.toString());
+    document.documentElement.style.setProperty('--patron-image-divisor', patronImageDivisor.toString());
+
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {

@@ -214,21 +214,20 @@
                                     </ion-icon>
                                 </ion-col>
                                 <ion-col [size]="(patronDetails.InputDirection == 1 || patronDetails.InputDirection == 2) ? 3 : 4">
-                                    <ion-avatar class="ion-float-right" style="width: auto !important;">                                       
-                                        <canvas #displayImage id="displayImage"
-                                            style="padding-right:3px!important; display: none;"></canvas>                                       
+                                    <ion-avatar class="ion-float-right patron-avatar-dynamic" style="width: auto !important;">
+                                        <canvas #displayImage id="displayImage" style="padding-right:3px!important; display: none;"></canvas>
                                     </ion-avatar>
-                                    <div *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0" style="position: absolute;top: 8.5rem;right:1rem;">
-                                        <ion-button
-                                                        (click)="blurInputElement(); ShowsolditemsPopover($event)"
-                                                        [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
-                                                        [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0 ? 'block': 'none'">
-                                                        Previous
-                                                        <span style="margin-left: 5px;"
-                                                            *ngIf="patronDetails.IsSecondMeal != true && patronDetails.HadSale === true">Item(s)</span>
-                                                        <span style="margin-left: 5px;"
-                                                            *ngIf="patronDetails.IsSecondMeal==true">Meal(s)</span>
-                                                        <span style="margin-left: 5px;" *ngIf="patronDetails.IsSecondMeal != true && patronDetails.HadSale === false">Payment(s)</span>
+                                    <div *ngIf="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0"
+                                        class="previous-btn-dynamic">
+                                        <ion-button (click)="blurInputElement(); ShowsolditemsPopover($event)"
+                                            [ngClass]="{'btn_previous_items':(patronDetails.IsSecondMeal!=true), 'btn_previous_meals':(patronDetails.IsSecondMeal==true), 'previous-meal-btn':(isElectronApp === true) , 'previous-meal-btn-tablet':(isElectronApp != true)}"
+                                            [style.display]="(!patronDetails.isSpecialAccount && patronDetails.HadSale===true) || patronDetails.Payments.length > 0 ? 'block': 'none'">
+                                            Previous
+                                            <span style="margin-left: 5px;"
+                                                *ngIf="patronDetails.IsSecondMeal != true && patronDetails.HadSale === true">Item(s)</span>
+                                            <span style="margin-left: 5px;" *ngIf="patronDetails.IsSecondMeal==true">Meal(s)</span>
+                                            <span style="margin-left: 5px;"
+                                                *ngIf="patronDetails.IsSecondMeal != true && patronDetails.HadSale === false">Payment(s)</span>
                                         </ion-button>
                                     </div>
                                 </ion-col>

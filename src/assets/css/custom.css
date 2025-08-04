@@ -1917,6 +1917,113 @@ ion-progress-bar{
   }
 }
 
+.patron-img-compact {
+  width: 77px !important;
+  height: 87px !important;
+  border-radius: 0%;
+}
+
+@media (max-width: 1280px),
+(min-width: 1300px) and (max-width: 1380px),
+(min-width: 1600px) and (max-width: 1680px) {
+  .patron-img-compact {
+    width: 66px !important;
+    height: 87px !important;
+    border-radius: 0%;
+  }
+}
+
+.patron-img-standard {
+  width: 110px !important;
+  /* Same as your original patronImgLarge */
+  height: 125px !important;
+  border-radius: 0%;
+}
+
+@media (max-width: 1280px),
+(min-width: 1300px) and (max-width: 1380px),
+(min-width: 1600px) and (max-width: 1680px) {
+  .patron-img-standard {
+    width: 94px !important;
+    /* Same responsive behavior as patronImgLarge */
+    height: 125px !important;
+    border-radius: 0%;
+  }
+}
+
+.patron-img-comfortable {
+  width: 130px !important;
+  /* Larger than standard */
+  height: 145px !important;
+  border-radius: 0%;
+}
+
+@media (max-width: 1280px),
+(min-width: 1300px) and (max-width: 1380px),
+(min-width: 1600px) and (max-width: 1680px) {
+  .patron-img-comfortable {
+    width: 115px !important;
+    height: 145px !important;
+    border-radius: 0%;
+  }
+}
+
+.patron-img-spacious {
+  /* width: 143px !important;
+  height: 163px !important; */
+  width: 160px !important;
+  height: 182px !important;
+  border-radius: 0%;
+}
+
+@media (max-width: 1280px),
+(min-width: 1300px) and (max-width: 1380px),
+(min-width: 1600px) and (max-width: 1680px) {
+  .patron-img-spacious {
+    width: 122px !important;
+    height: 163px !important;
+    border-radius: 0%;
+  }
+}
+
+/* List view sizes with meaningful names */
+.patron-avatar-compact {
+  width: 35px !important;
+  height: 35px !important;
+  min-width: 35px !important;
+  min-height: 35px !important;
+}
+
+.patron-avatar-standard {
+  width: 55px !important;
+  /* Same proportional size as your original */
+  height: 55px !important;
+  min-width: 55px !important;
+  min-height: 55px !important;
+}
+
+.patron-avatar-comfortable {
+  width: 65px !important;
+  /* Larger than standard */
+  height: 65px !important;
+  min-width: 65px !important;
+  min-height: 65px !important;
+}
+
+.patron-avatar-spacious {
+  width: 70px !important;
+  height: 70px !important;
+  min-width: 70px !important;
+  min-height: 70px !important;
+}
+
+.previous-btn-dynamic {
+  position: relative;
+  margin-top: 5rem;
+  float: right;
+  clear: both;
+}
+
 @media (max-width: 1200px) {  
     .previous-meal-btn {
       height: 2.8rem !important;
@@ -1955,4 +2062,36 @@ ion-progress-bar{
     .patron-info-balance {
         font-size: 12px !important;
     }
+}
+
+@media (min-width: 768px) {
+  .menu-static ion-button {
+    height: calc((100vh - 180px) / var(--static-divisor)) !important;
+  }
+
+  .menu-dynamic ion-button {
+    height: calc((100vh - 180px) / var(--dynamic-divisor)) !important;
+  }
+
+  .patron-pin-search ion-button:not(.previous_patron_btn):not(.openOSKbutton) {
+    height: calc((100vh - 450px) / var(--keypad-divisor)) !important;
+  }
+
+  .btn-patron-special-account ion-button {
+    height: calc((100vh - 180px) / var(--special-account-divisor)) !important;
+    font-size: 120% !important;
+    font-weight: bold;
+  }
+}
+
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* 👇 1 item per row on small screens */
+@media (max-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
 }
