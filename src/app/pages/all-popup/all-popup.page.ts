@@ -335,6 +335,11 @@ export class AllPopupPage implements OnInit {
                 this.displayData(filteredData);
                 break;
         }
+        const storedResOptions = JSON.parse(localStorage.getItem('resOptions') || '{}');
+        const patronImageSizeFormat = storedResOptions.PatronImageSize ?? 'standard';
+        if (patronImageSizeFormat) {
+            this.imageSize = patronImageSizeFormat;
+        }
     }
     // *ngIf="title=='PersonList'  || title=='Patron'"
     // @ViewChild(IonDigitKeyboardCmp) public keyboard;
@@ -388,6 +393,7 @@ export class AllPopupPage implements OnInit {
     public isPatronType: boolean = false;
     public isElectronApp: boolean;
     public PREFNAME: number = 1;
+    public imageSize: 'compact' | 'standard' | 'comfortable' | 'spacious' = 'spacious'; // default to standard (medium)
 
     constructor(
         public navCtrl: NavController,
@@ -974,6 +980,79 @@ export class AllPopupPage implements OnInit {
         //Check if toggle is enabled in admin settings
         if (this.utilService.isElectronApp()) {
             this.utilService.openOnScreenKeyboard();
+        }
+    }
+
+    // Method to get the appropriate CSS class for list view
+    getPatronImageClass(): string {
+        switch (this.imageSize) {
+            case 'compact': return 'patron-avatar-compact';
+            case 'standard': return 'patron-avatar-standard';
+            case 'comfortable': return 'patron-avatar-comfortable';
+            case 'spacious': return 'patron-avatar-spacious';
+            default: return 'patron-avatar-standard';
+        }
+    }
+
+    // Method to get the appropriate CSS class for grid view
+    getPatronGridImageClass(): string {
+        switch (this.imageSize) {
+            case 'compact': return 'patron-img-compact';
+            case 'standard': return 'patron-img-standard';
+            case 'comfortable': return 'patron-img-comfortable';
+            case 'spacious': return 'patron-img-spacious';
+            default: return 'patron-img-compact';
+        }
+    }
+
+    // Method to get dynamic column sizes based on image size
+    getGridColumnSizes(): { size: string, sizeXl: string, sizeLg: string, sizeMd: string, sizeSm: string, sizeXs: string } {
+        switch (this.imageSize) {
+            case 'compact':
+                return {
+                    size: '2',     // 6 items per row - fits more items
+                    sizeXl: '2',
+                    sizeLg: '3',   // 4 items per row
+                    sizeMd: '4',   // 3 items per row
+                    sizeSm: '6',   // 2 items per row
+                    sizeXs: '12'   // 1 item per row
+                };
+            case 'standard':
+                return {
+                    size: '3',     // 4 items per row - same as your original layout
+                    sizeXl: '3',
+                    sizeLg: '4',   // 3 items per row
+                    sizeMd: '6',   // 2 items per row
+                    sizeSm: '6',
+                    sizeXs: '12'
+                };
+            case 'comfortable':
+                return {
+                    size: '4',     // 3 items per row - larger images
+                    sizeXl: '4',
+                    sizeLg: '6',   // 2 items per row
+                    sizeMd: '6',
+                    sizeSm: '12',  // 1 item per row
+                    sizeXs: '12'
+                };
+            case 'spacious':
+                return {
+                    size: '6',     // 2 items per row - most space per item
+                    sizeXl: '6',
+                    sizeLg: '6',   // 2 items per row
+                    sizeMd: '12',  // 1 item per row
+                    sizeSm: '12',
+                    sizeXs: '12'
+                };
+            default:
+                return {
+                    size: '2',
+                    sizeXl: '2',
+                    sizeLg: '3',
+                    sizeMd: '4',
+                    sizeSm: '6',
+                    sizeXs: '12'
+                };
         }
     }
 }
