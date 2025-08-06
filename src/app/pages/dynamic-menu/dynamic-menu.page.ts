@@ -1363,8 +1363,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         switch (savedSize) {
             case 'compact': return 65;   // Smaller than current
             case 'standard': return 85;  // Your current size
-            case 'comfortable': return 100; // Larger than current
-            case 'spacious': return 120; // Largest
+            case 'comfortable': return 120; // Larger than current
+            case 'spacious': return 140; // Largest
             default: return 85; // Default to your current size
         }
     }
