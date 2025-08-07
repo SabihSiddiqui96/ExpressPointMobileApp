@@ -2019,9 +2019,10 @@ ion-progress-bar{
 
 .previous-btn-dynamic {
   position: relative;
-  margin-top: 5rem;
+  margin-top: 7rem;
   float: right;
   clear: both;
+  margin-right: 10px;;
 }
 
 @media (max-width: 1200px) {  
