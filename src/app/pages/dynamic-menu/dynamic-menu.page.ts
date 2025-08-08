@@ -342,6 +342,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public PaymentAmount: number = 0.00;
     public priceTypeStatus: string = "";
     public isBackdated: boolean;
+    public imageSize: 'compact' | 'standard' | 'comfortable' | 'spacious' = 'spacious'; // default to standard (medium)
 
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -687,6 +688,12 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             'DontShowMe': 0,
             'ChkShowValue': false
         };
+
+        const storedResOptions = JSON.parse(localStorage.getItem('resOptions') || '{}');
+        const patronImageSizeFormat = storedResOptions.PatronImageSize ?? 'standard';
+        if (patronImageSizeFormat) {
+            this.imageSize = patronImageSizeFormat;
+        }
     }
 
     public saveDefaultDynamicTerminalMenu() {
@@ -1349,6 +1356,19 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
     }
 
+    // Get size from localStorage
+    private getDynamicPatronSizeFromStorage(): number {
+        const savedSize = this.imageSize;
+
+        switch (savedSize) {
+            case 'compact': return 65;   // Smaller than current
+            case 'standard': return 85;  // Your current size
+            case 'comfortable': return 120; // Larger than current
+            case 'spacious': return 140; // Largest
+            default: return 85; // Default to your current size
+        }
+    }
+
     public patronImageLoad(imageSrc = null) {
         this.generateRandomImageURL();
         if (this.canvasRef != null && this.canvasRef != undefined) {
@@ -1359,29 +1379,37 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 const context = cv.getContext('2d');
 
                 if (context) {
-                    let newWidth, newHeight;
+                    // Get dynamic size from localStorage
+                    const patronSize = this.getDynamicPatronSizeFromStorage();
 
-                    newWidth = 85;
-                    newHeight = 85;
+                    let newWidth = patronSize;
+                    let newHeight = patronSize;
 
                     // Set the canvas size to the new dimensions
                     cv.width = newWidth;
                     cv.height = newHeight;
 
+                    // Calculate border radius proportionally (was 40 for 85px)
+                    const borderRadius = Math.round(patronSize * 0.47); // 40/85 ≈ 0.47
+
                     // Draw the image onto the canvas with rounded corners
                     context.beginPath();
-                    context.moveTo(40, 0); // Move to top-left corner with border-radius
-                    context.arcTo(newWidth, 0, newWidth, newHeight, 40); // Top-right corner
-                    context.arcTo(newWidth, newHeight, 0, newHeight, 40); // Bottom-right corner
-                    context.arcTo(0, newHeight, 0, 0, 40); // Bottom-left corner
-                    context.arcTo(0, 0, newWidth, 0, 40); // Top-left corner
+                    context.moveTo(borderRadius, 0);
+                    context.arcTo(newWidth, 0, newWidth, newHeight, borderRadius);
+                    context.arcTo(newWidth, newHeight, 0, newHeight, borderRadius);
+                    context.arcTo(0, newHeight, 0, 0, borderRadius);
+                    context.arcTo(0, 0, newWidth, 0, borderRadius);
                     context.closePath();
                     context.clip();
+
                     if ((this.patronDetails.Gender == 'M' || this.patronDetails.Gender == 'F') && imageSrc == null) {
                         context.translate(newWidth, 0);
                         context.scale(-1, 1);
                     }
-                    context.drawImage(img, 0, 0, 85, 100);
+
+                    // Draw with dynamic height (maintain aspect ratio)
+                    const drawHeight = Math.round(patronSize * 1.18); // 100/85 ≈ 1.18
+                    context.drawImage(img, 0, 0, patronSize, drawHeight);
                 }
             };
             img.src = imageSrc != null ? imageSrc : this.patronImageConditionCheck;

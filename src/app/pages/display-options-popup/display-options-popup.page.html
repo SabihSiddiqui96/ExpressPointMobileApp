@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-row>
+      <ion-col size="8">
+        <ion-title class="text-large" style="height: 100%;">
+          Display Options
+        </ion-title>
+      </ion-col>
+      <ion-col size="4">
+        <ion-button expand="block" size="large" fill="clear" color="slate" (click)="restoreDefaults()">
+          Restore Defaults
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding class="display-options-content ion-padding" style="height:fit-content;">
+  <ion-list>    
+    <ion-item lines="none" title="Static Menu Item Size" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Static Menu Item Size</ion-label>
+      <ion-select [(ngModel)]="resOption.StaticMenuItemSize" (ionChange)="setStaticMenuItemSize($event)" 
+        aria-label="Static Menu Item Size" interface="action-sheet">
+        <ion-select-option value="6">Extra Large (Default)</ion-select-option>
+        <ion-select-option value="10">Large</ion-select-option>
+        <ion-select-option value="14">Medium</ion-select-option>
+        <ion-select-option value="18">Small</ion-select-option>
+        <ion-select-option value="23">Extra Small</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" title="Dynamic Menu Item Size" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Dynamic Menu Item Size</ion-label>
+      <ion-select [(ngModel)]="resOption.DynamicMenuItemSize" (ionChange)="setDynamicMenuItemSize($event)"
+        aria-label="Dynamic Menu Item Size" interface="action-sheet">
+        <ion-select-option value="6">Extra Large (Default)</ion-select-option>
+        <ion-select-option value="10">Large</ion-select-option>
+        <ion-select-option value="14">Medium</ion-select-option>
+        <ion-select-option value="18">Small</ion-select-option>
+        <ion-select-option value="23">Extra Small</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" title="Keypad Button Size" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Keypad Button Size</ion-label>
+      <ion-select [(ngModel)]="resOption.KeypadButtonSize" (ionChange)="setKeypadButtonSize($event)"
+        aria-label="Keypad Button Size" interface="action-sheet">
+        <ion-select-option value="5">Extra Large (Default)</ion-select-option>
+        <ion-select-option value="9">Large</ion-select-option>
+        <ion-select-option value="14">Medium</ion-select-option>
+        <ion-select-option value="18">Small</ion-select-option>
+        <ion-select-option value="22">Extra Small</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" title="Special Account Button Size" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Special Account Button Size</ion-label>
+      <ion-select [(ngModel)]="resOption.SpecialAccountButtonSize" (ionChange)="setSpecialAccountButtonSize($event)"
+        aria-label="Special Account Button Size" interface="action-sheet">        
+        <ion-select-option value="6">Extra Large</ion-select-option>
+        <ion-select-option value="9">Large</ion-select-option>
+        <ion-select-option value="13">Medium</ion-select-option>
+        <ion-select-option value="16">Small (Default)</ion-select-option>
+        <ion-select-option value="20">Extra Small</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item lines="none" title="Patron Image Size" class="bg-transparent pad-top">
+      <ion-label class="ion-text-left bold" position="bottom">Patron Image Size</ion-label>
+      <ion-select [(ngModel)]="resOption.PatronImageSize" (ionChange)="setPatronImageSize($event)"
+        aria-label="Patron Image Size" interface="action-sheet">
+        <ion-select-option value=compact>Small</ion-select-option>
+        <ion-select-option value=standard>Medium (Default)</ion-select-option>
+        <ion-select-option value=comfortable>Large</ion-select-option>
+        <ion-select-option value=spacious>Extra Large</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <!-- Added this div, intentianally for height beween close and options -->
+    <div style="height:45px;"></div>
+  </ion-list>
+</ion-content>
+<ion-footer>
+  <ion-toolbar class="center" color="white">
+    <ion-button expand="block" size="large" fill="clear" color="slate" (click)="close()">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

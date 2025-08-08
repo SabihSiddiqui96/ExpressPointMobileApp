@@ -1,7 +1,7 @@
 <ion-content bg-theme>
   <ion-row vh-100-dyn class="ion-justify-content-center" bg-theme>
-    <ion-col size="12" size-md="8" size-xl="6" class="ion-align-self-center">
-      <div box-list-white class="ion-margin-horizontal">
+    <ion-col box-list-white size="12" size-md="8" size-xl="8" class="ion-align-self-center">
+      <div class="ion-margin-horizontal grid-responsive" style="padding: unset;">
         <ion-button default expand="block" icon-only color="primary" *ngIf='isUserLoggedIn'
           (click)="openPerformanceOptionsPopup($event)">
           <ion-label text-large>Performance Options</ion-label>
@@ -39,7 +39,11 @@
           (click)="deactivatePrompt()">
           <ion-label text-large>Rename Device</ion-label>
         </ion-button>
-
+        <ion-button default expand="block" icon-only color="primary" (click)="setDisplayOptions($event)">
+          <ion-label text-large>Display Options</ion-label>
+        </ion-button>
+      </div>
+      <div class="ion-margin-horizontal grid-responsive" style="padding: unset;">
         <ion-item *ngIf='isElectronApp' lines="none" class="bg-transparent" style="padding-top: 4px;">
           <ion-label slot="end" class="ion-text-right" position="bottom">Open On Screen Keyboard</ion-label>
           <ion-toggle slot="end" color="slate" [(ngModel)]="openOSK" (ionChange)="setOpenOSK($event)">
@@ -71,16 +75,6 @@
           </ion-toggle>
         </ion-item>
 
-        <ion-item *ngIf='isElectronApp && MULTIREAD' lines="none" class="bg-transparent" style="padding-top: 4px;">
-          <ion-label class="ion-text-end" position="bottom">Use Plug and Play Peripherals</ion-label>
-          <ion-toggle slot="end" color="slate" [(ngModel)]="pnpPeripherals" (ionChange)="configurePeripherals()">
-          </ion-toggle>
-        </ion-item>
-        <ion-item lines="none" class="ion-text-right" *ngIf='!pnpPeripherals && isElectronApp && MULTIREAD'>
-          <ion-label>
-            <ion-button default size="small" (click)='showPeripheralApp()'>Configure Peripherals</ion-button>
-          </ion-label>
-        </ion-item>
         <ion-item *ngIf='isElectronApp' lines="none" class="bg-transparent" style="padding-top: 4px;">
           <ion-label class="ion-text-end" position="bottom">Check for text in the PIN field ?</ion-label>
           <ion-toggle slot="end" color="slate" [(ngModel)]="CheckIfPinEntered" (ionChange)="OnChangeCheckIfPinEntered($event)">
@@ -103,6 +97,18 @@
           <ion-label class="ion-text-end" position="bottom">Enable Data Analytics</ion-label>
           <ion-toggle slot="end" color="slate" [checked]="EnableDataAnalytics" (ionChange)="OnChangeEnableDataAnalytics($event)">
           </ion-toggle>
+        </ion-item>
+      </div>      
+      <div class="ion-margin-horizontal grid-responsive" style="padding: unset;">
+        <ion-item *ngIf='isElectronApp && MULTIREAD' lines="none" class="bg-transparent" style="padding-top: 4px;">
+          <ion-label class="ion-text-end" position="bottom">Use Plug and Play Peripherals</ion-label>
+          <ion-toggle slot="end" color="slate" [(ngModel)]="pnpPeripherals" (ionChange)="configurePeripherals()">
+          </ion-toggle>
+        </ion-item>
+        <ion-item lines="none" class="ion-text-right" *ngIf='!pnpPeripherals && isElectronApp && MULTIREAD'>
+          <ion-label>
+            <ion-button default size="small" (click)='showPeripheralApp()'>Configure Peripherals</ion-button>
+          </ion-label>
         </ion-item>
       </div>
     </ion-col>

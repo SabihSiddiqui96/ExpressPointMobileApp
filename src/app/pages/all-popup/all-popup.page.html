@@ -120,12 +120,12 @@
           style="min-height: 100%;border-bottom: 1px solid #dedede;" (click)="select(list)">
           <ion-col>
             <ion-item lines="none" [style.background-color]="list.BackColor">
-              <ion-avatar slot="start" class="avatar-small"
+              <ion-avatar slot="start" [class]="getPatronImageClass()"
                 *ngIf="(this.navType=='patronPatron' || this.navType=='patronSpecialRosterPersonList' ||this.navType=='patronlist' ) && !this.isGridView">
-                <img src="{{list.Image}}" *ngIf="list.Image">
-                <img src="assets/img/default_male.png" *ngIf="!list.Image && list.Gender === 'M'">
-                <img src="assets/img/default_female.png" *ngIf="!list.Image && list.Gender === 'F'">
-                <img src="assets/img/no_image.png" style="border-radius: 0%;"
+                <img [class]="getPatronImageClass()" src="{{list.Image}}" *ngIf="list.Image">
+                <img [class]="getPatronImageClass()" src="assets/img/default_male.png" *ngIf="!list.Image && list.Gender === 'M'">
+                <img [class]="getPatronImageClass()" src="assets/img/default_female.png" *ngIf="!list.Image && list.Gender === 'F'">
+                <img [class]="getPatronImageClass()" src="assets/img/no_image.png" style="border-radius: 0%;"
                   *ngIf="!list.Image && (list.Gender !== 'M' && list.Gender !== 'F')">
               </ion-avatar>
               <ion-label text-large>{{list.label}}
@@ -177,51 +177,53 @@
         </div>
 
         <div style="width: 100%;">
-          <ion-row *ngIf="isPatronType && isGridView && (this.navType === 'patronPatron' || this.navType === 'patronlist' || this.navType === 'patronSpecialRosterPersonList')" style="width: 100%;">
+          <ion-row
+            *ngIf="isPatronType && isGridView && (this.navType === 'patronPatron' || this.navType === 'patronlist' || this.navType === 'patronSpecialRosterPersonList')"
+            style="width: 100%;">
             <ion-row style="width: 99%;">
-                <ion-col size="3" sizeXl="3" sizeLg="4" sizeMd="6" sizeSm="6" sizeXs="6"
-                    *ngFor="let patron of lists;let i=index;">
-                <ion-card (click)="select(patron)" class="ion-align-items-center ion-justify-content-center card-size bg-border" style="height: 15rem;width:99%;">
-                    <ion-grid>
-                        <ion-row>                              
-                            <ion-col size="6" style="width: 100%;">                              
-                                <ion-avatar class="patronImgLarge" item-start *ngIf="this.navOptionList.includes(this.navType)">
-                                    <img class="patronImgLarge" src="{{patron.Image}}" *ngIf="patron.Image">
-                                    <img class="patronImgLarge" src="assets/img/default_male.png"
-                                        *ngIf="!patron.Image && patron.Gender === 'M'">
-                                    <img class="patronImgLarge" src="assets/img/default_female.png"
-                                        *ngIf="!patron.Image && patron.Gender === 'F'">
-                                    <img class="patronImgLarge" style="border-radius: 0%;" src="assets/img/no_image.png"
-                                        *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
-                                </ion-avatar>
-                            </ion-col>
-                            <ion-col size="6" style="width:100%;height: 100%;">
-                                <ion-row style="width: 100%;">
-                                    <ion-label>                                       
-                                        {{getPreferredName(patron.FirstName, patron.LastName, patron.PreferredName, patron.label)}}
-                                        <span *ngIf="patron.hadmeal == true && this.navPage!='Payments'"> *</span>
-                                        <p *ngIf="isPatronType" class="center_text_content">&nbsp;</p>
-                                        <!--<p class="center_text_content">Site: {{patron.SiteCode}}</p>-->
-                                    </ion-label> 
-                                </ion-row>
-                                <ion-row style="width: 100%;">
-                                    <ion-label *ngIf="patron.Grade">Grade : {{patron.Grade}}</ion-label><br />
-                                    <!--<ion-label style="text-align:center" *ngIf="patron.IsStudent!=null">
-                                        {{patron.IsStudent?'Student': 'A'}}
-                                    </ion-label><br />-->
-                                </ion-row>
-                                <ion-row style="width: 100%;">
-                                    <ion-label *ngIf="patron.identifier!=null">
-                                        PIN - {{patron.identifier}}</ion-label>
-                                    <ion-label *ngIf="patron.identifier==null">
-                                        {{patron.Homeroom}}</ion-label>
-                                </ion-row>
-                            </ion-col>
+              <ion-col [size]="getGridColumnSizes().size" [sizeXl]="getGridColumnSizes().sizeXl"
+                [sizeLg]="getGridColumnSizes().sizeLg" [sizeMd]="getGridColumnSizes().sizeMd"
+                [sizeSm]="getGridColumnSizes().sizeSm" [sizeXs]="getGridColumnSizes().sizeXs"
+                *ngFor="let patron of lists;let i=index;">
+        
+                <ion-card (click)="select(patron)"
+                  class="ion-align-items-center ion-justify-content-center card-size bg-border patron-card-dynamic"
+                  style="width:99%;">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col size="6" style="width: 100%;">
+                        <ion-avatar [class]="getPatronGridImageClass()" item-start *ngIf="this.navOptionList.includes(this.navType)">
+                          <img [class]="getPatronGridImageClass()" src="{{patron.Image}}" *ngIf="patron.Image">
+                          <img [class]="getPatronGridImageClass()" src="assets/img/default_male.png"
+                            *ngIf="!patron.Image && patron.Gender === 'M'">
+                          <img [class]="getPatronGridImageClass()" src="assets/img/default_female.png"
+                            *ngIf="!patron.Image && patron.Gender === 'F'">
+                          <img [class]="getPatronGridImageClass()" style="border-radius: 0%;" src="assets/img/no_image.png"
+                            *ngIf="!patron.Image && (patron.Gender !== 'M' && patron.Gender !== 'F')">
+                        </ion-avatar>
+                      </ion-col>
+                      <ion-col size="6" style="width:100%;height: 100%;">
+                        <ion-row style="width: 100%;">
+                          <ion-label>
+                            {{getPreferredName(patron.FirstName, patron.LastName, patron.PreferredName, patron.label)}}
+                            <span *ngIf="patron.hadmeal == true && this.navPage!='Payments'"> *</span>
+                            <p *ngIf="isPatronType" class="center_text_content">&nbsp;</p>
+                          </ion-label>
                         </ion-row>
-                    </ion-grid>
-
+                        <ion-row style="width: 100%;">
+                          <ion-label *ngIf="patron.Grade">Grade : {{patron.Grade}}</ion-label><br />
+                        </ion-row>
+                        <ion-row style="width: 100%;">
+                          <ion-label *ngIf="patron.identifier!=null">
+                            PIN - {{patron.identifier}}</ion-label>
+                          <ion-label *ngIf="patron.identifier==null">
+                            {{patron.Homeroom}}</ion-label>
+                        </ion-row>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
                 </ion-card>
-                </ion-col>
+              </ion-col>
             </ion-row>
           </ion-row>
         </div>
@@ -231,12 +233,12 @@
           style="min-height: 100%;border-bottom: 1px solid #dedede;" (click)="select(list)">
           <ion-col>
             <ion-item lines="none" [style.background-color]="list.BackColor">
-              <ion-avatar slot="start" class="avatar-small"
+              <ion-avatar slot="start" [class]="getPatronImageClass()"
                 *ngIf="(this.navOptionList.includes(this.navType) ) && !this.isGridView">
-                <img src="{{list.Image}}" *ngIf="list.Image">
-                <img src="assets/img/default_male.png" *ngIf="!list.Image && list.Gender === 'M'">
-                <img src="assets/img/default_female.png" *ngIf="!list.Image && list.Gender === 'F'">
-                <img src="assets/img/no_image.png" style="border-radius: 0%;"
+                <img [class]="getPatronImageClass()" src="{{list.Image}}" *ngIf="list.Image">
+                <img [class]="getPatronImageClass()" src="assets/img/default_male.png" *ngIf="!list.Image && list.Gender === 'M'">
+                <img [class]="getPatronImageClass()" src="assets/img/default_female.png" *ngIf="!list.Image && list.Gender === 'F'">
+                <img [class]="getPatronImageClass()" src="assets/img/no_image.png" style="border-radius: 0%;"
                   *ngIf="!list.Image && (list.Gender !== 'M' && list.Gender !== 'F')">
               </ion-avatar>
               <ion-label text-large>
