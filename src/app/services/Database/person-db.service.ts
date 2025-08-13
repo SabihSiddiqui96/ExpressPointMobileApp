@@ -314,7 +314,7 @@ export class PersonDBService {
           const oldDoc = res.rows.find(row => row.id === newDoc._id);          
           if (oldDoc === undefined && isAccountObject === false) {
             return newDoc;
-          } else if (oldDoc.doc == null || oldDoc.doc == undefined) {
+          } else if (!oldDoc) {
             return newDoc;
           } else {
             const updatedDoc = oldDoc.doc;
