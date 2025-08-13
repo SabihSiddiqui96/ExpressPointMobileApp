@@ -225,7 +225,10 @@ export class GeneralDBService {
                   'SiteTypeId': site.SiteTypeId,
                   'SiteNameWithCode': site.SiteCode + '-' + site.SiteName,
                   'TerminalId': site.TerminalId,
-                  'PaidMealPriceTypeId': site.PaidMealPriceTypeId
+                  'PaidMealPriceTypeId': site.PaidMealPriceTypeId,
+                  'SiteId': site.SiteId,
+                  'ParentSchoolId': site.ParentSchoolId,
+                  'ServingSchoolIds': site.ServingSchoolIds,
                 };
                 sites.push(siteDoc);
               });

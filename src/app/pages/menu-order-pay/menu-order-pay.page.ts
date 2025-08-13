@@ -210,6 +210,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
         if (AppStateService.get('site_details')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+            this.servingSchoolIds = JSON.parse(AppStateService.get('site_details')).ServingSchoolIds;
+
         }
 
         this.isStaffNVisitor = this.checkStaffNVisitor(this.patronDetails);
@@ -430,6 +432,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public showPin: boolean = false;
     public HIDELGBLTY: number = 0;
     public schoolId = null;
+    public servingSchoolIds = [];
     public accountDetails;
     public canLoadPrevPatron = false;
     public lastPatron = undefined;
