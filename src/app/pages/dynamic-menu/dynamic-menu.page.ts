@@ -7395,7 +7395,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.selectedAccountDetails.GradeId = null;
         }
 
-        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && this.servingSchoolIds.includes(this.selectedAccountDetails['SchoolId'])) {
+        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.selectedAccountDetails['SchoolId'])) {
             if (this.selectedAccountDetails['SiteCode']) {
 
                 if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&
