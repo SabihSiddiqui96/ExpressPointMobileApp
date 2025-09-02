@@ -172,6 +172,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public type = 'DynamicMenus';
     public patronId = null;
     public schoolId = null;
+    public servingSchoolIds = [];
     public sessionId = null;
     public specialAccounts;
     public setting = {
@@ -382,6 +383,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
             this.siteName = JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode;
+            this.servingSchoolIds = JSON.parse(AppStateService.get('site_details')).ServingSchoolIds;
         }
         if (AppStateService.get('session_id')) {
             this.sessionId = AppStateService.get('session_id');
@@ -1335,7 +1337,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         // Change during dallas merge
-        if (this.patronDetails['SchoolId'] !== this.schoolId) {
+        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.patronDetails['SchoolId'])) {
             if (this.patronDetails['SiteCode']) {
                 // this.utilService.showToast('Patron does not belong to this school.');
 
@@ -7393,7 +7395,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.selectedAccountDetails.GradeId = null;
         }
 
-        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId) {
+        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.selectedAccountDetails['SchoolId'])) {
             if (this.selectedAccountDetails['SiteCode']) {
 
                 if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&

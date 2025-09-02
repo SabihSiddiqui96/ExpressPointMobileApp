@@ -478,12 +478,14 @@ export class LookupService {
             }
             
             let schoolId;
+            let servingSchoolIds = [];
             if (AppStateService.get('SelectedSite')) {
                 schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+                servingSchoolIds = JSON.parse(AppStateService.get('site_details')).ServingSchoolIds;
             }
             // check visiting patron previous sales
             if (checkForServer && patron) {
-                checkForServer = !patron.isSpecialAccount && (patron.SchoolId !== schoolId);
+                checkForServer = !patron.isSpecialAccount && patron.SchoolId !== schoolId && (!servingSchoolIds.includes(patron.SchoolId));
             }
 
             // Retrieve local sales and merge with previous sales

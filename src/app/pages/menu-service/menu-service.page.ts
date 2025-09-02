@@ -219,6 +219,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public type = 'MenuService';
     // public patronId = null;
     public schoolId = null;
+    public servingSchoolIds = [];
     public sessionId = null;
     public setting = {
         'Setting_ChargeReimbursableMealsOnly': null, 'Setting_ActionWhenBelowChargeLimit': null,
@@ -400,6 +401,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         AppStateService.remove('patron_details');
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+            this.servingSchoolIds = JSON.parse(AppStateService.get('site_details')).ServingSchoolIds;
         }
         this.transactionNumber = parseInt(AppStateService.get('TransactionNumber'));
         if (isNaN(this.transactionNumber)) {
@@ -1176,7 +1178,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
         /** ToDo: Probably not needed - verify and remove */
 
-        if (this.patronDetails['SchoolId'] !== this.schoolId) {
+        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.patronDetails.SchoolId)) {
             if (this.patronDetails['SiteCode']) {
                 if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) && (this.schoolId !== this.patronDetails['ServingSchoolId'])) {
@@ -4620,7 +4622,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
         /** ToDo: Probably not needed - verify and remove */
 
-        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId) {
+        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.selectedAccountDetails['SchoolId'])) {
             if (this.selectedAccountDetails['SiteCode']) {
 
                 if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {

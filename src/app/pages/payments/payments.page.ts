@@ -103,6 +103,7 @@ export class DoPayment {
     public makePaymentProcessing: boolean = false;
     public siteName;
     public schoolId;
+    public servingSchoolIds = [];
     public userId;
 
     public isKeyboardOpen = false;
@@ -172,6 +173,7 @@ export class DoPayment {
         // });
         if (AppStateService.get('SelectedSite')) {
             this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+            this.servingSchoolIds = JSON.parse(AppStateService.get('site_details')).ServingSchoolIds;
             this.siteName = JSON.parse(AppStateService.get('SelectedSite')).SiteNameWithCode;
 
         }
@@ -835,7 +837,7 @@ export class DoPayment {
 
 
                 if (updatedPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId ||
-                    !updatedPatronDetails.IsFromServer) {
+                    !updatedPatronDetails.IsFromServer || this.servingSchoolIds.includes(updatedPatronDetails.SchoolId)) {
                     PouchDBService.UpsertSingleDoc(updatedPatronDetails, EXP_PERSON);
                 } else {
                     this.oldBalance = (this.newBalance != null && this.newBalance != undefined) ? Number(Number(this.newBalance).toFixed(2)) : this.newBalance;
@@ -1097,7 +1099,7 @@ export class PaymentsPage extends DoPayment implements OnInit {
         this.navPatronDetails.preferredNameDisplay = this.getPreferredName(this.navPatronDetails['FirstName'], this.navPatronDetails['LastName'], this.navPatronDetails['PreferredName'], this.navPatronDetails['PersonName']);
         super.initVariables();
 
-        if (this.navPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId) {
+        if (this.navPatronDetails.SchoolId === JSON.parse(AppStateService.get('SelectedSite')).SchoolId || this.servingSchoolIds.includes(this.navPatronDetails.SchoolId)) {
             this.newBalance = (this.navPatronDetails.Balance != null && this.navPatronDetails.Balance != undefined) ? Number(Number(this.navPatronDetails.Balance).toFixed(2)) : this.navPatronDetails.Balance;
         } else {
 
