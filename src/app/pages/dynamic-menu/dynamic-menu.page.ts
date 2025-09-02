@@ -1337,7 +1337,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         // Change during dallas merge
-        if (this.patronDetails['SchoolId'] !== this.schoolId && this.servingSchoolIds.includes(this.patronDetails['SchoolId'])) {
+        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.patronDetails['SchoolId'])) {
             if (this.patronDetails['SiteCode']) {
                 // this.utilService.showToast('Patron does not belong to this school.');
 
