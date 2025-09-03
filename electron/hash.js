@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const YOUR_FILE_PATH = 'dist/ExpressPoint Setup 5.4.1.exe';  //  POPULATE THIS
+const YOUR_FILE_PATH = 'dist/ExpressPoint Setup 5.12.0.exe';  //  POPULATE THIS
 
 function hashFile(file, algorithm = 'sha512', encoding = 'base64', options) {
   return new Promise((resolve, reject) => {
