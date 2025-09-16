@@ -116,7 +116,8 @@ export class SetupDbService {
                             this.generalDB.SetupGeneralDB(),
                             this.staticMenusDB.SetupStaticMenusDB(),
                             this.dynamicMenusDB.SetupDynamicMenusDB(),
-                            this.personDB.SetupPersonDB().then(() => this.personImageDB.SetupPersonImageDB()) // Ensure sequential execution
+                            this.personDB.SetupPersonDB().then(() => this.personImageDB.SetupPersonImageDB()), // Ensure sequential execution
+                            this.usersDb.SetupUsersDB()
                         ];
                         this.syncList['DynamicMenus'] = 'InProgress';
                         this.syncList['Students'] = 'InProgress';
