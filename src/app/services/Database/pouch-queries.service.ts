@@ -2065,7 +2065,7 @@ export class PouchQueriesService {
   public PostDeviceSettings() {    
     return new Promise((resolve, reject) => {   
       let devSettingChanged = AppStateService.get('IsDeviceSettingsChanged');
-      if(devSettingChanged != null && devSettingChanged != undefined && devSettingChanged == 1){
+      if(devSettingChanged != null && devSettingChanged != undefined && devSettingChanged == 1) {
         PouchQueriesService.GetDeviceSettingToSync().then((res) => {
           const devSetting = res.rows.map(row => row.doc);
           if (devSetting.length > 0) {
@@ -2080,11 +2080,15 @@ export class PouchQueriesService {
                   () => {
                     resolve(null);
                   });
-                }
+              }
             });
+          } else {
+            resolve(null);
           }
         });
         AppStateService.set('IsDeviceSettingsChanged', 0);
+      } else {
+        resolve(null);
       }
     });
   }
@@ -2107,10 +2111,13 @@ export class PouchQueriesService {
                 () => {
                   resolve(null);
                 });
+            } else {
+              resolve(null);
             }
           });
+        } else {
+          resolve(null); // resolve if no docs
         }
-
       });
     });
   }
