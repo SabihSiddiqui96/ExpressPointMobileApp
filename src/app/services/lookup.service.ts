@@ -929,7 +929,7 @@ export class LookupService {
                 // same site
                 this.utilService.setLoader(true);
 
-                PouchQueriesService.PatronSearchByName(firstname, lastname, externalId).
+                PouchQueriesService.PatronSearchByName(firstname, lastname, externalId, selectedsite).
                     then((res) => {
 
                         const docs = res.docs.map((patron) => {
