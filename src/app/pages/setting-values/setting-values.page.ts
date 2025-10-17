@@ -38,6 +38,25 @@ export class SettingValuesPage implements OnInit {
             }
 
         });
+
+        if (AppStateService.get('site_details') && AppStateService.get('login_details') && AppStateService.get('SelectedSite')) {
+
+            this.siteList = JSON.parse(AppStateService.get('login_details')).AuthorizedSites;
+            this.schoolId = JSON.parse(AppStateService.get('SelectedSite')).SchoolId;
+
+            const siteDetails = JSON.parse(AppStateService.get('site_details'));
+            this.servingSchoolIds = siteDetails?.ServingSchoolIds;
+
+            // Only process if both siteList and servingSchoolIds exist
+            if (this.siteList && this.servingSchoolIds && this.servingSchoolIds.length > 0) {
+                this.commaSeparatedServedSiteNames = this.siteList
+                    .filter(site => this.servingSchoolIds.includes(site.SchoolId))
+                    .map(site => site.SiteNameWithCode)
+                    .join(', ');
+            } else {
+                this.commaSeparatedServedSiteNames = '--';
+            }
+        }
     }
     /**
         * Variable Declarations here
@@ -45,6 +64,10 @@ export class SettingValuesPage implements OnInit {
     public isUserLoggedIn: boolean = false;
     public settings: any = {};
     public siteSettings = [];
+    public commaSeparatedServedSiteNames = "";
+    public servingSchoolIds = [];
+    public siteList: any = [];
+    public schoolId = null;
     public chargeLimitSettings = [];
     public studentLimits = [];
     public adultLimits = [];

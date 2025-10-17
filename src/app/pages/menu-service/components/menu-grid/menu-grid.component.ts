@@ -180,7 +180,7 @@ export class MenuGridComponent {
     public showItemsInCategory(categoryId) {
         if (this.patronDetails.PersonId) {
             PouchQueriesService.GetItemsInCategory(categoryId).then(res => {
-                if (res.rows[0].doc) {
+                if (res && res.rows && res.rows.length > 0 && res.rows[0].doc) {
                     const categoryName = res.rows[0].doc.Description;
                     let buttons = res.rows[0].doc.Buttons;
 
@@ -256,86 +256,148 @@ export class MenuGridComponent {
         }
     }
 
-    public showDynamicEntreeItemsInCategory(dynamicEntreeCategoryId) {
-        if (this.patronDetails.PersonId) {
-            let menuItemsArray = this.servingLines
-                .filter(f => this.selectedServingLines.includes(f.ServingLineId))  // Filter by selectedServingLines
-                .map(f => f.MenuItems)                                              // Extract MenuItems from each
-                .flat();
-            menuItemsArray = menuItemsArray.reduce((acc, item) => {                // Ensure uniqueness by menuItemId and keep max PlannedCount
-                const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
-                if (existingItemIndex !== -1) {
-                    // If item already exists, check if we need to replace it with the one with max PlannedCount
-                    if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
-                        // Replace the existing item with the current item
-                        acc[existingItemIndex] = item;
-                    }
-                } else {
-                    // If item doesn't exist, push it to the accumulator
-                    acc.push(item);
-                }
-                return acc;
-            }, []); // Initialize accumulator as an empty array
-            
-            if (menuItemsArray.length > 0) {
-                menuItemsArray = _.orderBy(menuItemsArray, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
-               
-                if (menuItemsArray != null && menuItemsArray != undefined && menuItemsArray.length > 0) {
-                    menuItemsArray = menuItemsArray.sort((a, b) => b.PlannedCount - a.PlannedCount);
+    private async getCategoryColorsByName(
+        categoryName: string
+    ): Promise<{ BackColor: string; ForeColor: string }> {
+        const defaultColors = { BackColor: "#80FFFF", ForeColor: "#FFFFFF" };
 
-                    menuItemsArray = menuItemsArray.map(b => {                      
-                        b.CategoryId = dynamicEntreeCategoryId;
-                        b.ButtonDescription = b.MenuItemDescription;
-                        b.RefId = b.MenuItemId;
-                        return b;
+        try {
+            const res = await PouchQueriesService.GetDynamicMenuItemCategories();
+            const docs = res?.rows?.map(r => r.doc) ?? [];
+
+            const match = docs.find(c =>
+                c.CategoryName?.toLowerCase().includes(categoryName.toLowerCase())
+            );
+
+            return {
+                BackColor: match?.BackColor || defaultColors.BackColor,
+                ForeColor: match?.ForeColor || defaultColors.ForeColor,
+            };
+        } catch (err) {
+            console.log("Error getting menu item categories:", err);
+            return defaultColors;
+        }
+    }    
+    
+    public async showDynamicEntreeItemsInCategory(dynamicEntreeCategoryId) {
+        if (this.patronDetails.PersonId) {
+            const categoryColors = await this.getCategoryColorsByName("Planned Entrees");
+            // Get carry-over details first
+            PouchQueriesService.GetCarryOverDetails()
+                .then((res) => {
+                    // Get selected serving lines and extract their MenuIds
+                    const selectedServingLinesData = this.servingLines
+                        .filter(f => this.selectedServingLines.includes(f.ServingLineId));
+                    const selectedMenuIds = selectedServingLinesData.map(f => f.MenuId);
+
+                    // Get carry-over items for the selected MenuIds
+                    const carryOvers = res.rows.filter(row => {
+                        return selectedMenuIds.includes(row.doc.MenuId);
                     });
 
-                    if (this.patronDetails.RestrictedMenuItems != null) {
-                        for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
-                            for (let k = 0; k < menuItemsArray.length; k++) {
-                                if (this.patronDetails.RestrictedMenuItems[i] === menuItemsArray[k].RefId) {
-                                    menuItemsArray[k]['restrictedItem'] = true;
+                    // Extract carry-over menu items
+                    let carryOverItems = [];
+                    if (carryOvers.length > 0) {
+                        carryOverItems = carryOvers
+                            .map(carryOver => carryOver.doc.MenuItems)
+                            .flat()
+                            .filter(item => item.IsReimbursable === true && item.IsPlannedCountZero === false)
+                            .map(item => ({
+                                ...item,
+                                BackColor: categoryColors.BackColor,
+                                ForeColor: categoryColors.ForeColor
+                            }));
+                    }
+
+                    // Get menu items from selected serving lines
+                    let servingLineItems = selectedServingLinesData
+                        .map(f => f.MenuItems)
+                        .flat()
+                        .map(item => ({
+                            ...item,
+                            BackColor: categoryColors.BackColor,
+                            ForeColor: categoryColors.ForeColor
+                        }));
+
+                    // Combine carry-over items and serving line items
+                    let allMenuItems = [...carryOverItems, ...servingLineItems];
+
+                    // Ensure uniqueness by MenuItemId and keep max PlannedCount
+                    let menuItemsArray = allMenuItems.reduce((acc, item) => {
+                        const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
+                        if (existingItemIndex !== -1) {
+                            // If item already exists, check if we need to replace it with the one with max PlannedCount
+                            if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
+                                // Replace the existing item with the current item
+                                acc[existingItemIndex] = item;
+                            }
+                        } else {
+                            // If item doesn't exist, push it to the accumulator
+                            acc.push(item);
+                        }
+                        return acc;
+                    }, []);
+            
+                    if (menuItemsArray.length > 0) {
+                        menuItemsArray = _.orderBy(menuItemsArray, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
+                       
+                        if (menuItemsArray != null && menuItemsArray != undefined && menuItemsArray.length > 0) {
+                            menuItemsArray = menuItemsArray.sort((a, b) => b.PlannedCount - a.PlannedCount);
+
+                            menuItemsArray = menuItemsArray.map(b => {
+                                b.CategoryId = dynamicEntreeCategoryId;
+                                b.ButtonDescription = b.MenuItemDescription;
+                                b.RefId = b.MenuItemId;
+                                return b;
+                            });
+
+                            if (this.patronDetails.RestrictedMenuItems != null) {
+                                for (let i = 0; i < this.patronDetails.RestrictedMenuItems.length; i++) {
+                                    for (let k = 0; k < menuItemsArray.length; k++) {
+                                        if (this.patronDetails.RestrictedMenuItems[i] === menuItemsArray[k].RefId) {
+                                            menuItemsArray[k]['restrictedItem'] = true;
+                                        }
+                                    }
                                 }
                             }
+
+                            let categoriesTapClose = true;
+                            if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
+                                categoriesTapClose = AppStateService.get('categoriesTapClose');
+                            }
+
+                            const modal = this.modalCtrl.create({
+                                component: MenuCategoryModelPage,
+                                componentProps: {
+                                    'submenuGrid': menuItemsArray,
+                                    'subMenuGridName': "Planned Entrees",
+                                    'DefaultMenuItemId': 0,
+                                    'PatronId': this.patronDetails.PersonId
+                                },
+                                backdropDismiss: categoriesTapClose
+                            }).then(async (res) => {
+                                await res.present();
+                            });
+
+                            this.event.destroy('menu_subcategory:select');
+                            this.event.subscribe('menu_subcategory:select', (userEventData) => {
+                                if (userEventData.subgrid) {
+                                    this.addMenuToCart(userEventData.subgrid, this.patronDetails, this.mealCount);
+                                }
+                            });
+                        }
+                        else {
+                            this.popupMessageService.showMessage(PopupMessageCode.E05408);
+                            // this.utilService.showToast('There are no items within this category.');
+                            return;
                         }
                     }
-
-                    let categoriesTapClose = true;
-                    if (AppStateService.get('categoriesTapClose') != undefined && AppStateService.get('categoriesTapClose') != null) {
-                        categoriesTapClose = AppStateService.get('categoriesTapClose');
+                    else {
+                        this.popupMessageService.showMessage(PopupMessageCode.E05408);
+                        // this.utilService.showToast('There are no items within this category.');
+                        return;
                     }
-
-                    const modal = this.modalCtrl.create({
-                        component: MenuCategoryModelPage,
-                        componentProps: {
-                            'submenuGrid': menuItemsArray,
-                            'subMenuGridName': "Planned Entrees",
-                            'DefaultMenuItemId': 0,
-                            'PatronId': this.patronDetails.PersonId
-                        },
-                        backdropDismiss: categoriesTapClose
-                    }).then(async (res) => {
-                        await res.present();
-                    });
-
-                    this.event.destroy('menu_subcategory:select');
-                    this.event.subscribe('menu_subcategory:select', (userEventData) => {
-                        if (userEventData.subgrid) {
-                            this.addMenuToCart(userEventData.subgrid, this.patronDetails, this.mealCount);
-                        }
-                    });
-                }
-                else {
-                    this.popupMessageService.showMessage(PopupMessageCode.E05408);
-                    // this.utilService.showToast('There are no items within this category.');
-                    return;
-                }
-            }
-            else {
-                this.popupMessageService.showMessage(PopupMessageCode.E05408);
-                // this.utilService.showToast('There are no items within this category.');
-                return;
-            }
+                });
         } else {
             this.popupMessageService.showMessage(PopupMessageCode.E05410);
             // this.utilService.showToast('Please select a student first by entering a PIN or using LookUp');

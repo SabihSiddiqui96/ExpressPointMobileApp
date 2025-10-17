@@ -937,6 +937,10 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public selectPatron(patronData) {
+        if (this.ApiInterval) {
+            clearInterval(this.ApiInterval);
+            this.ApiInterval = null; // reset it
+        }
         if (!this.transactionInProgress && !this.isValidMenuItemArray) {
 
             this.showPin = false;
@@ -3601,12 +3605,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 // this.dismissPopup(modal)
                                 this.transactionInProgress = false;
                                 clearInterval(this.ApiInterval);
+                                this.ApiInterval = null; // reset it
                                 this.utilService.showToast('Square transaction failed, Please try again.');
                                 // this.voidOrder();
                                 resolve(false);
                                 return;
                             } else if (this.transactionDetails.Status === CCTransactionStatusType.CANCELED || this.transactionDetails.Status === CCTransactionStatusType.CANCEL_REQ) {
                                 clearInterval(this.ApiInterval);
+                                this.ApiInterval = null; // reset it
                                 this.transactionInProgress = false;
                                 this.utilService.showToast('Square transaction CANCELED, Please try again.');
                                 // this.voidOrder();
@@ -3617,7 +3623,8 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 // this.dismissPopup(modal)
                                 // this.event.publish('ModalComponent:close', {});
                                 // this.creditCardTransactionService.SquareTransactionStatusSubject.next(true);
-                                clearInterval(this.ApiInterval)
+                                clearInterval(this.ApiInterval);
+                                this.ApiInterval = null; // reset it
                                 this.utilService.showToast('Square transaction successful.');
                                 resolve(true);
                                 return;
@@ -3625,6 +3632,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         }
                         else {
                             clearInterval(this.ApiInterval);
+                            this.ApiInterval = null; // reset it
                             this.transactionInProgress = false;
                             this.utilService.showToast('Square transaction failed. Please try again.');
                             resolve(false);
@@ -3645,10 +3653,16 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     public checkSquareTransactionRegularly() {
 
         return new Promise((resolve, reject) => {
+            // Prevent multiple intervals from running
+            if (this.ApiInterval) {
+                console.log('Interval already running, skipping new one:', this.ApiInterval);
+                return;
+            }
             if (this.SquareSetting === true && this.deviceTransactionId != null) {
                 this.ApiInterval = setInterval(() => {
                     if (this.deviceTransactionId == null) {
                         clearInterval(this.ApiInterval);
+                        this.ApiInterval = null; // reset it
                         resolve(null);
                     }
                     else {
@@ -3660,8 +3674,9 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                                 this.creditCardTransactionService.SquareTransactionObject = res;
                                 if (res.Status == CCTransactionStatusType.COMPLETED || res.Status == CCTransactionStatusType.CANCELED
                                     || res.Status == CCTransactionStatusType.FAILED || res.Status == CCTransactionStatusType.CANCEL_REQ) {
-                                    clearInterval(this.ApiInterval)
-                                    resolve(res)
+                                    clearInterval(this.ApiInterval);
+                                    this.ApiInterval = null; // reset it
+                                    resolve(res);
                                 }
                             }
 
@@ -3671,7 +3686,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
             }
             else {
-                resolve(true)
+                resolve(true);
             }
         })
 
@@ -5917,7 +5932,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             PouchQueriesService.GetItemsInCategory(categoryId).then(res => {
                 // console.clear()
 
-                if (res.rows[0].doc) {
+                if (res && res.rows && res.rows.length > 0 && res.rows[0].doc) {
 
                     const categoryName = res.rows[0].doc.Description;
                     let buttons = res.rows[0].doc.Buttons;
