@@ -1779,7 +1779,7 @@ export class ClassroomSalePage extends QuickClassroomSalePage implements OnInit,
         if (this.patronId) {
             PouchQueriesService.GetItemsInCategory(categoryId).then(res => {
                 // debugger;
-                if (res.rows[0].doc) {
+                if (res && res.rows && res.rows.length > 0 && res.rows[0].doc) {
                     // get all items, amounts, menu restrictions
                     this.getPatronDetails(this.patronSelectedData);
                     const categoryName = res.rows[0].doc.Description;

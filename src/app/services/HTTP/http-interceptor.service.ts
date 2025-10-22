@@ -166,7 +166,11 @@ export class HttpInterceptorService {
         break;
       case 500:
         // Internal server error : this is a server error and the app should not be taken offline.
-        this.event.publish('networkService:apiFailure', {});
+        if (!request.url.includes('GetCCTransactionStatusFromPrimero')) {
+          this.event.publish('networkService:apiFailure', {});
+        } else {
+          console.log('500 from polling API, will retry next interval');
+        }
         break;
       default:
         if (this.checkURLToForceOfflineIfDisconnected(request)) {

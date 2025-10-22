@@ -21,6 +21,7 @@ import { CCTransactionStatus, CreditCardTransactionService } from '../../service
 import { CCTransactionStatusType } from '../../services/enums/Credit-Card-Transaction-Status-Types';
 import { PatronLookupPopupPage } from '../patron-lookup-popup/patron-lookup-popup.page';
 import { MathService } from '../../services/math.service';
+import { LocalTimerService } from '../../services/local-timer.service';
 
 enum SuspiciousActivityTypes {
     VOID = 1,
@@ -444,6 +445,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     public paymentAmnt: number = 0.00
     public PARTIALPAY: boolean = false;
     public squareDeviceId: string = undefined;
+    public squareTokenExpiredAt: string = undefined;
 
     constructor(public navCtrl: NavController, public event: Events, public navParams: NavParams,
         private alertCtrl: AlertController, private utilService: UtilService,
@@ -461,6 +463,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         const sellerDetails = AppStateService.get('SellerDetails');
         if (sellerDetails) {
             this.squareDeviceId = JSON.parse(sellerDetails).DeviceId;
+            this.squareTokenExpiredAt = JSON.parse(sellerDetails).ExpiredAt;
         }
     }
     private inputBuffer = [];
@@ -1248,6 +1251,33 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
             this.SquareTransactionStarted =  this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
             if (this.cardAmount.indexOf('$') !== -1) {
                 this.cashtendAmount = this.cardAmount.replace('$', '');
+            }
+
+            if (this.SquareTransactionStarted == true) {                
+                let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(this.squareTokenExpiredAt), 'DAY', false);
+                if (expiresInDays <= 0) {
+                    this.saveInProgress = false;
+                    this.isCompleteTransactionProcessing = false;
+                    let message = 'The Authorization token has expired. Please contact your Admin to get a new authorization token. You will not be able to use the Square terminal with ExpressPoint unless the token is reauthorized.';
+
+                    this.alertCtrl.create({
+                        header: 'Alert',
+                        message: message,
+                        cssClass: 'customAlertCss',
+                        buttons: [
+                            {
+                                text: 'OK',
+                                handler: () => {
+                                    console.log('User acknowledged expired token');
+                                }
+                            }
+                        ]
+                    }).then(async (res) => {
+                        res.present();
+                    });
+                    
+                    return; // stop further processing
+                }
             }
         }
         this.isCompleteTransactionProcessing = true;

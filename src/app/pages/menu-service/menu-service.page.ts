@@ -907,7 +907,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     }
     public selectPatron(patronData) {
-        if (this.ApiInterval) clearInterval(this.ApiInterval)
+        if (this.ApiInterval) {
+            clearInterval(this.ApiInterval);
+            this.ApiInterval = null; // reset it
+        }
         if (!this.transactionInProgress) {
             this.transactionInProgress = true;
 
@@ -3749,18 +3752,20 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         //     need to wait on a request before we save the transaction
 
                         if (res !== null) {
-                            this.transactionDetails = res
+                            this.transactionDetails = res;
                             if (this.transactionDetails.Status === CCTransactionStatusType.FAILED) {
                                 // this.creditCardTransactionService.SquareTransactionStatusSubject.next(false);
                                 // Show a message here on if the transaction is saved or not 
                                 // this.dismissPopup(modal)
                                 this.transactionInProgress = false;
                                 clearInterval(this.ApiInterval);
+                                this.ApiInterval = null; // reset it
                                 this.utilService.showToast('Square transaction failed, Please try again.');
                                 // this.voidOrder();
                                 resolve(false);
                             } else if (this.transactionDetails.Status === CCTransactionStatusType.CANCELED || this.transactionDetails.Status === CCTransactionStatusType.CANCEL_REQ) {
                                 clearInterval(this.ApiInterval);
+                                this.ApiInterval = null; // reset it
                                 this.transactionInProgress = false;
                                 this.utilService.showToast('Square transaction CANCELED, Please try again.');
                                 // this.voidOrder();
@@ -3770,9 +3775,10 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 // this.dismissPopup(modal)
                                 // this.event.publish('ModalComponent:close', {});
                                 // this.creditCardTransactionService.SquareTransactionStatusSubject.next(true);
-                                clearInterval(this.ApiInterval)
+                                clearInterval(this.ApiInterval);
+                                this.ApiInterval = null; // reset it
                                 this.utilService.showToast('Square transaction successful.');
-                                resolve(true)
+                                resolve(true);
                             }
                         }
                     })
@@ -3789,10 +3795,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public checkSquareTransactionRegularly() {
 
         return new Promise((resolve, reject) => {
+            // Prevent multiple intervals from running
+            if (this.ApiInterval) {
+                console.log('Interval already running, skipping new one:', this.ApiInterval);
+                return;
+            }
             if (this.SquareSetting === true && this.deviceTransactionId != null) {
                 this.ApiInterval = setInterval(() => {
                     if (this.deviceTransactionId == null) {
                         clearInterval(this.ApiInterval);
+                        this.ApiInterval = null; // reset it
                         resolve(null);
                     }
                     else{
@@ -3804,8 +3816,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                 this.creditCardTransactionService.SquareTransactionObject = res;
                                 if (res.Status == CCTransactionStatusType.COMPLETED || res.Status == CCTransactionStatusType.CANCELED
                                     || res.Status == CCTransactionStatusType.FAILED || res.Status == CCTransactionStatusType.CANCEL_REQ) { 
-                                    clearInterval(this.ApiInterval)
-                                    resolve(res)
+                                    clearInterval(this.ApiInterval);
+                                    this.ApiInterval = null; // reset it
+                                    resolve(res);
                                 }
                             }
 
@@ -4861,75 +4874,111 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     private bindDynamicEntreeItemsByServingLine() {
-        if (this.selectedServingLines == undefined) {
-            this.selectedServingLines = [];
-        }
-        if (this.selectedMenuType != -1 && this.selectedServingLines.length > 0) {
-            let menuItems = this.servingLines
-                .filter(f => this.selectedServingLines.includes(f.ServingLineId))  // Filter by selectedServingLines
-                .map(f => f.MenuItems)                                              // Extract MenuItems from each
-                .flat()                                                             // Flatten the array
-                .reduce((acc, item) => {                                            // Ensure uniqueness by menuItemId and keep max PlannedCount
-                    const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
-                    if (existingItemIndex !== -1) {
-                        // If item already exists, check if we need to replace it with the one with max PlannedCount
-                        if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
-                            // Replace the existing item with the current item
-                            acc[existingItemIndex] = item;
-                        }
-                    } else {
-                        // If item doesn't exist, push it to the accumulator
-                        acc.push(item);
-                    }
-                    return acc;
-                }, []);
-            
-            if (menuItems.length > 0) {
-                menuItems = _.orderBy(menuItems, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
-                let refCount = 0;
-                if (this.menuGrid['Buttons'].length > 0) {
-                    // Find the backColor from the "Planned Entrees" category
-                    const plannedEntreesColor = this.allCategories.find(
-                        item => item.Description === "Planned Entrees"
-                    )?.BackColor;
+        return new Promise((resolve) => {
+            if (this.selectedServingLines == undefined) {
+                this.selectedServingLines = [];
+            }
 
-                    // Apply that color to items with DynEntree_Id > 0
-                    if (plannedEntreesColor) {
-                        this.menuGrid.Buttons.forEach(item => {
-                            if (item.DynEntree_Id > 0) {
-                                item.BackColor = plannedEntreesColor;
-                            }
+            if (this.selectedMenuType != -1 && this.selectedServingLines.length > 0) {
+                // Get carry-over details first
+                PouchQueriesService.GetCarryOverDetails()
+                    .then((res) => {
+                        // Get selected serving lines and extract their MenuIds
+                        const selectedServingLinesData = this.servingLines
+                            .filter(f => this.selectedServingLines.includes(f.ServingLineId));
+                        const selectedMenuIds = selectedServingLinesData.map(f => f.MenuId);
+
+                        // Get carry-over items for the selected MenuIds
+                        const carryOvers = res.rows.filter(row => {
+                            return selectedMenuIds.includes(row.doc.MenuId);
                         });
-                    }
-                    this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
-                    for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
-                        if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
-                            this.menuGrid['Buttons'][k]['RefId'] = 0;
-                            this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
-                            this.menuGrid['Buttons'][k]['IsTaxable'] = false;
+
+                        // Extract carry-over menu items
+                        let carryOverItems = [];
+                        if (carryOvers.length > 0) {
+                            carryOverItems = carryOvers
+                                .map(carryOver => carryOver.doc.MenuItems)
+                                .flat()
+                                .filter(item => item.IsReimbursable === true && item.IsPlannedCountZero === false);
                         }
-                        if (menuItems[refCount] != undefined && menuItems[refCount] != null && this.menuGrid['Buttons'][k]['RefId'] == 0) {
-                            this.menuGrid['Buttons'][k]['IsReimbursable'] = true;
-                            this.menuGrid['Buttons'][k]['RefId'] = menuItems[refCount].MenuItemId;
-                            this.menuGrid['Buttons'][k]['IsTaxable'] = menuItems[refCount].IsTaxable;
-                            this.menuGrid['Buttons'][k]['OldDEText'] = this.menuGrid['Buttons'][k]['ButtonDescription'];
-                            this.menuGrid['Buttons'][k]['ButtonDescription'] = menuItems[refCount].MenuItemDescription;
-                            this.menuGrid['Buttons'][k]['IsCategory'] = false;
-                            this.menuGrid['Buttons'][k]['IsRefIdDE'] = true;
-                            menuItems[refCount].ForeColor = this.menuGrid['Buttons'][k]['ForeColor'];
-                            menuItems[refCount].BackColor = this.menuGrid['Buttons'][k]['BackColor'];
-                            refCount = refCount + 1;
+
+                        // Get menu items from selected serving lines
+                        let servingLineItems = selectedServingLinesData
+                            .map(f => f.MenuItems)
+                            .flat();
+
+                        // Combine carry-over items and serving line items
+                        let allMenuItems = [...carryOverItems, ...servingLineItems];
+
+                        // Ensure uniqueness by MenuItemId and keep max PlannedCount
+                        let menuItems = allMenuItems.reduce((acc, item) => {
+                            const existingItemIndex = acc.findIndex(existing => existing.MenuItemId === item.MenuItemId);
+                            if (existingItemIndex !== -1) {
+                                // If item already exists, check if we need to replace it with the one with max PlannedCount
+                                if (item.PlannedCount > acc[existingItemIndex].PlannedCount) {
+                                    // Replace the existing item with the current item
+                                    acc[existingItemIndex] = item;
+                                }
+                            } else {
+                                // If item doesn't exist, push it to the accumulator
+                                acc.push(item);
+                            }
+                            return acc;
+                        }, []);
+
+                        if (menuItems.length > 0) {
+                            menuItems = _.orderBy(menuItems, ['PlannedCount', 'MenuItemDescription'], ['desc', 'asc']);
+                            let refCount = 0;
+                            if (this.menuGrid['Buttons'].length > 0) {
+                                // Find the backColor from the "Planned Entrees" category
+                                const plannedEntreesColor = this.allCategories.find(
+                                    item => item.Description === "Planned Entrees"
+                                )?.BackColor;
+
+                                // Apply that color to items with DynEntree_Id > 0
+                                if (plannedEntreesColor) {
+                                    this.menuGrid.Buttons.forEach(item => {
+                                        if (item.DynEntree_Id > 0) {
+                                            item.BackColor = plannedEntreesColor;
+                                        }
+                                    });
+                                }
+                                this.menuGrid.Buttons = _.orderBy(this.menuGrid.Buttons, ['DynEntree_Id'], ['asc']);
+                                for (let k = 0; k < this.menuGrid['Buttons'].length; k++) {
+                                    if (this.menuGrid['Buttons'][k]['IsRefIdDE'] != undefined && this.menuGrid['Buttons'][k]['IsRefIdDE'] == true) {
+                                        this.menuGrid['Buttons'][k]['RefId'] = 0;
+                                        this.menuGrid['Buttons'][k]['ButtonDescription'] = this.menuGrid['Buttons'][k]['OldDEText'];
+                                        this.menuGrid['Buttons'][k]['IsTaxable'] = false;
+                                    }
+                                    if (menuItems[refCount] != undefined && menuItems[refCount] != null && this.menuGrid['Buttons'][k]['RefId'] == 0) {
+                                        this.menuGrid['Buttons'][k]['IsReimbursable'] = true;
+                                        this.menuGrid['Buttons'][k]['RefId'] = menuItems[refCount].MenuItemId;
+                                        this.menuGrid['Buttons'][k]['IsTaxable'] = menuItems[refCount].IsTaxable;
+                                        this.menuGrid['Buttons'][k]['OldDEText'] = this.menuGrid['Buttons'][k]['ButtonDescription'];
+                                        this.menuGrid['Buttons'][k]['ButtonDescription'] = menuItems[refCount].MenuItemDescription;
+                                        this.menuGrid['Buttons'][k]['IsCategory'] = false;
+                                        this.menuGrid['Buttons'][k]['IsRefIdDE'] = true;
+                                        menuItems[refCount].ForeColor = this.menuGrid['Buttons'][k]['ForeColor'];
+                                        menuItems[refCount].BackColor = this.menuGrid['Buttons'][k]['BackColor'];
+                                        refCount = refCount + 1;
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
-            else {
+                        else {
+                            this.setBackGridButtons();
+                        }
+                        resolve(null);
+                    })
+                    .catch((error) => {
+                        this.setBackGridButtons();
+                        resolve(null);
+                    });
+            } else {
                 this.setBackGridButtons();
+                resolve(null);
             }
-        }
-        else {
-            this.setBackGridButtons();
-        }
+        });
     }
 
     public setBackGridButtons() {
@@ -5018,24 +5067,26 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public async dismissAllOpenPopups(popoverCtrl?, modalCtrl?, alertCtrl?) {
-        const popOver = document.getElementsByTagName('ion-popover');
-        const alertBox = document.getElementsByTagName('ion-alert');
-        const modal = document.getElementsByTagName('ion-modal');
+        if (this.autoServeEnabled && this.impermanentAutoServePause == false) {
+            const popOver = document.getElementsByTagName('ion-popover');
+            const alertBox = document.getElementsByTagName('ion-alert');
+            const modal = document.getElementsByTagName('ion-modal');
 
-        if (Object.keys(popOver).length !== 0 && popoverCtrl) {
-            const element = await popoverCtrl.getTop();
-            if (element) {
-                element.dismiss();
-            }
-        } else if (Object.keys(modal).length !== 0 && modalCtrl) {
-            const element = await modalCtrl.getTop();
-            if (element) {
-                element.dismiss();
-            }
-        } else if (Object.keys(alertBox).length !== 0 && alertCtrl) {
-            const element = await alertCtrl.getTop();
-            if (element) {
-                element.dismiss();
+            if (Object.keys(popOver).length !== 0 && popoverCtrl) {
+                const element = await popoverCtrl.getTop();
+                if (element) {
+                    element.dismiss();
+                }
+            } else if (Object.keys(modal).length !== 0 && modalCtrl) {
+                const element = await modalCtrl.getTop();
+                if (element) {
+                    element.dismiss();
+                }
+            } else if (Object.keys(alertBox).length !== 0 && alertCtrl) {
+                const element = await alertCtrl.getTop();
+                if (element) {
+                    element.dismiss();
+                }
             }
         }
         AppStateService.set("UnidentifiedPatronPopUp", "0");
