@@ -274,46 +274,54 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     return this.checkAllFields() && this.goLogin();
   }
 
-
   public validateSSOLogin() {
-    this.samlProcessing = false;
     const ssoAuthDetails = AppStateService.get('SSOAuthDetails');
     if (ssoAuthDetails && this.utilService.isElectronApp()) {
-      if (this.samlProcessing) {
-        return;
-      }
 
+      // Prevent multiple simultaneous SSO attempts
+      if (this.samlProcessing) return;
+      this.samlProcessing = true;
+
+      // Send SSO login request
       this.utilService.publishIpcEvent('ssologin', JSON.parse(ssoAuthDetails).SSOUrl);
-      this.electronService.ipcRenderer.on('ssoinput', (event, data) => {
-        if (this.samlProcessing) {
+
+      // Remove previous listener and listen only once
+      this.electronService.ipcRenderer.removeAllListeners('ssoinput');
+      this.electronService.ipcRenderer.once('ssoinput', (event, data) => {
+        this.samlProcessing = false;
+
+        if (data.Error && data.Error.trim().length > 0) {
+          const errorMsg = data.Error.toLowerCase();
+          if (errorMsg.includes('timed out')) {
+            this.showLoginFailedMessage('Login Timeout', 'The login process timed out. Please try again.');
+          } else if (errorMsg.includes('closed')) {
+            this.showLoginFailedMessage('Login Window Closed', 'The login window was closed before completing sign-in.');
+          } else if (errorMsg.includes('failed to load')) {
+            this.showLoginFailedMessage('Network Error', 'Unable to load the login page. Please check your internet connection.');
+          } else {
+            this.showLoginFailedMessage('Login Failed', data.Error);
+          }
           return;
         }
 
-        this.samlProcessing = true;
-        console.log('Login data received from SAML app...');
+        // Successful login
+        if (data.Nameid && data.Nameid.trim() !== '') {
+          this.utilService.showToast(`Logged in as ${data.Nameid}`, 5000);
 
-        if (data.Error.length > 0) {
-          this.showLoginFailedMessage('Login Timeout', 'User login timeout reached... Please try login again !!!')
-        }
-        else {
-          if (data.Nameid !== '') {
-            this.utilService.showToast('Logged in as ' + data.Nameid, 5000);
+          this.loginProcessing = true;
+          this.login.WindowsAuth = false;
+          this.login.username = data.Nameid;
+          this.login.password = '';
+          this.login.ADFSAuth = true;
+          this.login.ADFSDetails = data.ADFSDetails;
 
-
-            this.loginProcessing = true;
-            this.login.WindowsAuth = false;
-            this.login.username = data.Nameid;
-            this.login.password = '';
-            this.login.ADFSAuth = true;
-            this.login.ADFSDetails = data.ADFSDetails;
-
-            return this.goLogin();
-          }
+          this.goLogin();
+        } else {
+          this.showLoginFailedMessage('Login Failed', 'Invalid login response. Please try again.');
         }
       });
     }
   }
-
   static shouldCheckBackup(): boolean {
     const storedDate: string | null = AppStateService.get("BackupAndRelaunchDate");
 
@@ -333,27 +341,37 @@ export class LoginPage extends GoLogin implements OnInit, OnDestroy {
     return differenceInDays >= 30;
   }
 
+  private alert: HTMLIonAlertElement | null = null;
+  private showLoginFailedMessage(caption: string, message: string) {
+    // Dismiss previous alert if exists
+    if (this.alert) {
+      this.alert.dismiss();
+      this.alert = null;
+    }
 
-  private showLoginFailedMessage(caption, message) {
-    return new Promise((resolve, reject) => {
-      const confirm = this.alertCtrl.create({
-        header: caption,
-        message: message,
-        cssClass: 'customAlertCss',
-        buttons: [
-          {
-            text: 'Ok',
-            handler: () => {
-              console.log(caption);
-            }
+    this.alertCtrl.create({
+      header: caption,
+      message: message,
+      cssClass: 'customAlertCss',
+      backdropDismiss: true,
+      buttons: [
+        {
+          text: 'Ok',
+          handler: () => {
+            this.samlProcessing = false;
+            this.alert = null;
           }
-        ]
-      }).then(async (res) => {
-        await res.present();
+        }
+      ]
+    }).then(res => {
+      this.alert = res;
+      res.onDidDismiss().then(() => {
+        this.samlProcessing = false;
+        this.alert = null;
       });
+      res.present();
     });
   }
-
 
   public validateWindowsLogin() {
     this.loginProcessing = true;
