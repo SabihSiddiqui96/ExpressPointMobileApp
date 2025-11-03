@@ -311,54 +311,102 @@ function getFromLocalStorage(key: any) {
 
 function openLogin(loginSSOUrl: any) {
   return new Promise((resolve) => {
-    let count = 0;
     ADFSInfo = '';
     NameId = '';
     LoginError = '';
-    // Use a new isolated session for every login
-    const uniqueSession = session.fromPartition(`persist:sso_${Date.now()}`);
+
+    if (!loginSSOUrl || typeof loginSSOUrl !== 'string') {
+      win?.webContents?.send('ssoinput', {
+        ADFSDetails: '',
+        Nameid: '',
+        Error: 'Invalid login URL provided.'
+      });
+      resolve(false);
+      return;
+    }
+
+    // Close any old SSO window
+    if (ssowin && !ssowin.isDestroyed()) {
+      try { ssowin.close(); } catch { }
+      ssowin = null;
+    }
+
+    const ssoSession = session.fromPartition(`persist:sso_${Date.now()}`);
+
     ssowin = new BrowserWindow({
       width: 700,
       height: 700,
       show: true,
       autoHideMenuBar: true,
       webPreferences: {
-        session: uniqueSession,
+        session: ssoSession,
         nodeIntegration: false,
-        contextIsolation: true
+        contextIsolation: true,
+        sandbox: true
       }
     });
-    ssowin.loadURL(loginSSOUrl);
-    ssowin.webContents.on('did-finish-load', () => {
-      const interval = setInterval(() => {
-        count++;
-        getFromLocalStorage('ADFSDetails');
-        getFromLocalStorage('NameId');
 
-        if (ADFSInfo !== null && ADFSInfo !== '' && NameId !== null && NameId !== '') {
-          clearInterval(interval);
-          win.webContents.send('ssoinput', {
-            ADFSDetails: ADFSInfo,
-            Nameid: NameId,
-            Error: LoginError
-          });
-          resolve(true);
-          ssowin.hide();
+    ssowin.loadURL(loginSSOUrl);
+
+    let isResolved = false;
+    let interval: NodeJS.Timeout | null = null;
+    const timeoutMs = 5 * 60 * 1000; // 5 minutes
+    const startTime = Date.now();
+
+    const finish = (success: boolean, errorMsg?: string) => {
+      if (isResolved) return;
+      isResolved = true;
+
+      if (interval) clearInterval(interval);
+      if (ssowin && !ssowin.isDestroyed()) ssowin.close();
+
+      win?.webContents?.send('ssoinput', {
+        ADFSDetails: success ? ADFSInfo : '',
+        Nameid: success ? NameId : '',
+        Error: errorMsg || ''
+      });
+
+      resolve(success);
+    };
+
+    ssowin.on('closed', () => {
+      if (!isResolved) finish(false, 'Login window closed by user.');
+    });
+
+    ssowin.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+      // Ignore harmless aborts (normal during SSO redirects or window close)
+      if (errorCode === -3 || errorCode === -27) {
+        return;
+      }
+      finish(false, `Failed to load: ${errorDescription}`);
+    });
+
+    ssowin.webContents.on('did-finish-load', () => {
+      interval = setInterval(async () => {
+        if (!ssowin || ssowin.isDestroyed()) {
+          clearInterval(interval!);
+          return;
         }
-        else if (count > 1200) {
-          ADFSInfo = '';
-          NameId = '';
-          LoginError = 'Login process has been timed out. Please try again.'
-          win.webContents.send('ssoinput', {
-            ADFSDetails: ADFSInfo,
-            Nameid: NameId,
-            Error: LoginError
-          });
-          resolve(true);
-          clearInterval(interval);
-          ssowin.hide();
+
+        const elapsed = Date.now() - startTime;
+        if (elapsed > timeoutMs) {
+          finish(false, 'Login timeout reached. Please try again.');
+          return;
         }
-      }, 250);
+
+        try {
+          const adfs = await ssowin.webContents.executeJavaScript(`localStorage.getItem("ADFSDetails")`, true);
+          const nameid = await ssowin.webContents.executeJavaScript(`localStorage.getItem("NameId")`, true);
+
+          if (adfs && nameid) {
+            ADFSInfo = adfs;
+            NameId = nameid;
+            finish(true);
+          }
+        } catch (err) {
+          // ignore until page JS ready
+        }
+      }, 1000);
     });
   });
 }
