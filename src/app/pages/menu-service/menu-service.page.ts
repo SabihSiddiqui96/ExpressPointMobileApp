@@ -123,7 +123,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     allergensAndNotes: false,
                     unidentifiedPatron: false,
                     adultStudents: false,
-                    autoCloseAlerts: false
+                    autoCloseAlerts: true
                 }
             }
         });
@@ -5068,7 +5068,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public async dismissAllOpenPopups(popoverCtrl?, modalCtrl?, alertCtrl?) {
-        if (this.autoServeEnabled && this.impermanentAutoServePause == false && this.settingAutoPause.autoCloseAlerts) {
+        if (this.autoServeEnabled && (this.impermanentAutoServePause == false || (this.impermanentAutoServePause == true && this.settingAutoPause.autoCloseAlerts == true))) {
             const popOver = document.getElementsByTagName('ion-popover');
             const alertBox = document.getElementsByTagName('ion-alert');
             const modal = document.getElementsByTagName('ion-modal');

@@ -28,7 +28,7 @@ export class AutoServePauseOptionsPopUpComponent implements OnInit {
     allergensAndNotes: false,
     unidentifiedPatron: false,
     adultStudents: false,
-    autoCloseAlerts: false
+    autoCloseAlerts: true
   }
   public autoServeInfoDB: any;
   constructor(public navCtrl: NavController, public event: Events, public router: Router, private systemService: SystemService,
@@ -109,7 +109,7 @@ export class AutoServePauseOptionsPopUpComponent implements OnInit {
         allergensAndNotes: false,
         unidentifiedPatron: false,
         adultStudents: false,
-        autoCloseAlerts: false
+        autoCloseAlerts: true
       }
       this.setAutoPauseOptions(event);
       this.autoServeInfoDB.autoPauseOptions = this.autoPauseOptions;
