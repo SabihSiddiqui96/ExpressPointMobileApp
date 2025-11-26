@@ -4,5 +4,6 @@ export interface PauseOptions {
     visitingStudents: boolean,
     allergensAndNotes: boolean,
     unidentifiedPatron: boolean,
-    adultStudents:boolean
+    adultStudents: boolean,
+    autoCloseAlerts: boolean
 }
