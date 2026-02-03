@@ -2,7 +2,7 @@
     "name": "expresspoint",
     "author": "Cybersoft Technologies Inc.",
     "homepage": "https://primeroedge.com/",
-    "version": "5.12.1",
+    "version": "6.1.0",
     "private": true,
     "scripts": {
         "ng": "ng",
