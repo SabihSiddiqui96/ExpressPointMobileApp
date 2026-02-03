@@ -807,6 +807,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.navOrderData.IsCard = false;
         if (this.cashpaymentOption === 'card') {
             this.navOrderData.IsCard = true;
+            // Ensure cardAmount is set synchronously when card is selected to avoid race conditions
+            this.cardAmount = '$' + this.navOrderData.totalAmount.toFixed(2);
         }
 
     }
@@ -1246,12 +1248,13 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
 
         if (this.cashpaymentOption === 'card') {
-            this.cashtendAmount = this.cardAmount;
+            // Ensure cardAmount is always set to totalAmount for card payments (set synchronously in setCashPaymentOption to avoid race conditions)
+            // Use totalAmount as source of truth - always set cardAmount for display
+            this.cardAmount = '$' + this.navOrderData.totalAmount.toFixed(2);
+            // Use totalAmount directly as the source of truth for cashtendAmount (no need to parse cardAmount)
+            this.cashtendAmount = this.navOrderData.totalAmount.toFixed(2);
             this.cashCardNum = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? '' : this.cashCardNum;
             this.SquareTransactionStarted =  this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
-            if (this.cardAmount.indexOf('$') !== -1) {
-                this.cashtendAmount = this.cardAmount.replace('$', '');
-            }
 
             if (this.SquareTransactionStarted == true) {                
                 let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(this.squareTokenExpiredAt), 'DAY', false);
