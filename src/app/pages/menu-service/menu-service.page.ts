@@ -1182,7 +1182,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
         /** ToDo: Probably not needed - verify and remove */
 
-        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.patronDetails.SchoolId)) {
+        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds?.includes(this.patronDetails.SchoolId)) {
             if (this.patronDetails['SiteCode']) {
                 if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
                     if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) && (this.schoolId !== this.patronDetails['ServingSchoolId'])) {
@@ -3371,7 +3371,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2).toString(),
                                     'NewBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(updatedPatronDetails.Balance * 100) / 100).toFixed(2).toString() : '0',
                                     'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
-                                    'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(Math.round(this.cashtendAmount * 100) / 100).toFixed(2).toString(),
+                                    'AmountTendered': this.orderData.IsCard ? Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)).toString() : (this.cashtendAmount === undefined || this.cashtendAmount === null ? '0' : Number(Math.round(this.cashtendAmount * 100) / 100).toFixed(2).toString()),
                                     'ChangeReturned': Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toString() !== 'NaN' ? Number(Math.round(parseFloat(this.cashDue) * 100) / 100).toFixed(2).toString() : '0',
                                     'Identifier': this.patronDetails.isSpecialAccount === false ? this.patronDetails.Identifier : 'NA',
                                     'Site': this.patronDetails.isSpecialAccount === false ? this.patronDetails.SiteCode : 'NA',
@@ -3474,7 +3474,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                             'TransactionDate': now.toLocaleDateString('en-US') + ' ' + now.toLocaleString('en-US',
                                                 { hour: 'numeric', minute: 'numeric', hour12: true }),
                                             'BonusAmount': Number(Math.round(this.bonusAmount * 100) / 100).toFixed(2),
-                                            'AmountTendered': this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2)),
+                                            'AmountTendered': this.orderData.IsCard ? Number(Number(Math.round(paymentAmnt * 100) / 100).toFixed(2)) : (this.cashtendAmount === undefined || this.cashtendAmount === null ? 0 : Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2))),
                                             'PaymentAmount': (Math.round(paymentAmnt * 100) / 100).toFixed(2), // parseFloat(paymentAmnt.toFixed(2))
                                             'Balance': Number(Math.round(parseFloat(this.saleData['NewBalance']) * 100) / 100).toFixed(2),
                                             'ChangeReturned': this.cashDue === undefined || this.cashDue === null ? 0 : Number(Math.round(parseFloat(this.cashDue) * 100) / 100),
@@ -4636,7 +4636,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
         }
         /** ToDo: Probably not needed - verify and remove */
 
-        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.selectedAccountDetails['SchoolId'])) {
+        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds?.includes(this.selectedAccountDetails['SchoolId'])) {
             if (this.selectedAccountDetails['SiteCode']) {
 
                 if (!this.autoServeEnabled || (this.autoServeEnabled && (this.settingAutoPause.visitingStudents || this.settingAutoPause.adultStudents))) {
