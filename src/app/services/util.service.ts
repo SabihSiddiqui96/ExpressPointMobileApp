@@ -150,51 +150,42 @@ export class UtilService {
   }
 
   public getSessionDate() {
+    const todayDate = moment(new Date()).format('YYYY-MM-DD');
     // Always check NewSessionDate first if it exists
     const newSessionDate = AppStateService.get('NewSessionDate');
-    
+
     if (newSessionDate) {
       const newSessionDateOnly = moment(new Date(newSessionDate)).format('YYYY-MM-DD');
       const currentSessionDateOnly = this.sessionPickedDate ? moment(new Date(this.sessionPickedDate)).format('YYYY-MM-DD') : '';
-      
-      // If sessionPickedDate is empty or doesn't match NewSessionDate, update it
+
       if (this.sessionPickedDate === '' || currentSessionDateOnly !== newSessionDateOnly) {
         this.setSessionDate(newSessionDate);
-        return this.sessionPickedDate;
-      } else {
-        // sessionPickedDate already matches NewSessionDate, return it
-        return this.sessionPickedDate;
       }
+      // When session date is today, return current time so TransactionDate = actual sale time
+      return (newSessionDateOnly === todayDate) ? `${new Date().toISOString()}` : this.sessionPickedDate;
     }
-    
+
     if (this.sessionPickedDate === '') {
       this.sessionPickedDate = `${new Date().toISOString()}`;
       return this.sessionPickedDate;
-    } else {
-      const todayDate = moment(new Date()).format('YYYY-MM-DD');
-      const sessionDate = moment(new Date(this.sessionPickedDate)).format('YYYY-MM-DD');
-      
-      if (todayDate === sessionDate) {
-        this.sessionPickedDate = `${new Date().toISOString()}`;
+    }
+    const sessionDate = moment(new Date(this.sessionPickedDate)).format('YYYY-MM-DD');
+    if (todayDate === sessionDate) {
+      this.sessionPickedDate = `${new Date().toISOString()}`;
+      return this.sessionPickedDate;
+    }
+    if (this.datePickerDate && this.datePickerDate !== '' && moment(new Date(this.datePickerDate)).isValid()) {
+      const datePickerDateOnly = moment(new Date(this.datePickerDate)).format('YYYY-MM-DD');
+      if (sessionDate === datePickerDateOnly) {
+        this.sessionPickedDate = `${new Date(this.datePickerDate).toISOString()}`;
         return this.sessionPickedDate;
-      } else {
-        // If datePickerDate is valid and matches sessionDate, use it
-        if (this.datePickerDate && this.datePickerDate !== '' && moment(new Date(this.datePickerDate)).isValid()) {
-          const datePickerDateOnly = moment(new Date(this.datePickerDate)).format('YYYY-MM-DD');
-          if (sessionDate === datePickerDateOnly) {
-            this.sessionPickedDate = `${new Date(this.datePickerDate).toISOString()}`;
-            return this.sessionPickedDate;
-          }
-        }
-        // Return the existing sessionPickedDate if it's valid
-        if (moment(new Date(this.sessionPickedDate)).isValid()) {
-          return this.sessionPickedDate;
-        } else {
-          this.sessionPickedDate = `${new Date().toISOString()}`;
-          return this.sessionPickedDate;
-        }
       }
     }
+    if (moment(new Date(this.sessionPickedDate)).isValid()) {
+      return (sessionDate === todayDate) ? `${new Date().toISOString()}` : this.sessionPickedDate;
+    }
+    this.sessionPickedDate = `${new Date().toISOString()}`;
+    return this.sessionPickedDate;
   }
 
   public get summarySaleDate(): string {
