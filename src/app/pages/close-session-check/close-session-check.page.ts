@@ -82,7 +82,7 @@ export class CloseSessionCheckPage implements OnInit {
       const createdDate = new Date(this.utilService.getSessionDate()).getTime();
 
       const sessionCheckDoc: SessionCheckDoc = {
-        '_id': 'SessionCheck--' + createdDate,
+        '_id': 'SessionCheck--' + createdDate + this.utilService.generateUUID(),
         'SessionId': AppStateService.get('session_id'),
         'CheckNumber': this.checkNumber,
         'Amount': parseFloat(amnt),

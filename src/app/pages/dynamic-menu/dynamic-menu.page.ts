@@ -4010,7 +4010,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     // }
 
                     const sessionCheckDoc: SessionCheckDoc = {
-                        '_id': 'SessionCheck--' + currentTime,
+                        '_id': 'SessionCheck--' + currentTime + this.utilService.generateUUID(),
                         'SessionId': this.sessionId,
                         'CheckNumber': this.orderData.CheckNumber,
                         'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
@@ -4022,7 +4022,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
 
                     const sessionCardDoc: SessionCardDoc = {
-                        '_id': 'SessionCard--' + currentTime,
+                        '_id': 'SessionCard--' + currentTime + this.utilService.generateUUID(),
                         'SessionId': this.sessionId,
                         'CardNumber': this.orderData.CardNumber,
                         'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
