@@ -773,7 +773,7 @@ export class DoPayment {
             });
 
             const sessionCheckDoc: SessionCheckDoc = {
-                '_id': 'SessionCheck--' + UTC,
+                '_id': 'SessionCheck--' + UTC + this.utilService.generateUUID(),
                 'SessionId': sessionId,
                 'CheckNumber': this.cashCheckNum,
                 'Amount': amount,
