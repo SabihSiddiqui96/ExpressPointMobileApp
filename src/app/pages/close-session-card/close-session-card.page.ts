@@ -88,7 +88,7 @@ export class CloseSessionCardPage implements OnInit {
       const createdDate = new Date(this.utilService.getSessionDate()).getTime();
 
       const sessionCardDoc: SessionCardDoc = {
-        '_id': 'SessionCard--' + createdDate,
+        '_id': 'SessionCard--' + createdDate + this.utilService.generateUUID(),
         'SessionId': AppStateService.get('session_id'),
         'CardNumber': this.cardNumber,
         'Amount': amnt,
