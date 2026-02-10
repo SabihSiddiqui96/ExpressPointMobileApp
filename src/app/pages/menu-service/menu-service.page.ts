@@ -3583,7 +3583,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         if (this.orderData.IsCheck) {
 
                                             const sessionCheckDoc: SessionCheckDoc = {
-                                                '_id': 'SessionCheck--' + UTC,
+                                                '_id': 'SessionCheck--' + UTC + this.utilService.generateUUID(),
                                                 'SessionId': this.sessionId,
                                                 'CheckNumber': this.orderData.CheckNumber,
                                                 'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
@@ -3600,7 +3600,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         if (this.orderData.IsCard) {
 
                                             const sessionCardDoc: SessionCardDoc = {
-                                                '_id': 'SessionCard--' + UTC,
+                                                '_id': 'SessionCard--' + UTC + this.utilService.generateUUID(),
                                                 'SessionId': this.sessionId,
                                                 'CardNumber': this.orderData.CardNumber,
                                                 'Amount': (paymentAmnt != null && paymentAmnt != undefined) ? parseFloat(paymentAmnt) : paymentAmnt,
