@@ -651,6 +651,7 @@ export interface TransactionDoc {
     IsProcessed: boolean;
     SalesTax: number;
     IsCard: boolean;
+    PaymentProviderId?: number | null;
     CardNumber: string;
     OldBalance: string;
     DepositAmount: string;
