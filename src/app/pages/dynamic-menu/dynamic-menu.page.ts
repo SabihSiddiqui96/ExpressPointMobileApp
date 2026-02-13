@@ -3888,6 +3888,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'SalesTax': 0,
                             'TerminalName': this.terminalName,
                             'IsCard': this.orderData.IsCard,
+                            'PaymentProviderId': this.getPaymentProviderId(),
                             'CardNumber': this.orderData.CardNumber,
                             'OldBalance': Number(Math.round(parseFloat(this.selectedAccountDetails.Balance) * 100) / 100).toFixed(2).toString(),
                             'DepositAmount': this.cashTendAmount != null && this.cashTendAmount != undefined ? Number(Math.round(this.cashTendAmount * 100) / 100).toFixed(2).toString() : '0',
@@ -3960,6 +3961,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'IsProcessed': false,
                         'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                         'IsCard': this.orderData.IsCard,
+                        'PaymentProviderId': this.getPaymentProviderId(),
                         'CardNumber': this.orderData.CardNumber,
                         'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
                         'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2).toString(),
@@ -4630,6 +4632,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             return html.join("");
         }
 
+    }
+
+    private getPaymentProviderId(): number | null {
+        if (!this.orderData.IsCard) return null;
+        if (this.transactionDetails?.CheckoutId && (this.SquareSetting && this.squareDeviceId && this.deviceTransactionId != null)) return 2; // Square
+        // TODO: In future, add CREDCADAPI logic for other providers (Stripe=1, Ingeneco=3, Verifone=4)
+        return null;
     }
 
     public generateUUID() {

@@ -5,6 +5,7 @@ export enum DefaultSettingValue {
     HIDECHECKS = '1',
     EXNEGBAL = '0',
     POSCHKBUT = '1',
+    CREDCADAPI = '0',
     CREDCADPAY = '0',
     ALACASREST = '0',
     AUTHENTYPE = '0',
