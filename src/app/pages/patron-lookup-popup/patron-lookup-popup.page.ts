@@ -869,13 +869,6 @@ export class PatronLookupPopupPage implements OnInit, OnDestroy {
     }
 
     public lookupByPIN() {
-        this.logDBService.logData({
-            event: EventType.LOOKUP,
-            patronId: this.patronSearch.keyword,
-            type: LogType.INFO,
-            data: this.patronSearch,
-            queueCount: this.lookUpService.personsQ.length
-        });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
             this.lookUpService.lookupByPIN(this.patronSearch.keyword, Direction.None, this.enablePinSchool).then((patrons) => {
                 this.patronSearch.keyword = '';

@@ -321,6 +321,11 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 this.countDown.unsubscribe();
             });
         }
+        this.event.destroy('menu-order:processing-reset');
+        this.event.subscribe('menu-order:processing-reset', () => {
+            this.isCompleteTransactionProcessing = false;
+            this.saveInProgress = false;
+        });
 
         this.popupMessageNoCharge[0] = {
             'MessageCode': 'E99999',
@@ -470,6 +475,8 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     public ngOnDestroy() {
         this.event.destroy('numberInput');
+        this.event.destroy('menu-order-popup:close');
+        this.event.destroy('menu-order:processing-reset');
         if (this.SquareSetting) {
             //this.ShowRetrySubscription.unsubscribe();
             this.creditCardTransactionService.ShowRetryButton.complete();
@@ -710,6 +717,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     public close(isClosed: boolean = false) {
+        this.blurInputElement();
 
         if (isClosed) {
             this.CancelSquareTransaction();
@@ -775,6 +783,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         }
     }
     public setCashPaymentOption() {
+        this.blurInputElement();
         // this.activeInputField = 'amount';
 
 
@@ -807,8 +816,6 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
         this.navOrderData.IsCard = false;
         if (this.cashpaymentOption === 'card') {
             this.navOrderData.IsCard = true;
-            // Ensure cardAmount is set synchronously when card is selected to avoid race conditions
-            this.cardAmount = '$' + this.navOrderData.totalAmount.toFixed(2);
         }
 
     }
@@ -1236,25 +1243,20 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     public makeSale(retrySquareTransaction = false) {
+        this.blurInputElement();
         //Added A La Carte total check for 'No Charge' toggle.
         const canProceed = this.calcAlaTotal(this.navOrderData.items);
         if (!canProceed) {
             return; // Stop sale
         }
 
-        if (retrySquareTransaction) {
-            this.ShowSquareRetry = false;
-            this.retrySquareTransaction(retrySquareTransaction);
-        }
-
         if (this.cashpaymentOption === 'card') {
-            // Ensure cardAmount is always set to totalAmount for card payments (set synchronously in setCashPaymentOption to avoid race conditions)
-            // Use totalAmount as source of truth - always set cardAmount for display
-            this.cardAmount = '$' + this.navOrderData.totalAmount.toFixed(2);
-            // Use totalAmount directly as the source of truth for cashtendAmount (no need to parse cardAmount)
-            this.cashtendAmount = this.navOrderData.totalAmount.toFixed(2);
+            this.cashtendAmount = this.cardAmount;
             this.cashCardNum = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? '' : this.cashCardNum;
-            this.SquareTransactionStarted =  this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
+            this.SquareTransactionStarted = this.SquareSetting === true && (this.squareDeviceId != null || this.squareDeviceId != undefined) ? true : false;
+            if (this.cardAmount.indexOf('$') !== -1) {
+                this.cashtendAmount = this.cardAmount.replace('$', '');
+            }
 
             if (this.SquareTransactionStarted == true) {                
                 let expiresInDays = LocalTimerService.getNumberOfUnitsFromDate(new Date(this.squareTokenExpiredAt), 'DAY', false);
@@ -1283,6 +1285,14 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 }
             }
         }
+
+        // Square retry: run only after ALC + card checks (e.g. token); avoid duplicate eventPublish / flags below
+        if (retrySquareTransaction) {
+            this.ShowSquareRetry = false;
+            this.retrySquareTransaction(retrySquareTransaction);
+            return;
+        }
+
         this.isCompleteTransactionProcessing = true;
         this.saveInProgress = true;
 
@@ -1445,7 +1455,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 return true;
             }
         }
-
+        return false;
     }
     public finalCheckOrderData() {
         return new Promise((resolve) => {
@@ -1518,8 +1528,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
 
     public eventPublish(retrySquareTransaction = false) {
         this.finalCheckOrderData().then(() => {
+            const orderDataPayload = _.cloneDeep(this.navOrderData);
             this.event.publish('menu-order:pay', {
-                'orderData': this.navOrderData,
+                'orderData': orderDataPayload,
                 'cashtend_amount': (this.cashtendAmount == null || this.cashtendAmount == undefined) ? this.cashtendAmount : Number(this.cashtendAmount).toFixed(2),
                 'isDepositByEXNEGBAL': this.isDepositByEXNEGBAL,
                 'amountTowardsBalance': Number(parseFloat(this.filterCurrency_DollarAndScale(this.depositAmount)).toFixed(2)),
@@ -1529,9 +1540,9 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
                 'PaymentAmount': this.paymentAmnt
             });
 
+            this.event.destroy('menu-order-popup:close');
             this.event.subscribe('menu-order-popup:close', (userEventData) => {
                 this.event.destroy('menu-order-popup:close');
-                this.event.destroy('menu-order:pay');
                 this.isCompleteTransactionProcessing = false;
                 this.close();
             });
@@ -1698,9 +1709,7 @@ export class MenuOrderPayPage implements OnInit, OnDestroy {
     }
 
     public blurInputElement() {
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
+        this.utilService.blurActiveElement();
     }
 
     public showPatronAccountPopup() {

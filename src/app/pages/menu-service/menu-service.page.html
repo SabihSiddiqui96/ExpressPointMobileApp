@@ -32,7 +32,7 @@
                     </ion-menu-toggle>
                     <ion-row>
                         <ion-col size="3">
-                            <ion-button class="btn-full-size-icon" default expand="block" (click)="blurInputElement(); makeSale(0)">
+                            <ion-button class="btn-full-size-icon" default expand="block" (click)="makeSale(0)">
                                 <ion-icon slot="icon-only" name="backspace">
                                 </ion-icon>
                                 Void
@@ -441,7 +441,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                             <ion-row>
                                 <ion-col size="6" class="ion-no-padding ion-no-margin align-content-center">
                                     <ion-button class="ion-float-left btn-full-size-icon" size="small" fill="clear"
-                                        color="danger" (click)="blurInputElement(); deleteMenuFromCart(i)">
+                                        color="danger" (click)="deleteMenuFromCart(i)">
                                         <ion-icon slot="icon-only" name="close-circle"></ion-icon>
                                     </ion-button>
                                     <ion-label align-left class="ion-no-padding ion-no-margin">
@@ -506,7 +506,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                             </ion-button>
                         </ion-col>
                         <ion-col size="8">
-                            <ion-button expand="block" size="large" color="mint" (click)="blurInputElement(); makeSale(2)"
+                            <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)"
                                 [disabled]="disableCharge || transactionInProgress">
                                 Charge
                             </ion-button>
@@ -548,7 +548,7 @@ this.patronDetails.DailyALCRestriction || this.patronDetails.WeeklyALCRestrictio
                             </ion-button>
                         </ion-col>
                         <ion-col size="8">
-                            <ion-button expand="block" size="large" color="mint" (click)="blurInputElement(); makeSale(2)"
+                            <ion-button expand="block" size="large" color="mint" (click)="makeSale(2)"
                                 [disabled]="(patronDetails.isSpecialAccount==true && orderData.totalAmount>0) || transactionInProgress">
                                 Charge
                                 <div class="spinLogin" *ngIf="transactionInProgress">
