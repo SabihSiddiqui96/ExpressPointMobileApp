@@ -185,17 +185,6 @@ export class LookupService {
 
             // Add to queue after lookup
             await this.pushPersonToQ(person, this.personsQ.length);
-
-            // Log lookup result
-            if (results.length > 0 && results[0] !== null) {
-                await this.logDBService.logData({
-                    event: EventType.LOOKUP,
-                    patronId: queueInput.PIN,
-                    type: LogType.INFO,
-                    data: results[0],
-                    queueCount: this.personsQ.length
-                });
-            }
         } catch (error) {
             console.error(`Lookup error for ${queueInput.PIN}:`, error);
             await this.logDBService.logError({
@@ -215,14 +204,6 @@ export class LookupService {
         // Process each input in the queue
         while (this.inputQueue.length > 0) {
             const { queueInput, searchTextLength } = this.inputQueue.shift(); // Get the next input
-
-            // Log the queue processing for the current input
-            this.logDBService.logData({
-                event: EventType.QUEUE,
-                patronId: queueInput.PIN,
-                type: LogType.INFO,
-                data: queueInput
-            });
 
             // Immediately insert the queueInput into personsQ first
             await this.addInputToPersonsQ(queueInput); // Wait for the input to be added
@@ -321,14 +302,6 @@ export class LookupService {
 
     public async pushPersonToQ(person, atIndex, fromQueue = false): Promise<void> {
         try {
-            // Ensure logging completes before proceeding
-            await this.logDBService.logData({
-                event: EventType.QUEUE,
-                personId: person.Identifier,
-                type: LogType.INFO,
-                data: person
-            });
-
             person.InputDirection = person.InputDirection || Direction.None;
 
             let personInQ = _.findIndex(this.personsQ, p => p.Identifier === person.Identifier);
@@ -386,17 +359,6 @@ export class LookupService {
                 await this.updatePersonInQ(person); // Update the person entry in personsQ
             } else {
                 console.log(`Added ${queueInput.PIN} without a unique lookup result.`);
-            }
-
-            // Log the lookup result
-            if (results.length > 0 && results[0] !== null) { // Check if results is not empty
-                await this.logDBService.logData({
-                    event: EventType.LOOKUP,
-                    patronId: queueInput.PIN,
-                    type: LogType.INFO,
-                    data: results[0],
-                    queueCount: this.personsQ.length
-                });
             }
         } catch (error) {
             // Handle error logging
@@ -848,15 +810,6 @@ export class LookupService {
         });
     }
 
-    private convertToBase64(imageData: Uint8Array): Promise<string> {
-        return new Promise((resolve) => {
-            const blob = new Blob([imageData], { type: 'image/jpeg' });
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-        });
-    }
-
     private convertBase64ToBlob(base64: string, contentType: string) {
         const byteCharacters = atob(base64);
         const byteNumbers = new Array(byteCharacters.length);
@@ -929,7 +882,9 @@ export class LookupService {
                 // same site
                 this.utilService.setLoader(true);
 
-                PouchQueriesService.PatronSearchByName(firstname, lastname, externalId, selectedsite).
+                // Local Pouch search intentionally does not filter by SelectedSite:
+                // combined/satellite schools can serve from a shared serving-site patron dataset.
+                PouchQueriesService.PatronSearchByName(firstname, lastname, externalId).
                     then((res) => {
 
                         const docs = res.docs.map((patron) => {
@@ -1119,12 +1074,6 @@ export class LookupService {
     }
 
     public CheckPreviousSalesOnInMemoryDBByDate(patron) {
-        this.logDBService.logData({
-            event: EventType.LOOKUP,
-            patronId: patron.Identifier,
-            type: LogType.INFO,
-            data: patron
-        });
         let inputDirectionVal = patron.InputDirection;
         return new Promise((resolve) => {
             PouchQueriesService.GetStudentInfo(patron.PersonId).then((result) => {

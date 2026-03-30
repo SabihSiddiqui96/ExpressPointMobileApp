@@ -1035,13 +1035,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
 
     public lookupByPIN() {
         this.fileService.saveLogToCSVFile(this.patronSearch.keyword, 'ENTER - UI', 0);
-        this.logDBService.logData({
-            event: EventType.LOOKUP,
-            patronId: this.patronSearch.keyword,
-            type: LogType.INFO,
-            data: this.patronSearch,
-            queueCount: this.lookUpService.personsQ.length
-        });
         if (this.patronSearch.keyword !== '' && this.patronSearch.keyword !== null) {
             this.lookUpService.lookupByPIN(this.patronSearch.keyword, Direction.None, this.enablePinSchool).then((patrons) => {
                 this.patronSearch.keyword = null;
@@ -1602,12 +1595,6 @@ export class PatronLookupPage implements OnInit, OnDestroy {
         let urlSubstringsArray = ["open-session", "payments", "login", "logout", "close-session", "classroom-sale"];
         let routeToAvoidPeripheralKey = urlSubstringsArray.some(substring => this.router.url.toUpperCase().includes(substring.toUpperCase()))
         if (!routeToAvoidPeripheralKey) {
-            this.logDBService.logData({
-                event: EventType.LOOKUP,
-                type: LogType.INFO,
-                data: event,
-                queueCount: this.personsQ.length
-            });
             if (isElectronWithoutPNP) {
                 if (this.isEnterKeyHandled === true) {
                     this.isEnterKeyHandled = false;

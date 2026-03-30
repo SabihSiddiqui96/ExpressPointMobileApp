@@ -204,14 +204,6 @@ export class RestrictionsService {
 
         creditLimit = -creditLimit;
 
-        this.logDBService.logData({
-            event: EventType.LOOKUP,
-            patronId: student.PatronId,
-            type: LogType.INFO,
-            creditLimit: creditLimit,
-            data: student
-        });
-
         if (projectedBalance >= 0) {
             // allow sale
             restriction.ChargeRestriction = false;
@@ -504,13 +496,6 @@ export class RestrictionsService {
 
         creditLimit = -creditLimit;
         creditLimitAlaCarte = -creditLimitAlaCarte;
-
-        this.logDBService.logData({
-            event: EventType.LOOKUP,
-            personId: this.patronDetails.PersonId,
-            type: LogType.INFO,
-            data: ordDetails.patronDetails
-        });
 
         if (projectedBalance >= 0 || paymentAmount >= saleTotal) {
             // allow sale

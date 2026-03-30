@@ -430,4 +430,17 @@ export class UtilService {
   getImpermanentAutoServePause(): boolean {
     return this.impermanentAutoServePauseSubject.getValue();
   }
+
+  /**
+   * Clears focus from the active element.
+   * Deferred so the current click/tap can finish first.
+   */
+  public blurActiveElement(): void {
+    setTimeout(() => {
+      const el = document.activeElement as HTMLElement;
+      if (el && typeof el.blur === 'function') {
+        el.blur();
+      }
+    }, 0);
+  }
 }
