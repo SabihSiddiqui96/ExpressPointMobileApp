@@ -727,6 +727,7 @@ export class DoPayment {
                 'SalesTax': 0,
                 'TerminalName': this.terminalName,
                 'IsCard': false,
+                'PaymentProviderId': null,
                 'CardNumber': '',
                 'OldBalance': Number(parseFloat(this.newBalance) - parseFloat(this.cashAmount.toString())).toFixed(2),
                 'DepositAmount': this.cashAmount === undefined || this.cashAmount === null ? '0' : Number(this.cashAmount).toString(),

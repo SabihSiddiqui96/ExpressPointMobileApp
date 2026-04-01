@@ -30,7 +30,7 @@
 
           <ion-item>
             <ion-label>
-              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="blurInputElement(); setCashPaymentOption(); onPaymentSegmentChange($event)"
+              <ion-segment color="slate" [(ngModel)]="cashpaymentOption" (ionChange)="setCashPaymentOption(); onPaymentSegmentChange($event)"
                 class="pay_segment" mode="md">
                 <ion-segment-button value="cash">
                   <ion-label>
@@ -136,7 +136,7 @@
               style="text-align: center;padding:5rem 5rem 3rem 5rem;">
               <label style="padding:0.5rem;">Square Transaction in Progress ...</label><br /><br />
               <label style="font-size: 24px;font-weight: bold;">{{counter | formatTime}}</label>
-              <ion-button *ngIf="ShowSquareRetry" (click)="blurInputElement(); makeSale(true)">Retry Square Transaction
+              <ion-button *ngIf="ShowSquareRetry" (click)="makeSale(true)">Retry Square Transaction
               </ion-button>
             </div>
           </ion-item>
@@ -276,7 +276,7 @@
 </ion-content>
 <ion-footer>
   <ion-toolbar>
-    <ion-button size="large" fill="clear" color="black" [disabled]="disableCancelButton" (click)="blurInputElement(); close(true)">
+    <ion-button size="large" fill="clear" color="black" [disabled]="disableCancelButton" (click)="close(true)">
       Cancel
 
     </ion-button>
@@ -288,7 +288,7 @@
       
         Use Principal Account
       </ion-button>
-      <ion-button size="large" color="slate" (click)="blurInputElement(); makeSale(ShowSquareRetry)" style="font-size: 135%;"
+      <ion-button size="large" color="slate" (click)="makeSale(ShowSquareRetry)" style="font-size: 135%;"
         [disabled]="checkPayDisable() || saveInProgress || isCompleteTransactionProcessing || ShowSquareRetry">
         Complete Transaction
         <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>

@@ -303,6 +303,8 @@ export class MenuServicePage implements OnInit, OnDestroy {
     public patronImage;
     public transactionInProgress;
     public transactionId: string;
+    private lastMakeSalePayAt = 0;
+    private isPostingSale = false;
 
     public isMakeCharge: boolean;
     public oldBalance;
@@ -606,13 +608,16 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     /**
                      * Set old values of orderData items
                      */
-                    const qty = this.orderData.items[i].Quantity;
+                    const qty = Number.isFinite(Number(this.orderData.items[i].Quantity)) ? Math.max(1, Math.floor(Number(this.orderData.items[i].Quantity))) : 1;
                     const price = this.orderData.items[i].Price;
                     const totPrice = this.orderData.items[i].IniTotalPrice;
                     const paidPrice = this.orderData.items[i].PaidPrice;
 
-                    if (userEventData.orderItemData.Quantity > 0) {
-                        this.orderData.items[i].Quantity = userEventData.orderItemData.Quantity;
+                    const normalizedIncomingQuantity = Number.isFinite(Number(userEventData.orderItemData.Quantity))
+                        ? Math.floor(Number(userEventData.orderItemData.Quantity))
+                        : 0;
+                    if (normalizedIncomingQuantity > 0) {
+                        this.orderData.items[i].Quantity = normalizedIncomingQuantity;
                         this.orderData.items[i].Price = userEventData.orderItemData.Price;
                         this.orderData.items[i].IniTotalPrice = userEventData.orderItemData.Price;
                         this.orderData.items[i].PaidPrice = userEventData.orderItemData.PaidPrice;
@@ -2118,6 +2123,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public deleteMenuFromCart(index) {
+        this.blurInputElement();
         // this.event.publish('patronLargeImagehide', null);
 
         if (this.mealCount >= 1) {
@@ -2475,8 +2481,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     const itemData = this.orderData.items[i];
 
                     if (priceTypeId === itemData.price_type_id && itemData.RefId === menuItem.RefId) {
-                        if (parseInt(itemData.Quantity) < 999) {
-                            quantity = parseInt(itemData.Quantity) + 1;
+                        const itemQuantity = Number.isFinite(Number(itemData.Quantity)) ? Math.floor(Number(itemData.Quantity)) : 0;
+                        if (itemQuantity < 999) {
+                            quantity = itemQuantity + 1;
                             itemPrice = currPrice + itemData.Price;
                             paidMealPrice = currPaidMealPrice + itemData.PaidPrice
                             this.orderData.items[i].Quantity = quantity;
@@ -2863,6 +2870,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public makeSale(transactionType) {
+        this.blurInputElement();
         // this.event.publish('patronLargeImagehide', null);
         // this.deviceTransactionId = this.generateUUID();
         this.transactionInProgress = true;
@@ -3000,18 +3008,28 @@ export class MenuServicePage implements OnInit, OnDestroy {
 
     }
 
-    public makeSalePay() {
+    private invokePostSaleFromPay(transactionType, bypassDebounce = false) {
+        const now = Date.now();
+        if (!bypassDebounce && now - this.lastMakeSalePayAt < 1200) {
+            return;
+        }
+        this.lastMakeSalePayAt = now;
+        this.postSaleTransaction(transactionType);
+    }
+
+    public makeSalePay(bypassDebounce = false) {
         if (this.orderData.TransactionType !== 3) {
             this.orderData.TransactionType = 1;
         }
 
         if (this.lookUpService.menuPayselectAccountClick === true && this.selectedAccountDetails.PersonId !== '') {
-            this.postSaleTransaction(this.orderData.TransactionType);
+            this.invokePostSaleFromPay(this.orderData.TransactionType, bypassDebounce);
         } else {
             this.utilService.selectAccountClick = false;
             this.lookUpService.menuPayselectAccountClick = false;
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
                 this.transactionInProgress = false;
+                this.event.publish('menu-order:processing-reset', {});
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 if (this.autoServeEnabled) {
                     this.impermanentAutoServePause = true;
@@ -3031,10 +3049,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 ordDetails['cashTendAmt'] = this.cashtendAmount;
                 this.transactionInProgress = this.restrictService.verifyChargeLimits(ordDetails); // this.chargeOrder(ordDetails);
                 if (!this.transactionInProgress) {
+                    this.event.publish('menu-order:processing-reset', {});
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 }
                 if (this.transactionInProgress) {
-                    this.postSaleTransaction(this.orderData.TransactionType);
+                    this.invokePostSaleFromPay(this.orderData.TransactionType, bypassDebounce);
                     this.impermanentAutoServePause = false;
                 } else {
                     const showPrompt = this.restrictService.showConfirm();
@@ -3044,7 +3063,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         // this.showConfrim(message, 'postSaleTransaction', { 'transactionType': this.orderData.TransactionType });
                         this.popupMessageService.showMessage(PopupMessageCode.E05488).then(bool => {
                             if (bool) {
-                                this.postSaleTransaction(this.orderData.TransactionType);
+                                this.invokePostSaleFromPay(this.orderData.TransactionType, bypassDebounce);
                                 this.event.publish('patron-released', { 'patronDetails': null });
                                 this.impermanentAutoServePause = false;
                             }
@@ -3105,9 +3124,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 }
             }
 
-            setTimeout(() => {
-                (document.activeElement as HTMLElement).blur();
-            }, 0);
+            this.utilService.blurActiveElement();
 
             this.modalCtrl.create({
                 component: MenuOrderPayPage,
@@ -3125,10 +3142,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 backdropDismiss: false,
                 cssClass: 'menu-order-pay-popup',
             }).then(async (res) => {
+                res.onDidDismiss().then(() => {
+                    this.event.destroy('menu-order:pay');
+                });
                 await res.present();
             });
 
 
+            this.event.destroy('menu-order:pay');
             this.event.subscribe('menu-order:pay', (userEventData) => {
                 // this.event.destroy('menu-order:pay');
                 if (userEventData.orderData) {
@@ -3138,11 +3159,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                     this.amountTowardsBalance = userEventData.amountTowardsBalance;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
                     this.cashDue = userEventData.cashDue;
-                    // need to give a new deviceTransactionId for the sake of creating a new square ReferenceId 
-                    // this.squareRetry = userEventData.squareRetry;
-                    //this.deviceTransactionId = userEventData.squareRetry ? this.utilService.generateUUID() : this.deviceTransactionId
                     this.PaymentAmount = userEventData.PaymentAmount;
-                    this.makeSalePay();
+                    // Keep subscription active while pay popup is open so user can retry after validation popups.
+                    this.makeSalePay(!!userEventData.squareRetry);
                 } else {
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 }
@@ -3160,12 +3179,14 @@ export class MenuServicePage implements OnInit, OnDestroy {
     }
 
     public blurInputElement() {
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
+        this.utilService.blurActiveElement();
     }
 
     public postSaleTransaction(transactionType) {
+        if (this.isPostingSale) {
+            return;
+        }
+        this.isPostingSale = true;
         this.transactionService.CheckSessionInAppState().then(() => {
             if (AppStateService.get('session_id')) {
                 this.sessionId = AppStateService.get('session_id');
@@ -3174,50 +3195,62 @@ export class MenuServicePage implements OnInit, OnDestroy {
             const siteSchool = JSON.parse(AppStateService.get('site_details')).SchoolId;
             this.principalId = JSON.parse(AppStateService.get('site_details')).PrincipalId;
             this.principalAccountId = JSON.parse(AppStateService.get('site_details')).PrincipalAccountId;
+            const orderItemsSnapshot = _.cloneDeep(this.orderData.items || []);
             const items = [];
             let squareItemsNote = '';
+            const isStudent = this.patronDetails.IsStudent === true
+                || this.patronDetails.IsStudent === 1
+                || this.patronDetails.IsStudent === '1'
+                || (typeof this.patronDetails.IsStudent === 'string' && this.patronDetails.IsStudent.toLowerCase() === 'true');
 
-            for (let i = 0; i < this.orderData.items.length; i++) {
-                if (squareItemsNote == '') {
-                    squareItemsNote = this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'].toString()) > 1 ? '(' + this.orderData.items[i]['Quantity'].toString() + ')' : '');
-                }
-                else {
-                    squareItemsNote = squareItemsNote + ', ' + this.orderData.items[i]['Name'].trim() + (Number(this.orderData.items[i]['Quantity'].toString()) > 1 ? '(' + this.orderData.items[i]['Quantity'].toString() + ')' : '');
-                }
-                for (let qty = 0; qty < this.orderData.items[i]['Quantity']; qty++) {
+            for (let i = 0; i < orderItemsSnapshot.length; i++) {
+                const currentItem = orderItemsSnapshot[i];
+                const quantity = Number.isFinite(Number(currentItem['Quantity'])) ? Math.max(0, Math.floor(Number(currentItem['Quantity']))) : 1;
+                let pushedQuantity = 0;
+                for (let qty = 0; qty < quantity; qty++) {
                     // Check if there are any cases where there are more than one first meal items and remove them promptly
                     let firstMeals = _.filter(items, ((o) =>
                         o.priceTypeId === this.patronDetails.PriceTypeId &&
                         o.IsReimbursable === true
                     ))
-                    if (this.orderData.items[i]['price_type_id'] === this.patronDetails.PriceTypeId &&
+                    if (currentItem['price_type_id'] === this.patronDetails.PriceTypeId &&
                         this.patronDetails.isSpecialAccount == false &&
-                        this.orderData.items[i]['IsReimbursable'] === true && this.patronDetails.IsStudent
+                        currentItem['IsReimbursable'] === true && isStudent
                         && firstMeals.length > 0
                     ) {
                         continue;
                     } else {
                         items.push({
-                            'Price': this.orderData.items[i]['CurrentPrice'],
-                            'CategoryId': this.orderData.items[i]['CategoryId'],
-                            'MenuItemId': this.orderData.items[i]['RefId'],
-                            'priceTypeId': this.orderData.items[i]['price_type_id'],
-                            'IsReimbursable': this.orderData.items[i]['IsReimbursable'],
-                            'IsSecondMeal': this.orderData.items[i]['isSecondMeal'],
-                            'MenuItemDescription': this.orderData.items[i]['Name'],
-                            'Date': (this.orderData.items[i]['ItemAddedAt'] + qty).toString(),
+                            'Price': currentItem['CurrentPrice'],
+                            'CategoryId': currentItem['CategoryId'],
+                            'MenuItemId': currentItem['RefId'],
+                            'priceTypeId': currentItem['price_type_id'],
+                            'IsReimbursable': currentItem['IsReimbursable'],
+                            'IsSecondMeal': currentItem['isSecondMeal'],
+                            'MenuItemDescription': currentItem['Name'],
+                            'Date': (currentItem['ItemAddedAt'] + qty).toString(),
                             'TransactionNo': this.transactionNumber,
-                            'StatePriceTypeId': (this.orderData.items[i]['IsReimbursable'] && this.orderData.items[i]['isSecondMeal'] == false) ? this.patronDetails['StateEligibilityId'] ? this.patronDetails['StateEligibilityId'] : this.patronDetails['StatePriceTypeId'] : null, //Intentially Added
-                            'StateEligibilityId': (this.orderData.items[i]['IsReimbursable'] && this.orderData.items[i]['isSecondMeal'] == false) ? this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null : null,
+                            'StatePriceTypeId': (currentItem['IsReimbursable'] && currentItem['isSecondMeal'] == false) ? this.patronDetails['StateEligibilityId'] ? this.patronDetails['StateEligibilityId'] : this.patronDetails['StatePriceTypeId'] : null, //Intentially Added
+                            'StateEligibilityId': (currentItem['IsReimbursable'] && currentItem['isSecondMeal'] == false) ? this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null : null,
                             // Saketh for meal Combo
                             'IsPartOfMeal': false,
                             'TerminalName': this.terminalName,
                             'MenuId': null
                         });
+                        pushedQuantity++;
+                    }
+                }
+                if (pushedQuantity > 0) {
+                    const quantityLabel = pushedQuantity > 1 ? '(' + pushedQuantity.toString() + ')' : '';
+                    if (squareItemsNote == '') {
+                        squareItemsNote = currentItem['Name'].trim() + quantityLabel;
+                    }
+                    else {
+                        squareItemsNote = squareItemsNote + ', ' + currentItem['Name'].trim() + quantityLabel;
                     }
                 }
             }
-            this.menuGridService.hasDifferentPriceType(transactionType, this.orderData.items,
+            this.menuGridService.hasDifferentPriceType(transactionType, orderItemsSnapshot,
                 this.patronDetails.PriceTypeId,
                 this.patronDetails.StatePriceTypeId, this.secondMealPriceType, this.stateEigSetting).then((res) => {
                     if (res) {
@@ -3293,6 +3326,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                         'IsProcessed': false,
                                         'TerminalName': this.terminalName,
                                         'IsCard': this.orderData.IsCard,
+                                        'PaymentProviderId': this.getPaymentProviderId(),
                                         'CardNumber': this.orderData.CardNumber,
                                         'OldBalance': Number(Math.round(parseFloat(this.selectedAccountDetails.Balance) * 100) / 100).toFixed(2),
                                         'DepositAmount': (this.cashtendAmount === undefined || this.cashtendAmount === null) ? this.cashtendAmount : Number(Number(Math.round(parseFloat(this.cashtendAmount) * 100) / 100).toFixed(2)),
@@ -3366,6 +3400,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'IsProcessed': false,
                                     'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                                     'IsCard': this.orderData.IsCard,
+                                    'PaymentProviderId': this.getPaymentProviderId(),
                                     'CardNumber': this.orderData.CardNumber,
                                     'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2).toString() : '0',
                                     'DepositAmount': transactionType === TransactionTypes.CHARGE ? '0' : this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2).toString(),
@@ -3390,6 +3425,33 @@ export class MenuServicePage implements OnInit, OnDestroy {
                                     'StateEligibilityId': this.patronDetails["StateEligibilityId"] ? this.patronDetails["StateEligibilityId"] : null,
                                     '_id': this.patronDetails._id
                                 };
+
+                                const externalPersonId = this.patronDetails
+                                    && (this.patronDetails['ExternalPersonId'] ?? this.patronDetails['externalPersonId']);
+                                // Log only payment-related sales (cash/check/card/deposit/principal/visitor), not voids or meal charge-to-account.
+                                const savedTransactionType = this.saleData.TransactionType as number;
+                                const isPaymentRecord =
+                                    savedTransactionType !== TransactionTypes.VOID
+                                    && savedTransactionType !== TransactionTypes.CHARGE;
+                                if (isPaymentRecord) {
+                                    this.logDBService.logData({
+                                        event: EventType.QUEUE,
+                                        patronId: this.patronDetails.PersonId,
+                                        type: LogType.INFO,
+                                        data: {
+                                            cartItems: orderItemsSnapshot,
+                                            saleMenuItems: sortedItems,
+                                            isCard: this.orderData.IsCard,
+                                            isCheck: this.orderData.IsCheck,
+                                            accountId: this.patronDetails.AccountId,
+                                            personIdentifier: this.patronDetails.PersonIdentifier,
+                                            patronId: this.patronDetails.PersonId,
+                                            transactionType: savedTransactionType,
+                                            totalAmount: this.orderData.totalAmount
+                                        },
+                                        queueCount: this.lookUpService.personsQ.length
+                                    });
+                                }
 
                                 const transactionDoc = {
                                     '_id': 'Transaction--' + this.deviceTransactionId,
@@ -3714,6 +3776,11 @@ export class MenuServicePage implements OnInit, OnDestroy {
                         });
                     }
                 });
+        }).catch((error) => {
+            console.log(error);
+            this.transactionInProgress = false;
+        }).finally(() => {
+            this.isPostingSale = false;
         });
     }
 
@@ -3998,6 +4065,13 @@ export class MenuServicePage implements OnInit, OnDestroy {
         this.impermanentAutoServePause = false;
     }
 
+    private getPaymentProviderId(): number | null {
+        if (!this.orderData.IsCard) return null;
+        if (this.transactionDetails?.CheckoutId && (this.SquareSetting && this.squareDeviceId && this.deviceTransactionId != null)) return 2; // Square
+        // TODO: In future, add CREDCADAPI logic for other providers (Stripe=1, Ingeneco=3, Verifone=4)
+        return null;
+    }
+
     public generateUUID() {
         let d = LocalTimerService.getCurrentSessionTime(this.utilService.getSessionDate());
         if (window.performance && typeof window.performance.now === 'function') {
@@ -4052,15 +4126,7 @@ export class MenuServicePage implements OnInit, OnDestroy {
                 this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             AppStateService.remove('patron_details');
-            if (this.patronDetails.PersonId !== null) {
-                this.logDBService.logData({
-                    event: EventType.QUEUE,
-                    patronId: this.patronDetails.PersonId,
-                    type: LogType.INFO,
-                    data: this.patronDetails,
-                    queueCount: this.lookUpService.personsQ.length
-                });
-            }
+            
             this.refreshHideStudentSetting();
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
@@ -4329,7 +4395,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
         accbal = (Math.round(accbal * 100) / 100).toFixed(2);
         this.cashtendered = '$' + accbal;
         this.cashtendAmount = this.orderData.accountBalance;
-        this.itemCount = this.orderData.items.map(li => li.Quantity).reduce((sum, val) => sum + val, 0);
+        this.itemCount = this.orderData.items
+            .map(li => Number.isFinite(Number(li.Quantity)) ? Math.max(0, Math.floor(Number(li.Quantity))) : 0)
+            .reduce((sum, val) => sum + val, 0);
     }
 
 
@@ -5436,8 +5504,9 @@ export class MenuServicePage implements OnInit, OnDestroy {
                             const itemData = this.orderData.items[i];
 
                             if (priceTypeId === itemData.price_type_id && itemData.Name === menuItem.ButtonDescription) {
-                                if (parseInt(itemData.Quantity) < 999) {
-                                    quantity = parseInt(itemData.Quantity) + 1;
+                                const itemQuantity = Number.isFinite(Number(itemData.Quantity)) ? Math.floor(Number(itemData.Quantity)) : 0;
+                                if (itemQuantity < 999) {
+                                    quantity = itemQuantity + 1;
                                     itemPrice = currPrice + itemData.Price;
                                     paidMealPrice = currPaidMealPrice + itemData.PaidPrice;
                                     this.orderData.items[i].Quantity = quantity;

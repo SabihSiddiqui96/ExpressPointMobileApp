@@ -87,7 +87,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
       this.sessionDateDisable = true;
     }
     if (this.currentRoute == 'summarySales') {
-      if (this.utilService.summarySalePickedDate) {
+      if (this.hadSessionIdBeforeLoad && this.utilService.summarySalePickedDate) {
         this.openSessionForm = this.fb.group({
           sessionDatePicker: [new Date(this.utilService.summarySalePickedDate)],
         });
@@ -100,8 +100,13 @@ export class OpenSessionPage implements OnInit, OnDestroy {
           this.sessionDateDisable = true;
         }
         */
+      } else {
+        const todayIso = new Date().toISOString();
+        this.utilService.setSummarySessionDate(todayIso);
+        this.openSessionForm.patchValue({ sessionDatePicker: todayIso });
+        this.sessionDatePicker.setValue(new Date(todayIso));
       }
-      this.checkPOSPeriod(new Date().toISOString());
+      this.checkPOSPeriod(this.openSessionForm.get('sessionDatePicker').value);
       //this.getOpenSession();
     }
     else {
@@ -182,6 +187,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
   public posPeriodCheckInProgress: boolean;
   public posPeriodDisabledMsg = `This option is disabled because the POS Period is closed`;
   public disabledHtml = `${this.posPeriodDisabledMsg}`;
+  public hadSessionIdBeforeLoad: boolean = false;
 
   constructor(
     public _nav: NavController,
@@ -222,6 +228,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
 
     }
 
+    this.hadSessionIdBeforeLoad = !!AppStateService.get('session_id');
     AppStateService.remove('session_id');
     AppStateService.remove('openingBalance');
     if (AppStateService.get('login_details')) {
@@ -325,6 +332,7 @@ export class OpenSessionPage implements OnInit, OnDestroy {
     if (this.currentRoute == 'summarySales') {
       const formattedDate = new Date(event.value).toISOString();
       this.utilService.summarySalePickedDate = formattedDate;
+      this.checkPOSPeriod(formattedDate);
       this.openSessionForm.patchValue(
         {
           sessionDatePicker: formattedDate,

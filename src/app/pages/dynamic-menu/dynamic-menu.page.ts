@@ -1341,7 +1341,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
         }
 
         // Change during dallas merge
-        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.patronDetails['SchoolId'])) {
+        if (this.patronDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds?.includes(this.patronDetails['SchoolId'])) {
             if (this.patronDetails['SiteCode']) {
                 // this.utilService.showToast('Patron does not belong to this school.');
 
@@ -1932,9 +1932,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public blurInputElement() {
-        setTimeout(() => {
-            (document.activeElement as HTMLElement).blur();
-        }, 0);
+        this.utilService.blurActiveElement();
     }
 
     public confirmChangeMealType(data) {
@@ -1992,6 +1990,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
     }
 
     public deleteItem(item) {
+        this.blurInputElement();
         this.event.publish('patronLargeImagehide', null);
         if (this.mealCount === 0) {
             this.mealFormed = false;
@@ -3431,6 +3430,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.lookUpService.menuPayselectAccountClick = false;
             if (this.alacarteCount > 0 && this.restrictedAlacarteCount > 0 && !this.patronDetails.IsAlaCarteByCashAllowed) {
                 this.transactionInProgress = false;
+                this.event.publish('menu-order:processing-reset', {});
                 //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 this.popupMessageService.showMessage(PopupMessageCode.E05368);
                 // this.utilService.showToast('A La Carte cash sales are restricted for this student today.');
@@ -3447,6 +3447,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 ordDetails['cashTendAmt'] = this.cashTendAmount;
                 this.transactionInProgress = this.restrictService.verifyChargeLimits(ordDetails); // this.chargeOrder(ordDetails);
                 if (!this.transactionInProgress) {
+                    this.event.publish('menu-order:processing-reset', {});
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
                 }
                 if (this.transactionInProgress) {
@@ -3520,7 +3521,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 (document.activeElement as HTMLElement).blur();
             }, 0);
 
-            const modal = this.modalCtrl.create({
+            this.modalCtrl.create({
                 component: MenuOrderPayPage,
                 componentProps: {
                     'orderData': this.orderData,
@@ -3535,12 +3536,14 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     'isAlaCateByDebitAllowed': isAlaCateByDebitAllowed
                 }
             }).then(async (res) => {
+                res.onDidDismiss().then(() => {
+                    this.event.destroy('menu-order:pay');
+                });
                 await res.present();
             });
 
-
+            this.event.destroy('menu-order:pay');
             this.event.subscribe('menu-order:pay', (userEventData) => {
-                // this.event.destroy('menu-order:pay');
                 if (userEventData.orderData) {
                     this.orderData = userEventData.orderData;
                     this.cashTendAmount = userEventData.cashtend_amount;
@@ -3549,6 +3552,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                     this.cashDue = userEventData.cashDue;
                     this.selectedAccountDetails = userEventData.selectedAccountDetails;
                     this.PaymentAmount = userEventData.PaymentAmount;
+                    // Keep subscription active while pay popup is open so user can retry after validation popups.
                     this.makeSalePay();
                 } else {
                     //MenuOrderPayPage.isCompleteTransactionProcessing = false;
@@ -3888,6 +3892,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                             'SalesTax': 0,
                             'TerminalName': this.terminalName,
                             'IsCard': this.orderData.IsCard,
+                            'PaymentProviderId': this.getPaymentProviderId(),
                             'CardNumber': this.orderData.CardNumber,
                             'OldBalance': Number(Math.round(parseFloat(this.selectedAccountDetails.Balance) * 100) / 100).toFixed(2).toString(),
                             'DepositAmount': this.cashTendAmount != null && this.cashTendAmount != undefined ? Number(Math.round(this.cashTendAmount * 100) / 100).toFixed(2).toString() : '0',
@@ -3960,6 +3965,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                         'IsProcessed': false,
                         'SalesTax': Number(Number(Math.round(this.orderData.tax * 100) / 100).toFixed(2)),
                         'IsCard': this.orderData.IsCard,
+                        'PaymentProviderId': this.getPaymentProviderId(),
                         'CardNumber': this.orderData.CardNumber,
                         'OldBalance': this.patronDetails.isSpecialAccount === false ? Number(Math.round(balance * 100) / 100).toFixed(2) : Number(0).toFixed(2),
                         'DepositAmount': this.amountTowardsBalance === undefined || this.amountTowardsBalance === null ? '0' : Number(Math.round(this.amountTowardsBalance * 100) / 100).toFixed(2).toString(),
@@ -4632,6 +4638,13 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
 
     }
 
+    private getPaymentProviderId(): number | null {
+        if (!this.orderData.IsCard) return null;
+        if (this.transactionDetails?.CheckoutId && (this.SquareSetting && this.squareDeviceId && this.deviceTransactionId != null)) return 2; // Square
+        // TODO: In future, add CREDCADAPI logic for other providers (Stripe=1, Ingeneco=3, Verifone=4)
+        return null;
+    }
+
     public generateUUID() {
         let d = new Date(this.utilService.getSessionDate()).getTime();
         if (window.performance && typeof window.performance.now === 'function') {
@@ -5188,15 +5201,6 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
                 this.lookUpService.pushPersonToQ(this.patronDetails, 0, true);    // putting the current patron in the queue at the top.
             }
             AppStateService.remove('patron_details');
-            if (this.patronDetails !== null) {
-                this.logDBService.logData({
-                    event: EventType.QUEUE,
-                    patronId: this.patronDetails.PersonId,
-                    type: LogType.INFO,
-                    data: this.patronDetails,
-                    queueCount: this.lookUpService.personsQ.length
-                });
-            }
             this.restrictedAlacarteCount = 0;
             this.alacarteTotal = 0.00;
             this.patronDetails = {};
@@ -7410,7 +7414,7 @@ export class DynamicMenuPage implements OnInit, OnDestroy {
             this.selectedAccountDetails.GradeId = null;
         }
 
-        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds.includes(this.selectedAccountDetails['SchoolId'])) {
+        if (this.selectedAccountDetails['SchoolId'] !== this.schoolId && !this.servingSchoolIds?.includes(this.selectedAccountDetails['SchoolId'])) {
             if (this.selectedAccountDetails['SiteCode']) {
 
                 if ((parseInt(SettingService.getSiteSettingValue('SHWOTHSTD')) > 0) &&

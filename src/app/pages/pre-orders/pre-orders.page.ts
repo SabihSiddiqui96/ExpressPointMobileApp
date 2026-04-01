@@ -446,6 +446,7 @@ export class PreOrdersPage implements OnInit {
                     'SalesTax': 0,
                     'UserId': 'test,',
                     'IsCard': false,
+                    'PaymentProviderId': null,
                     'CardNumber': '',
                     'TerminalName': this.terminalName,
                     'PersonIdentifier': student.PersonIdentifier,

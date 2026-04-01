@@ -475,7 +475,7 @@
             <span slot="start" style="display: block; width: 20px;"
               *ngIf="item.IsPartOfMeal == true && mealFormed==true"></span>
             <!-- <ion-col width-10><ion-button block class="btn_delete" (click)="deleteMenuFromCart(i)" ><ion-icon name="close-circle"></ion-icon></ion-button></ion-col> -->
-            <ion-button class="btn-full-size-icon" fill="clear" color="danger" (click)="blurInputElement(); deleteItem(item)">
+            <ion-button class="btn-full-size-icon" fill="clear" color="danger" (click)="deleteItem(item)">
               <ion-icon slot="icon-only" name="close-circle"></ion-icon>
             </ion-button>
             <ion-label>
