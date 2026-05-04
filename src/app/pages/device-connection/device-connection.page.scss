@@ -19,6 +19,12 @@
     font-size: 16px;
     text-align: center;  
   }
+
+  @media (orientation: portrait) and (max-width: 600px) {
+    ion-footer {
+      display: none;
+    }
+  }
   
   .fusion-body .fusion-footer-copyright-center .fusion-copyright-notice, .fusion-body .fusion-footer-copyright-center {
     display: block;
