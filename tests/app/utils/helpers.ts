@@ -77,6 +77,53 @@ export async function waitForText(text: string | RegExp, timeout = 20000): Promi
   });
 }
 
+export async function seedOpenSessionForToday(): Promise<number> {
+  return await browser.execute(async () => {
+    const now = new Date();
+    const openDate = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+
+    return await new Promise<number>((resolve) => {
+      const request = indexedDB.open('_pouch_EXP_TRANSACTIONS');
+      request.onerror = () => resolve(0);
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction('by-sequence', 'readwrite');
+        const store = tx.objectStore('by-sequence');
+        let updated = 0;
+
+        const cursorRequest = store.openCursor();
+        cursorRequest.onsuccess = () => {
+          const cursor = cursorRequest.result;
+          if (!cursor) return;
+
+          const doc = cursor.value;
+          if (
+            /^OpenSession--/.test(doc._doc_id_rev ?? '') &&
+            doc.isStillOpen === true
+          ) {
+            doc.OpenDate = openDate;
+            doc.OpenDateWithTime = now.getTime();
+            doc.OpenSessionDate = now.getTime();
+            cursor.update(doc);
+            updated += 1;
+          }
+
+          cursor.continue();
+        };
+
+        tx.oncomplete = () => {
+          db.close();
+          resolve(updated);
+        };
+        tx.onerror = () => {
+          db.close();
+          resolve(updated);
+        };
+      };
+    });
+  });
+}
+
 export async function loginToExpressPointApp(): Promise<void> {
   await waitForIonicApp();
 
