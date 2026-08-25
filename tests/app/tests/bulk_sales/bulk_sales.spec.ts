@@ -1,4 +1,3 @@
-// Mirrors ExpressPointDesktopApp/tests/bulk_sales/bulk_sales.spec.ts using WebdriverIO + Appium
 // Test Link: https://dev.azure.com/Cybersoft-Technologies-Inc/PrimeroEdge%20Classic/_testPlans/define?planId=115128&suiteId=115134
 
 import {

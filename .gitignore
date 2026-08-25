@@ -42,3 +42,6 @@ npm-debug.log*
 /electron/ExpressPointPeripherals
 /electron/Peripherals
 /.angular/cache
+.claude/
+CLAUDE.md
+.mcp.json
