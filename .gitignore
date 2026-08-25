@@ -45,3 +45,7 @@ npm-debug.log*
 .claude/
 CLAUDE.md
 .mcp.json
+.claude-flow/
+.swarm/
+.hive-mind/
+memory/claude-flow-data.json
